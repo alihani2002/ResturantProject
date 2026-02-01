@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام المطعم الذكي | Smart Restaurant System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #ea580c, #c2410c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ea580c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .device-mockup {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s ease;
+        }
+        .device-mockup:hover {
+            transform: translateY(-5px);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header / Navbar -->
+    <nav class="bg-white shadow-sm fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <i class="fas fa-utensils text-orange-600 text-2xl"></i>
+                    <span class="font-bold text-xl text-gray-900">سيستم المطعم الذكي</span>
+                </div>
+                <div class="hidden md:flex space-x-8 space-x-reverse">
+                    <a href="#features" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md font-medium transition">المميزات</a>
+                    <a href="#pos" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md font-medium transition">الكاشير والحسابات</a>
+                    <a href="#growth" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md font-medium transition">إدارة النمو</a>
+                </div>
+                <div>
+                    <a href="#contact" class="bg-orange-600 text-white px-5 py-2 rounded-full font-bold hover:bg-orange-700 transition shadow-lg transform hover:scale-105">
+                        اطلب ديمو الآن
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-white hero-pattern">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center lg:text-right lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                <div class="mb-10 lg:mb-0">
+                    <span class="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-sm font-semibold mb-4 border border-orange-200">
+                        🔥 الحل الشامل: طلبات + كاشير + مخزون
+                    </span>
+                    <h1 class="text-4xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
+                        نظام إدارة مطاعم متكامل <br>
+                        <span class="gradient-text">من الطلب وحتى الحسابات</span>
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        ليس مجرد منيو رقمي! بل نظام POS سحابي يدير الطاولات، يحسب التكاليف، يطبع الفواتير، ويرسلها للعميل عبر واتساب. تحكم بمطعمك بالكامل من شاشة واحدة.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="#contact" class="px-8 py-4 bg-orange-600 text-white font-bold rounded-lg shadow-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-rocket"></i> ابدأ بتطوير مطعمك
+                        </a>
+                        <a href="#pos" class="px-8 py-4 bg-white text-orange-600 border-2 border-orange-100 font-bold rounded-lg hover:border-orange-600 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-cash-register"></i> نظام الكاشير
+                        </a>
+                    </div>
+                </div>
+                <div class="relative mx-auto w-full max-w-md lg:max-w-full">
+                    <!-- Abstract representation of the system -->
+                    <div class="relative bg-gradient-to-tr from-gray-900 to-gray-800 rounded-3xl p-6 shadow-2xl device-mockup border-4 border-gray-200">
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+                            <div class="text-white font-bold"><i class="fas fa-qrcode text-orange-500 mr-2"></i> طاولة رقم 5</div>
+                            <div class="bg-green-500 text-xs px-2 py-1 rounded text-white">متصل</div>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Simulated POS Interface Item -->
+                            <div class="bg-gray-800 p-3 rounded-lg flex justify-between items-center border-l-4 border-orange-500">
+                                <div class="text-white">
+                                    <div class="font-bold text-sm">إجمالي الفاتورة</div>
+                                    <div class="text-xs text-gray-400">شامل الضريبة والخدمة</div>
+                                </div>
+                                <div class="text-2xl font-bold text-white">450 <span class="text-sm text-orange-500">ج.م</span></div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 mt-4">
+                                <button class="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded text-xs flex flex-col items-center gap-1">
+                                    <i class="fas fa-print text-lg text-blue-400"></i> طباعة كاشير
+                                </button>
+                                <button class="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded text-xs flex flex-col items-center gap-1">
+                                    <i class="fab fa-whatsapp text-lg text-green-400"></i> إرسال واتساب
+                                </button>
+                            </div>
+                            
+                            <button class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold mt-2">إتمام الدفع (Checkout)</button>
+                        </div>
+                    </div>
+                    <!-- Floating Badge -->
+                    <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 flex items-center gap-3 animate-bounce">
+                        <div class="bg-blue-100 p-2 rounded-full text-blue-600">
+                            <i class="fas fa-file-invoice-dollar text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">تم إصدار الفاتورة</p>
+                            <p class="font-bold text-gray-800">حفظ في الحسابات</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section id="workflow" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold text-gray-900">دورة عمل النظام</h2>
+                <p class="mt-4 text-xl text-gray-500">من مسح الكود وحتى استلام الطلب، كل شيء مؤتمت.</p>
+            </div>
+            <!-- (Existing workflow cards kept same, concise) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+                <div class="relative bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center hover:shadow-lg transition group">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:bg-orange-600 group-hover:text-white transition">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">1. مسح الـ QR</h3>
+                    <p class="text-gray-600 text-sm">يتعرف النظام تلقائياً على الطاولة ويحفظ الجلسة.</p>
+                </div>
+                <div class="relative bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center hover:shadow-lg transition group">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">2. تصفح وطلب</h3>
+                    <p class="text-gray-600 text-sm">منيو تفاعلي بالصور والفيديو مع تحديث فوري للأسعار.</p>
+                </div>
+                <div class="relative bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center hover:shadow-lg transition group">
+                    <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">3. إشعار واعتماد</h3>
+                    <p class="text-gray-600 text-sm">إشعار فوري للويتر لتأكيد الطلب قبل إرساله للمطبخ.</p>
+                </div>
+                <div class="relative bg-gray-50 p-6 rounded-2xl border border-gray-100 text-center hover:shadow-lg transition group">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4 group-hover:bg-green-600 group-hover:text-white transition">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">4. الدفع والمحاسبة</h3>
+                    <p class="text-gray-600 text-sm">طباعة الريسيت، الدفع الإلكتروني، وتسجيل العملية في السيستم.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Accounting & POS -->
+    <section id="pos" class="py-20 bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-orange-600 font-bold tracking-wider uppercase text-sm">نظام الـ POS السحابي</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 mt-2">محاسبة دقيقة، بلا أخطاء</h2>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">حول مطعمك إلى منظومة رقمية. النظام يقوم بدور المحاسب، الكاشير، ومدير الصالة في آن واحد.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- Text Features -->
+                <div class="space-y-8">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 text-xl"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-1">فواتير مرنة ومتعددة</h3>
+                            <p class="text-gray-600 text-sm">يدعم النظام تقسيم الشيك (Split Bill)، إضافة الخدمة والضريبة تلقائياً، والطباعة على طابعات الشبكة (Kitchen Printers) أو الكاشير.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 text-xl"><i class="fab fa-whatsapp"></i></div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-1">الريسيت الذكي (WhatsApp)</h3>
+                            <p class="text-gray-600 text-sm">بدلاً من الورق، يمكنك إرسال الفاتورة مباشرة لواتساب العميل. هذه الميزة تبني لك قاعدة بيانات (Data) لعملاءك لاستخدامها في العروض لاحقاً.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 text-xl"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-1">بوابات دفع متنوعة</h3>
+                            <p class="text-gray-600 text-sm">سجل المدفوعات سواء كانت كاش، فيزا، أو محافظ إلكترونية (مثل Instapay)، مع تقفيل للوردية (Shift Closing) يوضح العجز والزيادة.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphic/Visual -->
+                <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
+                    <div class="border-b pb-4 mb-4 flex justify-between items-center">
+                        <h4 class="font-bold text-gray-800">تقرير الوردية المسائي</h4>
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">مفتوح الآن</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">إجمالي المبيعات (Cash)</span>
+                            <span class="font-bold">12,450 ج.م</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">إجمالي المبيعات (Visa)</span>
+                            <span class="font-bold">5,200 ج.م</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">عدد الطلبات</span>
+                            <span class="font-bold">84 طلب</span>
+                        </div>
+                        <div class="h-px bg-gray-200 my-2"></div>
+                        <div class="flex justify-between font-bold text-lg text-orange-600">
+                            <span>الصافي</span>
+                            <span>17,650 ج.م</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-6 bg-gray-900 text-white py-2 rounded text-sm">طباعة تقرير الإغلاق Z-Report</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: Smart Features / Expansion Ideas -->
+    <section id="growth" class="py-20 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-extrabold mb-4">أفكار تجعل نظامك متكاملاً (Full ERP)</h2>
+                <p class="text-gray-400 text-lg">النظام مصمم ليتوسع معك. إليك بعض الوحدات التي يمكن إضافتها لزيادة التحكم والربحية.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1: Inventory -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-750 transition border border-gray-700 feature-card">
+                    <div class="w-14 h-14 bg-red-500 rounded-lg flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">إدارة المخزون والوصفات</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        اربط كل صنف بمكوناته (Recipe). عند بيع "برجر"، يخصم النظام تلقائياً (1 خبز + 150جم لحم). يرسل النظام تنبيهاً عند انخفاض المخزون عن حد معين.
+                    </p>
+                </div>
+
+                <!-- Feature 2: Analytics -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-750 transition border border-gray-700 feature-card">
+                    <div class="w-14 h-14 bg-indigo-500 rounded-lg flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">لوحة تحكم المالك (Analytics)</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        شاهد مطعمك من منزلك. تعرف على (أكثر الأصناف ربحية، ساعات الذروة، أداء كل ويتر). اتخذ قرارات مبنية على أرقام حقيقية وليس التخمين.
+                    </p>
+                </div>
+
+                <!-- Feature 3: CRM & Loyalty -->
+                <div class="bg-gray-800 rounded-xl p-8 hover:bg-gray-750 transition border border-gray-700 feature-card">
+                    <div class="w-14 h-14 bg-yellow-500 rounded-lg flex items-center justify-center text-2xl mb-6">
+                        <i class="fas fa-users-crown"></i> <!-- Note: users-crown might need pro, fallback to users -->
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">برامج الولاء (Loyalty)</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        بناءً على رقم هاتف العميل المسجل، امنحه نقاطاً مع كل طلب. يمكنه استبدال النقاط بخصومات لاحقاً. هذه أفضل طريقة لضمان عودة العميل مرة أخرى.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Feature Section (Kept as Visual Appeal) -->
+    <section id="menu" class="py-20 bg-orange-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-4">منيو إلكتروني ينبض بالحياة</h2>
+            <p class="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">المحتوى المرئي هو ما يبيع. نظامنا يتيح لك عرض أطباقك بأفضل صورة ممكنة.</p>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition p-6">
+                    <div class="h-12 w-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">دعم الفيديو</h3>
+                    <p class="text-gray-500">لا تكتفِ بالصور. أضف فيديوهات قصيرة تشهي العميل وتظهر جودة التحضير لكل صنف.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition p-6">
+                    <div class="h-12 w-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">تحديث فوري</h3>
+                    <p class="text-gray-500">انتهت الكمية؟ تغير السعر؟ عدل المنيو في ثانية واحدة من هاتفك ويظهر التعديل لكل العملاء فوراً.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition p-6">
+                    <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-xl mx-auto mb-4">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">سهولة التصفح</h3>
+                    <p class="text-gray-500">واجهة مستخدم بسيطة وسلسة تناسب جميع الأعمار، مع تصنيفات واضحة (مشروبات، أطباق، حلويات).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">جاهز لتطوير مطعمك؟</h2>
+            <div class="bg-gray-50 p-8 rounded-2xl shadow-inner border border-gray-200">
+                <form class="space-y-4 text-right">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">اسم المطعم / الكافيه</label>
+                            <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition" placeholder="مثال: مطعم السعادة">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">رقم الهاتف</label>
+                            <input type="tel" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition" placeholder="01xxxxxxxxx">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">رسالتك (اختياري)</label>
+                        <textarea class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition" rows="3" placeholder="هل لديك استفسار محدد؟"></textarea>
+                    </div>
+                    <button type="button" class="w-full bg-gray-900 text-white font-bold py-4 rounded-lg hover:bg-black transition shadow-lg">
+                        أرسل طلب الانضمام
+                    </button>
+                    <p class="text-xs text-gray-500 text-center mt-3">سيقوم فريق المبيعات بالتواصل معك خلال 24 ساعة لتقديم عرض تجريبي.</p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <span class="text-white font-bold text-lg">Smart Restaurant System</span>
+                <p class="text-sm mt-1">جميع الحقوق محفوظة © 2024</p>
+            </div>
+            <div class="flex space-x-6 space-x-reverse">
+                <a href="#" class="hover:text-white transition"><i class="fab fa-facebook fa-lg"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fab fa-instagram fa-lg"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fab fa-whatsapp fa-lg"></i></a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

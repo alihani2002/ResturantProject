@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Resturant.Core/Resturant.Core.csproj" />
+  <Project Path="Resturant.Infrastructure/Resturant.Infrastructure.csproj" />
+  <Project Path="Resturant.Services/Resturant.Services.csproj" />
+  <Project Path="Resturant.Web.UI/Resturant.Web.UI.csproj" />
+</Solution>
