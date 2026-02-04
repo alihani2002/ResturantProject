@@ -66,8 +66,10 @@
                             <span class="nxl-mtext">Dashboards</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="index.html">CRM</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="analytics.html">Analytics</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Waiter" asp-action="Index">Waiter Dashboard</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Chef" asp-action="Index">Chef Dashboard</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Cashier" asp-action="Index">Cashier Dashboard</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Admin" asp-action="Index">Admin Dashboard</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -160,6 +162,16 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Users" asp-action="Index">All Users</a></li>
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Users" asp-action="Create">Create User</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-book"></i></span>
+                            <span class="nxl-mtext">Menu Management</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="MenuCategory" asp-action="Index">Categories</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="MenuItem" asp-action="Index">Menu Items</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">

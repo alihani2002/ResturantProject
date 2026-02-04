@@ -3,6 +3,7 @@ using Resturant.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Resturant.Core.Entities;
+using Resturant.Web.UI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ResturantWebUIContextConnection") ?? throw new InvalidOperationException("Connection string 'ResturantWebUIContextConnection' not found.");;
@@ -18,6 +19,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
+// Configure SignalR
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -25,7 +29,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    await Resturant.Infrastructure.Data.DbInitializer.SeedDataAsync(roleManager, userManager);
+    var context = services.GetRequiredService<Resturant.Infrastructure.Data.AppDbContext>();
+    await Resturant.Infrastructure.Data.DbInitializer.SeedDataAsync(roleManager, userManager, context);
 }
 
 
@@ -52,5 +57,7 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+// Configure SignalR endpoint
+app.MapHub<OrderHub>("/orderHub");
 
 app.Run();

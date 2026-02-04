@@ -20,8 +20,30 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Redirect to appropriate dashboard based on role
+            if (roles.Contains(AppRoles.Waiter))
+            {
+                return RedirectToAction("Index", "Waiter");
+            }
+            else if (roles.Contains(AppRoles.Chief))
+            {
+                return RedirectToAction("Index", "Chef");
+            }
+            else if (roles.Contains(AppRoles.Accountant))
+            {
+                return RedirectToAction("Index", "Cashier");
+            }
+            else if (roles.Contains(AppRoles.Admin) || roles.Contains(AppRoles.Manager))
+            {
+                // Admin and Manager can access all dashboards, show admin dashboard
+                return View();
+            }
+
             return View();
         }
     }

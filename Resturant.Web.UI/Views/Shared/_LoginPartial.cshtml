@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Resturant.Core.Entities
+@using Resturant.Core.Common
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -7,9 +8,42 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    var user = await UserManager.GetUserAsync(User);
+    var roles = await UserManager.GetRolesAsync(user);
+    
     <li class="nav-item">
         <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
     </li>
+    
+    // Show dashboard links based on role
+    if (roles.Contains(AppRoles.Waiter))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Waiter" asp-action="Index">Waiter Dashboard</a>
+        </li>
+    }
+    
+    if (roles.Contains(AppRoles.Chief))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Chef" asp-action="Index">Chef Dashboard</a>
+        </li>
+    }
+    
+    if (roles.Contains(AppRoles.Accountant))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Cashier" asp-action="Index">Cashier Dashboard</a>
+        </li>
+    }
+    
+    if (roles.Contains(AppRoles.Admin) || roles.Contains(AppRoles.Manager))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+        </li>
+    }
+    
     <li class="nav-item">
         <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
             <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>

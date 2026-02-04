@@ -1,0 +1,316 @@
+@model IEnumerable<Resturant.Core.Entities.MenuCategory>
+
+@{
+    ViewData["Title"] = "Menu";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar - Category Navigation -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Categories</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var category in Model)
+                        {
+                            <li class="list-group-item">
+                                <a href="#" class="category-link" data-category-id="@category.Id">
+                                    @category.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content - Menu Items -->
+        <div class="col-md-9">
+            <!-- Cart Summary -->
+            <div id="cart-summary" class="card mb-4">
+                <div class="card-header">
+                    <h4>Your Cart (<span id="cart-count">0</span>)</h4>
+                </div>
+                <div class="card-body">
+                    <div id="cart-items">
+                        <p class="text-muted">Your cart is empty</p>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong id="cart-total">$0.00</strong>
+                    </div>
+                    <button id="checkout-btn" class="btn btn-primary btn-block mt-3" disabled>
+                        Checkout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Menu Items -->
+            <div id="menu-items-container">
+                <h3>Select a category to view menu items</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signalr/7.0.2/signalr.min.js"></script>
+    <script>
+        // Table number handling
+        let tableNumber = @ViewData["TableNumber"];
+        const TABLE_STORAGE_KEY = 'tableNumber';
+        const TABLE_EXPIRY_KEY = 'tableNumberExpiry';
+        const EXPIRY_MINUTES = 60;
+
+        // Check if table number is stored locally
+        function getStoredTableNumber() {
+            const storedNumber = localStorage.getItem(TABLE_STORAGE_KEY);
+            const expiryTime = localStorage.getItem(TABLE_EXPIRY_KEY);
+            
+            if (storedNumber && expiryTime) {
+                const now = new Date().getTime();
+                if (now < parseInt(expiryTime)) {
+                    return parseInt(storedNumber);
+                }
+            }
+            
+            return null;
+        }
+
+        // Store table number with expiry
+        function storeTableNumber(number) {
+            const expiryTime = new Date().getTime() + (EXPIRY_MINUTES * 60 * 1000);
+            localStorage.setItem(TABLE_STORAGE_KEY, number.toString());
+            localStorage.setItem(TABLE_EXPIRY_KEY, expiryTime.toString());
+        }
+
+        // Prompt user for table number
+        function promptForTableNumber() {
+            const storedNumber = getStoredTableNumber();
+            if (storedNumber) {
+                tableNumber = storedNumber;
+                return Promise.resolve(tableNumber);
+            }
+
+            return new Promise((resolve) => {
+                const input = prompt("Please enter your table number:");
+                if (input && !isNaN(input) && parseInt(input) > 0) {
+                    tableNumber = parseInt(input);
+                    storeTableNumber(tableNumber);
+                    resolve(tableNumber);
+                } else {
+                    alert("Please enter a valid table number");
+                    resolve(promptForTableNumber());
+                }
+            });
+        }
+
+        // If table number not provided in URL, prompt user
+        if (!tableNumber) {
+            promptForTableNumber();
+        } else {
+            storeTableNumber(tableNumber);
+        }
+
+        // Cart functionality
+        let cart = [];
+
+        // Load cart from local storage
+        function loadCart() {
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCartUI();
+            }
+        }
+
+        // Save cart to local storage
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Add item to cart
+        function addToCart(menuItem) {
+            const existingItem = cart.find(item => item.id === menuItem.id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: menuItem.id,
+                    name: menuItem.name,
+                    price: menuItem.price,
+                    quantity: 1
+                });
+            }
+            saveCart();
+            updateCartUI();
+        }
+
+        // Remove item from cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            saveCart();
+            updateCartUI();
+        }
+
+        // Update cart quantity
+        function updateQuantity(itemId, change) {
+            const item = cart.find(item => item.id === itemId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(itemId);
+                } else {
+                    saveCart();
+                    updateCartUI();
+                }
+            }
+        }
+
+        // Update cart UI
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-muted">Your cart is empty</p>';
+                cartCount.textContent = '0';
+                cartTotal.textContent = '$0.00';
+                checkoutBtn.disabled = true;
+            } else {
+                let cartHtml = '<ul class="list-group">';
+                let total = 0;
+                
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    cartHtml += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>${item.name}</h6>
+                                <p class="mb-0">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary mr-1" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <button class="btn btn-sm btn-outline-secondary mr-1" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                <button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id})">Remove</button>
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                cartHtml += '</ul>';
+                cartItemsContainer.innerHTML = cartHtml;
+                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartTotal.textContent = '$' + total.toFixed(2);
+                checkoutBtn.disabled = false;
+            }
+        }
+
+        // Load menu items by category
+        function loadMenuItems(categoryId) {
+            fetch(`/Menu/GetMenuItemsByCategory?categoryId=${categoryId}`)
+                .then(response => response.json())
+                .then(menuItems => {
+                    const container = document.getElementById('menu-items-container');
+                    
+                    if (menuItems.length === 0) {
+                        container.innerHTML = '<h3>No items available in this category</h3>';
+                        return;
+                    }
+
+                    let html = '<div class="row">';
+                    menuItems.forEach(item => {
+                        html += `
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    ${item.imageUrl ? `
+                                        <img src="${item.imageUrl}" class="card-img-top" alt="${item.name}" style="height: 200px; object-fit: cover;">
+                                    ` : ''}
+                                    <div class="card-body">
+                                        <h5 class="card-title">${item.name}</h5>
+                                        <p class="card-text">${item.description}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h4>$${item.price.toFixed(2)}</h4>
+                                            <button class="btn btn-primary" onclick="addToCart(${JSON.stringify(item)})">
+                                                Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading menu items:', error);
+                });
+        }
+
+        // Checkout
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+
+            const orderItems = cart.map(item => ({
+                menuItemId: item.id,
+                quantity: item.quantity
+            }));
+
+            fetch('/Order/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tableNumber: tableNumber,
+                    orderItems: orderItems
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Order placed successfully! Order ID: ${data.orderId}`);
+                    cart = [];
+                    saveCart();
+                    updateCartUI();
+                } else {
+                    alert('Error placing order: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error placing order:', error);
+                alert('Error placing order');
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load cart from local storage
+            loadCart();
+
+            // Category navigation
+            document.querySelectorAll('.category-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const categoryId = parseInt(this.getAttribute('data-category-id'));
+                    loadMenuItems(categoryId);
+                });
+            });
+
+            // Checkout button
+            document.getElementById('checkout-btn').addEventListener('click', checkout);
+        });
+    </script>
+}

@@ -1,0 +1,208 @@
+@{
+    ViewData["Title"] = "Cashier Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2>Cashier Dashboard</h2>
+            <p>Process payments and generate receipts</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Ready for Checkout</h4>
+                </div>
+                <div class="card-body">
+                    <div id="orders-container">
+                        <p class="text-muted">Loading orders...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signalr/7.0.2/signalr.min.js"></script>
+    <script>
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/orderHub")
+            .build();
+
+        // Load orders ready for checkout
+        function loadReadyOrders() {
+            // Load Ready (3) orders
+            fetch('/Order/GetOrdersByStatus?status=3')
+                .then(response => response.json())
+                .then(orders => {
+                    const container = document.getElementById('orders-container');
+                    
+                    if (orders.length === 0) {
+                        container.innerHTML = '<p class="text-muted">No orders ready for checkout</p>';
+                        return;
+                    }
+
+                    let html = '<div class="row">';
+                    orders.forEach(order => {
+                        const orderDate = new Date(order.orderDate).toLocaleString();
+                        
+                        let itemsHtml = '<ul class="list-group list-group-flush">';
+                        
+                        order.orderItems.forEach(item => {
+                            itemsHtml += `
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>${item.menuItem.name} x ${item.quantity}</span>
+                                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                                </li>
+                            `;
+                        });
+                        
+                        itemsHtml += '</ul>';
+
+                        html += `
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Order #${order.id} - Table ${order.tableNumber}</h5>
+                                        <small>${orderDate}</small>
+                                        <span class="badge bg-success">Ready</span>
+                                    </div>
+                                    <div class="card-body">
+                                        ${itemsHtml}
+                                        <hr>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total:</strong>
+                                            <strong>$${order.totalAmount.toFixed(2)}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button class="btn btn-success btn-block mb-2" onclick="processPayment(${order.id})">
+                                            Process Payment
+                                        </button>
+                                        <button class="btn btn-info btn-block" onclick="printReceipt(${order.id})">
+                                            Print Receipt
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading orders:', error);
+                });
+        }
+
+        // Process payment
+        function processPayment(orderId) {
+            if (!confirm('Are you sure you want to process payment for this order?')) {
+                return;
+            }
+
+            fetch('/Order/UpdateStatus', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `orderId=${orderId}&status=5` // 5 = Completed
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Payment processed successfully');
+                    loadReadyOrders();
+                } else {
+                    alert('Error processing payment');
+                }
+            })
+            .catch(error => {
+                console.error('Error processing payment:', error);
+                alert('Error processing payment');
+            });
+        }
+
+        // Print receipt
+        function printReceipt(orderId) {
+            fetch(`/Order/GetOrderDetails?id=${orderId}`)
+                .then(response => response.json())
+                .then(order => {
+                    const orderDate = new Date(order.orderDate).toLocaleString();
+                    
+                    let receiptHtml = `
+                        <div style="font-family: monospace; padding: 20px; border: 1px solid #000; max-width: 400px; margin: 0 auto;">
+                            <h3 style="text-align: center;">Restaurant Receipt</h3>
+                            <hr>
+                            <p><strong>Order #:</strong> ${order.id}</p>
+                            <p><strong>Table:</strong> ${order.tableNumber}</p>
+                            <p><strong>Date:</strong> ${orderDate}</p>
+                            <hr>
+                            <h4>Items:</h4>
+                            <ul style="list-style: none; padding: 0;">
+                    `;
+                    
+                    order.orderItems.forEach(item => {
+                        receiptHtml += `
+                            <li style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>${item.menuItem.name} x ${item.quantity}</span>
+                                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                            </li>
+                        `;
+                    });
+                    
+                    receiptHtml += `
+                            </ul>
+                            <hr>
+                            <div style="display: flex; justify-content: space-between; font-size: 1.2em;">
+                                <strong>Total:</strong>
+                                <strong>$${order.totalAmount.toFixed(2)}</strong>
+                            </div>
+                            <hr>
+                            <p style="text-align: center;">Thank you for dining with us!</p>
+                        </div>
+                    `;
+
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(receiptHtml);
+                    printWindow.document.close();
+                    printWindow.print();
+                })
+                .catch(error => {
+                    console.error('Error printing receipt:', error);
+                    alert('Error printing receipt');
+                });
+        }
+
+        // SignalR event handlers
+        connection.on("ReceiveCashierUpdate", function(message) {
+            console.log("Cashier update received:", message);
+            loadReadyOrders();
+        });
+
+        connection.on("ReceiveOrderDetails", function(order) {
+            console.log("Order details received:", order);
+            loadReadyOrders();
+        });
+
+        // Start SignalR connection
+        connection.start()
+            .then(function() {
+                console.log("SignalR connected");
+                loadReadyOrders();
+            })
+            .catch(function(err) {
+                console.error("SignalR connection error:", err);
+            });
+
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReadyOrders();
+        });
+    </script>
+}
