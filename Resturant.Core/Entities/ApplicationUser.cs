@@ -16,6 +16,6 @@ namespace Resturant.Core.Entities
         public string? LastUpdatedById { get; set; }
         public DateTime? LastUpdatedOn { get; set; }
         // public Client? ClientProfile { get; set; }
-        public string Role { get; set; } = null!;
+        public string? Role { get; set; }
     }
 }

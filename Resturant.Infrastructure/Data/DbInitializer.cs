@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Resturant.Core.Common;
 using Resturant.Core.Entities;
 using System.Threading.Tasks;
 
@@ -6,9 +7,9 @@ namespace Resturant.Infrastructure.Data
 {
     public static class DbInitializer
     {
-        public static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+        public static async Task SeedDataAsync(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
-            string[] roleNames = { "Admin", "Chief", "Waiter", "User", "Manager", "Accountant" };
+            string[] roleNames = { AppRoles.Admin, AppRoles.Chief, AppRoles.Waiter, AppRoles.User, AppRoles.Manager, AppRoles.Accountant };
 
             foreach (var roleName in roleNames)
             {
@@ -16,6 +17,28 @@ namespace Resturant.Infrastructure.Data
                 if (!roleExist)
                 {
                     await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
+            // Seed Admin User
+            var adminEmail = "admin@resturant.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                var newAdmin = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FullName = "System Administrator",
+                    Role = AppRoles.Admin,
+                    EmailConfirmed = true,
+                    CreatedOn = DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(newAdmin, "Admin@123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(newAdmin, AppRoles.Admin);
                 }
             }
         }

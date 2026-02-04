@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Resturant.Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +15,7 @@ namespace Resturant.Services
         {
             // Register services here, e.g.:
             // services.AddScoped<IOrderService, OrderService>();
+            services.AddTransient<IEmailSender, EmailSender>();
             
             return services;
         }

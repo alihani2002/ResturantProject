@@ -13,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("ResturantWebUI
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -23,7 +24,8 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await Resturant.Infrastructure.Data.DbInitializer.SeedRolesAsync(roleManager);
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    await Resturant.Infrastructure.Data.DbInitializer.SeedDataAsync(roleManager, userManager);
 }
 
 
@@ -38,6 +40,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -46,6 +49,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+app.MapRazorPages();
 
 
 app.Run();
