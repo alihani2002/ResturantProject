@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Resturant.Core.Common;
 using Resturant.Web.UI.Models;
 
 namespace Resturant.Web.UI.Controllers
@@ -8,6 +9,17 @@ namespace Resturant.Web.UI.Controllers
     {
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole(AppRoles.Admin) || 
+                    User.IsInRole(AppRoles.Chief) || 
+                    User.IsInRole(AppRoles.Manager) || 
+                    User.IsInRole(AppRoles.Accountant) || 
+                    User.IsInRole(AppRoles.Waiter))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+            }
             return View();
         }
 

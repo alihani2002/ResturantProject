@@ -1,29 +1,198 @@
-﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
-    {
-        Layout = parentLayout.ToString();
-    }
-    else
-    {
-        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
-    }
-}
+﻿<!DOCTYPE html>
+<html lang="zxx">
 
-<h1>Manage your account</h1>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword" content="">
+    <meta name="author" content="theme_ocean">
+    <title>Duralux || User Settings</title>
+    <link rel="shortcut icon" type="image/x-icon" href="~/assets/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="~/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/vendors/css/vendors.min.css">
+    <link rel="stylesheet" type="text/css" href="~/assets/css/theme.min.css">
+    <!--[if lt IE 9]>
+            <script src="https:oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+            <script src="https:oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+</head>
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-3">
-            <partial name="_ManageNav" />
+<body>
+    <!--! [Start] Navigation Manu !-->
+    <nav class="nxl-navigation">
+        <div class="navbar-wrapper">
+            <div class="m-header">
+                <a href="index.html" class="b-brand">
+                    <!-- <img src="~/assets/images/logo-full.png" alt="" class="logo logo-lg"> -->
+                    <img src="~/assets/images/logo-abbr.png" alt="" class="logo logo-sm">
+                    <span class="logo-lg fw-bolder fs-20">Duralux</span>
+                </a>
+            </div>
+            <div class="navbar-content">
+                <ul class="nxl-navbar">
+                    <li class="nxl-item nxl-caption">
+                        <label>Navigation</label>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-airplay"></i></span>
+                            <span class="nxl-mtext">Dashboards</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">CRM</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Analytics</a></li>
+                        </ul>
+                    </li>
+                     <!-- Placeholder for other menu items -->
+                </ul>
+            </div>
         </div>
-        <div class="col-md-9">
-            @RenderBody()
+    </nav>
+    <!--! [End] Navigation Manu !-->
+
+    <!--! [Start] Header !-->
+    <header class="nxl-header">
+        <div class="header-wrapper">
+            <div class="header-left d-flex align-items-center gap-4">
+                <a href="javascript:void(0);" class="nxl-head-link me-0" id="mobile-collapse">
+                    <i class="feather-align-left"></i>
+                </a>
+                <div class="nxl-h-item d-none d-sm-flex">
+                    <div class="nxl-head-link me-0 nxl-lavel-mega-menu">
+                        <div class="d-flex align-items-center gap-2">
+                             <div class="nxl-h-item text-uppercase fw-bold">Settings</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="header-right ms-auto">
+                <div class="d-flex align-items-center">
+                    <div class="nxl-h-item dark-light-theme">
+                        <a href="javascript:void(0);" class="nxl-head-link me-0 dark-button">
+                            <i class="feather-moon"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="nxl-head-link me-0 light-button" style="display: none">
+                            <i class="feather-sun"></i>
+                        </a>
+                    </div>
+                     <!-- User Dropdown -->
+                    <div class="dropdown nxl-h-item">
+                        <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">
+                            <img src="~/assets/images/avatar/1.png" alt="user-image" class="img-fluid user-avtar me-0">
+                        </a>
+                         <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
+                            <a href="javascript:void(0);" class="dropdown-item">
+                                <i class="feather-user"></i>
+                                <span>Profile Details</span>
+                            </a>
+                             <!-- Logout Logic -->
+                             <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                <button type="submit" class="dropdown-item">
+                                    <i class="feather-log-out"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!--! [End] Header !-->
+
+    <!--! [Start] Main Content !-->
+    <main class="nxl-container apps-container">
+        <div class="nxl-content without-header nxl-full-content">
+            <!-- [ Main Content ] start -->
+            <div class="main-content d-flex">
+                <!-- [ Content Sidebar ] start -->
+                <div class="content-sidebar content-sidebar-md" data-scrollbar-target="#psScrollbarInit">
+                    <div class="content-sidebar-header bg-white sticky-top hstack justify-content-between">
+                        <h4 class="fw-bolder mb-0">Settings</h4>
+                        <a href="javascript:void(0);" class="app-sidebar-close-trigger d-flex">
+                            <i class="feather-x"></i>
+                        </a>
+                    </div>
+                    <div class="content-sidebar-body">
+                         @await Html.PartialAsync("_ManageNav")
+                    </div>
+                </div>
+                <!-- [ Content Sidebar  ] end -->
+                <!-- [ Main Area  ] start -->
+                <div class="content-area" data-scrollbar-target="#psScrollbarInit">
+                     @RenderBody()
+                </div>
+                <!-- [ Main Area  ] end -->
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+        <!-- [ Footer ] start -->
+        <footer class="footer">
+            <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
+                <span>Copyright ©</span>
+                <script>
+                    document.write(new Date().getFullYear());
+                </script>
+            </p>
+             <div class="d-flex align-items-center gap-4">
+                <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Help</a>
+                <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Terms</a>
+                <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Privacy</a>
+            </div>
+        </footer>
+        <!-- [ Footer ] end -->
+    </main>
+    <!--! [End] Main Content !-->
+
+    <!--! [Start] Theme Customizer !-->
+     <div class="theme-customizer">
+        <div class="customizer-handle">
+            <a href="javascript:void(0);" class="cutomizer-open-trigger bg-primary">
+                <i class="feather-settings"></i>
+            </a>
+        </div>
+        <div class="customizer-sidebar-wrapper">
+            <div class="customizer-sidebar-header px-4 ht-80 border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Theme Settings</h5>
+                <a href="javascript:void(0);" class="cutomizer-close-trigger d-flex">
+                    <i class="feather-x"></i>
+                </a>
+            </div>
+            <div class="customizer-sidebar-body position-relative p-4" data-scrollbar-target="#psScrollbarInit">
+                <!--! BEGIN: [Skins] !-->
+                <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
+                    <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Skins</label>
+                    <div class="row g-2 theme-options-items app-skin" id="appSkinList">
+                        <div class="col-6 text-center position-relative single-option light-button active">
+                            <input type="radio" class="btn-check" id="app-skin-light" name="app-skin" value="1" data-app-skin="app-skin-light">
+                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-skin-light">Light</label>
+                        </div>
+                        <div class="col-6 text-center position-relative single-option dark-button">
+                            <input type="radio" class="btn-check" id="app-skin-dark" name="app-skin" value="2" data-app-skin="app-skin-dark">
+                            <label class="py-2 fs-9 fw-bold text-dark text-uppercase text-spacing-1 border border-gray-2 w-100 h-100 c-pointer position-relative options-label" for="app-skin-dark">Dark</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="customizer-sidebar-footer px-4 ht-60 border-top d-flex align-items-center gap-2">
+                <div class="flex-fill w-50">
+                    <a href="javascript:void(0);" class="btn btn-danger" data-style="reset-all-common-style">Reset</a>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+    <!--! [End] Theme Customizer !-->
 
-@section Scripts {
-    @RenderSection("Scripts", required: false)
-}
+    <!--! BEGIN: Vendors JS !-->
+    <script src="~/assets/vendors/js/vendors.min.js"></script>
+    <!--! END: Vendors JS !-->
+    <!--! BEGIN: Apps Init  !-->
+    <script src="~/assets/js/common-init.min.js"></script>
+    <script src="~/assets/js/theme-customizer-init.min.js"></script>
+    <!--! END: Apps Init !-->
+     @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

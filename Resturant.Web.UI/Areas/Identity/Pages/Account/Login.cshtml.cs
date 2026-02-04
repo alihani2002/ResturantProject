@@ -118,11 +118,19 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-                    
                     var user = await _userManager.FindByEmailAsync(Input.Email);
                     if (user != null)
                     {
+                        if (!user.IsActive || user.IsDeleted)
+                        {
+                            await _signInManager.SignOutAsync();
+                            _logger.LogWarning("User account inactive or deleted.");
+                            ModelState.AddModelError(string.Empty, "Account is deactivated or suspended.");
+                            return Page();
+                        }
+
+                        _logger.LogInformation("User logged in.");
+                    
                         var roles = await _userManager.GetRolesAsync(user);
                         if (roles.Contains(AppRoles.Admin) || 
                             roles.Contains(AppRoles.Chief) || 

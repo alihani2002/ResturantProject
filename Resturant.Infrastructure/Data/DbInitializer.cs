@@ -32,13 +32,27 @@ namespace Resturant.Infrastructure.Data
                     FullName = "System Administrator",
                     Role = AppRoles.Admin,
                     EmailConfirmed = true,
-                    CreatedOn = DateTime.Now
+                    CreatedOn = DateTime.Now,
+                    IsActive = true,
+                    IsCompelteProfile = true,
+                    IsDeleted = false
+
                 };
 
                 var result = await userManager.CreateAsync(newAdmin, "Admin@123");
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(newAdmin, AppRoles.Admin);
+                }
+            }
+            else
+            {
+                // Ensure Admin is always Active and Not Deleted
+                if (!adminUser.IsActive || adminUser.IsDeleted)
+                {
+                    adminUser.IsActive = true;
+                    adminUser.IsDeleted = false;
+                    await userManager.UpdateAsync(adminUser);
                 }
             }
         }

@@ -10,6 +10,7 @@ namespace Resturant.Core.Entities
         public override string? Email { get => base.Email; set => base.Email = value; }
         public bool IsCompelteProfile { get; set; } = false;
         public int? Age { get; set; }
+        public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; }
         public string? CreatedById { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.Now;
