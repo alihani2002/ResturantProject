@@ -16,6 +16,7 @@ namespace Resturant.Services
             // Register services here, e.g.:
             // services.AddScoped<IOrderService, OrderService>();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddScoped<Resturant.Core.Interfaces.ICloudinaryService, CloudinaryService>();
             
             return services;
         }

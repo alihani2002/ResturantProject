@@ -20,10 +20,9 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var users = await _userManager.Users.ToListAsync();
-            return View(users);
+            return View();
         }
     }
 }
