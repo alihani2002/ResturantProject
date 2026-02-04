@@ -43,6 +43,22 @@ namespace Resturant.Services.Services
             return uploadResult.SecureUrl.ToString();
         }
 
+        public async Task<string> UploadImageAsync(byte[] fileBytes, string fileName, string folder = null)
+        {
+            if (fileBytes == null || fileBytes.Length == 0)
+                throw new ArgumentException("File cannot be empty");
+
+            using var stream = new MemoryStream(fileBytes);
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(fileName, stream),
+                Folder = folder
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            return uploadResult.SecureUrl.ToString();
+        }
+
         public async Task<string> UploadVideoAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)

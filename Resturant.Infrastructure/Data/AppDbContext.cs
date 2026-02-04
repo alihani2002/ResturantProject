@@ -11,6 +11,8 @@ namespace Resturant.Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<GuestTable> GuestTables { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
