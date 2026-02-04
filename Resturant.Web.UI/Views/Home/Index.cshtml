@@ -1,8 +1,90 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="hero-section" style="background-image: url('/assets/images/banner/3.jpg');">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Experience the Taste of Excellence</h1>
+        <p class="hero-subtitle">Fresh ingredients, passionate chefs, and an unforgettable dining experience delivered to your doorstep.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="#menu" class="btn btn-primary-custom btn-lg">View Our Menu</a>
+            <a href="#book" class="btn btn-outline-light btn-lg rounded-1 text-uppercase fw-bold px-4 py-3" style="border-width: 2px;">Book a Table</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="about">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-stopwatch"></i>
+                    </div>
+                    <h3>Fast Delivery</h3>
+                    <p class="text-muted">We ensure your food arrives hot and fresh within 30 minutes of ordering.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-award"></i>
+                    </div>
+                    <h3>Fresh Ingredients</h3>
+                    <p class="text-muted">We use only the finest and freshest ingredients from local farmers.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p class="text-muted">Our friendly support team is always here to help you effectively.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Placeholder -->
+<section class="py-5 bg-white" id="menu">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold display-6">Popular Categories</h2>
+            <p class="text-muted">Explore our wide range of delicious cuisines.</p>
+            <div class="mx-auto bg-warning" style="height: 3px; width: 60px; margin-top: 15px;"></div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Placeholder Categories -->
+             <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-3 hover-scale">
+                    <div class="display-4 text-warning mb-2"><i class="bi bi-cup-hot"></i></div>
+                    <h5 class="fw-bold">Breakfast</h5>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-3 hover-scale">
+                    <div class="display-4 text-warning mb-2"><i class="bi bi-egg-fried"></i></div>
+                    <h5 class="fw-bold">Lunch</h5>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-3 hover-scale">
+                    <div class="display-4 text-warning mb-2"><i class="bi bi-moon-stars"></i></div>
+                    <h5 class="fw-bold">Dinner</h5>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm h-100 text-center p-3 hover-scale">
+                    <div class="display-4 text-warning mb-2"><i class="bi bi-cup-straw"></i></div>
+                    <h5 class="fw-bold">Drinks</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

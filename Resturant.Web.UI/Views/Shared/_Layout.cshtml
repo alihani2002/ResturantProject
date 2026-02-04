@@ -12,20 +12,32 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Resturant.Web.UI</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top box-shadow">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-egg-fried text-warning fs-3"></i>
+                    <span>TestResturant</span>
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white" href="#menu">Menu</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link text-white" href="#about">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#contact">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -33,50 +45,47 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-@* 
-    <footer id="footer" class="footer border-top text-muted">
-        <div class="container footer-top">
-            <div class="row gy-4">
-                <div class="col-lg-4 col-md-6">
-                    <h4>Need a Website Like This?</h4>
-                    <p>
-                        Transform your business into a professional online store or custom web platform with modern design and powerful features.
-                    </p>
-                    <p>
-                        <strong>ALDevs Software Solutions</strong><br>
-                        <strong>Phone:</strong> +20 10 21551737<br>
-                        <strong>WhatsApp:</strong>
-                        <a href="https://wa.me/201021551737" target="_blank" class="ms-1">
-                            <i class="bi bi-whatsapp" style="color:#25D366; font-size:18px;"></i>
-                            Chat with us
-                        </a>
-                        <br>
-                        <strong>Email:</strong> aldevssoft@gmail.com<br>
-                        <strong>Company Site:</strong>
-                        <a href="https://aldevs.tryasp.net/" target="_blank">aldevs.tryasp.net</a>
-                    </p>
+    <main role="main" class="pb-0">
+        @RenderBody()
+    </main>
+    <footer class="footer-custom" id="contact">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5>TestResturant</h5>
+                    <p class="text-secondary">Experience the best culinary delights with our exquisite menu and exceptional service. Fresh ingredients, passionate chefs, and a warm atmosphere.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Quick Links</h5>
+                    <a href="#">Home</a>
+                    <a href="#menu">Menu</a>
+                    <a href="#about">About Us</a>
+                    <a href="#contact">Contact</a>
+                    <a asp-area="Identity" asp-page="/Account/Login">Login</a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Opening Hours</h5>
+                    <p class="mb-1">Mon - Fri: 09:00 - 22:00</p>
+                    <p class="mb-1">Sat: 10:00 - 23:00</p>
+                    <p>Sun: Closed</p>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Contact Us</h5>
+                    <p class="mb-1"><i class="bi bi-geo-alt-fill me-2 text-warning"></i> 123 Restaurant Street, Food City</p>
+                    <p class="mb-1"><i class="bi bi-telephone-fill me-2 text-warning"></i> +1 234 567 890</p>
+                    <p><i class="bi bi-envelope-fill me-2 text-warning"></i> info@testresturant.com</p>
                 </div>
             </div>
-        </div>
-
-        <div class="container copyright text-center mt-4">
-            <p>
-                © <span>Copyright</span>
-                <strong class="px-1 sitename">testResturant</strong>
-                <span>All Rights Reserved</span>
-            </p>
-
-            <div class="credits">
-                Designed & Developed by
-                <a href="https://aldevs.tryasp.net/" target="_blank">ALDevs Software Solutions</a>
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year TestResturant. All Rights Reserved.</p>
             </div>
         </div>
-    </footer> *@
+    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
