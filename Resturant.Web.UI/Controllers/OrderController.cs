@@ -122,6 +122,29 @@ namespace Resturant.Web.UI.Controllers
             return Ok(new { OrderId = order.Id, TotalAmount = totalAmount });
         }
 
+        // GET: Order/CheckTable - Check if table exists and is available
+        [HttpGet]
+        public async Task<IActionResult> CheckTable(int tableNumber)
+        {
+            var tableExists = await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber);
+            if (!tableExists)
+            {
+                return Json(new { available = false, message = $"Table {tableNumber} does not exist." });
+            }
+
+            var isOccupied = await _context.Orders
+                .AnyAsync(o => o.TableNumber == tableNumber
+                    && o.Status != OrderStatus.Completed
+                    && o.Status != OrderStatus.Cancelled);
+
+            if (isOccupied)
+            {
+                return Json(new { available = false, message = $"Table {tableNumber} is currently occupied. Please choose another table." });
+            }
+
+            return Json(new { available = true, message = "Table is available." });
+        }
+
         // GET: Order/GetOrdersByStatus
         [HttpGet]
         public async Task<IActionResult> GetOrdersByStatus(OrderStatus status)

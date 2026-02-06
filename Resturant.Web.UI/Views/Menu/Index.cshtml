@@ -160,12 +160,27 @@
         let tableNumberResolve = null;
 
         // Prompt user for table number using modal
-        function promptForTableNumber(forceShow = false) {
+        async function promptForTableNumber(forceShow = false) {
             const storedNumber = getStoredTableNumber();
             if (storedNumber && !forceShow) {
-                tableNumber = storedNumber;
-                updateTableNumberUI();
-                return Promise.resolve(tableNumber);
+                // Verify stored table is still available
+                try {
+                    const response = await fetch(`/Order/CheckTable?tableNumber=${storedNumber}`);
+                    const result = await response.json();
+                    if (result.available) {
+                        tableNumber = storedNumber;
+                        updateTableNumberUI();
+                        return Promise.resolve(tableNumber);
+                    }
+                    // Table no longer available, clear and prompt
+                    localStorage.removeItem(TABLE_STORAGE_KEY);
+                    localStorage.removeItem(TABLE_EXPIRY_KEY);
+                } catch (e) {
+                    // On error, use stored value
+                    tableNumber = storedNumber;
+                    updateTableNumberUI();
+                    return Promise.resolve(tableNumber);
+                }
             }
 
             return new Promise((resolve) => {
@@ -188,26 +203,53 @@
         }
 
         // Confirm table number from modal
-        function confirmTableNumber() {
+        async function confirmTableNumber() {
             const input = document.getElementById('tableNumberInput');
+            const errorDiv = document.getElementById('tableNumberError');
+            const confirmBtn = document.getElementById('confirmTableBtn');
             const value = parseInt(input.value);
 
             if (!value || value <= 0) {
                 input.classList.add('is-invalid');
+                errorDiv.textContent = 'Please enter a valid table number.';
                 return;
             }
 
-            tableNumber = value;
-            storeTableNumber(tableNumber);
-            updateTableNumberUI();
+            // Disable button while checking
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking...';
 
-            if (tableNumberModal) {
-                tableNumberModal.hide();
-            }
+            try {
+                const response = await fetch(`/Order/CheckTable?tableNumber=${value}`);
+                const result = await response.json();
 
-            if (tableNumberResolve) {
-                tableNumberResolve(tableNumber);
-                tableNumberResolve = null;
+                if (!result.available) {
+                    input.classList.add('is-invalid');
+                    errorDiv.textContent = result.message;
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Confirm Table';
+                    return;
+                }
+
+                // Table is available
+                tableNumber = value;
+                storeTableNumber(tableNumber);
+                updateTableNumberUI();
+
+                if (tableNumberModal) {
+                    tableNumberModal.hide();
+                }
+
+                if (tableNumberResolve) {
+                    tableNumberResolve(tableNumber);
+                    tableNumberResolve = null;
+                }
+            } catch (error) {
+                input.classList.add('is-invalid');
+                errorDiv.textContent = 'Could not verify table. Please try again.';
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Confirm Table';
             }
         }
 

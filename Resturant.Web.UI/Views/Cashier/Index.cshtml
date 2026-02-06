@@ -28,7 +28,7 @@
         <div class="row g-4" id="orders-container">
             @foreach (var order in Model)
             {
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-4 col-md-6" id="order-card-@order.Id">
                     <div class="card h-100 shadow-sm border-success">
                         <div class="card-header @(order.Status == Resturant.Core.Entities.OrderStatus.Ready ? "bg-success" : "bg-warning") text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Table @order.TableNumber</h5>

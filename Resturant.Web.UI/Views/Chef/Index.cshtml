@@ -23,7 +23,7 @@
         <div class="row g-4" id="orders-container">
             @foreach (var order in Model)
             {
-                <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="col-lg-3 col-md-4 col-sm-6" id="order-card-@order.Id">
                     <div class="card h-100 border-danger shadow-sm">
                         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Table @order.TableNumber</h5>
