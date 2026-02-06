@@ -17,7 +17,7 @@ namespace Resturant.Web.UI.Controllers
         }
 
         // GET: Menu
-        public async Task<IActionResult> Index(int? tableNumber)
+        public async Task<IActionResult> Index(int? tableNumber, int? categoryId)
         {
             var menu = await _context.MenuCategories
                 .Include(c => c.MenuItems.Where(i => i.IsAvailable))
@@ -26,6 +26,7 @@ namespace Resturant.Web.UI.Controllers
                 .ToListAsync();
 
             ViewData["TableNumber"] = tableNumber;
+            ViewData["SelectedCategoryId"] = categoryId;
             return View(menu);
         }
 

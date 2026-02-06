@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Resturant.Core.Common;
 using Resturant.Core.Entities;
+using Resturant.Infrastructure.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,10 +15,12 @@ namespace Resturant.Web.UI.Controllers
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _context;
 
-        public AdminController(UserManager<ApplicationUser> userManager)
+        public AdminController(UserManager<ApplicationUser> userManager, AppDbContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -45,6 +48,38 @@ namespace Resturant.Web.UI.Controllers
             }
 
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardStats()
+        {
+            var today = DateTime.Today;
+
+            var activeTables = await _context.Orders
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
+                .Select(o => o.TableNumber)
+                .Distinct()
+                .CountAsync();
+
+            var pendingOrders = await _context.Orders
+                .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .CountAsync();
+
+            var completedToday = await _context.Orders
+                .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .CountAsync();
+
+            var totalRevenueToday = await _context.Orders
+                .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .SumAsync(o => o.TotalAmount);
+
+            return Json(new
+            {
+                activeTables,
+                pendingOrders,
+                completedToday,
+                totalRevenueToday
+            });
         }
     }
 }

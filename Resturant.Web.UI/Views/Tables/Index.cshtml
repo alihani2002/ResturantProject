@@ -1,7 +1,7 @@
-@model IEnumerable<Resturant.Core.Entities.GuestTable>
+@model IEnumerable<Resturant.Core.Entities.RestaurantTable>
 
 @{
-    ViewData["Title"] = "Generate QR code";
+    ViewData["Title"] = "Restaurant Tables";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -11,15 +11,15 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <div class="d-flex justify-content-between align-items-center p-3">
-                        <h3>Generate QR code</h3>
-                        <a asp-action="Create" class="btn btn-primary">Add New Table</a>
+                        <h3>Restaurant Tables</h3>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary me-2">Add New Table</a>
+                        </div>
                     </div>
                     <table class="table table-hover" id="tablesTable" style="width:100%">
                         <thead>
                             <tr>
                                 <th>Table Number</th>
-                                <th>QR Code</th>
-                                <th>URL</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -58,28 +58,7 @@
                         "name": "TableNumber", 
                         "autoWidth": true,
                         "render": function (data, type, row) {
-                            return data ? `<span class="fw-bold fs-16">Table ${data}</span>` : '<span class="fw-bold fs-16">General QR</span>';
-                        }
-                    },
-                    { 
-                        "data": "qrCodeUrl", 
-                        "name": "QrCodeUrl", 
-                        "autoWidth": true,
-                        "render": function (data, type, row) {
-                            if (data) {
-                                var tableName = row.tableNumber ? row.tableNumber : "General";
-                                return `<img src="${data}" alt="QR Code" style="width: 100px; height: 100px;" /><br/>
-                                        <a href="${data}" download="Table_${tableName}_QR.png" class="btn btn-sm btn-outline-secondary mt-2">Download QR</a>`;
-                            }
-                            return '<span class="text-muted">No QR Code</span>';
-                        }
-                    },
-                    { 
-                        "data": "url", 
-                        "name": "Url", 
-                        "autoWidth": true,
-                        "render": function (data, type, row) {
-                             return `<a href="${data}" target="_blank">${data}</a>`;
+                            return `<span class="fw-bold fs-16">Table ${data}</span>`;
                         }
                     }
                 ]

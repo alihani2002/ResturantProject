@@ -1,163 +1,327 @@
+@model IEnumerable<Resturant.Core.Entities.Order>
+
 @{
     ViewData["Title"] = "Chef Dashboard";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <h2>Chef Dashboard</h2>
-            <p>View and prepare orders</p>
-        </div>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-fire text-danger me-2"></i>Kitchen Orders <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
+        <span class="badge bg-danger">@Model.Count() Pending</span>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Orders to Prepare</h4>
-                </div>
-                <div class="card-body">
-                    <div id="orders-container">
-                        <p class="text-muted">Loading orders...</p>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-check-circle display-1 text-success"></i>
+            <h3 class="mt-3">All caught up!</h3>
+            <p class="text-muted">No pending orders in the queue.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4" id="orders-container">
+            @foreach (var order in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 border-danger shadow-sm">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Table @order.TableNumber</h5>
+                            <small>@order.OrderDate.ToString("HH:mm")</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush mb-3">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary rounded-pill me-2">@item.Quantity x</span>
+                                            <span class="fw-bold">@item.MenuItem.Name</span>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                            <div class="mt-auto text-end">
+                                <small class="text-muted d-block mb-2">Order ID: #@order.Id</small>
+                            </div>
+                        </div>
+                         <div class="card-footer bg-white border-top-0 pb-3">
+                             <button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(@order.Id)">
+                                <i class="bi bi-check-lg me-1"></i> Order Ready
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>
-    </div>
+    }
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/signalr/7.0.2/signalr.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
-        // SignalR connection
+        // SignalR Connection with auto-reconnect
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub")
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .configureLogging(signalR.LogLevel.Warning)
             .build();
 
-        // Load orders to prepare
-        function loadOrdersToPrepare() {
-            // Load Confirmed (1) and InPreparation (2) orders
-            Promise.all([
-                fetch('/Order/GetOrdersByStatus?status=1').then(r => r.json()),
-                fetch('/Order/GetOrdersByStatus?status=2').then(r => r.json())
-            ])
-            .then(([confirmedOrders, inPreparationOrders]) => {
-                const container = document.getElementById('orders-container');
-                const allOrders = [...confirmedOrders, ...inPreparationOrders];
-                
-                if (allOrders.length === 0) {
-                    container.innerHTML = '<p class="text-muted">No orders to prepare</p>';
-                    return;
-                }
-
-                let html = '<div class="row">';
-                allOrders.forEach(order => {
-                    const orderDate = new Date(order.orderDate).toLocaleString();
-                    const isConfirmed = order.status === 1;
-                    const statusText = isConfirmed ? 'Ready to Prepare' : 'In Preparation';
-                    const statusClass = isConfirmed ? 'warning' : 'info';
-                    const actionText = isConfirmed ? 'Start Preparation' : 'Mark as Ready';
-                    const actionStatus = isConfirmed ? 2 : 3; // 2 = InPreparation, 3 = Ready
-                    
-                    let itemsHtml = '<ul class="list-group list-group-flush">';
-                    
-                    order.orderItems.forEach(item => {
-                        itemsHtml += `
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>${item.menuItem.name} x ${item.quantity}</span>
-                                <span>$${(item.price * item.quantity).toFixed(2)}</span>
-                            </li>
-                        `;
-                    });
-                    
-                    itemsHtml += '</ul>';
-
-                    html += `
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Order #${order.id} - Table ${order.tableNumber}</h5>
-                                    <small>${orderDate}</small>
-                                    <span class="badge bg-${statusClass}">${statusText}</span>
-                                </div>
-                                <div class="card-body">
-                                    ${itemsHtml}
-                                    <hr>
-                                    <div class="d-flex justify-content-between">
-                                        <strong>Total:</strong>
-                                        <strong>$${order.totalAmount.toFixed(2)}</strong>
-                                    </div>
-                                </div>
-                                <div class="card-footer">
-                                    <button class="btn btn-primary btn-block" onclick="updateOrderStatus(${order.id}, ${actionStatus})">
-                                        ${actionText}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                container.innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Error loading orders:', error);
-            });
+        // Connection state indicator
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connection-status');
+            if (badge) {
+                badge.className = connected ? 'badge bg-success ms-2' : 'badge bg-danger ms-2';
+                badge.innerHTML = connected ? '<i class="bi bi-wifi"></i> Live' : '<i class="bi bi-wifi-off"></i> Offline';
+            }
         }
 
-        // Update order status
-        function updateOrderStatus(orderId, status) {
-            const statusText = status === 2 ? 'start preparation' : 'mark as ready';
-            if (!confirm(`Are you sure you want to ${statusText} for this order?`)) {
+        // Update pending count
+        function updatePendingCount() {
+            const container = document.getElementById('orders-container');
+            const count = container ? container.querySelectorAll('.col-lg-3').length : 0;
+            const badge = document.querySelector('.badge.bg-danger');
+            if (badge) badge.textContent = count + ' Pending';
+        }
+
+        // Create order card HTML
+        function createOrderCard(order) {
+            const orderTime = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            let itemsHtml = '';
+            if (order.orderItems && order.orderItems.length > 0) {
+                order.orderItems.forEach(item => {
+                    itemsHtml += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
+                                <span class="fw-bold">${item.menuItemName || item.name || 'Item'}</span>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+
+            return `
+                <div class="col-lg-3 col-md-4 col-sm-6" id="order-card-${order.id}">
+                    <div class="card h-100 border-danger shadow-sm">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Table ${order.tableNumber}</h5>
+                            <small>${orderTime}</small>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush mb-3">
+                                ${itemsHtml}
+                            </ul>
+                            <div class="mt-auto text-end">
+                                <small class="text-muted d-block mb-2">Order ID: #${order.id}</small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-top-0 pb-3">
+                            <button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(${order.id})">
+                                <i class="bi bi-check-lg me-1"></i> Order Ready
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add new order to the grid
+        function addOrderCard(order) {
+            const container = document.getElementById('orders-container');
+            if (!container) {
+                // If there's no container (empty state), refresh the page once
+                location.reload();
                 return;
             }
 
-            fetch('/Order/UpdateStatus', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `orderId=${orderId}&status=${status}`
-            })
-            .then(response => {
-                if (response.ok) {
-                    alert('Order status updated successfully');
-                    loadOrdersToPrepare();
-                } else {
-                    alert('Error updating order status');
-                }
-            })
-            .catch(error => {
-                console.error('Error updating order status:', error);
-                alert('Error updating order status');
-            });
+            // Check if order already exists
+            if (document.getElementById(`order-card-${order.id}`)) return;
+
+            const cardHtml = createOrderCard(order);
+            container.insertAdjacentHTML('afterbegin', cardHtml);
+
+            // Flash animation
+            const newCard = document.getElementById(`order-card-${order.id}`);
+            if (newCard) {
+                newCard.style.animation = 'pulse 0.5s ease-in-out';
+            }
+
+            updatePendingCount();
+            playNotificationSound();
+            showNotification(`New order for Table ${order.tableNumber}!`, 'warning');
+        }
+
+        // Remove order card
+        function removeOrderCard(orderId) {
+            const card = document.getElementById(`order-card-${orderId}`);
+            if (card) {
+                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.remove();
+                    updatePendingCount();
+                    checkEmptyState();
+                }, 300);
+            }
+        }
+
+        // Check if we should show empty state
+        function checkEmptyState() {
+            const container = document.getElementById('orders-container');
+            if (container && container.children.length === 0) {
+                container.outerHTML = `
+                    <div class="text-center py-5" id="empty-state">
+                        <i class="bi bi-check-circle display-1 text-success"></i>
+                        <h3 class="mt-3">All caught up!</h3>
+                        <p class="text-muted">No pending orders in the queue.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Play notification sound
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 600;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.4);
+            } catch (e) { }
+        }
+
+        // Show toast notification
+        function showNotification(message, type = 'info') {
+            const container = document.querySelector('.toast-container') || createToastContainer();
+            const toastId = 'toast-' + Date.now();
+            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
         }
 
         // SignalR event handlers
-        connection.on("ReceiveChefUpdate", function(message) {
-            console.log("Chef update received:", message);
-            loadOrdersToPrepare();
+        connection.on("OrderAccepted", function (order) {
+            // Remove empty state if exists
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) {
+                emptyState.outerHTML = '<div class="row g-4" id="orders-container"></div>';
+            }
+            addOrderCard(order);
         });
 
-        connection.on("ReceiveOrderDetails", function(order) {
-            console.log("Order details received:", order);
-            loadOrdersToPrepare();
+        connection.on("OrderCancelled", function (order) {
+            removeOrderCard(order.id);
+            showNotification(`Order #${order.id} for Table ${order.tableNumber} was cancelled`, 'warning');
         });
 
-        // Start SignalR connection
-        connection.start()
-            .then(function() {
-                console.log("SignalR connected");
-                loadOrdersToPrepare();
+        // Legacy event handlers
+        connection.on("ReceiveChefUpdate", function (message) {
+            // Refresh orders
+            fetchAndRefreshOrders();
+        });
+
+        connection.on("ReceiveWaiterUpdate", function (message) {
+            // May affect orders
+        });
+
+        // Fetch and refresh orders
+        async function fetchAndRefreshOrders() {
+            try {
+                const response = await fetch('/Chef/GetOrdersData');
+                if (response.ok) {
+                    const orders = await response.json();
+                    const container = document.getElementById('orders-container');
+                    if (container) {
+                        // Get current order IDs
+                        const currentIds = new Set(Array.from(container.querySelectorAll('[id^="order-card-"]'))
+                            .map(el => parseInt(el.id.replace('order-card-', ''))));
+                        const newIds = new Set(orders.map(o => o.id));
+
+                        // Remove orders not in new list
+                        currentIds.forEach(id => {
+                            if (!newIds.has(id)) removeOrderCard(id);
+                        });
+
+                        // Add new orders
+                        orders.forEach(order => {
+                            if (!currentIds.has(order.id)) addOrderCard(order);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
+
+        // Start connection and join dashboard group
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+                await connection.invoke("JoinDashboard", "chef");
+                updateConnectionStatus(true);
+            } catch (err) {
+                console.error("SignalR Connection Error:", err);
+                updateConnectionStatus(false);
+                setTimeout(startConnection, 5000);
+            }
+        }
+
+        connection.onreconnecting(() => updateConnectionStatus(false));
+        connection.onreconnected(() => {
+            connection.invoke("JoinDashboard", "chef");
+            updateConnectionStatus(true);
+            fetchAndRefreshOrders();
+        });
+        connection.onclose(() => updateConnectionStatus(false));
+
+        startConnection();
+
+        function finishOrder(orderId) {
+            if (!confirm('Mark order as Ready?')) return;
+
+            fetch('/Chef/FinishOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `orderId=${orderId}`
             })
-            .catch(function(err) {
-                console.error("SignalR connection error:", err);
+            .then(response => {
+                if (response.ok) {
+                    removeOrderCard(orderId);
+                    showNotification('Order marked as ready!', 'success');
+                } else {
+                    alert('Error updating order');
+                }
             });
-
-        // Load orders on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadOrdersToPrepare();
-        });
+        }
     </script>
 }

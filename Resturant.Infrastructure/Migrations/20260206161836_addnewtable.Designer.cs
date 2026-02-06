@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Resturant.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Resturant.Infrastructure.Data;
 namespace Resturant.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260206161836_addnewtable")]
+    partial class addnewtable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,7 +293,7 @@ namespace Resturant.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MenuCategories", (string)null);
+                    b.ToTable("MenuCategories");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.MenuItem", b =>
@@ -340,7 +343,7 @@ namespace Resturant.Infrastructure.Migrations
 
                     b.HasIndex("MenuCategoryId");
 
-                    b.ToTable("MenuItems", (string)null);
+                    b.ToTable("MenuItems");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.Order", b =>
@@ -398,7 +401,7 @@ namespace Resturant.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.OrderItem", b =>
@@ -442,7 +445,7 @@ namespace Resturant.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.QrCode", b =>
@@ -471,12 +474,17 @@ namespace Resturant.Infrastructure.Migrations
                     b.Property<string>("QrCodeUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("RestaurantTableId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("QrCodes", (string)null);
+                    b.HasIndex("RestaurantTableId");
+
+                    b.ToTable("QrCodes");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.RestaurantTable", b =>
@@ -505,9 +513,12 @@ namespace Resturant.Infrastructure.Migrations
                     b.Property<int>("TableNumber")
                         .HasColumnType("int");
 
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("RestaurantTables", (string)null);
+                    b.ToTable("RestaurantTables");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -591,6 +602,15 @@ namespace Resturant.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Resturant.Core.Entities.QrCode", b =>
+                {
+                    b.HasOne("Resturant.Core.Entities.RestaurantTable", "RestaurantTable")
+                        .WithMany("QrCodes")
+                        .HasForeignKey("RestaurantTableId");
+
+                    b.Navigation("RestaurantTable");
+                });
+
             modelBuilder.Entity("Resturant.Core.Entities.MenuCategory", b =>
                 {
                     b.Navigation("MenuItems");
@@ -599,6 +619,11 @@ namespace Resturant.Infrastructure.Migrations
             modelBuilder.Entity("Resturant.Core.Entities.Order", b =>
                 {
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Resturant.Core.Entities.RestaurantTable", b =>
+                {
+                    b.Navigation("QrCodes");
                 });
 #pragma warning restore 612, 618
         }

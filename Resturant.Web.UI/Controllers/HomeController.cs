@@ -1,13 +1,22 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Resturant.Core.Common;
+using Resturant.Core.Entities;
+using Resturant.Core.Interfaces;
 using Resturant.Web.UI.Models;
 
 namespace Resturant.Web.UI.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IUnitOfWork _unitOfWork;
+
+        public HomeController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -20,7 +29,11 @@ namespace Resturant.Web.UI.Controllers
                     return RedirectToAction("Index", "Admin");
                 }
             }
-            return View();
+
+            var categories = await _unitOfWork.Repository<MenuCategory>().GetAllWithIncludesAsync();
+            var activeCategories = categories.Where(c => c.IsActive).ToList();
+
+            return View(activeCategories);
         }
 
         public IActionResult Privacy()

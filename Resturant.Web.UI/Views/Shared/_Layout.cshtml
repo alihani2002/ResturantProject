@@ -12,11 +12,11 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top box-shadow">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm mb-4">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-egg-fried text-warning fs-3"></i>
-                    <span>TestResturant</span>
+                    <span class="text-dark">TestResturant</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -25,19 +25,19 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="#menu">Menu</a>
+                            <a class="nav-link text-dark fw-bold" href="#menu">Menu</a>
                         </li>
                          <li class="nav-item">
-                            <a class="nav-link text-white" href="#about">About</a>
+                            <a class="nav-link text-dark fw-bold" href="#about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="#contact">Contact</a>
+                            <a class="nav-link text-dark fw-bold" href="#contact">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -48,20 +48,20 @@
     <main role="main" class="pb-0">
         @RenderBody()
     </main>
-    <footer class="footer-custom" id="contact">
+    <footer class="footer-custom mt-5 border-top" id="contact">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <h5>TestResturant</h5>
-                    <p class="text-secondary">Experience the best culinary delights with our exquisite menu and exceptional service. Fresh ingredients, passionate chefs, and a warm atmosphere.</p>
+                    <h5 class="text-dark">TestResturant</h5>
+                    <p class="text-muted">Experience the best culinary delights with our exquisite menu and exceptional service. Fresh ingredients, passionate chefs, and a warm atmosphere.</p>
                     <div class="d-flex gap-3 mt-3">
-                        <a href="#"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#"><i class="bi bi-instagram fs-5"></i></a>
-                        <a href="#"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#" class="text-dark"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="text-dark"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#" class="text-dark"><i class="bi bi-twitter fs-5"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
-                    <h5>Quick Links</h5>
+                    <h5 class="text-dark">Quick Links</h5>
                     <a href="#">Home</a>
                     <a href="#menu">Menu</a>
                     <a href="#about">About Us</a>
@@ -69,20 +69,20 @@
                     <a asp-area="Identity" asp-page="/Account/Login">Login</a>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Opening Hours</h5>
-                    <p class="mb-1">Mon - Fri: 09:00 - 22:00</p>
-                    <p class="mb-1">Sat: 10:00 - 23:00</p>
-                    <p>Sun: Closed</p>
+                    <h5 class="text-dark">Opening Hours</h5>
+                    <p class="mb-1 text-muted">Mon - Fri: 09:00 - 22:00</p>
+                    <p class="mb-1 text-muted">Sat: 10:00 - 23:00</p>
+                    <p class="text-muted">Sun: Closed</p>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
-                    <h5>Contact Us</h5>
-                    <p class="mb-1"><i class="bi bi-geo-alt-fill me-2 text-warning"></i> 123 Restaurant Street, Food City</p>
-                    <p class="mb-1"><i class="bi bi-telephone-fill me-2 text-warning"></i> +1 234 567 890</p>
-                    <p><i class="bi bi-envelope-fill me-2 text-warning"></i> info@testresturant.com</p>
+                    <h5 class="text-dark">Contact Us</h5>
+                    <p class="mb-1 text-muted"><i class="bi bi-geo-alt-fill me-2 text-warning"></i> 123 Restaurant Street, Food City</p>
+                    <p class="mb-1 text-muted"><i class="bi bi-telephone-fill me-2 text-warning"></i> +1 234 567 890</p>
+                    <p class="text-muted"><i class="bi bi-envelope-fill me-2 text-warning"></i> info@testresturant.com</p>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; @DateTime.Now.Year TestResturant. All Rights Reserved.</p>
+            <div class="footer-bottom border-top pt-4 mt-4">
+                <p class="text-muted">&copy; @DateTime.Now.Year TestResturant. All Rights Reserved.</p>
             </div>
         </div>
     </footer>

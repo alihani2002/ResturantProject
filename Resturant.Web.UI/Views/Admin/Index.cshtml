@@ -1,107 +1,242 @@
 @{
-    ViewData["Title"] = "Dashboard";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="main-content">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card stretch stretch-full">
-                <div class="card-header">
-                    <h5 class="card-title">Dashboard</h5>
-                </div>
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-speedometer2 text-primary me-2"></i>Admin Dashboard <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
+            <p class="text-muted">Live overview of restaurant operations.</p>
+        </div>
+    </div>
+
+    <!-- Live Status Cards -->
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
                 <div class="card-body">
-                    <h3>Welcome to the Admin Dashboard</h3>
-                    <p class="mb-4">Select a dashboard to manage orders:</p>
-                    
-                    <div class="row">
-                        <div class="col-md-3 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-utensils fa-3x mb-3 text-primary"></i>
-                                    <h5>Waiter Dashboard</h5>
-                                    <p class="text-muted">View and confirm pending orders</p>
-                                    <a href="@Url.Action("Index", "Waiter")" class="btn btn-primary btn-block">
-                                        Go to Waiter Dashboard
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-3 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-fire fa-3x mb-3 text-warning"></i>
-                                    <h5>Chef Dashboard</h5>
-                                    <p class="text-muted">View and prepare orders</p>
-                                    <a href="@Url.Action("Index", "Chef")" class="btn btn-warning btn-block">
-                                        Go to Chef Dashboard
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-3 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-cash-register fa-3x mb-3 text-success"></i>
-                                    <h5>Cashier Dashboard</h5>
-                                    <p class="text-muted">Process payments and print receipts</p>
-                                    <a href="@Url.Action("Index", "Cashier")" class="btn btn-success btn-block">
-                                        Go to Cashier Dashboard
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-3 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-list fa-3x mb-3 text-info"></i>
-                                    <h5>Menu Management</h5>
-                                    <p class="text-muted">Manage categories and items</p>
-                                    <div class="d-grid gap-2">
-                                        <a href="@Url.Action("Index", "MenuCategory")" class="btn btn-info">
-                                            Manage Categories
-                                        </a>
-                                        <a href="@Url.Action("Index", "MenuItem")" class="btn btn-info">
-                                            Manage Items
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-qrcode fa-3x mb-3 text-secondary"></i>
-                                    <h5>Table Management</h5>
-                                    <p class="text-muted">Create tables and generate QR codes</p>
-                                    <a href="@Url.Action("Index", "Tables")" class="btn btn-secondary btn-block">
-                                        Manage Tables
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-users fa-3x mb-3 text-dark"></i>
-                                    <h5>User Management</h5>
-                                    <p class="text-muted">Manage staff accounts</p>
-                                    <a href="@Url.Action("Index", "Users")" class="btn btn-dark btn-block">
-                                        Manage Users
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <h5 class="card-title"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Active Tables</h5>
+                    <h2 class="display-4 fw-bold" id="active-tables-count">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-clock-fill me-2"></i>Pending Orders</h5>
+                    <h2 class="display-4 fw-bold" id="pending-orders-count">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-check-circle-fill me-2"></i>Completed Today</h5>
+                    <h2 class="display-4 fw-bold" id="completed-orders-count">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-cash-stack me-2"></i>Revenue Today</h5>
+                    <h2 class="display-4 fw-bold" id="revenue-today">$-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row mt-4 g-3">
+        <div class="col-md-3">
+            <a href="/Waiter" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-people-fill display-4 text-warning"></i>
+                    <h5 class="mt-2">Waiter Dashboard</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Chef" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-fire display-4 text-danger"></i>
+                    <h5 class="mt-2">Kitchen Dashboard</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Cashier" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-coin display-4 text-success"></i>
+                    <h5 class="mt-2">Cashier Dashboard</h5>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/Tables" class="card text-decoration-none hover-shadow">
+                <div class="card-body text-center">
+                    <i class="bi bi-grid-fill display-4 text-primary"></i>
+                    <h5 class="mt-2">Manage Tables</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-center">
+                <i class="bi bi-broadcast me-2"></i>
+                <div>
+                   <strong>Live Updates Active:</strong> This dashboard updates in real-time. Actions taken by Waiters, Chefs, and Cashiers will be reflected instantly.
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .hover-shadow:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        transition: all 0.2s ease-in-out;
+    }
+    .card {
+        transition: all 0.2s ease-in-out;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // SignalR Connection with auto-reconnect
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/orderHub")
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .configureLogging(signalR.LogLevel.Warning)
+            .build();
+
+        // Connection state indicator
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connection-status');
+            if (badge) {
+                badge.className = connected ? 'badge bg-success ms-2' : 'badge bg-danger ms-2';
+                badge.innerHTML = connected ? '<i class="bi bi-wifi"></i> Live' : '<i class="bi bi-wifi-off"></i> Offline';
+            }
+        }
+
+        // Fetch and update dashboard stats
+        async function fetchDashboardStats() {
+            try {
+                const response = await fetch('/Admin/GetDashboardStats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateStats(stats);
+                }
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        // Update stats with animation
+        function updateStats(stats) {
+            animateValue('active-tables-count', stats.activeTables);
+            animateValue('pending-orders-count', stats.pendingOrders);
+            animateValue('completed-orders-count', stats.completedToday);
+            document.getElementById('revenue-today').textContent = '$' + stats.totalRevenueToday.toFixed(2);
+        }
+
+        // Animate number changes
+        function animateValue(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = parseInt(element.textContent) || 0;
+
+            if (currentValue !== newValue) {
+                element.textContent = newValue;
+                element.style.transform = 'scale(1.2)';
+                element.style.transition = 'transform 0.2s';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+
+        // Show toast notification
+        function showNotification(message, type = 'info') {
+            const container = document.querySelector('.toast-container') || createToastContainer();
+            const toastId = 'toast-' + Date.now();
+            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // SignalR event handlers
+        connection.on("NewOrderReceived", function (order) {
+            fetchDashboardStats();
+            showNotification(`New order from Table ${order.tableNumber}`, 'warning');
+        });
+
+        connection.on("OrderStatusChanged", function (order) {
+            fetchDashboardStats();
+        });
+
+        // Legacy event handlers
+        const refreshEvents = [
+            "ReceiveOrderDetails",
+            "ReceiveOrderUpdate",
+            "ReceiveWaiterUpdate",
+            "ReceiveChefUpdate",
+            "ReceiveAccountantUpdate"
+        ];
+
+        refreshEvents.forEach(event => {
+            connection.on(event, function(message) {
+                fetchDashboardStats();
+            });
+        });
+
+        // Start connection and join dashboard group
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+                await connection.invoke("JoinDashboard", "admin");
+                updateConnectionStatus(true);
+                fetchDashboardStats();
+            } catch (err) {
+                console.error("SignalR Connection Error:", err);
+                updateConnectionStatus(false);
+                setTimeout(startConnection, 5000);
+            }
+        }
+
+        connection.onreconnecting(() => updateConnectionStatus(false));
+        connection.onreconnected(() => {
+            connection.invoke("JoinDashboard", "admin");
+            updateConnectionStatus(true);
+            fetchDashboardStats();
+        });
+        connection.onclose(() => updateConnectionStatus(false));
+
+        // Initial load
+        startConnection();
+    </script>
+}

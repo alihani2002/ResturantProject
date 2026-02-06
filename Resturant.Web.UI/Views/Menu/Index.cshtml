@@ -29,6 +29,20 @@
 
         <!-- Main Content - Menu Items -->
         <div class="col-md-9">
+            <!-- Table Number Display -->
+            <div id="table-info" class="card mb-3 border-primary">
+                <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-hash text-primary me-2"></i>
+                        <strong>Table: </strong>
+                        <span id="current-table-number" class="badge bg-primary fs-6">Not Set</span>
+                    </div>
+                    <button id="change-table-btn" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Change
+                    </button>
+                </div>
+            </div>
+
             <!-- Cart Summary -->
             <div id="cart-summary" class="card mb-4">
                 <div class="card-header">
@@ -57,11 +71,64 @@
     </div>
 </div>
 
+<!-- Table Number Modal -->
+<div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="tableNumberModalLabel">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter Your Table Number
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Please enter your table number to continue with your order.</p>
+                <div class="form-group">
+                    <label for="tableNumberInput" class="form-label fw-bold">Table Number</label>
+                    <input type="number" class="form-control form-control-lg text-center" id="tableNumberInput"
+                           min="1" placeholder="e.g., 5" autofocus>
+                    <div class="invalid-feedback" id="tableNumberError">Please enter a valid table number.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-lg w-100" id="confirmTableBtn">
+                    <i class="bi bi-check-lg me-2"></i>Confirm Table
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 z-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <img id="previewImage" src="" class="img-fluid rounded shadow-lg" style="max-height: 85vh;" alt="Preview">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle-fill me-2"></i> Item added to cart!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/signalr/7.0.2/signalr.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
         // Table number handling
-        let tableNumber = @ViewData["TableNumber"];
+        let tableNumber = @(ViewData["TableNumber"] ?? "null");
+        let selectedCategoryId = @(ViewData["SelectedCategoryId"] ?? "null");
+        
         const TABLE_STORAGE_KEY = 'tableNumber';
         const TABLE_EXPIRY_KEY = 'tableNumberExpiry';
         const EXPIRY_MINUTES = 60;
@@ -88,33 +155,84 @@
             localStorage.setItem(TABLE_EXPIRY_KEY, expiryTime.toString());
         }
 
-        // Prompt user for table number
-        function promptForTableNumber() {
+        // Table number modal elements
+        let tableNumberModal = null;
+        let tableNumberResolve = null;
+
+        // Prompt user for table number using modal
+        function promptForTableNumber(forceShow = false) {
             const storedNumber = getStoredTableNumber();
-            if (storedNumber) {
+            if (storedNumber && !forceShow) {
                 tableNumber = storedNumber;
+                updateTableNumberUI();
                 return Promise.resolve(tableNumber);
             }
 
             return new Promise((resolve) => {
-                const input = prompt("Please enter your table number:");
-                if (input && !isNaN(input) && parseInt(input) > 0) {
-                    tableNumber = parseInt(input);
-                    storeTableNumber(tableNumber);
-                    resolve(tableNumber);
+                tableNumberResolve = resolve;
+                const modalEl = document.getElementById('tableNumberModal');
+                tableNumberModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+
+                // Pre-fill with current table number if changing
+                const input = document.getElementById('tableNumberInput');
+                if (tableNumber && tableNumber > 0) {
+                    input.value = tableNumber;
                 } else {
-                    alert("Please enter a valid table number");
-                    resolve(promptForTableNumber());
+                    input.value = '';
                 }
+                input.classList.remove('is-invalid');
+
+                tableNumberModal.show();
+                setTimeout(() => input.focus(), 500);
             });
         }
 
-        // If table number not provided in URL, prompt user
-        if (!tableNumber) {
-            promptForTableNumber();
-        } else {
+        // Confirm table number from modal
+        function confirmTableNumber() {
+            const input = document.getElementById('tableNumberInput');
+            const value = parseInt(input.value);
+
+            if (!value || value <= 0) {
+                input.classList.add('is-invalid');
+                return;
+            }
+
+            tableNumber = value;
             storeTableNumber(tableNumber);
+            updateTableNumberUI();
+
+            if (tableNumberModal) {
+                tableNumberModal.hide();
+            }
+
+            if (tableNumberResolve) {
+                tableNumberResolve(tableNumber);
+                tableNumberResolve = null;
+            }
         }
+
+        // Update table number display in UI
+        function updateTableNumberUI() {
+            const tableDisplay = document.getElementById('current-table-number');
+            if (tableDisplay) {
+                if (tableNumber && tableNumber > 0) {
+                    tableDisplay.textContent = tableNumber;
+                    tableDisplay.className = 'badge bg-primary fs-6';
+                } else {
+                    tableDisplay.textContent = 'Not Set';
+                    tableDisplay.className = 'badge bg-secondary fs-6';
+                }
+            }
+        }
+
+        // If table number provided in URL or storage, use it
+        if (tableNumber) {
+            storeTableNumber(tableNumber);
+        } else {
+            tableNumber = getStoredTableNumber();
+        }
+
+
 
         // Cart functionality
         let cart = [];
@@ -148,6 +266,21 @@
             }
             saveCart();
             updateCartUI();
+            showToast();
+        }
+
+        // Show toast notification
+        function showToast() {
+            const toastEl = document.getElementById('cartToast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // Open image preview
+        function openImagePreview(imageUrl) {
+            const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            document.getElementById('previewImage').src = imageUrl;
+            modal.show();
         }
 
         // Remove item from cart
@@ -228,19 +361,31 @@
                     let html = '<div class="row">';
                     menuItems.forEach(item => {
                         html += `
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100">
-                                    ${item.imageUrl ? `
-                                        <img src="${item.imageUrl}" class="card-img-top" alt="${item.name}" style="height: 200px; object-fit: cover;">
-                                    ` : ''}
-                                    <div class="card-body">
-                                        <h5 class="card-title">${item.name}</h5>
-                                        <p class="card-text">${item.description}</p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h4>$${item.price.toFixed(2)}</h4>
-                                            <button class="btn btn-primary" onclick="addToCart(${JSON.stringify(item)})">
-                                                Add to Cart
-                                            </button>
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 shadow-sm border-0">
+                                    <div class="row g-0 h-100">
+                                        ${item.imageUrl ? `
+                                        <div class="col-md-4">
+                                            <img src="${item.imageUrl}" class="img-fluid rounded-start h-100 w-100" 
+                                                 style="object-fit: cover; cursor: pointer;" 
+                                                 alt="${item.name}"
+                                                 onclick="openImagePreview('${item.imageUrl}')">
+                                        </div>
+                                        ` : ''}
+                                        <div class="${item.imageUrl ? 'col-md-8' : 'col-12'}">
+                                            <div class="card-body d-flex flex-column h-100">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h5 class="card-title fw-bold text-dark mb-0">${item.name}</h5>
+                                                    <span class="badge bg-primary rounded-pill">$${item.price.toFixed(2)}</span>
+                                                </div>
+                                                <p class="card-text text-muted small flex-grow-1">${item.description || ''}</p>
+                                                <div class="mt-3 text-end">
+                                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-4" 
+                                                            onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                                        <i class="bi bi-plus-lg me-1"></i> Add
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -257,10 +402,19 @@
         }
 
         // Checkout
-        function checkout() {
+        async function checkout() {
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
+            }
+
+            // Ensure table number is present
+            if (!tableNumber || tableNumber <= 0) {
+                await promptForTableNumber();
+                if (!tableNumber || tableNumber <= 0) {
+                     alert("Table number is required to place an order.");
+                     return;
+                }
             }
 
             const orderItems = cart.map(item => ({
@@ -278,20 +432,35 @@
                     orderItems: orderItems
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Order placed successfully! Order ID: ${data.orderId}`);
-                    cart = [];
-                    saveCart();
-                    updateCartUI();
+            .then(async response => {
+                if (response.ok) {
+                    return response.json();
                 } else {
-                    alert('Error placing order: ' + data.message);
+                    const errorText = await response.text();
+                    // If table is occupied or doesn't exist, clear stored table and prompt again
+                    if (errorText.includes('occupied') || errorText.includes('does not exist')) {
+                        localStorage.removeItem(TABLE_STORAGE_KEY);
+                        localStorage.removeItem(TABLE_EXPIRY_KEY);
+                        tableNumber = null;
+                        updateTableNumberUI();
+                    }
+                    throw new Error(errorText || 'Failed to place order');
                 }
+            })
+            .then(data => {
+                // Success
+                alert(`Order placed successfully! Order ID: ${data.orderId}`);
+                cart = [];
+                saveCart();
+                updateCartUI();
             })
             .catch(error => {
                 console.error('Error placing order:', error);
-                alert('Error placing order');
+                alert(error.message);
+                // If table issue, prompt for a new table number
+                if (error.message.includes('occupied') || error.message.includes('does not exist')) {
+                    promptForTableNumber(true);
+                }
             });
         }
 
@@ -299,6 +468,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Load cart from local storage
             loadCart();
+
+            // Update table number UI
+            updateTableNumberUI();
+
+            // If no table number, prompt for it
+            if (!tableNumber || tableNumber <= 0) {
+                promptForTableNumber();
+            }
+
+            // Auto-load category if selected
+            if (typeof selectedCategoryId !== 'undefined' && selectedCategoryId !== null) {
+                loadMenuItems(selectedCategoryId);
+            }
 
             // Category navigation
             document.querySelectorAll('.category-link').forEach(link => {
@@ -311,6 +493,21 @@
 
             // Checkout button
             document.getElementById('checkout-btn').addEventListener('click', checkout);
+
+            // Change table button
+            document.getElementById('change-table-btn').addEventListener('click', function() {
+                promptForTableNumber(true);
+            });
+
+            // Confirm table button in modal
+            document.getElementById('confirmTableBtn').addEventListener('click', confirmTableNumber);
+
+            // Enter key in table number input
+            document.getElementById('tableNumberInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmTableNumber();
+                }
+            });
         });
     </script>
 }

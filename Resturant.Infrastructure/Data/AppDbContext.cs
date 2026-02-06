@@ -11,7 +11,8 @@ namespace Resturant.Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
-        public DbSet<GuestTable> GuestTables { get; set; }
+        public DbSet<RestaurantTable> RestaurantTables { get; set; }
+        public DbSet<QrCode> QrCodes { get; set; }
         public DbSet<MenuCategory> MenuCategories { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<Order> Orders { get; set; }

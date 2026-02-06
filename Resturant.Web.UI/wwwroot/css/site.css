@@ -28,8 +28,10 @@ a {
     font-size: 1rem;
 }
 
-.nav-link:hover, .nav-link.active {
-    color: #ffc107 !important; /* Gold color for accents */
+.nav-link:hover,
+.nav-link.active {
+    color: #ffc107 !important;
+    /* Gold color for accents */
 }
 
 /* Hero Section */
@@ -42,7 +44,8 @@ a {
     display: flex;
     align-items: center;
     color: white;
-    margin-top: -76px; /* Offset navbar height if sticky/transparent */
+    margin-top: -76px;
+    /* Offset navbar height if sticky/transparent */
 }
 
 .hero-overlay {
@@ -51,7 +54,8 @@ a {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+    background: rgba(0, 0, 0, 0.5);
+    /* Dark overlay */
     z-index: 1;
 }
 
@@ -69,7 +73,7 @@ a {
     font-weight: 800;
     margin-bottom: 20px;
     text-transform: uppercase;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-subtitle {
@@ -107,7 +111,7 @@ a {
     padding: 30px;
     background: white;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s;
     height: 100%;
 }
@@ -124,20 +128,20 @@ a {
 
 /* Footer */
 .footer-custom {
-    background-color: #1a1a1a;
-    color: #adb5bd;
+    background-color: #ffffff;
+    color: #333;
     padding: 60px 0 20px;
     margin-top: auto;
 }
 
 .footer-custom h5 {
-    color: white;
+    color: #000;
     margin-bottom: 20px;
     font-weight: 600;
 }
 
 .footer-custom a {
-    color: #adb5bd;
+    color: #555;
     display: block;
     margin-bottom: 10px;
 }
@@ -148,7 +152,7 @@ a {
 }
 
 .footer-bottom {
-    border-top: 1px solid #333;
+    border-top: 1px solid #dee2e6;
     padding-top: 20px;
     margin-top: 40px;
     text-align: center;

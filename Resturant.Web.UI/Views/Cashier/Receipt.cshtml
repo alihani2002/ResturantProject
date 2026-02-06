@@ -1,0 +1,107 @@
+@model Resturant.Core.Entities.Order
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receipt #@Model.Id</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 80mm;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .details {
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .items-table th {
+            text-align: left;
+            border-bottom: 1px dashed black;
+        }
+        .items-table td {
+            padding: 4px 0;
+        }
+        .total-section {
+            margin-top: 20px;
+            border-top: 1px dashed black;
+            padding-top: 10px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        @@media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="header">
+        <h1>TestResturant</h1>
+        <p>123 Restaurant Street<br>Food City</p>
+    </div>
+
+    <div class="details">
+        <div>Date: @Model.OrderDate.ToString("g")</div>
+        <div>Order ID: #@Model.Id</div>
+        <div>Table: @Model.TableNumber</div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th style="text-align: right;">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.MenuItem.Name</td>
+                    <td>@item.Quantity</td>
+                    <td style="text-align: right;">@((item.Price * item.Quantity).ToString("F2"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="total-section">
+        Total: $@Model.TotalAmount.ToString("F2")
+    </div>
+
+    <div class="footer">
+        <p>Thank you for dining with us!</p>
+        <p>Please visit us again.</p>
+    </div>
+
+    <div class="no-print" style="margin-top: 20px; text-align: center;">
+        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer;">Print Receipt</button>
+    </div>
+</body>
+</html>
