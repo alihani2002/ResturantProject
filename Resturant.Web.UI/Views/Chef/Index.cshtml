@@ -41,6 +41,13 @@
                                     </li>
                                 }
                             </ul>
+                            @if (!string.IsNullOrEmpty(order.Note))
+                            {
+                                <div class="alert alert-warning py-2 mb-3">
+                                    <small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
+                                    <p class="mb-0 small fst-italic">@order.Note</p>
+                                </div>
+                            }
                             <div class="mt-auto text-end">
                                 <small class="text-muted d-block mb-2">Order ID: #@order.Id</small>
                             </div>
@@ -112,6 +119,12 @@
                             <ul class="list-group list-group-flush mb-3">
                                 ${itemsHtml}
                             </ul>
+                            ${order.note ? `
+                                <div class="alert alert-warning py-2 mb-3">
+                                    <small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
+                                    <p class="mb-0 small fst-italic">${order.note}</p>
+                                </div>
+                            ` : ''}
                             <div class="mt-auto text-end">
                                 <small class="text-muted d-block mb-2">Order ID: #${order.id}</small>
                             </div>

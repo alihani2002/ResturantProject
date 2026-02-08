@@ -151,10 +151,74 @@ a {
     padding-left: 5px;
 }
 
-.footer-bottom {
-    border-top: 1px solid #dee2e6;
-    padding-top: 20px;
-    margin-top: 40px;
-    text-align: center;
-    font-size: 0.9rem;
+/* Professional UI Updates */
+
+/* Dark Primary Button */
+.btn-dark-primary {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #000000;
+    padding: 10px 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
+    /* Slightly sharper corners for professional look */
+    transition: all 0.3s ease;
+}
+
+.btn-dark-primary:hover {
+    background-color: #333333;
+    border-color: #333333;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Force pure black text */
+.text-black-pure {
+    color: #000000 !important;
+}
+
+/* Professional Card Style */
+.card-professional {
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    /* Softer shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card-professional:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-professional .card-title {
+    color: #000000;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.card-professional .card-text {
+    color: #000000;
+    /* Ensure description is black as requested */
+    opacity: 0.8;
+    /* Slight opacity for hierarchy but still black base */
+}
+
+/* Navbar Customizations */
+.navbar-brand-centered {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.navbar-nav-centered {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }

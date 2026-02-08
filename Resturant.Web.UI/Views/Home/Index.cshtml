@@ -37,7 +37,7 @@
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold mb-3">Our Menu</h1>
-        <p class="lead text-muted">Choose a category to start your order</p>
+        <p class="lead text-black-pure">Choose a category to start your order</p>
         <div class="mx-auto bg-warning" style="height: 3px; width: 60px;"></div>
     </div>
 
@@ -48,7 +48,7 @@
             {
                 <div class="col-md-4 col-sm-6">
                     <a href="@Url.Action("Index", "Menu", new { categoryId = item.Id })" class="text-decoration-none">
-                        <div class="card category-card">
+                        <div class="card card-professional h-100"> <!-- Used card-professional here -->
                             @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
                                 <img src="@item.ImageUrl" class="category-img" alt="@item.Name">
@@ -56,14 +56,14 @@
                             else
                             {
                                 <div class="category-img d-flex align-items-center justify-content-center bg-light text-muted">
-                                    <i class="bi bi-image fs-1"></i>
+                                    <i class="bi bi-image fs-1 opacity-50"></i>
                                 </div>
                             }
-                            <div class="card-body text-center">
-                                <h3 class="card-title text-dark">@item.Name</h3>
+                            <div class="card-body text-center p-4">
+                                <h3 class="card-title text-black-pure mb-2">@item.Name</h3>
                                 @if (!string.IsNullOrEmpty(item.Description))
                                 {
-                                    <p class="card-text text-muted small">@item.Description</p>
+                                    <p class="card-text text-black-pure small">@item.Description</p>
                                 }
                             </div>
                         </div>

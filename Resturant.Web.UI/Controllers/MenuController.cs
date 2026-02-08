@@ -37,6 +37,16 @@ namespace Resturant.Web.UI.Controllers
             var menuItems = await _context.MenuItems
                 .Where(i => i.MenuCategoryId == categoryId && i.IsAvailable)
                 .OrderBy(i => i.Name)
+                .Select(i => new 
+                {
+                    id = i.Id,
+                    name = i.Name,
+                    description = i.Description,
+                    price = i.Price,
+                    imageUrl = i.ImageUrl,
+                    isAvailable = i.IsAvailable,
+                    menuCategoryId = i.MenuCategoryId
+                })
                 .ToListAsync();
 
             return Json(menuItems);

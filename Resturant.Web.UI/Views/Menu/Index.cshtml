@@ -7,22 +7,19 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar - Category Navigation -->
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Categories</h4>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        @foreach (var category in Model)
-                        {
-                            <li class="list-group-item">
-                                <a href="#" class="category-link" data-category-id="@category.Id">
-                                    @category.Name
-                                </a>
-                            </li>
-                        }
-                    </ul>
+        <div class="col-md-3 d-none d-md-block">
+            <div class="sticky-top" style="top: 100px; z-index: 1020;">
+                <h5 class="fw-bold mb-3 px-3 text-black-pure text-uppercase ls-1">Menu Categories</h5>
+                <div class="list-group list-group-flush shadow-sm rounded-3 overflow-hidden bg-white">
+                    @foreach (var category in Model)
+                    {
+                        <a href="#" class="list-group-item list-group-item-action category-link py-3 px-4 border-0 d-flex justify-content-between align-items-center" 
+                           data-category-id="@category.Id"
+                           style="transition: all 0.2s;">
+                            <span class="fw-bold">@category.Name</span>
+                            <i class="bi bi-chevron-right small opacity-50"></i>
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -30,14 +27,14 @@
         <!-- Main Content - Menu Items -->
         <div class="col-md-9">
             <!-- Table Number Display -->
-            <div id="table-info" class="card mb-3 border-primary">
+            <div id="table-info" class="card mb-3 border-dark">
                 <div class="card-body py-2 d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="bi bi-hash text-primary me-2"></i>
-                        <strong>Table: </strong>
-                        <span id="current-table-number" class="badge bg-primary fs-6">Not Set</span>
+                        <i class="bi bi-hash text-black-pure me-2"></i>
+                        <strong class="text-black-pure">Table: </strong>
+                        <span id="current-table-number" class="badge bg-dark fs-6">Not Set</span>
                     </div>
-                    <button id="change-table-btn" class="btn btn-outline-primary btn-sm">
+                    <button id="change-table-btn" class="btn btn-outline-dark btn-sm">
                         <i class="bi bi-pencil me-1"></i>Change
                     </button>
                 </div>
@@ -45,19 +42,19 @@
 
             <!-- Cart Summary -->
             <div id="cart-summary" class="card mb-4">
-                <div class="card-header">
-                    <h4>Your Cart (<span id="cart-count">0</span>)</h4>
+                <div class="card-header bg-black text-white" style="background-color: #000 !important;">
+                    <h4 class="mb-0">Your Cart (<span id="cart-count">0</span>)</h4>
                 </div>
                 <div class="card-body">
                     <div id="cart-items">
-                        <p class="text-muted">Your cart is empty</p>
+                        <p class="text-black-pure">Your cart is empty</p>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between">
-                        <strong>Total:</strong>
-                        <strong id="cart-total">$0.00</strong>
+                        <strong class="text-black-pure">Total:</strong>
+                        <strong id="cart-total" class="text-black-pure">$0.00</strong>
                     </div>
-                    <button id="checkout-btn" class="btn btn-primary btn-block mt-3" disabled>
+                    <button id="checkout-btn" class="btn btn-dark-primary btn-block mt-3 w-100" disabled>
                         Checkout
                     </button>
                 </div>
@@ -75,7 +72,7 @@
 <div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-black text-white" style="background-color: #000 !important;">
                 <h5 class="modal-title" id="tableNumberModalLabel">
                     <i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter Your Table Number
                 </h5>
@@ -89,14 +86,45 @@
                     <div class="invalid-feedback" id="tableNumberError">Please enter a valid table number.</div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary btn-lg w-100" id="confirmTableBtn">
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-dark-primary btn-lg w-100" id="confirmTableBtn">
                     <i class="bi bi-check-lg me-2"></i>Confirm Table
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Checkout Modal with Note -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-black text-white" style="background-color: #000 !important;">
+                <h5 class="modal-title" id="checkoutModalLabel">
+                    <i class="bi bi-cart-check-fill me-2"></i>Confirm Order
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="checkout-summary" class="mb-3">
+                    <!-- Summary will be injected here -->
+                </div>
+                <div class="form-group">
+                    <label for="orderNote" class="form-label fw-bold">Note to Chef (Optional)</label>
+                    <textarea class="form-control" id="orderNote" rows="2" placeholder="e.g., No onions, extra spicy..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark-primary" id="confirmCheckoutBtn">
+                    <i class="bi bi-check-lg me-2"></i>Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
@@ -109,6 +137,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Toast Notification -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
@@ -131,20 +161,23 @@
         
         const TABLE_STORAGE_KEY = 'tableNumber';
         const TABLE_EXPIRY_KEY = 'tableNumberExpiry';
-        const EXPIRY_MINUTES = 60;
+        const ORDER_HISTORY_KEY = 'guestOrderHistory';
+        const EXPIRY_MINUTES = 480; // 8 Hours to match order history
+        const ORDER_EXPIRY_HOURS = 8;
 
         // Check if table number is stored locally
         function getStoredTableNumber() {
-            const storedNumber = localStorage.getItem(TABLE_STORAGE_KEY);
-            const expiryTime = localStorage.getItem(TABLE_EXPIRY_KEY);
-            
-            if (storedNumber && expiryTime) {
-                const now = new Date().getTime();
-                if (now < parseInt(expiryTime)) {
-                    return parseInt(storedNumber);
+            try {
+                const storedNumber = localStorage.getItem(TABLE_STORAGE_KEY);
+                const expiryTime = localStorage.getItem(TABLE_EXPIRY_KEY);
+                
+                if (storedNumber && expiryTime) {
+                    const now = new Date().getTime();
+                    if (now < parseInt(expiryTime)) {
+                        return parseInt(storedNumber);
+                    }
                 }
-            }
-            
+            } catch(e) { console.error(e); }
             return null;
         }
 
@@ -166,17 +199,17 @@
                 // Verify stored table is still available
                 try {
                     const response = await fetch(`/Order/CheckTable?tableNumber=${storedNumber}`);
-                    const result = await response.json();
-                    if (result.available) {
-                        tableNumber = storedNumber;
-                        updateTableNumberUI();
-                        return Promise.resolve(tableNumber);
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.available) {
+                            tableNumber = storedNumber;
+                            updateTableNumberUI();
+                            return Promise.resolve(tableNumber);
+                        }
                     }
-                    // Table no longer available, clear and prompt
                     localStorage.removeItem(TABLE_STORAGE_KEY);
                     localStorage.removeItem(TABLE_EXPIRY_KEY);
                 } catch (e) {
-                    // On error, use stored value
                     tableNumber = storedNumber;
                     updateTableNumberUI();
                     return Promise.resolve(tableNumber);
@@ -186,7 +219,8 @@
             return new Promise((resolve) => {
                 tableNumberResolve = resolve;
                 const modalEl = document.getElementById('tableNumberModal');
-                tableNumberModal = new bootstrap.Modal(modalEl, { backdrop: 'static', keyboard: false });
+                const bsRequest = window.bootstrap || bootstrap;
+                tableNumberModal = new bsRequest.Modal(modalEl, { backdrop: 'static', keyboard: false });
 
                 // Pre-fill with current table number if changing
                 const input = document.getElementById('tableNumberInput');
@@ -215,7 +249,6 @@
                 return;
             }
 
-            // Disable button while checking
             confirmBtn.disabled = true;
             confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking...';
 
@@ -231,7 +264,6 @@
                     return;
                 }
 
-                // Table is available
                 tableNumber = value;
                 storeTableNumber(tableNumber);
                 updateTableNumberUI();
@@ -276,7 +308,9 @@
 
 
 
-        // Cart functionality
+
+
+        // --- CART & MENU ---
         let cart = [];
 
         // Load cart from local storage
@@ -314,13 +348,15 @@
         // Show toast notification
         function showToast() {
             const toastEl = document.getElementById('cartToast');
-            const toast = new bootstrap.Toast(toastEl);
+            const bsRequest = window.bootstrap || bootstrap;
+            const toast = new bsRequest.Toast(toastEl);
             toast.show();
         }
 
         // Open image preview
         function openImagePreview(imageUrl) {
-            const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            const bsRequest = window.bootstrap || bootstrap;
+            const modal = new bsRequest.Modal(document.getElementById('imagePreviewModal'));
             document.getElementById('previewImage').src = imageUrl;
             modal.show();
         }
@@ -418,11 +454,11 @@
                                             <div class="card-body d-flex flex-column h-100">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                                     <h5 class="card-title fw-bold text-dark mb-0">${item.name}</h5>
-                                                    <span class="badge bg-primary rounded-pill">$${item.price.toFixed(2)}</span>
+                                                    <span class="badge bg-dark rounded-pill">$${item.price.toFixed(2)}</span>
                                                 </div>
                                                 <p class="card-text text-muted small flex-grow-1">${item.description || ''}</p>
                                                 <div class="mt-3 text-end">
-                                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-4" 
+                                                    <button class="btn btn-sm btn-dark-primary rounded-pill px-4" 
                                                             onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                                                         <i class="bi bi-plus-lg me-1"></i> Add
                                                     </button>
@@ -443,7 +479,7 @@
                 });
         }
 
-        // Checkout
+        // Checkout - Step 1: Open Modal
         async function checkout() {
             if (cart.length === 0) {
                 alert('Your cart is empty');
@@ -459,6 +495,46 @@
                 }
             }
 
+             // Populate summary in modal
+            let summaryHtml = '<ul class="list-group mb-2">';
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+                summaryHtml += `
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">${item.name}</h6>
+                            <small class="text-muted">x ${item.quantity}</small>
+                        </div>
+                        <span class="text-muted">$${(item.price * item.quantity).toFixed(2)}</span>
+                    </li>
+                `;
+            });
+            summaryHtml += `
+                <li class="list-group-item d-flex justify-content-between bg-light">
+                    <span>Total (USD)</span>
+                    <strong>$${total.toFixed(2)}</strong>
+                </li>
+            </ul>`;
+            
+            document.getElementById('checkout-summary').innerHTML = summaryHtml;
+            document.getElementById('orderNote').value = ''; // Clean previous note
+
+            const bsRequest = window.bootstrap || bootstrap;
+            const checkoutModal = new bsRequest.Modal(document.getElementById('checkoutModal'));
+            checkoutModal.show();
+        }
+
+        // Checkout - Step 2: Confirm Order
+        async function confirmCheckout() {
+            const note = document.getElementById('orderNote').value;
+            const confirmBtn = document.getElementById('confirmCheckoutBtn');
+            const bsRequest = window.bootstrap || bootstrap;
+            const checkoutModal = bsRequest.Modal.getInstance(document.getElementById('checkoutModal'));
+
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+
             const orderItems = cart.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity
@@ -471,6 +547,7 @@
                 },
                 body: JSON.stringify({
                     tableNumber: tableNumber,
+                    note: note,
                     orderItems: orderItems
                 })
             })
@@ -491,18 +568,33 @@
             })
             .then(data => {
                 // Success
+                checkoutModal.hide();
+                
+                // Save to local Order History
+                let orderTotal = 0;
+                cart.forEach(i => orderTotal += (i.price * i.quantity));
+                saveOrderToHistory(data.orderId, orderTotal, cart, note);
+
                 alert(`Order placed successfully! Order ID: ${data.orderId}`);
                 cart = [];
                 saveCart();
                 updateCartUI();
+
+                // Show orders immediately to confirm? or just let them check
+                // showOrderHistory(); 
             })
             .catch(error => {
                 console.error('Error placing order:', error);
                 alert(error.message);
-                // If table issue, prompt for a new table number
+                
                 if (error.message.includes('occupied') || error.message.includes('does not exist')) {
+                    checkoutModal.hide();
                     promptForTableNumber(true);
                 }
+            })
+            .finally(() => {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Place Order';
             });
         }
 
@@ -516,7 +608,8 @@
 
             // If no table number, prompt for it
             if (!tableNumber || tableNumber <= 0) {
-                promptForTableNumber();
+                // Short delay to ensure Bootstrap is ready
+                setTimeout(() => promptForTableNumber(), 500);
             }
 
             // Auto-load category if selected
@@ -528,27 +621,27 @@
             document.querySelectorAll('.category-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
+                    // Basic active state toggling
+                    document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active', 'bg-primary', 'text-white'));
+                    this.classList.add('active', 'bg-dark', 'text-white');
+
                     const categoryId = parseInt(this.getAttribute('data-category-id'));
                     loadMenuItems(categoryId);
                 });
             });
 
-            // Checkout button
+            // Button Events
             document.getElementById('checkout-btn').addEventListener('click', checkout);
-
-            // Change table button
-            document.getElementById('change-table-btn').addEventListener('click', function() {
-                promptForTableNumber(true);
-            });
-
-            // Confirm table button in modal
+            document.getElementById('change-table-btn').addEventListener('click', () => promptForTableNumber(true));
             document.getElementById('confirmTableBtn').addEventListener('click', confirmTableNumber);
+            document.getElementById('confirmCheckoutBtn').addEventListener('click', confirmCheckout);
+            
+            // "الطلبات" Button
 
-            // Enter key in table number input
+
+            // Inputs
             document.getElementById('tableNumberInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    confirmTableNumber();
-                }
+                if (e.key === 'Enter') confirmTableNumber();
             });
         });
     </script>

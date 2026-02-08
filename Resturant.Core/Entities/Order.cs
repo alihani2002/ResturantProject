@@ -29,6 +29,9 @@ namespace Resturant.Core.Entities
         [Display(Name = "Table Number")]
         public int TableNumber { get; set; }
 
+        [Display(Name = "Note")]
+        public string? Note { get; set; }
+
         [Required]
         [Display(Name = "Order Status")]
         public OrderStatus Status { get; set; } = OrderStatus.Pending;

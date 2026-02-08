@@ -42,10 +42,11 @@ namespace Resturant.Web.UI.Controllers
                 .AnyAsync(o => o.TableNumber == request.TableNumber
                     && o.Status != OrderStatus.Completed
                     && o.Status != OrderStatus.Cancelled);
-            if (activeOrder)
-            {
-                return BadRequest($"Table {request.TableNumber} is currently occupied. Please choose another table.");
-            }
+            // RELAXED RULE: Allow multiple orders for the same table (Guest Multi-Order Support)
+            // if (activeOrder)
+            // {
+            //     return BadRequest($"Table {request.TableNumber} is currently occupied. Please choose another table.");
+            // }
 
             // Calculate total amount and prepare order items
             decimal totalAmount = 0;
@@ -76,7 +77,8 @@ namespace Resturant.Web.UI.Controllers
                 TableNumber = request.TableNumber,
                 Status = OrderStatus.Pending,
                 TotalAmount = totalAmount,
-                OrderDate = DateTime.Now
+                OrderDate = DateTime.Now,
+                Note = request.Note
             };
 
             _context.Orders.Add(order);
@@ -102,6 +104,7 @@ namespace Resturant.Web.UI.Controllers
                 status = order.Status.ToString(),
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate,
+                note = order.Note,
                 items = orderItemsEntities.Select(oi => new
                 {
                     menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.Name ?? "Unknown",
@@ -137,10 +140,11 @@ namespace Resturant.Web.UI.Controllers
                     && o.Status != OrderStatus.Completed
                     && o.Status != OrderStatus.Cancelled);
 
-            if (isOccupied)
-            {
-                return Json(new { available = false, message = $"Table {tableNumber} is currently occupied. Please choose another table." });
-            }
+            // RELAXED RULE: Allow multiple orders (Guest Multi-Order Support)
+            // if (isOccupied)
+            // {
+            //     return Json(new { available = false, message = $"Table {tableNumber} is currently occupied. Please choose another table." });
+            // }
 
             return Json(new { available = true, message = "Table is available." });
         }
@@ -173,6 +177,14 @@ namespace Resturant.Web.UI.Controllers
                 return NotFound();
             }
 
+            // Prevent modifying orders that are already Completed or Cancelled
+            if (order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
+            {
+                // If the order is already final, we shouldn't allow moving it back to an active state
+                // Exception: maybe if an admin wants to reopen it, but for now let's block it to fix the reported bug
+                return BadRequest($"Order #{orderId} is already {order.Status} and cannot be modified.");
+            }
+
             order.Status = status;
 
             // Prepare order data for SignalR
@@ -183,6 +195,7 @@ namespace Resturant.Web.UI.Controllers
                 status = status.ToString(),
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate,
+                note = order.Note,
                 items = order.OrderItems.Select(oi => new
                 {
                     menuItemName = oi.MenuItem?.Name ?? "Unknown",
@@ -261,6 +274,7 @@ namespace Resturant.Web.UI.Controllers
     public class CreateOrderRequest
     {
         public int TableNumber { get; set; }
+        public string? Note { get; set; }
         public List<OrderItemRequest> OrderItems { get; set; }
     }
 

@@ -30,6 +30,8 @@ namespace Resturant.Web.UI.Controllers
         {
             var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
             var activeOrders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
                 .ToListAsync();
 
@@ -49,6 +51,12 @@ namespace Resturant.Web.UI.Controllers
                     viewModel.CurrentOrderId = activeOrder.Id;
                     viewModel.TotalAmount = activeOrder.TotalAmount;
                     viewModel.OrderTime = activeOrder.OrderDate;
+                    viewModel.Note = activeOrder.Note;
+                    viewModel.OrderItems = activeOrder.OrderItems.Select(oi => new WaiterOrderItemViewModel
+                    {
+                        Name = oi.MenuItem?.Name ?? "Unknown",
+                        Quantity = oi.Quantity
+                    }).ToList();
                     
                     if (activeOrder.Status == OrderStatus.Pending)
                     {
@@ -75,6 +83,8 @@ namespace Resturant.Web.UI.Controllers
         {
             var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
             var activeOrders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
                 .ToListAsync();
 
@@ -87,7 +97,12 @@ namespace Resturant.Web.UI.Controllers
                     status = activeOrder == null ? "Empty" : (activeOrder.Status == OrderStatus.Pending ? "Pending" : "Active"),
                     currentOrderId = activeOrder?.Id,
                     totalAmount = activeOrder?.TotalAmount ?? 0,
-                    orderTime = activeOrder?.OrderDate
+                    orderTime = activeOrder?.OrderDate,
+                    note = activeOrder?.Note,
+                    orderItems = activeOrder?.OrderItems.Select(oi => new {
+                        name = oi.MenuItem?.Name ?? "Unknown",
+                        quantity = oi.Quantity
+                    }).ToList()
                 };
             });
 

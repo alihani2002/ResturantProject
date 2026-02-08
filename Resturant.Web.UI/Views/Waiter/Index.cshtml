@@ -30,7 +30,33 @@
                             <div class="status-content">
                                 <span class="badge bg-warning text-dark mb-3 fs-6">New Order!</span>
                                 <p class="mb-1 fw-bold">Amount: $@table.TotalAmount.ToString("0.00")</p>
-                                <p class="small text-muted mb-3">@table.OrderTime?.ToShortTimeString()</p>
+                                <p class="small text-muted mb-2">@table.OrderTime?.ToShortTimeString()</p>
+                                
+                                @if (table.OrderItems != null && table.OrderItems.Any())
+                                {
+                                    <div class="text-start bg-light p-2 rounded mb-2" style="max-height: 100px; overflow-y: auto;">
+                                        <small class="fw-bold d-block mb-1">Items:</small>
+                                        <ul class="list-unstyled mb-0 small">
+                                            @foreach (var item in table.OrderItems)
+                                            {
+                                                <li>- @item.Quantity x @item.Name</li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(table.Note))
+                                {
+                                    <div class="alert alert-warning py-1 px-2 mb-3 text-start">
+                                        <small class="fw-bold d-block"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
+                                        <small class="fst-italic">@table.Note</small>
+                                    </div>
+                                }
+                                else 
+                                {
+                                    <div class="mb-3"></div>
+                                }
+
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-success flex-grow-1" onclick="acceptOrder(@table.CurrentOrderId)">
                                         <i class="bi bi-check2-circle me-1"></i> Confirm
@@ -91,7 +117,7 @@
         }
 
         // Update table card UI dynamically
-        function updateTableCard(tableNumber, status, orderId, totalAmount, orderTime) {
+        function updateTableCard(tableNumber, status, orderId, totalAmount, orderTime, note, orderItems) {
             const card = document.getElementById(`table-card-${tableNumber}`);
             if (!card) return;
 
@@ -105,10 +131,37 @@
             if (status === 'Pending') {
                 cardInner.classList.add('bg-warning', 'bg-opacity-25');
                 const time = orderTime ? new Date(orderTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                
+                let placeItemsHtml = '';
+                if (orderItems && orderItems.length > 0) {
+                    placeItemsHtml = `
+                        <div class="text-start bg-light p-2 rounded mb-2" style="max-height: 100px; overflow-y: auto;">
+                            <small class="fw-bold d-block mb-1">Items:</small>
+                            <ul class="list-unstyled mb-0 small">
+                                ${orderItems.map(i => `<li>- ${i.quantity} x ${i.menuItemName || i.name}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                let noteHtml = '';
+                if (note) {
+                    noteHtml = `
+                        <div class="alert alert-warning py-1 px-2 mb-3 text-start">
+                            <small class="fw-bold d-block"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
+                            <small class="fst-italic">${note}</small>
+                        </div>
+                    `;
+                } else {
+                    noteHtml = '<div class="mb-3"></div>';
+                }
+
                 html = `
                     <span class="badge bg-warning text-dark mb-3 fs-6">New Order!</span>
                     <p class="mb-1 fw-bold">Amount: $${totalAmount.toFixed(2)}</p>
-                    <p class="small text-muted mb-3">${time}</p>
+                    <p class="small text-muted mb-2">${time}</p>
+                    ${placeItemsHtml}
+                    ${noteHtml}
                     <div class="d-flex gap-2">
                         <button class="btn btn-success flex-grow-1" onclick="acceptOrder(${orderId})">
                             <i class="bi bi-check2-circle me-1"></i> Confirm
@@ -197,14 +250,14 @@
 
         // SignalR event handlers
         connection.on("NewOrderReceived", function (order) {
-            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate);
+            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate, order.note, order.items);
             playNotificationSound();
             showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
         });
 
         connection.on("OrderStatusChanged", function (order) {
-            const status = order.status === 1 ? 'Active' : order.status === 6 ? 'Empty' : 'Active';
-            updateTableCard(order.tableNumber, status, order.id, order.totalAmount, order.orderDate);
+            const status = order.status === '1' || order.status === 1 ? 'Active' : (order.status === '6' || order.status === 6 ? 'Empty' : (order.status === '0' || order.status === 0 ? 'Pending' : 'Active'));
+            updateTableCard(order.tableNumber, status, order.id, order.totalAmount, order.orderDate, order.note, order.items);
         });
 
         connection.on("OrderReady", function (order) {
@@ -222,7 +275,7 @@
 
         // Legacy event handlers (backward compatibility)
         connection.on("ReceiveOrderDetails", function (order) {
-            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate);
+            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate, order.note, order.items);
             playNotificationSound();
             showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
         });
@@ -246,7 +299,7 @@
                 if (response.ok) {
                     const tables = await response.json();
                     tables.forEach(table => {
-                        updateTableCard(table.tableNumber, table.status, table.currentOrderId, table.totalAmount || 0, table.orderTime);
+                        updateTableCard(table.tableNumber, table.status, table.currentOrderId, table.totalAmount || 0, table.orderTime, table.note, table.orderItems);
                     });
                 }
             } catch (error) {

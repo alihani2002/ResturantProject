@@ -12,35 +12,42 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm mb-4">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-egg-fried text-warning fs-3"></i>
-                    <span class="text-dark">TestResturant</span>
-                </a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm mb-4 py-3">
+            <div class="container d-flex flex-column align-items-center">
+                <!-- Brand Centered -->
+                <div class="navbar-brand-centered">
+                    <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-egg-fried text-warning fs-2"></i> <!-- Slightly larger icon -->
+                        <span class="text-black-pure fw-bold fs-2" style="letter-spacing: 1px;">TEST RESTAURANT</span> <!-- Uppercase for brand -->
+                    </a>
+                </div>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+                <!-- Links Centered Below Brand -->
+                <div class="navbar-collapse collapse w-100 justify-content-center">
+                     <ul class="navbar-nav mb-2 mb-lg-0 gap-4"> <!-- Added gap for spacing -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-black-pure fw-bold text-uppercase" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" href="#menu">Menu</a>
+                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#menu">Menu</a>
                         </li>
                          <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" href="#about">About</a>
+                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" href="#contact">Contact</a>
+                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#contact">Contact</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        <!-- Privacy removed from main nav for cleaner look, can stay in footer -->
                     </ul>
-                    <partial name="_LoginPartial" />
+                    <!-- Login Partial (Absolute right on desktop, or stacked on mobile) -->
+                    <div class="d-lg-flex position-lg-absolute end-0 top-50 translate-middle-y-lg mt-3 mt-lg-0"> 
+                         <partial name="_LoginPartial" />
+                    </div>
                 </div>
             </div>
         </nav>
@@ -48,12 +55,15 @@
     <main role="main" class="pb-0">
         @RenderBody()
     </main>
+    
+    <partial name="_OrderHistoryPartial" />
+
     <footer class="footer-custom mt-5 border-top" id="contact">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
                     <h5 class="text-dark">TestResturant</h5>
-                    <p class="text-muted">Experience the best culinary delights with our exquisite menu and exceptional service. Fresh ingredients, passionate chefs, and a warm atmosphere.</p>
+                    <p class="text-black-pure">Experience the best culinary delights with our exquisite menu and exceptional service. Fresh ingredients, passionate chefs, and a warm atmosphere.</p>
                     <div class="d-flex gap-3 mt-3">
                         <a href="#" class="text-dark"><i class="bi bi-facebook fs-5"></i></a>
                         <a href="#" class="text-dark"><i class="bi bi-instagram fs-5"></i></a>
@@ -70,9 +80,9 @@
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h5 class="text-dark">Opening Hours</h5>
-                    <p class="mb-1 text-muted">Mon - Fri: 09:00 - 22:00</p>
-                    <p class="mb-1 text-muted">Sat: 10:00 - 23:00</p>
-                    <p class="text-muted">Sun: Closed</p>
+                    <p class="mb-1 text-black-pure">Mon - Fri: 09:00 - 22:00</p>
+                    <p class="mb-1 text-black-pure">Sat: 10:00 - 23:00</p>
+                    <p class="text-black-pure">Sun: Closed</p>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h5 class="text-dark">Contact Us</h5>
