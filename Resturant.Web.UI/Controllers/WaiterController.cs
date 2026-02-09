@@ -72,7 +72,7 @@ namespace Resturant.Web.UI.Controllers
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated)
                 .ToListAsync();
 
             var result = tables.Select(table =>

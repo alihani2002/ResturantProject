@@ -7,10 +7,12 @@ namespace Resturant.Core.Entities
 {
     public enum OrderStatus
     {
+        [Display(Name = "Initiated")]
+        Initiated = 100,
         [Display(Name = "Pending")]
-        Pending,
+        Pending = 0,
         [Display(Name = "Confirmed by Waiter")]
-        Confirmed,
+        Confirmed = 1,
         [Display(Name = "In Preparation")]
         InPreparation,
         [Display(Name = "Ready")]
