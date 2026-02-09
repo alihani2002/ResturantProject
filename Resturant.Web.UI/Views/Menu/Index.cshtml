@@ -69,31 +69,7 @@
 </div>
 
 <!-- Table Number Modal -->
-<div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-black text-white" style="background-color: #000 !important;">
-                <h5 class="modal-title" id="tableNumberModalLabel">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter Your Table Number
-                </h5>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted mb-3">Please enter your table number to continue with your order.</p>
-                <div class="form-group">
-                    <label for="tableNumberInput" class="form-label fw-bold">Table Number</label>
-                    <input type="number" class="form-control form-control-lg text-center" id="tableNumberInput"
-                           min="1" placeholder="e.g., 5" autofocus>
-                    <div class="invalid-feedback" id="tableNumberError">Please enter a valid table number.</div>
-                </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-dark-primary btn-lg w-100" id="confirmTableBtn">
-                    <i class="bi bi-check-lg me-2"></i>Confirm Table
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<partial name="_TableNumberModal" />
 
 <!-- Checkout Modal with Note -->
 <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
@@ -154,161 +130,14 @@
 
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/table-prompt.js"></script>
     <script>
         // Table number handling
         let tableNumber = @(ViewData["TableNumber"] ?? "null");
         let selectedCategoryId = @(ViewData["SelectedCategoryId"] ?? "null");
         
-        const TABLE_STORAGE_KEY = 'tableNumber';
-        const TABLE_EXPIRY_KEY = 'tableNumberExpiry';
         const ORDER_HISTORY_KEY = 'guestOrderHistory';
-        const EXPIRY_MINUTES = 480; // 8 Hours to match order history
         const ORDER_EXPIRY_HOURS = 8;
-
-        // Check if table number is stored locally
-        function getStoredTableNumber() {
-            try {
-                const storedNumber = localStorage.getItem(TABLE_STORAGE_KEY);
-                const expiryTime = localStorage.getItem(TABLE_EXPIRY_KEY);
-                
-                if (storedNumber && expiryTime) {
-                    const now = new Date().getTime();
-                    if (now < parseInt(expiryTime)) {
-                        return parseInt(storedNumber);
-                    }
-                }
-            } catch(e) { console.error(e); }
-            return null;
-        }
-
-        // Store table number with expiry
-        function storeTableNumber(number) {
-            const expiryTime = new Date().getTime() + (EXPIRY_MINUTES * 60 * 1000);
-            localStorage.setItem(TABLE_STORAGE_KEY, number.toString());
-            localStorage.setItem(TABLE_EXPIRY_KEY, expiryTime.toString());
-        }
-
-        // Table number modal elements
-        let tableNumberModal = null;
-        let tableNumberResolve = null;
-
-        // Prompt user for table number using modal
-        async function promptForTableNumber(forceShow = false) {
-            const storedNumber = getStoredTableNumber();
-            if (storedNumber && !forceShow) {
-                // Verify stored table is still available
-                try {
-                    const response = await fetch(`/Order/CheckTable?tableNumber=${storedNumber}`);
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.available) {
-                            tableNumber = storedNumber;
-                            updateTableNumberUI();
-                            return Promise.resolve(tableNumber);
-                        }
-                    }
-                    localStorage.removeItem(TABLE_STORAGE_KEY);
-                    localStorage.removeItem(TABLE_EXPIRY_KEY);
-                } catch (e) {
-                    tableNumber = storedNumber;
-                    updateTableNumberUI();
-                    return Promise.resolve(tableNumber);
-                }
-            }
-
-            return new Promise((resolve) => {
-                tableNumberResolve = resolve;
-                const modalEl = document.getElementById('tableNumberModal');
-                const bsRequest = window.bootstrap || bootstrap;
-                tableNumberModal = new bsRequest.Modal(modalEl, { backdrop: 'static', keyboard: false });
-
-                // Pre-fill with current table number if changing
-                const input = document.getElementById('tableNumberInput');
-                if (tableNumber && tableNumber > 0) {
-                    input.value = tableNumber;
-                } else {
-                    input.value = '';
-                }
-                input.classList.remove('is-invalid');
-
-                tableNumberModal.show();
-                setTimeout(() => input.focus(), 500);
-            });
-        }
-
-        // Confirm table number from modal
-        async function confirmTableNumber() {
-            const input = document.getElementById('tableNumberInput');
-            const errorDiv = document.getElementById('tableNumberError');
-            const confirmBtn = document.getElementById('confirmTableBtn');
-            const value = parseInt(input.value);
-
-            if (!value || value <= 0) {
-                input.classList.add('is-invalid');
-                errorDiv.textContent = 'Please enter a valid table number.';
-                return;
-            }
-
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking...';
-
-            try {
-                const response = await fetch(`/Order/CheckTable?tableNumber=${value}`);
-                const result = await response.json();
-
-                if (!result.available) {
-                    input.classList.add('is-invalid');
-                    errorDiv.textContent = result.message;
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Confirm Table';
-                    return;
-                }
-
-                tableNumber = value;
-                storeTableNumber(tableNumber);
-                updateTableNumberUI();
-
-                if (tableNumberModal) {
-                    tableNumberModal.hide();
-                }
-
-                if (tableNumberResolve) {
-                    tableNumberResolve(tableNumber);
-                    tableNumberResolve = null;
-                }
-            } catch (error) {
-                input.classList.add('is-invalid');
-                errorDiv.textContent = 'Could not verify table. Please try again.';
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Confirm Table';
-            }
-        }
-
-        // Update table number display in UI
-        function updateTableNumberUI() {
-            const tableDisplay = document.getElementById('current-table-number');
-            if (tableDisplay) {
-                if (tableNumber && tableNumber > 0) {
-                    tableDisplay.textContent = tableNumber;
-                    tableDisplay.className = 'badge bg-primary fs-6';
-                } else {
-                    tableDisplay.textContent = 'Not Set';
-                    tableDisplay.className = 'badge bg-secondary fs-6';
-                }
-            }
-        }
-
-        // If table number provided in URL or storage, use it
-        if (tableNumber) {
-            storeTableNumber(tableNumber);
-        } else {
-            tableNumber = getStoredTableNumber();
-        }
-
-
-
-
 
         // --- CART & MENU ---
         let cart = [];
@@ -487,13 +316,18 @@
             }
 
             // Ensure table number is present
-            if (!tableNumber || tableNumber <= 0) {
-                await promptForTableNumber();
-                if (!tableNumber || tableNumber <= 0) {
-                     alert("Table number is required to place an order.");
+            // Use TablePrompt.get() to check
+            let currentTable = TablePrompt.get();
+            if (!currentTable || currentTable <= 0) {
+                currentTable = await TablePrompt.prompt();
+                if (!currentTable || currentTable <= 0) {
+                     // Still no table (user cancelled or error)
+                     // alert("Table number is required to place an order."); // Modal helps 
                      return;
                 }
             }
+            // Update local variable
+            tableNumber = currentTable;
 
              // Populate summary in modal
             let summaryHtml = '<ul class="list-group mb-2">';
@@ -539,6 +373,9 @@
                 menuItemId: item.id,
                 quantity: item.quantity
             }));
+            
+            // Re-fetch table number in case it changed or wasn't synced
+            tableNumber = TablePrompt.get();
 
             fetch('/Order/Create', {
                 method: 'POST',
@@ -558,10 +395,8 @@
                     const errorText = await response.text();
                     // If table is occupied or doesn't exist, clear stored table and prompt again
                     if (errorText.includes('occupied') || errorText.includes('does not exist')) {
-                        localStorage.removeItem(TABLE_STORAGE_KEY);
-                        localStorage.removeItem(TABLE_EXPIRY_KEY);
+                        TablePrompt.clear();
                         tableNumber = null;
-                        updateTableNumberUI();
                     }
                     throw new Error(errorText || 'Failed to place order');
                 }
@@ -589,7 +424,7 @@
                 
                 if (error.message.includes('occupied') || error.message.includes('does not exist')) {
                     checkoutModal.hide();
-                    promptForTableNumber(true);
+                    TablePrompt.prompt(true);
                 }
             })
             .finally(() => {
@@ -600,16 +435,16 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize TablePrompt
+            TablePrompt.init(tableNumber);
+            
             // Load cart from local storage
             loadCart();
 
-            // Update table number UI
-            updateTableNumberUI();
-
-            // If no table number, prompt for it
-            if (!tableNumber || tableNumber <= 0) {
-                // Short delay to ensure Bootstrap is ready
-                setTimeout(() => promptForTableNumber(), 500);
+            // If no table number, prompt for it - handled by init slightly but we can force it
+            const currentTable = TablePrompt.get();
+            if(!currentTable) {
+                setTimeout(() => TablePrompt.prompt(), 500);
             }
 
             // Auto-load category if selected
@@ -632,17 +467,7 @@
 
             // Button Events
             document.getElementById('checkout-btn').addEventListener('click', checkout);
-            document.getElementById('change-table-btn').addEventListener('click', () => promptForTableNumber(true));
-            document.getElementById('confirmTableBtn').addEventListener('click', confirmTableNumber);
             document.getElementById('confirmCheckoutBtn').addEventListener('click', confirmCheckout);
-            
-            // "الطلبات" Button
-
-
-            // Inputs
-            document.getElementById('tableNumberInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') confirmTableNumber();
-            });
         });
     </script>
 }

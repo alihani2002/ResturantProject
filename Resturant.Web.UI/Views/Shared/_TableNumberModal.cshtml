@@ -1,0 +1,27 @@
+
+<!-- Table Number Modal -->
+<div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-black text-white" style="background-color: #000 !important;">
+                <h5 class="modal-title" id="tableNumberModalLabel">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter Your Table Number
+                </h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Please enter your table number to continue.</p>
+                <div class="form-group">
+                    <label for="tableNumberInput" class="form-label fw-bold">Table Number</label>
+                    <input type="number" class="form-control form-control-lg text-center" id="tableNumberInput"
+                           min="1" placeholder="e.g., 5">
+                    <div class="invalid-feedback" id="tableNumberError">Please enter a valid table number.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-dark-primary btn-lg w-100" id="confirmTableBtn">
+                    <i class="bi bi-check-lg me-2"></i>Confirm Table
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,77 +18,76 @@
         @foreach (var table in Model)
         {
             <div class="col-lg-3 col-md-4 col-sm-6" id="table-card-@table.TableNumber">
-                <div class="card h-100 shadow-sm border-0 @(table.Status == "Pending" ? "bg-warning bg-opacity-25" : (table.Status == "Active" ? "bg-success bg-opacity-25" : "bg-white"))">
-                    <div class="card-body text-center d-flex flex-column">
-                        <h3 class="card-title display-6 fw-bold mb-3">
+                <div class="card h-100 shadow-sm border-0 @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : "bg-white"))">
+                    <div class="card-body text-center d-flex flex-column p-2">
+                        <h3 class="card-title display-6 fw-bold mb-3 border-bottom pb-2">
                             Table @table.TableNumber
                         </h3>
                         
-                        <div class="mt-auto">
-                        @if (table.Status == "Pending")
-                        {
-                            <div class="status-content">
-                                <span class="badge bg-warning text-dark mb-3 fs-6">New Order!</span>
-                                <p class="mb-1 fw-bold">Amount: $@table.TotalAmount.ToString("0.00")</p>
-                                <p class="small text-muted mb-2">@table.OrderTime?.ToShortTimeString()</p>
-                                
-                                @if (table.OrderItems != null && table.OrderItems.Any())
+                        <div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">
+                            @if (table.Orders != null && table.Orders.Any())
+                            {
+                                foreach (var order in table.Orders)
                                 {
-                                    <div class="text-start bg-light p-2 rounded mb-2" style="max-height: 100px; overflow-y: auto;">
-                                        <small class="fw-bold d-block mb-1">Items:</small>
-                                        <ul class="list-unstyled mb-0 small">
-                                            @foreach (var item in table.OrderItems)
+                                    <div class="card mb-2 shadow-sm order-card border-@((order.Status == "Pending") ? "warning" : "success")">
+                                        <div class="card-header py-1 @((order.Status == "Pending") ? "bg-warning text-dark" : "bg-success text-white") d-flex justify-content-between align-items-center">
+                                            <small class="fw-bold">Order #@order.OrderId</small>
+                                            <span class="badge bg-white text-dark small">@order.Status</span>
+                                        </div>
+                                        <div class="card-body p-2 text-start">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <small class="text-muted">@order.OrderTime?.ToShortTimeString()</small>
+                                                <small class="fw-bold">$@order.TotalAmount.ToString("0.00")</small>
+                                            </div>
+
+                                            @if (order.OrderItems != null && order.OrderItems.Any())
                                             {
-                                                <li>- @item.Quantity x @item.Name</li>
+                                                <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                                                    @foreach (var item in order.OrderItems)
+                                                    {
+                                                        <li>@item.Quantity x @item.Name</li>
+                                                    }
+                                                </ul>
                                             }
-                                        </ul>
+
+                                            @if (!string.IsNullOrEmpty(order.Note))
+                                            {
+                                                <div class="alert alert-warning py-1 px-2 mb-2">
+                                                    <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>@order.Note</small>
+                                                </div>
+                                            }
+                                            
+                                            <div class="d-flex gap-1 mt-2">
+                                                @if (order.Status == "Pending")
+                                                {
+                                                    <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(@order.OrderId)">
+                                                        <i class="bi bi-check2"></i> 
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)">
+                                                        <i class="bi bi-x"></i> 
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)">
+                                                        <i class="bi bi-x"></i> 
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(@order.OrderId)">
+                                                        <i class="bi bi-check-circle"></i> Clear
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
                                 }
-
-                                @if (!string.IsNullOrEmpty(table.Note))
-                                {
-                                    <div class="alert alert-warning py-1 px-2 mb-3 text-start">
-                                        <small class="fw-bold d-block"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
-                                        <small class="fst-italic">@table.Note</small>
-                                    </div>
-                                }
-                                else 
-                                {
-                                    <div class="mb-3"></div>
-                                }
-
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-success flex-grow-1" onclick="acceptOrder(@table.CurrentOrderId)">
-                                        <i class="bi bi-check2-circle me-1"></i> Confirm
-                                    </button>
-                                    <button class="btn btn-danger flex-grow-1" onclick="cancelOrder(@table.CurrentOrderId, @table.TableNumber)">
-                                        <i class="bi bi-x-lg me-1"></i> Cancel
-                                    </button>
+                            }
+                            else
+                            {
+                                <div class="text-muted small mt-4">
+                                    <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                                    Available
                                 </div>
-                            </div>
-                        }
-                        else if (table.Status == "Active")
-                        {
-                            <div class="status-content">
-                                <span class="badge bg-success mb-3 fs-6">Active</span>
-                                <p class="mb-1 fw-bold">Amount: $@table.TotalAmount.ToString("0.00")</p>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-danger flex-grow-1 bg-white" onclick="cancelOrder(@table.CurrentOrderId, @table.TableNumber)">
-                                        <i class="bi bi-x-lg me-1"></i> Cancel
-                                    </button>
-                                    <button class="btn btn-outline-secondary flex-grow-1 bg-white" onclick="clearTable(@table.CurrentOrderId)">
-                                        <i class="bi bi-check-circle me-1"></i> Clear
-                                    </button>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="status-content">
-                                <span class="badge bg-secondary mb-3 fs-6">Empty</span>
-                                <p class="text-muted small">Available for guests</p>
-                            </div>
-                        }
+                            }
                         </div>
                     </div>
                 </div>
@@ -117,87 +116,102 @@
         }
 
         // Update table card UI dynamically
-        function updateTableCard(tableNumber, status, orderId, totalAmount, orderTime, note, orderItems) {
+        function updateTableCard(tableNumber, status, orders) {
             const card = document.getElementById(`table-card-${tableNumber}`);
             if (!card) return;
 
             const cardInner = card.querySelector('.card');
-            const statusContent = card.querySelector('.status-content');
+            const ordersContainer = card.querySelector('.orders-container');
 
-            // Update card background
-            cardInner.classList.remove('bg-warning', 'bg-opacity-25', 'bg-success', 'bg-white');
-
-            let html = '';
+            // Update card background based on aggregate status
+            cardInner.className = 'card h-100 shadow-sm border-0'; // Reset
             if (status === 'Pending') {
                 cardInner.classList.add('bg-warning', 'bg-opacity-25');
-                const time = orderTime ? new Date(orderTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                
-                let placeItemsHtml = '';
-                if (orderItems && orderItems.length > 0) {
-                    placeItemsHtml = `
-                        <div class="text-start bg-light p-2 rounded mb-2" style="max-height: 100px; overflow-y: auto;">
-                            <small class="fw-bold d-block mb-1">Items:</small>
-                            <ul class="list-unstyled mb-0 small">
-                                ${orderItems.map(i => `<li>- ${i.quantity} x ${i.menuItemName || i.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `;
-                }
-
-                let noteHtml = '';
-                if (note) {
-                    noteHtml = `
-                        <div class="alert alert-warning py-1 px-2 mb-3 text-start">
-                            <small class="fw-bold d-block"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
-                            <small class="fst-italic">${note}</small>
-                        </div>
-                    `;
-                } else {
-                    noteHtml = '<div class="mb-3"></div>';
-                }
-
-                html = `
-                    <span class="badge bg-warning text-dark mb-3 fs-6">New Order!</span>
-                    <p class="mb-1 fw-bold">Amount: $${totalAmount.toFixed(2)}</p>
-                    <p class="small text-muted mb-2">${time}</p>
-                    ${placeItemsHtml}
-                    ${noteHtml}
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-success flex-grow-1" onclick="acceptOrder(${orderId})">
-                            <i class="bi bi-check2-circle me-1"></i> Confirm
-                        </button>
-                        <button class="btn btn-danger flex-grow-1" onclick="cancelOrder(${orderId}, ${tableNumber})">
-                            <i class="bi bi-x-lg me-1"></i> Cancel
-                        </button>
-                    </div>
-                `;
             } else if (status === 'Active') {
                 cardInner.classList.add('bg-success', 'bg-opacity-25');
-                html = `
-                    <span class="badge bg-success mb-3 fs-6">Active</span>
-                    <p class="mb-1 fw-bold">Amount: $${totalAmount.toFixed(2)}</p>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-danger flex-grow-1 bg-white" onclick="cancelOrder(${orderId}, ${tableNumber})">
-                            <i class="bi bi-x-lg me-1"></i> Cancel
-                        </button>
-                        <button class="btn btn-outline-secondary flex-grow-1 bg-white" onclick="clearTable(${orderId})">
-                            <i class="bi bi-check-circle me-1"></i> Clear
-                        </button>
-                    </div>
-                `;
             } else {
                 cardInner.classList.add('bg-white');
-                html = `
-                    <span class="badge bg-secondary mb-3 fs-6">Empty</span>
-                    <p class="text-muted small">Available for guests</p>
+            }
+
+            let html = '';
+            if (orders && orders.length > 0) {
+                orders.forEach(order => {
+                    const isPending = order.status === 'Pending' || order.status === 0;
+                    const statusText = isPending ? 'Pending' : 'Active';
+                    const themeColor = isPending ? 'warning' : 'success';
+                    const time = order.orderTime ? new Date(order.orderTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+                    let itemsHtml = '';
+                    if (order.items && order.items.length > 0) {
+                        itemsHtml = `
+                            <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                                ${order.items.map(i => `<li>${i.quantity} x ${i.name || i.menuItemName}</li>`).join('')}
+                            </ul>
+                        `;
+                    }
+                    
+                     let noteHtml = '';
+                    if (order.note) {
+                        noteHtml = `
+                            <div class="alert alert-warning py-1 px-2 mb-2">
+                                <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>${order.note}</small>
+                            </div>
+                        `;
+                    }
+
+                    let actionsHtml = '';
+                    if (isPending) {
+                        actionsHtml = `
+                             <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(${order.id})">
+                                <i class="bi bi-check2"></i> 
+                            </button>
+                            <button class="btn btn-sm btn-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                        `;
+                    } else {
+                         actionsHtml = `
+                             <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(${order.id})">
+                                <i class="bi bi-check-circle"></i> Clear
+                            </button>
+                        `;
+                    }
+
+                     html += `
+                        <div class="card mb-2 shadow-sm order-card border-${themeColor}">
+                            <div class="card-header py-1 bg-${themeColor} ${isPending ? 'text-dark' : 'text-white'} d-flex justify-content-between align-items-center">
+                                <small class="fw-bold">Order #${order.id}</small>
+                                <span class="badge bg-white text-dark small">${statusText}</span>
+                            </div>
+                            <div class="card-body p-2 text-start">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">${time}</small>
+                                    <small class="fw-bold">$${(order.totalAmount || 0).toFixed(2)}</small>
+                                </div>
+                                ${itemsHtml}
+                                ${noteHtml}
+                                <div class="d-flex gap-1 mt-2">
+                                    ${actionsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                 html = `
+                    <div class="text-muted small mt-4">
+                        <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                        Available
+                    </div>
                 `;
             }
 
-            if (statusContent) {
-                statusContent.innerHTML = html;
-            }
+            ordersContainer.innerHTML = html;
 
-            // Flash animation to highlight change
+            // Flash animation
             cardInner.style.transition = 'transform 0.2s';
             cardInner.style.transform = 'scale(1.02)';
             setTimeout(() => { cardInner.style.transform = 'scale(1)'; }, 200);
@@ -207,6 +221,7 @@
         function playNotificationSound() {
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') audioContext.resume();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 oscillator.connect(gainNode);
@@ -217,7 +232,7 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
                 oscillator.start(audioContext.currentTime);
                 oscillator.stop(audioContext.currentTime + 0.3);
-            } catch (e) { }
+            } catch (e) { console.error(e); }
         }
 
         // Show toast notification
@@ -249,48 +264,48 @@
         }
 
         // SignalR event handlers
+        // We now refresh the whole table data on any event because the incremental updates logic
+        // is too complex with multiple orders (need to know which table, etc. cleanly).
+        // Since we have a robust FetchAndRefreshTables, let's use it for sync.
+        
         connection.on("NewOrderReceived", function (order) {
-            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate, order.note, order.items);
             playNotificationSound();
             showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
+            fetchAndRefreshTables();
         });
 
         connection.on("OrderStatusChanged", function (order) {
-            const status = order.status === '1' || order.status === 1 ? 'Active' : (order.status === '6' || order.status === 6 ? 'Empty' : (order.status === '0' || order.status === 0 ? 'Pending' : 'Active'));
-            updateTableCard(order.tableNumber, status, order.id, order.totalAmount, order.orderDate, order.note, order.items);
+            fetchAndRefreshTables();
         });
 
         connection.on("OrderReady", function (order) {
-            showNotification(`Order for Table ${order.tableNumber} is ready!`, 'success');
+             showNotification(`Order for Table ${order.tableNumber} is ready!`, 'success');
+             fetchAndRefreshTables();
         });
 
         connection.on("PaymentProcessed", function (order) {
-            updateTableCard(order.tableNumber, 'Empty', null, 0, null);
             showNotification(`Payment received for Table ${order.tableNumber}`, 'success');
+            fetchAndRefreshTables();
         });
 
         connection.on("TableCleared", function (order) {
-            updateTableCard(order.tableNumber, 'Empty', null, 0, null);
+            fetchAndRefreshTables();
         });
-
-        // Legacy event handlers (backward compatibility)
+        
+         // Legacy event handlers
         connection.on("ReceiveOrderDetails", function (order) {
-            updateTableCard(order.tableNumber, 'Pending', order.id, order.totalAmount, order.orderDate, order.note, order.items);
             playNotificationSound();
-            showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
+             fetchAndRefreshTables();
         });
 
         connection.on("ReceiveWaiterUpdate", function (message) {
             fetchAndRefreshTables();
         });
-
-        connection.on("ReceiveChefUpdate", function (message) {
-            // Chef updates may affect table status
-        });
-
+        
         connection.on("ReceiveAccountantUpdate", function (message) {
             fetchAndRefreshTables();
         });
+
 
         // Fetch and refresh tables data
         async function fetchAndRefreshTables() {
@@ -299,7 +314,7 @@
                 if (response.ok) {
                     const tables = await response.json();
                     tables.forEach(table => {
-                        updateTableCard(table.tableNumber, table.status, table.currentOrderId, table.totalAmount || 0, table.orderTime, table.note, table.orderItems);
+                        updateTableCard(table.tableNumber, table.status, table.orders);
                     });
                 }
             } catch (error) {
@@ -338,7 +353,7 @@
         startConnection();
 
         function acceptOrder(orderId) {
-            if (!confirm('Are you sure you want to accept this order?')) return;
+            // if (!confirm('Are you sure you want to accept this order?')) return; // Removed confirm for speed
 
             fetch('/Waiter/AcceptOrder', {
                 method: 'POST',
@@ -350,6 +365,9 @@
             .then(response => {
                 if (!response.ok) {
                     alert('Error accepting order');
+                } else {
+                    // Optimistic UI update or wait for signalR
+                    fetchAndRefreshTables();
                 }
             });
         }
@@ -366,8 +384,8 @@
             })
             .then(response => {
                 if (response.ok) {
-                    updateTableCard(tableNumber, 'Empty', null, 0, null);
-                    showNotification(`Order cancelled - Table ${tableNumber} is now empty`, 'warning');
+                     showNotification(`Order cancelled - ${tableNumber}`, 'warning');
+                     fetchAndRefreshTables();
                 } else {
                     alert('Error cancelling order');
                 }
@@ -375,7 +393,7 @@
         }
 
         function clearTable(orderId) {
-            if (!confirm('Is this table empty and ready to be cleared?')) return;
+            if (!confirm('Is this order/table empty and ready to be cleared?')) return;
 
             fetch('/Waiter/CompleteOrder', {
                 method: 'POST',
@@ -387,6 +405,8 @@
             .then(response => {
                 if (!response.ok) {
                     alert('Error clearing table');
+                } else {
+                    fetchAndRefreshTables();
                 }
             });
         }

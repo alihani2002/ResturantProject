@@ -39,38 +39,25 @@ namespace Resturant.Web.UI.Controllers
 
             foreach (var table in tables)
             {
-                var activeOrder = activeOrders.FirstOrDefault(o => o.TableNumber == table.TableNumber);
+                var tableOrders = activeOrders.Where(o => o.TableNumber == table.TableNumber).ToList();
                 var viewModel = new WaiterTableViewModel
                 {
                     TableId = table.Id,
-                    TableNumber = table.TableNumber
+                    TableNumber = table.TableNumber,
+                    Orders = tableOrders.Select(o => new WaiterOrderViewModel 
+                    {
+                        OrderId = o.Id,
+                        TotalAmount = o.TotalAmount,
+                        OrderTime = o.OrderDate,
+                        Note = o.Note,
+                        Status = o.Status == OrderStatus.Pending ? "Pending" : "Active",
+                        OrderItems = o.OrderItems.Select(oi => new WaiterOrderItemViewModel
+                        {
+                            Name = oi.MenuItem?.Name ?? "Unknown",
+                            Quantity = oi.Quantity
+                        }).ToList()
+                    }).ToList()
                 };
-
-                if (activeOrder != null)
-                {
-                    viewModel.CurrentOrderId = activeOrder.Id;
-                    viewModel.TotalAmount = activeOrder.TotalAmount;
-                    viewModel.OrderTime = activeOrder.OrderDate;
-                    viewModel.Note = activeOrder.Note;
-                    viewModel.OrderItems = activeOrder.OrderItems.Select(oi => new WaiterOrderItemViewModel
-                    {
-                        Name = oi.MenuItem?.Name ?? "Unknown",
-                        Quantity = oi.Quantity
-                    }).ToList();
-                    
-                    if (activeOrder.Status == OrderStatus.Pending)
-                    {
-                        viewModel.Status = "Pending";
-                    }
-                    else
-                    {
-                        viewModel.Status = "Active";
-                    }
-                }
-                else
-                {
-                    viewModel.Status = "Empty";
-                }
 
                 viewModels.Add(viewModel);
             }
@@ -90,18 +77,29 @@ namespace Resturant.Web.UI.Controllers
 
             var result = tables.Select(table =>
             {
-                var activeOrder = activeOrders.FirstOrDefault(o => o.TableNumber == table.TableNumber);
+                var tableOrders = activeOrders.Where(o => o.TableNumber == table.TableNumber).ToList();
+                var status = "Empty";
+                if (tableOrders.Any())
+                {
+                    if (tableOrders.Any(o => o.Status == OrderStatus.Pending)) status = "Pending";
+                    else status = "Active";
+                }
+
                 return new
                 {
                     tableNumber = table.TableNumber,
-                    status = activeOrder == null ? "Empty" : (activeOrder.Status == OrderStatus.Pending ? "Pending" : "Active"),
-                    currentOrderId = activeOrder?.Id,
-                    totalAmount = activeOrder?.TotalAmount ?? 0,
-                    orderTime = activeOrder?.OrderDate,
-                    note = activeOrder?.Note,
-                    orderItems = activeOrder?.OrderItems.Select(oi => new {
-                        name = oi.MenuItem?.Name ?? "Unknown",
-                        quantity = oi.Quantity
+                    status = status,
+                    orders = tableOrders.Select(o => new 
+                    {
+                        id = o.Id,
+                        totalAmount = o.TotalAmount,
+                        orderTime = o.OrderDate,
+                        note = o.Note,
+                        status = o.Status == OrderStatus.Pending ? "Pending" : "Active",
+                        items = o.OrderItems.Select(oi => new {
+                            name = oi.MenuItem?.Name ?? "Unknown",
+                            quantity = oi.Quantity
+                        }).ToList()
                     }).ToList()
                 };
             });

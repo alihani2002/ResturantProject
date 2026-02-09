@@ -6,11 +6,28 @@ namespace Resturant.Web.UI.ViewModels
     {
         public int TableId { get; set; }
         public int TableNumber { get; set; }
-        public int? CurrentOrderId { get; set; }
-        public string Status { get; set; } // "Empty", "Pending", "Active"
+        public List<WaiterOrderViewModel> Orders { get; set; } = new List<WaiterOrderViewModel>();
+        
+        // Helper to determine aggregate status for coloring the card
+        public string AggregateStatus 
+        { 
+            get 
+            {
+                if (Orders == null || !Orders.Any()) return "Empty";
+                if (Orders.Any(o => o.Status == "Pending")) return "Pending";
+                if (Orders.Any(o => o.Status == "Active" || o.Status == "Ready")) return "Active";
+                return "Empty";
+            }
+        }
+    }
+
+    public class WaiterOrderViewModel
+    {
+        public int OrderId { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime? OrderTime { get; set; }
         public string Note { get; set; }
+        public string Status { get; set; } // "Pending", "Active", "Ready"
         public List<WaiterOrderItemViewModel> OrderItems { get; set; } = new List<WaiterOrderItemViewModel>();
     }
 

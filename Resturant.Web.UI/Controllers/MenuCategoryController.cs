@@ -79,6 +79,13 @@ namespace Resturant.Web.UI.Controllers
                 return NotFound();
             }
 
+            // Fetch existing category to get current ImageUrl
+            var existingCategory = await _context.MenuCategories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            if (existingCategory == null)
+            {
+                return NotFound();
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -86,6 +93,11 @@ namespace Resturant.Web.UI.Controllers
                     if (imageFile != null && imageFile.Length > 0)
                     {
                         menuCategory.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+                    }
+                    else
+                    {
+                        // Keep existing image
+                        menuCategory.ImageUrl = existingCategory.ImageUrl;
                     }
 
                     _context.Update(menuCategory);

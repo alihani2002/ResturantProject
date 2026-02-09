@@ -79,3 +79,22 @@
         }
     </div>
 </div>
+
+<partial name="_TableNumberModal" />
+
+@section Scripts {
+    <script src="~/js/table-prompt.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            TablePrompt.init();
+            
+            // If table number is not set, prompt for it
+            const currentTable = TablePrompt.get();
+            if (!currentTable) {
+                setTimeout(() => {
+                    TablePrompt.prompt();
+                }, 1000); // 1s delay for better UX
+            }
+        });
+    </script>
+}

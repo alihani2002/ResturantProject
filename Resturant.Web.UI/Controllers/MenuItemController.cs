@@ -79,11 +79,19 @@ namespace Resturant.Web.UI.Controllers
         }
 
         // POST: MenuItem/Edit/5
+        // POST: MenuItem/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, MenuItem menuItem, Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
             if (id != menuItem.Id)
+            {
+                return NotFound();
+            }
+
+            // Fetch existing item to retrive the current image URL
+            var existingMenuItem = await _context.MenuItems.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+            if (existingMenuItem == null)
             {
                 return NotFound();
             }
@@ -96,6 +104,11 @@ namespace Resturant.Web.UI.Controllers
                     if (imageFile != null && imageFile.Length > 0)
                     {
                         menuItem.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+                    }
+                    else
+                    {
+                        // Keep the existing image
+                        menuItem.ImageUrl = existingMenuItem.ImageUrl;
                     }
 
                     _context.Update(menuItem);
@@ -114,6 +127,9 @@ namespace Resturant.Web.UI.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            
+            // Repopulate ViewBag.MenuCategories for the dropdown if validation fails
+            ViewBag.MenuCategories = _context.MenuCategories.ToList();
             ViewData["MenuCategoryId"] = new SelectList(_context.MenuCategories, "Id", "Name", menuItem.MenuCategoryId);
             return View(menuItem);
         }
