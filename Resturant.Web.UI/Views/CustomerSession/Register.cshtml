@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Welcome to Our Restaurant";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="registration-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="max-width: 450px; width: 100%;">
+        <div class="bg-primary p-4 text-center text-white">
+            <i class="bi bi-person-badge-fill display-4 mb-3"></i>
+            <h2 class="fw-bold">Welcome!</h2>
+            <p class="mb-0 opacity-75">Please provide your details to start ordering.</p>
+        </div>
+        <div class="card-body p-5">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                </div>
+            }
+
+            <form asp-action="Register" method="post" class="needs-validation">
+                <div class="form-floating mb-4">
+                    <input type="text" name="customerName" class="form-control border-0 bg-light rounded-3" id="nameInput" placeholder="Your Name" required>
+                    <label for="nameInput">Full Name</label>
+                </div>
+                
+                <div class="form-floating mb-4">
+                    <input type="tel" name="phoneNumber" class="form-control border-0 bg-light rounded-3" id="phoneInput" placeholder="0123456789" required>
+                    <label for="phoneInput">Phone Number</label>
+                </div>
+
+                <div class="d-grid gap-2 mt-5">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm transition-all hover-lift">
+                        Start Ordering <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="card-footer bg-white border-0 text-center py-3">
+            <small class="text-muted">Your session will be active for the duration of your visit.</small>
+        </div>
+    </div>
+</div>
+
+<style>
+    .registration-container {
+        background: linear-gradient(135deg, #f6f8fd 0%, #e9ecef 100%);
+    }
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+</style>

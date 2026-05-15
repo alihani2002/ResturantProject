@@ -16,6 +16,8 @@ namespace Resturant.Core.Interfaces
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
         Task<T?> GetByIdAsync(int id);
+        Task<IEnumerable<T>> ListAsync(Expression<Func<T, bool>> predicate);
+        Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<List<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes);
         IEnumerable<T> GetQueryable(bool withNoTracking = true);
         IQueryable<T> GetQueryable();

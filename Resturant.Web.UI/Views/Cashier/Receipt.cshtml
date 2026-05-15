@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Receipt #@Model.Id</title>
+    <title>Receipt - Table @Model.TableNumber</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -66,9 +66,12 @@
     </div>
 
     <div class="details">
-        <div>Date: @Model.OrderDate.ToString("g")</div>
-        <div>Order ID: #@Model.Id</div>
+        <div>Date: @DateTime.Now.ToString("g")</div>
         <div>Table: @Model.TableNumber</div>
+        <div style="border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px;">
+            <strong>Customer: @(Model.CustomerName ?? "Guest")</strong><br>
+            Phone: @(Model.PhoneNumber ?? "N/A")
+        </div>
     </div>
 
     <table class="items-table">
@@ -80,19 +83,27 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.OrderItems)
+            @{
+                var allOrders = ViewBag.AllOrders as List<Resturant.Core.Entities.Order> ?? new List<Resturant.Core.Entities.Order> { Model };
+                decimal grandTotal = 0;
+            }
+            @foreach (var order in allOrders)
             {
-                <tr>
-                    <td>@item.MenuItem.Name</td>
-                    <td>@item.Quantity</td>
-                    <td style="text-align: right;">@((item.Price * item.Quantity).ToString("F2"))</td>
-                </tr>
+                grandTotal += order.TotalAmount;
+                @foreach (var item in order.OrderItems)
+                {
+                    <tr>
+                        <td>@item.MenuItem.Name</td>
+                        <td>@item.Quantity</td>
+                        <td style="text-align: right;">@((item.Price * item.Quantity).ToString("F2"))</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
 
     <div class="total-section">
-        Total: $@Model.TotalAmount.ToString("F2")
+        Total: $@grandTotal.ToString("F2")
     </div>
 
     <div class="footer">

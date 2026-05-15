@@ -1,4 +1,8 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using Resturant.Core.Common;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Resturant.Core.Entities
@@ -24,9 +28,21 @@ namespace Resturant.Core.Entities
         [Display(Name = "Is Available")]
         public bool IsAvailable { get; set; } = true;
 
+        [Display(Name = "Is Popular")]
+        public bool IsPopular { get; set; } = false;
+
+        [Display(Name = "Is Trending")]
+        public bool IsTrending { get; set; } = false;
+
+        [Display(Name = "Is Recommended")]
+        public bool IsRecommended { get; set; } = false;
+
         [Required]
         [Display(Name = "Category")]
         public int MenuCategoryId { get; set; }
         public MenuCategory? MenuCategory { get; set; }
+
+        public ICollection<MenuItemAddOn> AddOns { get; set; } = new List<MenuItemAddOn>();
+        public ICollection<MenuItemRecommendation> Recommendations { get; set; } = new List<MenuItemRecommendation>();
     }
-}
+}

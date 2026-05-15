@@ -1,3 +1,6 @@
+@* 
+ * NOTE: didn't create migration or database
+ *@
 @model IEnumerable<Resturant.Core.Entities.RestaurantTable>
 
 @{
@@ -20,6 +23,8 @@
                         <thead>
                             <tr>
                                 <th>Table Number</th>
+                                <th>QR Code</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,11 +52,6 @@
                     "type": "POST",
                     "datatype": "json"
                 },
-                "columnDefs": [{
-                    "targets": [0],
-                    "visible": true,
-                    "searchable": true
-                }],
                 "columns": [
                     { 
                         "data": "tableNumber", 
@@ -60,9 +60,45 @@
                         "render": function (data, type, row) {
                             return `<span class="fw-bold fs-16">Table ${data}</span>`;
                         }
+                    },
+                    {
+                        "data": "qrCodeImageUrl",
+                        "name": "QrCodeImageUrl",
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            if (data) {
+                                return `<a href="${data}" target="_blank" class="btn btn-xs btn-outline-primary">View QR</a>`;
+                            }
+                            return `<span class="text-muted">No QR</span>`;
+                        }
+                    },
+                    {
+                        "data": "id",
+                        "name": "Id",
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return `<button class="btn btn-xs btn-danger" onclick="deleteTable(${data})">Delete</button>`;
+                        }
                     }
                 ]
             });
         });
+
+        function deleteTable(id) {
+            if (confirm("Are you sure you want to delete this table?")) {
+                $.ajax({
+                    url: '/Tables/Delete/' + id,
+                    type: 'POST',
+                    success: function (result) {
+                        if (result.success) {
+                            $('#tablesTable').DataTable().ajax.reload();
+                        } else {
+                            alert(result.message);
+                        }
+                    }
+                });
+            }
+        }
     </script>
 }
+

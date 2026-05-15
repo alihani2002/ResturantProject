@@ -26,18 +26,31 @@
     else
     {
         <div class="row g-4" id="orders-container">
-            @foreach (var order in Model)
+            @{
+                var groupedOrders = Model.GroupBy(o => o.TableSessionId ?? -o.TableNumber);
+            }
+            @foreach (var group in groupedOrders)
             {
-                <div class="col-lg-4 col-md-6" id="order-card-@order.Id">
+                var firstOrder = group.First();
+                var totalAmount = group.Sum(o => o.TotalAmount);
+                var orderIds = string.Join(",", group.Select(o => o.Id));
+                var isReady = group.Any(o => o.Status == Resturant.Core.Entities.OrderStatus.Ready);
+                
+                <div class="col-lg-4 col-md-6" id="order-card-@(group.Key)">
                     <div class="card h-100 shadow-sm border-success">
-                        <div class="card-header @(order.Status == Resturant.Core.Entities.OrderStatus.Ready ? "bg-success" : "bg-warning") text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Table @order.TableNumber</h5>
-                            <span class="badge bg-white @(order.Status == Resturant.Core.Entities.OrderStatus.Ready ? "text-success" : "text-warning")">
-                                @order.Status.ToString()
+                        <div class="card-header @(isReady ? "bg-success" : "bg-warning") text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Table @firstOrder.TableNumber</h5>
+                            <span class="badge bg-white @(isReady ? "text-success" : "text-warning")">
+                                @(isReady ? "Ready" : firstOrder.Status.ToString())
                             </span>
                         </div>
                         <div class="card-body">
-                            <h4 class="card-title text-center mb-4 display-6">$@order.TotalAmount.ToString("0.00")</h4>
+                            <div class="customer-info mb-3 p-2 bg-light rounded border-start border-4 border-success">
+                                <div class="fw-bold text-dark"><i class="bi bi-person-fill me-1"></i> @(firstOrder.CustomerName ?? "Guest")</div>
+                                <div class="small text-muted"><i class="bi bi-telephone-fill me-1"></i> @(firstOrder.PhoneNumber ?? "N/A")</div>
+                            </div>
+
+                            <h4 class="card-title text-center mb-4 display-6">$@totalAmount.ToString("0.00")</h4>
                             <div class="table-responsive mb-3" style="max-height: 200px; overflow-y: auto;">
                                 <table class="table table-sm table-borderless">
                                     <thead>
@@ -48,23 +61,26 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var item in order.OrderItems)
+                                        @foreach (var order in group)
                                         {
-                                            <tr>
-                                                <td>@item.MenuItem.Name</td>
-                                                <td class="text-end">@item.Quantity</td>
-                                                <td class="text-end">$@item.Price.ToString("0.00")</td>
-                                            </tr>
+                                            @foreach (var item in order.OrderItems)
+                                            {
+                                                <tr>
+                                                    <td>@item.MenuItem.Name</td>
+                                                    <td class="text-end">@item.Quantity</td>
+                                                    <td class="text-end">$@item.Price.ToString("0.00")</td>
+                                                </tr>
+                                            }
                                         }
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                          <div class="card-footer bg-white border-top-0 d-flex gap-2 pb-3">
-                             <a href="@Url.Action("Receipt", "Cashier", new { id = order.Id })" target="_blank" class="btn btn-outline-secondary flex-grow-1">
+                             <a href="@Url.Action("Receipt", "Cashier", new { ids = orderIds })" target="_blank" class="btn btn-outline-secondary flex-grow-1">
                                 <i class="bi bi-printer me-1"></i> Receipt
                             </a>
-                             <button class="btn btn-success flex-grow-1 fw-bold" onclick="processPayment(@order.Id)">
+                             <button class="btn btn-success flex-grow-1 fw-bold" onclick="processPayment('@orderIds')">
                                 <i class="bi bi-check-circle me-1"></i> Paid
                             </button>
                         </div>
@@ -102,19 +118,21 @@
             if (badge) badge.textContent = count + ' Ready for Payment';
         }
 
-        // Create order card HTML
-        function createOrderCard(order) {
-            const isReady = order.status === 3; // OrderStatus.Ready
+        // Create order card HTML (Grouped)
+        function createOrderCard(group) {
+            const isReady = group.status === 3; // OrderStatus.Ready
             const statusClass = isReady ? 'bg-success' : 'bg-warning';
             const statusTextClass = isReady ? 'text-success' : 'text-warning';
-            const statusText = order.status === 3 ? 'Ready' : (order.status === 1 ? 'Confirmed' : 'InPreparation');
+            const statusText = isReady ? 'Ready' : (group.status === 1 ? 'Confirmed' : 'Active');
+            const cardId = group.sessionId ? group.sessionId : -group.tableNumber;
+            const orderIdsStr = group.orderIds.join(',');
 
             let itemsHtml = '';
-            if (order.orderItems && order.orderItems.length > 0) {
-                order.orderItems.forEach(item => {
+            if (group.orderItems && group.orderItems.length > 0) {
+                group.orderItems.forEach(item => {
                     itemsHtml += `
                         <tr>
-                            <td>${item.menuItemName || item.name || 'Item'}</td>
+                            <td>${item.menuItemName || 'Item'}</td>
                             <td class="text-end">${item.quantity}</td>
                             <td class="text-end">$${item.price.toFixed(2)}</td>
                         </tr>
@@ -123,14 +141,19 @@
             }
 
             return `
-                <div class="col-lg-4 col-md-6" id="order-card-${order.id}">
+                <div class="col-lg-4 col-md-6" id="order-card-${cardId}">
                     <div class="card h-100 shadow-sm border-success">
                         <div class="card-header ${statusClass} text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Table ${order.tableNumber}</h5>
+                            <h5 class="mb-0">Table ${group.tableNumber}</h5>
                             <span class="badge bg-white ${statusTextClass}">${statusText}</span>
                         </div>
                         <div class="card-body">
-                            <h4 class="card-title text-center mb-4 display-6">$${order.totalAmount.toFixed(2)}</h4>
+                             <div class="customer-info mb-3 p-2 bg-light rounded border-start border-4 border-success">
+                                <div class="fw-bold text-dark"><i class="bi bi-person-fill me-1"></i> ${group.customerName}</div>
+                                <div class="small text-muted"><i class="bi bi-telephone-fill me-1"></i> ${group.phoneNumber}</div>
+                            </div>
+
+                            <h4 class="card-title text-center mb-4 display-6">$${group.totalAmount.toFixed(2)}</h4>
                             <div class="table-responsive mb-3" style="max-height: 200px; overflow-y: auto;">
                                 <table class="table table-sm table-borderless">
                                     <thead>
@@ -147,10 +170,10 @@
                             </div>
                         </div>
                         <div class="card-footer bg-white border-top-0 d-flex gap-2 pb-3">
-                            <a href="/Cashier/Receipt/${order.id}" target="_blank" class="btn btn-outline-secondary flex-grow-1">
+                            <a href="/Cashier/Receipt?ids=${orderIdsStr}" target="_blank" class="btn btn-outline-secondary flex-grow-1">
                                 <i class="bi bi-printer me-1"></i> Receipt
                             </a>
-                            <button class="btn btn-success flex-grow-1 fw-bold" onclick="processPayment(${order.id})">
+                            <button class="btn btn-success flex-grow-1 fw-bold" onclick="processPayment('${orderIdsStr}')">
                                 <i class="bi bi-credit-card-2-front me-1"></i> Paid
                             </button>
                         </div>
@@ -191,8 +214,8 @@
         }
 
         // Remove order card
-        function removeOrderCard(orderId) {
-            const card = document.getElementById(`order-card-${orderId}`);
+        function removeOrderCard(cardId) {
+            const card = document.getElementById(`order-card-${cardId}`);
             if (card) {
                 card.style.transition = 'opacity 0.3s, transform 0.3s';
                 card.style.opacity = '0';
@@ -266,30 +289,19 @@
 
         // SignalR event handlers
         connection.on("OrderAccepted", function (order) {
-            // Waiter accepted order - add to cashier dashboard
-            const emptyState = document.getElementById('empty-state');
-            if (emptyState) {
-                emptyState.outerHTML = '<div class="row g-4" id="orders-container"></div>';
-            }
-            addOrderCard(order);
+            fetchAndRefreshOrders();
         });
 
         connection.on("OrderReady", function (order) {
-            // Chef marked order as ready - update card
-            const emptyState = document.getElementById('empty-state');
-            if (emptyState) {
-                emptyState.outerHTML = '<div class="row g-4" id="orders-container"></div>';
-            }
-            addOrderCard(order);
+            fetchAndRefreshOrders();
         });
 
-        connection.on("OrderCompleted", function (order) {
-            // Order was paid/completed/cancelled - remove from dashboard
-            removeOrderCard(order.id);
+        connection.on("OrderCompleted", function (data) {
+             fetchAndRefreshOrders();
         });
 
         connection.on("OrderCancelled", function (order) {
-            removeOrderCard(order.id);
+            fetchAndRefreshOrders();
             showNotification(`Order #${order.id} for Table ${order.tableNumber} was cancelled`, 'warning');
         });
 
@@ -310,18 +322,24 @@
                     const orders = await response.json();
                     const container = document.getElementById('orders-container');
                     if (container) {
-                        const currentIds = new Set(Array.from(container.querySelectorAll('[id^="order-card-"]'))
-                            .map(el => parseInt(el.id.replace('order-card-', ''))));
-                        const newIds = new Set(orders.map(o => o.id));
+                        const currentCardIds = new Set(Array.from(container.querySelectorAll('[id^="order-card-"]'))
+                            .map(el => el.id.replace('order-card-', '')));
+                        const newCardIds = new Set(orders.map(o => (o.sessionId ? o.sessionId.toString() : (-o.tableNumber).toString())));
 
-                        // Remove orders not in new list
-                        currentIds.forEach(id => {
-                            if (!newIds.has(id)) removeOrderCard(id);
+                        // Remove cards not in new list
+                        currentCardIds.forEach(id => {
+                            if (!newCardIds.has(id)) removeOrderCard(id);
                         });
 
-                        // Add/update orders
-                        orders.forEach(order => {
-                            if (!currentIds.has(order.id)) addOrderCard(order);
+                        // Add/update cards
+                        orders.forEach(group => {
+                            const cardId = group.sessionId ? group.sessionId.toString() : (-group.tableNumber).toString();
+                            const existingCard = document.getElementById(`order-card-${cardId}`);
+                            if (existingCard) {
+                                existingCard.outerHTML = createOrderCard(group);
+                            } else {
+                                container.insertAdjacentHTML('afterbegin', createOrderCard(group));
+                            }
                         });
                     }
                 }
@@ -354,20 +372,20 @@
 
         startConnection();
 
-        function processPayment(orderId) {
-            if (!confirm('Confirm payment received for Order #' + orderId + '?')) return;
+        function processPayment(orderIds) {
+            if (!confirm('Confirm payment received for Table orders?')) return;
 
             fetch('/Cashier/ProcessPayment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `orderId=${orderId}`
+                body: `orderIds=${orderIds}`
             })
             .then(response => {
                 if (response.ok) {
-                    removeOrderCard(orderId);
-                    showNotification('Payment processed successfully!', 'success');
+                    fetchAndRefreshOrders();
+                    showNotification('Payment processed and Table cleared!', 'success');
                 } else {
                     alert('Error processing payment');
                 }

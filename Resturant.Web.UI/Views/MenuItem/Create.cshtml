@@ -1,3 +1,6 @@
+@* 
+ * NOTE: didn't create migration or database
+ *@
 @model Resturant.Core.Entities.MenuItem
 
 @{
@@ -57,9 +60,31 @@
                             <input name="imageFile" type="file" class="form-control" accept="image/*" />
                         </div>
                         
-                        <div class="form-check mb-3">
-                            <input asp-for="IsAvailable" class="form-check-input" />
-                            <label asp-for="IsAvailable" class="form-check-label">Available</label>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input asp-for="IsAvailable" class="form-check-input" />
+                                    <label asp-for="IsAvailable" class="form-check-label">Available</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input asp-for="IsPopular" class="form-check-input" />
+                                    <label asp-for="IsPopular" class="form-check-label text-danger fw-bold">Best Seller</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input asp-for="IsTrending" class="form-check-input" />
+                                    <label asp-for="IsTrending" class="form-check-label text-warning fw-bold">Trending</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input asp-for="IsRecommended" class="form-check-input" />
+                                    <label asp-for="IsRecommended" class="form-check-label text-info fw-bold">Recommended</label>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -79,4 +104,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
+}

@@ -1,4 +1,9 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Resturant.Web.UI.ViewModels
 {
@@ -6,6 +11,9 @@ namespace Resturant.Web.UI.ViewModels
     {
         public int TableId { get; set; }
         public int TableNumber { get; set; }
+        public int? ActiveSessionId { get; set; }
+        public string? CustomerName { get; set; }
+        public string? PhoneNumber { get; set; }
         public List<WaiterOrderViewModel> Orders { get; set; } = new List<WaiterOrderViewModel>();
         
         // Helper to determine aggregate status for coloring the card
@@ -37,3 +45,4 @@ namespace Resturant.Web.UI.ViewModels
         public int Quantity { get; set; }
     }
 }
+

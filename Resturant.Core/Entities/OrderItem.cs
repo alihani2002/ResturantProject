@@ -1,4 +1,8 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using Resturant.Core.Common;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Resturant.Core.Entities
@@ -22,5 +26,7 @@ namespace Resturant.Core.Entities
         public decimal Price { get; set; }
 
         public decimal Total => Quantity * Price;
+
+        public ICollection<OrderItemAddOn> AddOns { get; set; } = new List<OrderItemAddOn>();
     }
-}
+}

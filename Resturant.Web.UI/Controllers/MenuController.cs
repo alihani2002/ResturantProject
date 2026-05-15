@@ -1,3 +1,6 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using Microsoft.AspNetCore.Mvc;
 using Resturant.Infrastructure.Data;
 using Resturant.Core.Entities;
@@ -19,6 +22,32 @@ namespace Resturant.Web.UI.Controllers
         // GET: Menu
         public async Task<IActionResult> Index(int? tableNumber, int? categoryId)
         {
+            if (tableNumber == null)
+            {
+                string tableNumberStr = Request.Cookies["TableNumber"];
+                if (int.TryParse(tableNumberStr, out int cachedTableNumber))
+                {
+                    tableNumber = cachedTableNumber;
+                }
+            }
+
+            if (tableNumber == null)
+            {
+                // No table number found, redirect to a landing page or show error
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Check for active session
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            if (table == null) return NotFound("Table not found");
+
+            var activeSession = await _context.Set<TableSession>().FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
+            if (activeSession == null)
+            {
+                // No active session for this table, redirect to registration
+                return RedirectToAction("Register", "CustomerSession");
+            }
+
             var menu = await _context.MenuCategories
                 .Include(c => c.MenuItems.Where(i => i.IsAvailable))
                 .Where(c => c.IsActive)
@@ -26,6 +55,7 @@ namespace Resturant.Web.UI.Controllers
                 .ToListAsync();
 
             ViewData["TableNumber"] = tableNumber;
+            ViewData["CustomerName"] = activeSession.CustomerName;
             ViewData["SelectedCategoryId"] = categoryId;
             return View(menu);
         }
@@ -45,7 +75,10 @@ namespace Resturant.Web.UI.Controllers
                     price = i.Price,
                     imageUrl = i.ImageUrl,
                     isAvailable = i.IsAvailable,
-                    menuCategoryId = i.MenuCategoryId
+                    menuCategoryId = i.MenuCategoryId,
+                    isPopular = i.IsPopular,
+                    isTrending = i.IsTrending,
+                    isRecommended = i.IsRecommended
                 })
                 .ToListAsync();
 
@@ -77,4 +110,4 @@ namespace Resturant.Web.UI.Controllers
             return Json(menuItem);
         }
     }
-}
+}

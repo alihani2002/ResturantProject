@@ -1,3 +1,6 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using Resturant.Core.Common;
 using System;
 using System.Collections.Generic;
@@ -22,7 +25,9 @@ namespace Resturant.Core.Entities
         [Display(Name = "Completed")]
         Completed,
         [Display(Name = "Cancelled")]
-        Cancelled
+        Cancelled,
+        [Display(Name = "Paid")]
+        Paid
     }
 
     public class Order : BaseEntity
@@ -30,6 +35,15 @@ namespace Resturant.Core.Entities
         [Required]
         [Display(Name = "Table Number")]
         public int TableNumber { get; set; }
+
+        [Display(Name = "Customer Name")]
+        public string? CustomerName { get; set; }
+
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Table Session Id")]
+        public int? TableSessionId { get; set; }
 
         [Display(Name = "Note")]
         public string? Note { get; set; }
@@ -64,4 +78,4 @@ namespace Resturant.Core.Entities
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
-}
+}

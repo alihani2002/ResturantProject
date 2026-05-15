@@ -25,14 +25,16 @@ namespace Resturant.Web.UI.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var orders = await _context.Orders
+            var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
                 .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served)
                 .OrderBy(o => o.OrderDate)
                 .ToListAsync();
 
-            return View(orders);
+            // We will pass the raw list but the View will handle grouping or we can group here.
+            // For consistency with GetOrdersData, let's prepare the grouped data.
+            return View(activeOrders);
         }
 
         [HttpGet]
@@ -42,15 +44,20 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
                 .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served)
-                .OrderBy(o => o.OrderDate)
-                .Select(o => new
+                .ToListAsync();
+
+            // Group by TableSessionId (if present) or TableNumber (fallback)
+            var groupedOrders = orders.GroupBy(o => o.TableSessionId ?? -o.TableNumber)
+                .Select(g => new
                 {
-                    id = o.Id,
-                    tableNumber = o.TableNumber,
-                    status = (int)o.Status,
-                    totalAmount = o.TotalAmount,
-                    orderDate = o.OrderDate,
-                    orderItems = o.OrderItems.Select(oi => new
+                    sessionId = g.Key > 0 ? g.Key : (int?)null,
+                    tableNumber = g.First().TableNumber,
+                    customerName = g.First().CustomerName ?? "Guest",
+                    phoneNumber = g.First().PhoneNumber ?? "N/A",
+                    status = g.Any(o => o.Status == OrderStatus.Ready) ? (int)OrderStatus.Ready : (int)g.First().Status,
+                    totalAmount = g.Sum(o => o.TotalAmount),
+                    orderIds = g.Select(o => o.Id).ToList(),
+                    orderItems = g.SelectMany(o => o.OrderItems).Select(oi => new
                     {
                         id = oi.Id,
                         menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
@@ -58,38 +65,54 @@ namespace Resturant.Web.UI.Controllers
                         price = oi.Price
                     })
                 })
-                .ToListAsync();
+                .ToList();
 
-            return Json(orders);
+            return Json(groupedOrders);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProcessPayment(int orderId)
+        public async Task<IActionResult> ProcessPayment(string orderIds)
         {
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order != null)
+            if (string.IsNullOrEmpty(orderIds)) return BadRequest();
+            
+            var ids = orderIds.Split(',').Select(int.Parse).ToList();
+            var orders = await _context.Orders.Where(o => ids.Contains(o.Id)).ToListAsync();
+            
+            if (orders.Any())
             {
-                order.Status = OrderStatus.Completed;
-                order.CompletedDate = DateTime.Now;
+                int? sessionId = orders.First().TableSessionId;
+                int tableNumber = orders.First().TableNumber;
+
+                foreach (var order in orders)
+                {
+                    order.Status = OrderStatus.Completed;
+                    order.CompletedDate = DateTime.Now;
+                }
+
+                // If all orders for this session are paid, optionally close the session
+                // But usually, payment IS the trigger to clear the table.
+                if (sessionId.HasValue)
+                {
+                    var session = await _context.Set<TableSession>().FindAsync(sessionId.Value);
+                    if (session != null)
+                    {
+                        session.IsActive = false;
+                        session.EndTime = DateTime.Now;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
-                var orderData = new
-                {
-                    id = order.Id,
-                    tableNumber = order.TableNumber,
-                    status = (int)order.Status,
-                    totalAmount = order.TotalAmount
-                };
+                var notifyData = new { tableNumber = tableNumber };
 
                 // Notify all dashboards
-                await _hubContext.Clients.Group("waiter").SendAsync("PaymentProcessed", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
+                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
+                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
 
-                // Legacy events
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Paid");
+                return Ok();
             }
-            return Ok();
+            return NotFound();
         }
 
         public async Task<IActionResult> PaidOrders()
@@ -104,16 +127,22 @@ namespace Resturant.Web.UI.Controllers
             return View(orders);
         }
 
-        public async Task<IActionResult> Receipt(int id)
+        public async Task<IActionResult> Receipt(string ids)
         {
-             var order = await _context.Orders
+            if (string.IsNullOrEmpty(ids)) return NotFound();
+            
+            var orderIds = ids.Split(',').Select(int.Parse).ToList();
+            var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .FirstOrDefaultAsync(o => o.Id == id);
+                .Where(o => orderIds.Contains(o.Id))
+                .ToListAsync();
 
-            if (order == null) return NotFound();
+            if (!orders.Any()) return NotFound();
 
-            return View(order);
+            // Pass the first order to get Customer info (they should all be same for same table)
+            ViewBag.AllOrders = orders;
+            return View(orders.First());
         }
     }
 }

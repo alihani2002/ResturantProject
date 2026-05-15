@@ -31,90 +31,61 @@ namespace Resturant.Web.UI.Controllers
             }
 
             // Check if table exists
-            var tableExists = await _context.RestaurantTables.AnyAsync(t => t.TableNumber == request.TableNumber);
-            if (!tableExists)
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == request.TableNumber);
+            if (table == null)
             {
                 return BadRequest($"Table {request.TableNumber} does not exist");
             }
 
-            // Strategy: 
-            // 1. Look for an existing "Initiated" session (Lock) to promote to a real order.
-            // 2. If no Lock, check if table is valid for Multi-Order (i.e., user already Occupies it).
-            // Note: We don't block invalid access here because strict blocking happens at CheckTable entry.
+            // Get Active Session
+            var activeSession = await _context.Set<TableSession>()
+                .FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
+            
+            if (activeSession == null)
+            {
+                return BadRequest("No active session found for this table. Please scan the QR code again.");
+            }
 
-            var initiatedOrder = await _context.Orders
-                .Include(o => o.OrderItems)
-                .Where(o => o.TableNumber == request.TableNumber 
-                    && o.Status == OrderStatus.Initiated)
-                .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefaultAsync();
+            Order order = new Order
+            {
+                TableNumber = request.TableNumber,
+                TableSessionId = activeSession.Id,
+                Status = OrderStatus.Pending,
+                OrderDate = DateTime.Now,
+                Note = request.Note,
+                CustomerName = activeSession.CustomerName,
+                PhoneNumber = activeSession.PhoneNumber
+            };
 
-            Order order;
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
             decimal totalAmount = 0;
             var orderItemsEntities = new List<OrderItem>();
 
-            // Calculate totals first
             foreach (var itemRequest in request.OrderItems)
             {
                 var menuItem = await _context.MenuItems.FindAsync(itemRequest.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable)
                 {
-                    return BadRequest($"MenuItem {itemRequest.MenuItemId} not found or not available");
+                    continue; // Or handle error
                 }
                 
                 var orderItem = new OrderItem
                 {
+                    OrderId = order.Id,
                     MenuItemId = itemRequest.MenuItemId,
                     Quantity = itemRequest.Quantity,
                     Price = menuItem.Price
                 };
 
+                _context.OrderItems.Add(orderItem);
                 orderItemsEntities.Add(orderItem);
                 totalAmount += orderItem.Total;
             }
 
-            if (initiatedOrder != null)
-            {
-                // Promote the Lock to a Real Order
-                order = initiatedOrder;
-                order.Status = OrderStatus.Pending;
-                order.OrderDate = DateTime.Now; // Update timestamp to actual order time
-                order.TotalAmount = totalAmount;
-                order.Note = request.Note;
-                
-                // Clear any existing dummy items if any (though lock shouldn't have any)
-                _context.OrderItems.RemoveRange(order.OrderItems);
-            }
-            else
-            {
-                // Check if table is occupied by REAL orders (Multi-Support) or Empty
-                // If it's occupied by someone else, we technically allow this as "Multi-Order" 
-                // assuming the frontend timeout prevented stale users.
-                
-                order = new Order
-                {
-                    TableNumber = request.TableNumber,
-                    Status = OrderStatus.Pending,
-                    TotalAmount = totalAmount,
-                    OrderDate = DateTime.Now,
-                    Note = request.Note
-                };
-                _context.Orders.Add(order);
-            }
-
+            order.TotalAmount = totalAmount;
             await _context.SaveChangesAsync();
-
-            // Add order items
-            foreach (var item in orderItemsEntities)
-            {
-                item.OrderId = order.Id;
-                _context.OrderItems.Add(item);
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Populate OrderItems for SignalR response
-            order.OrderItems = orderItemsEntities;
 
             // Prepare order data for SignalR
             var orderData = new
@@ -134,13 +105,8 @@ namespace Resturant.Web.UI.Controllers
                 }).ToList()
             };
 
-            // Send real-time updates to all relevant dashboards using groups
             await _hubContext.Clients.Group("waiter").SendAsync("NewOrderReceived", orderData);
             await _hubContext.Clients.Group("admin").SendAsync("NewOrderReceived", orderData);
-
-            // Legacy broadcast for backward compatibility
-            await _hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", "New order received");
-            await _hubContext.Clients.All.SendAsync("ReceiveOrderDetails", orderData);
 
             return Ok(new { OrderId = order.Id, TotalAmount = totalAmount });
         }
@@ -149,61 +115,29 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> CheckTable(int tableNumber)
         {
-            var tableExists = await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber);
-            if (!tableExists)
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            if (table == null)
             {
                 return Json(new { available = false, message = $"Table {tableNumber} does not exist." });
             }
 
-            // Clean up expired locks (older than 5 minutes)
-            var expiredLocks = await _context.Orders
-                .Where(o => o.TableNumber == tableNumber && o.Status == OrderStatus.Initiated && o.OrderDate < DateTime.Now.AddMinutes(-5))
-                .ToListAsync();
-            
-            if (expiredLocks.Any())
-            {
-                foreach (var lockOrder in expiredLocks)
-                {
-                    lockOrder.Status = OrderStatus.Cancelled;
-                    lockOrder.CancelledDate = DateTime.Now;
-                    lockOrder.Note = "Session Expired";
-                }
-                await _context.SaveChangesAsync();
-            }
+            // Check if there's an active session for this table
+            var activeSession = await _context.Set<TableSession>()
+                .FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
 
-            // Check for strict occupancy
-            var activeOrder = await _context.Orders
-                .Where(o => o.TableNumber == tableNumber
-                    && o.Status != OrderStatus.Completed
-                    && o.Status != OrderStatus.Cancelled)
-                .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefaultAsync();
-
-            if (activeOrder != null)
+            if (activeSession != null)
             {
-                // If the active order is Initiated (and not expired since we just cleaned them), access is denied
-                if (activeOrder.Status == OrderStatus.Initiated)
+                // If the current user has the cookie for this table, allow them in
+                string cachedTable = Request.Cookies["TableNumber"];
+                if (cachedTable == tableNumber.ToString())
                 {
-                    return Json(new { available = false, message = $"Table {tableNumber} is currently being viewed by another guest." });
+                    return Json(new { available = true, message = "Table session is active." });
                 }
                 
-                // If active order is Pending/Active, access is denied (Strict Locking)
-                return Json(new { available = false, message = $"Table {tableNumber} is occupied. Please wait until orders are paid." });
+                return Json(new { available = false, message = $"Table {tableNumber} is occupied." });
             }
 
-            // Table is free, Create a Lock (Initiated Order)
-            var lockSession = new Order
-            {
-                TableNumber = tableNumber,
-                Status = OrderStatus.Initiated,
-                OrderDate = DateTime.Now,
-                TotalAmount = 0,
-                Note = "Browsing Menu"
-            };
-            _context.Orders.Add(lockSession);
-            await _context.SaveChangesAsync();
-
-            return Json(new { available = true, message = "Table is available.", lockId = lockSession.Id });
+            return Json(new { available = true, message = "Table is free." });
         }
 
         // GET: Order/GetOrdersByStatus

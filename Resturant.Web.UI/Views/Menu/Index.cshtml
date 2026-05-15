@@ -1,3 +1,6 @@
+@* 
+ * NOTE: didn't create migration or database
+ *@
 @model IEnumerable<Resturant.Core.Entities.MenuCategory>
 
 @{
@@ -28,16 +31,15 @@
         <div class="col-md-9">
             <!-- Table Number Display -->
             <div id="table-info" class="card mb-3 border-dark">
-                <div class="card-body py-2 d-flex justify-content-between align-items-center">
                     <div>
                         <i class="bi bi-hash text-black-pure me-2"></i>
                         <strong class="text-black-pure">Table: </strong>
-                        <span id="current-table-number" class="badge bg-dark fs-6">Not Set</span>
+                        <span id="current-table-number" class="badge bg-dark fs-6">@ViewData["TableNumber"]</span>
+                        @if (ViewData["CustomerName"] != null)
+                        {
+                            <span class="ms-3 text-muted">| <i class="bi bi-person me-1"></i> @ViewData["CustomerName"]</span>
+                        }
                     </div>
-                    <button id="change-table-btn" class="btn btn-outline-dark btn-sm">
-                        <i class="bi bi-pencil me-1"></i>Change
-                    </button>
-                </div>
             </div>
 
             <!-- Cart Summary -->
@@ -68,8 +70,6 @@
     </div>
 </div>
 
-<!-- Table Number Modal -->
-<partial name="_TableNumberModal" />
 
 <!-- Checkout Modal with Note -->
 <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
@@ -130,7 +130,6 @@
 
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-    <script src="~/js/table-prompt.js"></script>
     <script>
         // Table number handling
         let tableNumber = @(ViewData["TableNumber"] ?? "null");
@@ -267,6 +266,11 @@
 
                     let html = '<div class="row">';
                     menuItems.forEach(item => {
+                        let badges = '';
+                        if (item.isPopular) badges += '<span class="badge bg-danger me-1">Best Seller</span>';
+                        if (item.isTrending) badges += '<span class="badge bg-warning text-dark me-1">Trending</span>';
+                        if (item.isRecommended) badges += '<span class="badge bg-info text-dark me-1">Recommended</span>';
+
                         html += `
                             <div class="col-md-6 mb-4">
                                 <div class="card h-100 shadow-sm border-0">
@@ -282,7 +286,10 @@
                                         <div class="${item.imageUrl ? 'col-md-8' : 'col-12'}">
                                             <div class="card-body d-flex flex-column h-100">
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h5 class="card-title fw-bold text-dark mb-0">${item.name}</h5>
+                                                    <div>
+                                                        <h5 class="card-title fw-bold text-dark mb-1">${item.name}</h5>
+                                                        <div class="mb-2">${badges}</div>
+                                                    </div>
                                                     <span class="badge bg-dark rounded-pill">$${item.price.toFixed(2)}</span>
                                                 </div>
                                                 <p class="card-text text-muted small flex-grow-1">${item.description || ''}</p>
@@ -315,19 +322,7 @@
                 return;
             }
 
-            // Ensure table number is present
-            // Use TablePrompt.get() to check
-            let currentTable = TablePrompt.get();
-            if (!currentTable || currentTable <= 0) {
-                currentTable = await TablePrompt.prompt();
-                if (!currentTable || currentTable <= 0) {
-                     // Still no table (user cancelled or error)
-                     // alert("Table number is required to place an order."); // Modal helps 
-                     return;
-                }
-            }
-            // Update local variable
-            tableNumber = currentTable;
+            // Table number is already set from server-side
 
              // Populate summary in modal
             let summaryHtml = '<ul class="list-group mb-2">';
@@ -374,8 +369,7 @@
                 quantity: item.quantity
             }));
             
-            // Re-fetch table number in case it changed or wasn't synced
-            tableNumber = TablePrompt.get();
+            // tableNumber is already set
 
             fetch('/Order/Create', {
                 method: 'POST',
@@ -393,11 +387,6 @@
                     return response.json();
                 } else {
                     const errorText = await response.text();
-                    // If table is occupied or doesn't exist, clear stored table and prompt again
-                    if (errorText.includes('occupied') || errorText.includes('does not exist')) {
-                        TablePrompt.clear();
-                        tableNumber = null;
-                    }
                     throw new Error(errorText || 'Failed to place order');
                 }
             })
@@ -408,7 +397,7 @@
                 // Save to local Order History
                 let orderTotal = 0;
                 cart.forEach(i => orderTotal += (i.price * i.quantity));
-                saveOrderToHistory(data.orderId, orderTotal, cart, note);
+                // saveOrderToHistory(data.orderId, orderTotal, cart, note);
 
                 alert(`Order placed successfully! Order ID: ${data.orderId}`);
                 cart = [];
@@ -422,9 +411,8 @@
                 console.error('Error placing order:', error);
                 alert(error.message);
                 
-                if (error.message.includes('occupied') || error.message.includes('does not exist')) {
-                    checkoutModal.hide();
-                    TablePrompt.prompt(true);
+                if (error.message.includes('No active session')) {
+                    window.location.href = '/CustomerSession/Register';
                 }
             })
             .finally(() => {
@@ -435,17 +423,8 @@
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize TablePrompt
-            TablePrompt.init(tableNumber);
-            
             // Load cart from local storage
             loadCart();
-
-            // If no table number, prompt for it - handled by init slightly but we can force it
-            const currentTable = TablePrompt.get();
-            if(!currentTable) {
-                setTimeout(() => TablePrompt.prompt(), 500);
-            }
 
             // Auto-load category if selected
             if (typeof selectedCategoryId !== 'undefined' && selectedCategoryId !== null) {
@@ -470,4 +449,4 @@
             document.getElementById('confirmCheckoutBtn').addEventListener('click', confirmCheckout);
         });
     </script>
-}
+}

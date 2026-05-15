@@ -1,3 +1,6 @@
+/* 
+ * NOTE: didn't create migration or database
+ */
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -29,6 +32,9 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> Index()
         {
             var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var activeSessions = await _context.Set<TableSession>()
+                .Where(s => s.IsActive)
+                .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
@@ -39,11 +45,16 @@ namespace Resturant.Web.UI.Controllers
 
             foreach (var table in tables)
             {
+                var session = activeSessions.FirstOrDefault(s => s.TableId == table.Id);
                 var tableOrders = activeOrders.Where(o => o.TableNumber == table.TableNumber).ToList();
+                
                 var viewModel = new WaiterTableViewModel
                 {
                     TableId = table.Id,
                     TableNumber = table.TableNumber,
+                    ActiveSessionId = session?.Id,
+                    CustomerName = session?.CustomerName,
+                    PhoneNumber = session?.PhoneNumber,
                     Orders = tableOrders.Select(o => new WaiterOrderViewModel 
                     {
                         OrderId = o.Id,
@@ -69,6 +80,9 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> GetTablesData()
         {
             var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var activeSessions = await _context.Set<TableSession>()
+                .Where(s => s.IsActive)
+                .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
@@ -77,6 +91,7 @@ namespace Resturant.Web.UI.Controllers
 
             var result = tables.Select(table =>
             {
+                var session = activeSessions.FirstOrDefault(s => s.TableId == table.Id);
                 var tableOrders = activeOrders.Where(o => o.TableNumber == table.TableNumber).ToList();
                 var status = "Empty";
                 if (tableOrders.Any())
@@ -89,6 +104,9 @@ namespace Resturant.Web.UI.Controllers
                 {
                     tableNumber = table.TableNumber,
                     status = status,
+                    sessionId = session?.Id,
+                    customerName = session?.CustomerName,
+                    phoneNumber = session?.PhoneNumber,
                     orders = tableOrders.Select(o => new 
                     {
                         id = o.Id,
@@ -105,6 +123,43 @@ namespace Resturant.Web.UI.Controllers
             });
 
             return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CloseSession(int sessionId)
+        {
+            var session = await _context.Set<TableSession>()
+                .Include(s => s.Table)
+                .FirstOrDefaultAsync(s => s.Id == sessionId);
+                
+            if (session != null)
+            {
+                session.IsActive = false;
+                session.EndTime = DateTime.Now;
+                
+                // Mark all active orders for this session as completed
+                var orders = await _context.Orders
+                    .Where(o => o.TableSessionId == sessionId && o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
+                    .ToListAsync();
+                
+                foreach (var order in orders)
+                {
+                    order.Status = OrderStatus.Completed;
+                    order.CompletedDate = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+                
+                var notifyData = new { tableNumber = session.Table?.TableNumber ?? 0 };
+                
+                // Notify dashboards to refresh
+                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
+                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
+                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
+                
+                return Ok();
+            }
+            return NotFound();
         }
 
         [HttpPost]
@@ -208,4 +263,4 @@ namespace Resturant.Web.UI.Controllers
             return Ok();
         }
     }
-}
+}
