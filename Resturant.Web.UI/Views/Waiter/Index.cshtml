@@ -62,9 +62,9 @@
                                             }
                                         </div>
                                         <div class="card-body p-2 text-start">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <small class="text-muted">@order.OrderTime?.ToShortTimeString()</small>
-                                                <small class="fw-bold">$@order.TotalAmount.ToString("0.00")</small>
+                                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                                <small class="text-muted">Total:</small>
+                                                <small class="fw-bold">@order.TotalAmount.ToString("0.00") L.E.</small>
                                             </div>
 
                                             @if (order.OrderItems != null && order.OrderItems.Any())
@@ -72,7 +72,15 @@
                                                 <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
                                                     @foreach (var item in order.OrderItems)
                                                     {
-                                                        <li>@item.Quantity x @item.Name</li>
+                                                        <li>
+                                                            <strong>@item.Quantity x @item.Name</strong>
+                                                            @if (!string.IsNullOrEmpty(item.AddOns))
+                                                            {
+                                                                <div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">
+                                                                    + @item.AddOns
+                                                                </div>
+                                                            }
+                                                        </li>
                                                     }
                                                 </ul>
                                             }
@@ -87,21 +95,30 @@
                                             <div class="d-flex gap-1 mt-2">
                                                 @if (order.Status == "Pending")
                                                 {
-                                                    <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(@order.OrderId)">
-                                                        <i class="bi bi-check2"></i> 
+                                                    <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(@order.OrderId)" title="Accept Order">
+                                                        <i class="bi bi-check2"></i> Accept
                                                     </button>
-                                                    <button class="btn btn-sm btn-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)">
+                                                    <button class="btn btn-sm btn-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                        <i class="bi bi-x"></i> 
+                                                    </button>
+                                                }
+                                                else if (order.Status == "Ready")
+                                                {
+                                                    <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(@order.OrderId)" title="Serve Order">
+                                                        <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
                                                         <i class="bi bi-x"></i> 
                                                     </button>
                                                 }
                                                 else
                                                 {
-                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)">
+                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
                                                         <i class="bi bi-x"></i> 
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(@order.OrderId)">
+                                                     </button>
+                                                     <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(@order.OrderId)" title="Clear Table">
                                                         <i class="bi bi-check-circle"></i> Clear
-                                                    </button>
+                                                     </button>
                                                 }
                                             </div>
                                         </div>
@@ -242,7 +259,13 @@
                     if (order.items && order.items.length > 0) {
                         itemsHtml = `
                             <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
-                                ${order.items.map(i => `<li>${i.quantity} x ${i.name || i.menuItemName}</li>`).join('')}
+                                ${order.items.map(i => {
+                                    let addonsList = '';
+                                    if (i.addOns && i.addOns.length > 0) {
+                                        addonsList = `<div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ ${i.addOns.map(a => a.name).join(', ')}</div>`;
+                                    }
+                                    return `<li><strong>${i.quantity} x ${(i.name || i.menuItemName)}</strong>${addonsList}</li>`;
+                                }).join('')}
                             </ul>
                         `;
                     }
@@ -259,19 +282,28 @@
                     let actionsHtml = '';
                     if (isPending) {
                         actionsHtml = `
-                             <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(${order.id})">
-                                <i class="bi bi-check2"></i> 
+                             <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(${order.id})" title="Accept Order">
+                                <i class="bi bi-check2"> Accept</i> 
                             </button>
-                            <button class="btn btn-sm btn-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})">
+                            <button class="btn btn-sm btn-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                        `;
+                    } else if (isReady) {
+                        actionsHtml = `
+                             <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(${order.id})" title="Serve Order">
+                                <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                            </button>
+                             <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
                                 <i class="bi bi-x"></i> 
                             </button>
                         `;
                     } else {
                          actionsHtml = `
-                             <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})">
+                             <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
                                 <i class="bi bi-x"></i> 
                             </button>
-                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(${order.id})">
+                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(${order.id})" title="Clear Table">
                                 <i class="bi bi-check-circle"></i> Clear
                             </button>
                         `;
@@ -284,9 +316,9 @@
                                 ${badgeHtml}
                             </div>
                             <div class="card-body p-2 text-start">
-                                <div class="d-flex justify-content-between mb-1">
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                                     <small class="text-muted">${time}</small>
-                                    <small class="fw-bold">$${(order.totalAmount || 0).toFixed(2)}</small>
+                                    <small class="fw-bold">${(order.totalAmount || 0).toFixed(2)} L.E.</small>
                                 </div>
                                 ${itemsHtml}
                                 ${noteHtml}
@@ -455,6 +487,14 @@
 
         function acceptOrder(orderId) {
             fetch('/Waiter/AcceptOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+
+        function serveOrder(orderId) {
+            fetch('/Waiter/ServeOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`

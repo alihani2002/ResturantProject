@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "User Management";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = Context.Request.Query["iframe"] == "true" ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="row">
@@ -10,7 +10,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4>Users List</h4>
-                <a asp-action="Create" class="btn btn-primary">Create New User</a>
+                <a asp-action="Create" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-primary">Create New User</a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -46,13 +46,13 @@
                                         }
                                     </td>
                                     <td>
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">Edit</a>
-                                        <a asp-action="ToggleActive" asp-route-id="@item.Id" class="btn btn-sm @(item.IsActive ? "btn-warning" : "btn-success")">
+                                        <a asp-action="Edit" asp-route-id="@item.Id" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-sm btn-info">Edit</a>
+                                        <a asp-action="ToggleActive" asp-route-id="@item.Id" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-sm @(item.IsActive ? "btn-warning" : "btn-success")">
                                             @(item.IsActive ? "Deactivate" : "Activate")
                                         </a>
                                         @if (!item.IsDeleted)
                                         {
-                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                                         }
                                     </td>
                                 </tr>

@@ -33,13 +33,24 @@
                             <ul class="list-group list-group-flush mb-3">
                                 @foreach (var item in order.OrderItems)
                                 {
-                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-secondary rounded-pill me-2">@item.Quantity x</span>
-                                            <span class="fw-bold">@item.MenuItem.Name</span>
-                                        </div>
-                                    </li>
-                                }
+                                     <li class="list-group-item px-0">
+                                         <div class="d-flex justify-content-between align-items-center">
+                                             <div class="d-flex align-items-center">
+                                                 <span class="badge bg-secondary rounded-pill me-2">@item.Quantity x</span>
+                                                 <span class="fw-bold fs-6">@item.MenuItem.Name</span>
+                                             </div>
+                                         </div>
+                                         @if (item.AddOns != null && item.AddOns.Any())
+                                         {
+                                             <div class="ms-4 mt-1">
+                                                 @foreach (var addOn in item.AddOns)
+                                                 {
+                                                     <span class="badge bg-info text-white me-1 font-monospace" style="font-size: 0.75rem;">+ @addOn.AddOn?.Name</span>
+                                                 }
+                                             </div>
+                                         }
+                                     </li>
+                                 }
                             </ul>
                             @if (!string.IsNullOrEmpty(order.Note))
                             {
@@ -97,12 +108,23 @@
             let itemsHtml = '';
             if (order.orderItems && order.orderItems.length > 0) {
                 order.orderItems.forEach(item => {
-                    itemsHtml += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
-                                <span class="fw-bold">${item.menuItemName || item.name || 'Item'}</span>
+                    let addonsHtml = '';
+                    if (item.addOns && item.addOns.length > 0) {
+                        addonsHtml = `
+                            <div class="ms-4 mt-1">
+                                ${item.addOns.map(a => `<span class="badge bg-info text-white me-1 font-monospace" style="font-size: 0.75rem;">+ ${a.name}</span>`).join('')}
                             </div>
+                        `;
+                    }
+                    itemsHtml += `
+                        <li class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
+                                    <span class="fw-bold fs-6">${item.menuItemName || item.name || 'Item'}</span>
+                                </div>
+                            </div>
+                            ${addonsHtml}
                         </li>
                     `;
                 });

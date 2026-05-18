@@ -37,6 +37,9 @@ namespace Resturant.Core.Entities
         [Display(Name = "Is Recommended")]
         public bool IsRecommended { get; set; } = false;
 
+        [Display(Name = "Order Number")]
+        public int OrderNumber { get; set; } = 0;
+
         [Required]
         [Display(Name = "Category")]
         public int MenuCategoryId { get; set; }

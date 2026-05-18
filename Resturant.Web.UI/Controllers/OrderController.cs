@@ -80,8 +80,31 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 _context.OrderItems.Add(orderItem);
+
+                // Add AddOns if selected
+                decimal addOnsTotal = 0;
+                if (itemRequest.AddOnIds != null && itemRequest.AddOnIds.Any())
+                {
+                    var dbAddOns = await _context.MenuItemAddOns
+                        .Where(a => itemRequest.AddOnIds.Contains(a.Id) && a.MenuItemId == itemRequest.MenuItemId)
+                        .ToListAsync();
+
+                    foreach (var addon in dbAddOns)
+                    {
+                        var orderItemAddOn = new OrderItemAddOn
+                        {
+                            OrderItem = orderItem,
+                            MenuItemAddOnId = addon.Id,
+                            Price = addon.ExtraPrice
+                        };
+                        _context.OrderItemAddOns.Add(orderItemAddOn);
+                        orderItem.AddOns.Add(orderItemAddOn);
+                        addOnsTotal += addon.ExtraPrice;
+                    }
+                }
+
                 orderItemsEntities.Add(orderItem);
-                totalAmount += orderItem.Total;
+                totalAmount += (orderItem.Price + addOnsTotal) * orderItem.Quantity;
             }
 
             order.TotalAmount = totalAmount;
@@ -100,8 +123,11 @@ namespace Resturant.Web.UI.Controllers
                 {
                     menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.Name ?? "Unknown",
                     quantity = oi.Quantity,
-                    price = oi.Price,
-                    total = oi.Total
+                    price = oi.Price + oi.AddOns.Sum(a => a.Price),
+                    total = oi.Total,
+                    addOns = oi.AddOns.Select(a => new {
+                        name = _context.MenuItemAddOns.Find(a.MenuItemAddOnId)?.Name ?? ""
+                    }).ToList()
                 }).ToList()
             };
 
@@ -239,6 +265,9 @@ namespace Resturant.Web.UI.Controllers
                     break;
             }
 
+            // Real-time broadcast to all clients (including guest tracking view)
+            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -260,6 +289,53 @@ namespace Resturant.Web.UI.Controllers
 
             return Json(order);
         }
+
+        // GET: Order/GetActiveSessionOrders
+        [HttpGet]
+        public async Task<IActionResult> GetActiveSessionOrders(int tableNumber)
+        {
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            if (table == null)
+            {
+                return BadRequest("Table not found");
+            }
+
+            var activeSession = await _context.Set<TableSession>()
+                .FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
+            
+            if (activeSession == null)
+            {
+                return Json(new List<object>());
+            }
+
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
+                .Where(o => o.TableSessionId == activeSession.Id)
+                .OrderByDescending(o => o.OrderDate)
+                .Select(o => new
+                {
+                    id = o.Id,
+                    status = o.Status.ToString(),
+                    statusInt = (int)o.Status,
+                    totalAmount = o.TotalAmount,
+                    orderDate = o.OrderDate,
+                    note = o.Note,
+                    items = o.OrderItems.Select(oi => new
+                    {
+                        name = oi.MenuItem != null ? oi.MenuItem.Name : "Unknown",
+                        quantity = oi.Quantity,
+                        price = oi.Price + oi.AddOns.Sum(a => a.Price),
+                        addOns = oi.AddOns.Select(a => new { name = a.AddOn != null ? a.AddOn.Name : "" }).ToList()
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return Json(orders);
+        }
     }
 
     public class CreateOrderRequest
@@ -273,5 +349,6 @@ namespace Resturant.Web.UI.Controllers
     {
         public int MenuItemId { get; set; }
         public int Quantity { get; set; }
+        public List<int>? AddOnIds { get; set; }
     }
 }

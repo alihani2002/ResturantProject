@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Create User";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = Context.Request.Query["iframe"] == "true" ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="row">
@@ -25,7 +25,7 @@
                             </div>
                             <span asp-validation-for="FullName" class="text-danger fs-12"></span>
                         </div>
-
+ 
                         <div class="col-md-6">
                             <label asp-for="Email" class="form-label fw-semibold"></label>
                             <div class="input-group">
@@ -34,7 +34,7 @@
                             </div>
                             <span asp-validation-for="Email" class="text-danger fs-12"></span>
                         </div>
-
+ 
                         <div class="col-md-6">
                             <label asp-for="Password" class="form-label fw-semibold"></label>
                             <div class="input-group">
@@ -43,7 +43,7 @@
                             </div>
                             <span asp-validation-for="Password" class="text-danger fs-12"></span>
                         </div>
-
+ 
                         <div class="col-md-6">
                             <label asp-for="Role" class="form-label fw-semibold"></label>
                             <div class="input-group">
@@ -70,11 +70,13 @@
                             </div>
                         </div>
                     </div>
+ 
+                    <input type="hidden" name="iframe" value="@Context.Request.Query["iframe"]" />
 
                     <hr class="my-4 border-dashed" />
-
+ 
                     <div class="d-flex justify-content-between align-items-center">
-                        <a asp-action="Index" class="btn btn-light text-muted">
+                        <a asp-action="Index" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-light text-muted">
                             <i class="feather-arrow-left me-1"></i> Back to List
                         </a>
                         <button type="submit" class="btn btn-primary px-4">

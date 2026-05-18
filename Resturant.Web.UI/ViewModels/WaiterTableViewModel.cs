@@ -43,6 +43,7 @@ namespace Resturant.Web.UI.ViewModels
     {
         public string Name { get; set; }
         public int Quantity { get; set; }
+        public string? AddOns { get; set; }
     }
 }
 

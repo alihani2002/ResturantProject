@@ -23,6 +23,7 @@ namespace Resturant.Web.UI.Hubs
         {
             await Clients.Group("waiter").SendAsync("NewOrderReceived", orderData);
             await Clients.Group("admin").SendAsync("NewOrderReceived", orderData);
+            await Clients.All.SendAsync("OrderStatusChanged", orderData);
         }
 
         // Order accepted by waiter - notify chef and cashier
@@ -32,6 +33,7 @@ namespace Resturant.Web.UI.Hubs
             await Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
             await Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
             await Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await Clients.All.SendAsync("OrderStatusChanged", orderData);
         }
 
         // Order ready by chef - notify waiter and cashier
@@ -40,6 +42,7 @@ namespace Resturant.Web.UI.Hubs
             await Clients.Group("waiter").SendAsync("OrderReady", orderData);
             await Clients.Group("cashier").SendAsync("OrderReady", orderData);
             await Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await Clients.All.SendAsync("OrderStatusChanged", orderData);
         }
 
         // Payment processed - notify waiter
@@ -47,6 +50,7 @@ namespace Resturant.Web.UI.Hubs
         {
             await Clients.Group("waiter").SendAsync("PaymentProcessed", orderData);
             await Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await Clients.All.SendAsync("OrderStatusChanged", orderData);
         }
 
         // Table cleared
@@ -55,6 +59,7 @@ namespace Resturant.Web.UI.Hubs
             await Clients.Group("waiter").SendAsync("TableCleared", orderData);
             await Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
             await Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await Clients.All.SendAsync("OrderStatusChanged", orderData);
         }
 
         // Legacy methods for backward compatibility

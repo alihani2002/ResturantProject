@@ -15,6 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("ResturantWebUI
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"]</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css" />
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/vendors/css/vendors.min.css" />
+    <!-- Custom Theme CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/theme.min.css" />
+    <style>
+        body {
+            background-color: transparent !important;
+            padding: 20px;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    @RenderBody()
+
+    <!-- Required Scripts -->
+    <script src="/assets/vendors/js/vendors.min.js"></script>
+    <script src="/assets/js/common-init.min.js"></script>
+    <script src="/assets/js/theme-customizer-init.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

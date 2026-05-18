@@ -37,7 +37,10 @@ namespace Resturant.Web.UI.Controllers
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
                 .ToListAsync();
 
@@ -61,11 +64,12 @@ namespace Resturant.Web.UI.Controllers
                         TotalAmount = o.TotalAmount,
                         OrderTime = o.OrderDate,
                         Note = o.Note,
-                        Status = o.Status == OrderStatus.Pending ? "Pending" : "Active",
+                        Status = o.Status.ToString(),
                         OrderItems = o.OrderItems.Select(oi => new WaiterOrderItemViewModel
                         {
                             Name = oi.MenuItem?.Name ?? "Unknown",
-                            Quantity = oi.Quantity
+                            Quantity = oi.Quantity,
+                            AddOns = string.Join(", ", oi.AddOns.Select(a => a.AddOn?.Name ?? ""))
                         }).ToList()
                     }).ToList()
                 };
@@ -85,7 +89,10 @@ namespace Resturant.Web.UI.Controllers
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated)
                 .ToListAsync();
 
@@ -113,10 +120,11 @@ namespace Resturant.Web.UI.Controllers
                         totalAmount = o.TotalAmount,
                         orderTime = o.OrderDate,
                         note = o.Note,
-                        status = o.Status == OrderStatus.Pending ? "Pending" : "Active",
+                        status = o.Status.ToString(),
                         items = o.OrderItems.Select(oi => new {
                             name = oi.MenuItem?.Name ?? "Unknown",
-                            quantity = oi.Quantity
+                            quantity = oi.Quantity,
+                            addOns = oi.AddOns.Select(a => new { name = a.AddOn?.Name ?? "" }).ToList()
                         }).ToList()
                     }).ToList()
                 };
@@ -192,11 +200,12 @@ namespace Resturant.Web.UI.Controllers
                     })
                 };
 
-                // Notify all dashboards
+                // Notify all dashboards and guest tracking
                 await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
                 await _hubContext.Clients.Group("chef").SendAsync("OrderAccepted", orderData);
                 await _hubContext.Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
                 await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events for backward compatibility
                 await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Accepted");
@@ -223,11 +232,12 @@ namespace Resturant.Web.UI.Controllers
                     totalAmount = order.TotalAmount
                 };
 
-                // Notify all dashboards - table is now empty
+                // Notify all dashboards and guest tracking - table is now empty
                 await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
                 await _hubContext.Clients.Group("chef").SendAsync("OrderCancelled", orderData);
                 await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
                 await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
 
                 await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Cancelled");
             }
@@ -252,13 +262,47 @@ namespace Resturant.Web.UI.Controllers
                     totalAmount = order.TotalAmount
                 };
 
-                // Notify all dashboards
+                // Notify all dashboards and guest tracking
                 await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
                 await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
                 await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events
                 await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Table Cleared");
+            }
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ServeOrder(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order != null && order.Status == OrderStatus.Ready)
+            {
+                order.Status = OrderStatus.Served;
+                await _context.SaveChangesAsync();
+
+                var orderData = new
+                {
+                    id = order.Id,
+                    tableNumber = order.TableNumber,
+                    status = order.Status.ToString(),
+                    statusInt = (int)order.Status,
+                    totalAmount = order.TotalAmount,
+                    orderDate = order.OrderDate
+                };
+
+                // Notify all dashboards and clients via SignalR
+                await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData); // Broadcast directly to guest tracker in real-time
+                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Served");
             }
             return Ok();
         }

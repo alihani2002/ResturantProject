@@ -105,10 +105,11 @@ namespace Resturant.Web.UI.Controllers
 
                 var notifyData = new { tableNumber = tableNumber };
 
-                // Notify all dashboards
+                // Notify all dashboards and guest tracking
                 await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
                 await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
                 await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", new { tableNumber = tableNumber });
 
                 return Ok();
             }
@@ -134,7 +135,10 @@ namespace Resturant.Web.UI.Controllers
             var orderIds = ids.Split(',').Select(int.Parse).ToList();
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
                 .Where(o => orderIds.Contains(o.Id))
                 .ToListAsync();
 

@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Edit User";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = Context.Request.Query["iframe"] == "true" ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="row">
@@ -16,6 +16,7 @@
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" asp-for="Id" />
+                    <input type="hidden" name="iframe" value="@Context.Request.Query["iframe"]" />
                     <div class="form-group mb-3">
                         <label asp-for="FullName" class="control-label"></label>
                         <input asp-for="FullName" class="form-control" />
@@ -56,7 +57,7 @@
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Save" class="btn btn-primary" />
-                        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                        <a asp-action="Index" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-secondary">Back to List</a>
                     </div>
                 </form>
             </div>

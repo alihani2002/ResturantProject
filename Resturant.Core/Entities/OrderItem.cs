@@ -4,6 +4,7 @@
 using Resturant.Core.Common;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Resturant.Core.Entities
 {
@@ -25,7 +26,7 @@ namespace Resturant.Core.Entities
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
 
-        public decimal Total => Quantity * Price;
+        public decimal Total => Quantity * (Price + (AddOns != null ? AddOns.Sum(a => a.Price) : 0));
 
         public ICollection<OrderItemAddOn> AddOns { get; set; } = new List<OrderItemAddOn>();
     }

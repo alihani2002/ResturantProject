@@ -1,106 +1,296 @@
-@* 
- * NOTE: didn't create migration or database
- *@
 @model IEnumerable<Resturant.Core.Entities.MenuCategory>
 
 @{
-    ViewData["Title"] = "Menu";
+    ViewData["Title"] = "Qore Menu";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar - Category Navigation -->
-        <div class="col-md-3 d-none d-md-block">
-            <div class="sticky-top" style="top: 100px; z-index: 1020;">
-                <h5 class="fw-bold mb-3 px-3 text-black-pure text-uppercase ls-1">Menu Categories</h5>
-                <div class="list-group list-group-flush shadow-sm rounded-3 overflow-hidden bg-white">
-                    @foreach (var category in Model)
-                    {
-                        <a href="#" class="list-group-item list-group-item-action category-link py-3 px-4 border-0 d-flex justify-content-between align-items-center" 
-                           data-category-id="@category.Id"
-                           style="transition: all 0.2s;">
-                            <span class="fw-bold">@category.Name</span>
-                            <i class="bi bi-chevron-right small opacity-50"></i>
-                        </a>
-                    }
+<div class="menu-app-container bg-light min-vh-100 pb-5">
+    <!-- Main Header Banner -->
+    <div class="brand-banner-section bg-black text-white text-center py-4 position-relative overflow-hidden" style="background: linear-gradient(180deg, #121212 0%, #000000 100%) !important;">
+        <div class="d-flex flex-column align-items-center">
+            <!-- Circular System Logo -->
+            <div class="circular-logo-container rounded-circle shadow-lg bg-warning p-1 mb-2" style="width: 90px; height: 90px; border: 3px solid #fff; overflow: hidden;">
+                <img src="/assets/images/Qore.png" class="w-100 h-100 rounded-circle" style="object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=200'">
+            </div>
+            <!-- Dynamic Brand Header -->
+            <h4 class="fw-bold mb-1 tracking-wide outfit-font text-white">QORE MENU</h4>
+            <small class="text-warning font-monospace text-uppercase" style="letter-spacing: 2px; font-size: 0.72rem;">Premium Restaurant Experience</small>
+        </div>
+    </div>
+
+    <!-- Main Layout Container -->
+    <div class="container py-3">
+        <!-- Floating Info Bar: Table & Active User -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle bg-dark text-white p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="bi bi-hash"></i>
+                    </span>
+                    <div>
+                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">Your Table</small>
+                        <strong class="text-dark">Table <span class="badge bg-dark rounded-pill">@ViewData["TableNumber"]</span></strong>
+                    </div>
                 </div>
+                @if (ViewData["CustomerName"] != null)
+                {
+                    <div class="text-end">
+                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">Welcome</small>
+                        <span class="fw-bold text-dark"><i class="bi bi-person-fill text-warning me-1"></i>@ViewData["CustomerName"]</span>
+                    </div>
+                }
             </div>
         </div>
 
-        <!-- Main Content - Menu Items -->
-        <div class="col-md-9">
-            <!-- Table Number Display -->
-            <div id="table-info" class="card mb-3 border-dark">
-                    <div>
-                        <i class="bi bi-hash text-black-pure me-2"></i>
-                        <strong class="text-black-pure">Table: </strong>
-                        <span id="current-table-number" class="badge bg-dark fs-6">@ViewData["TableNumber"]</span>
-                        @if (ViewData["CustomerName"] != null)
+        <!-- Search Bar Card -->
+        <div class="search-section mb-4">
+            <div class="position-relative">
+                <input type="text" id="menu-search-input" class="form-control border-0 shadow-sm rounded-pill py-3 px-4" placeholder="ابحث هنا عن وجبتك المفضلة... (Search food...)" style="padding-right: 50px;">
+                <span class="position-absolute end-0 top-50 translate-middle-y me-3 text-muted fs-5">
+                    <i class="bi bi-search text-warning"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- Instagram Stories Category Navigator -->
+        <div class="category-stories-section mb-4">
+            <h6 class="fw-bold text-dark mb-3 px-1 outfit-font text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">Categories / التصنيفات</h6>
+            <div class="d-flex overflow-auto flex-nowrap scrollbar-none gap-3 pb-2 px-1" id="category-stories-container">
+                @foreach (var category in Model)
+                {
+                    var isActive = ViewData["SelectedCategoryId"] != null && (int)ViewData["SelectedCategoryId"] == category.Id;
+                    <div class="category-story-item text-center cursor-pointer" onclick="selectCategory(@category.Id, this)" data-category-id="@category.Id" style="flex: 0 0 auto; width: 80px;">
+                        <!-- Circular Ring -->
+                        <div class="story-circle-ring rounded-circle p-[3px] mb-1" 
+                             style="width: 72px; height: 72px; transition: all 0.3s; background: @(isActive ? "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)" : "linear-gradient(45deg, #e2e8f0, #cbd5e1)");">
+                            <div class="story-inner-circle bg-white rounded-circle p-[2px] w-100 h-100">
+                                <div class="rounded-circle overflow-hidden w-100 h-100">
+                                    @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                    {
+                                        <img src="@category.ImageUrl" class="w-100 h-100" style="object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 bg-warning-subtle d-flex align-items-center justify-content-center text-warning fw-bold fs-4">
+                                            @category.Name.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Story Label -->
+                        <small class="story-label fw-bold d-block text-truncate text-dark" style="font-size: 0.72rem; transition: all 0.2s; color: @(isActive ? "#dc2743" : "#475569") !important;">
+                            @category.Name
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Main Layout Split -->
+        <div class="row">
+            <!-- Main Items & Active Orders List -->
+            <div class="col-12">
+                <!-- My Orders Tracking Card -->
+                <div id="my-orders-card" class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white" style="display: none;">
+                    <div class="card-header bg-black text-white d-flex justify-content-between align-items-center py-3" style="background-color: #0b0b0b !important;">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-warning me-2"></i>طلباتي النشطة (Active Orders)</h6>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1" onclick="fetchAndRefreshMyOrders()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body p-3">
+                        <div id="my-orders-list" class="d-flex flex-column gap-3" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Active order cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Items Vertical Stacks -->
+                <div class="menu-items-grid-wrapper">
+                    @foreach (var category in Model)
+                    {
+                        @if (category.MenuItems.Any(i => i.IsAvailable))
                         {
-                            <span class="ms-3 text-muted">| <i class="bi bi-person me-1"></i> @ViewData["CustomerName"]</span>
+                            <div class="category-section mb-5" id="category-section-@category.Id">
+                                <h4 class="fw-black outfit-font text-slate-800 mb-3 px-1 d-flex align-items-center justify-content-between border-bottom pb-2">
+                                    <span>@category.Name</span>
+                                    <span class="badge bg-warning-subtle text-warning rounded-pill border border-warning-subtle px-2.5 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                        @category.MenuItems.Count(i => i.IsAvailable) Items
+                                    </span>
+                                </h4>
+                                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-3" id="menu-items-grid-container-@category.Id">
+                                    @foreach (var item in category.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
+                                    {
+                                        var badges = "";
+                                        if (item.IsPopular) { badges = "<span class=\"badge bg-danger position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Best Seller</span>"; }
+                                        else if (item.IsTrending) { badges = "<span class=\"badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Trending</span>"; }
+                                        else if (item.IsRecommended) { badges = "<span class=\"badge bg-info text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Recommended</span>"; }
+
+                                        <div class="col menu-item-card-col" data-item-id="@item.Id" data-name="@item.Name.ToLower()" data-description="@(item.Description?.ToLower() ?? "")">
+                                            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift bg-white">
+                                                @Html.Raw(badges)
+                                                <!-- Image Container -->
+                                                <div class="position-relative" style="height: 135px; overflow: hidden; background-color: #f8fafc;">
+                                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                    {
+                                                        <img src="@item.ImageUrl" class="w-100 h-100" 
+                                                             style="object-fit: cover; cursor: pointer; transition: transform 0.3s;" 
+                                                             alt="@item.Name"
+                                                             onclick="openImagePreview('@item.ImageUrl')"
+                                                             onmouseover="this.style.transform='scale(1.05)'"
+                                                             onmouseout="this.style.transform='scale(1.0)'">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+                                                            <i class="bi bi-egg-fried fs-1 opacity-20"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <!-- Card Body -->
+                                                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                                    <div>
+                                                        <h6 class="fw-bold text-dark mb-1 line-clamp-1" title="@item.Name">@item.Name</h6>
+                                                        <p class="text-muted mb-0 small line-clamp-2" style="font-size: 0.75rem; min-height: 32px;">@(item.Description ?? "Freshly prepared high-quality restaurant item.")</p>
+                                                    </div>
+                                                    <div class="d-flex align-items-center justify-content-between mt-3">
+                                                        <div>
+                                                            <span class="fw-extrabold text-slate-800" style="font-size: 0.95rem;">@item.Price.ToString("F2")</span>
+                                                            <small class="text-muted d-block" style="font-size: 0.65rem; font-weight: bold; margin-top: -3px;">L.E. / ج.م</small>
+                                                        </div>
+                                                        <button class="btn btn-dark btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" 
+                                                                onclick="openCustomizationModal(@item.Id)"
+                                                                style="width: 32px; height: 32px; background-color: #0b0b0b; border: none;">
+                                                            <i class="bi bi-plus-lg text-white"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
                         }
-                    </div>
-            </div>
-
-            <!-- Cart Summary -->
-            <div id="cart-summary" class="card mb-4">
-                <div class="card-header bg-black text-white" style="background-color: #000 !important;">
-                    <h4 class="mb-0">Your Cart (<span id="cart-count">0</span>)</h4>
+                    }
                 </div>
-                <div class="card-body">
-                    <div id="cart-items">
-                        <p class="text-black-pure">Your cart is empty</p>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <strong class="text-black-pure">Total:</strong>
-                        <strong id="cart-total" class="text-black-pure">$0.00</strong>
-                    </div>
-                    <button id="checkout-btn" class="btn btn-dark-primary btn-block mt-3 w-100" disabled>
-                        Checkout
-                    </button>
+    </div>
+
+    <!-- Sticky Floating Action Cart Bar for Mobile & Tablet -->
+    <!-- Unified Talabat-Style Floating Cart Bar (Universal for Mobile & Desktop) -->
+    <div class="floating-talabat-cart-bar fixed-bottom py-3 px-4 shadow animate-slide-up" id="universal-cart-bar" 
+         style="display: none; z-index: 1040; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 600px; border-radius: 20px; background: linear-gradient(135deg, #18181b 0%, #09090b 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Left Info Panel -->
+            <div class="d-flex align-items-center gap-3 cursor-pointer" onclick="checkout()">
+                <div class="position-relative bg-warning text-black rounded-circle p-2.5 d-flex align-items-center justify-content-center shadow" style="width: 48px; height: 48px; min-width: 48px;">
+                    <i class="bi bi-bag-fill fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.72rem; padding: 4px 6px;">0</span>
+                </div>
+                <div>
+                    <span class="text-white-50 d-block outfit-font" style="font-size: 0.68rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
+                    <strong class="text-warning fs-5 outfit-font fw-extrabold" id="universal-cart-total-text">0.00 L.E.</strong>
                 </div>
             </div>
-
-            <!-- Menu Items -->
-            <div id="menu-items-container">
-                <h3>Select a category to view menu items</h3>
-            </div>
+            <!-- Right CTA Button -->
+            <button class="btn btn-warning rounded-pill px-4 py-2.5 fw-bold outfit-font d-flex align-items-center gap-2 shadow" style="font-size: 0.88rem; font-weight: 800 !important; color: #000; transition: all 0.3s;" onclick="checkout()">
+                <span>Proceed to Checkout</span>
+                <i class="bi bi-arrow-right-short fs-5 fw-bold"></i>
+            </button>
         </div>
     </div>
 </div>
 
-
-<!-- Checkout Modal with Note -->
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-black text-white" style="background-color: #000 !important;">
-                <h5 class="modal-title" id="checkoutModalLabel">
-                    <i class="bi bi-cart-check-fill me-2"></i>Confirm Order
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="checkout-summary" class="mb-3">
-                    <!-- Summary will be injected here -->
-                </div>
-                <div class="form-group">
-                    <label for="orderNote" class="form-label fw-bold">Note to Chef (Optional)</label>
-                    <textarea class="form-control" id="orderNote" rows="2" placeholder="e.g., No onions, extra spicy..."></textarea>
+<!-- Customization & Recommendation Modal -->
+<div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white">
+            <!-- Image Header -->
+            <div class="position-relative bg-light text-center" id="customization-image-container" style="height: 220px; overflow: hidden; display: none;">
+                <img id="customization-item-image" src="" class="w-100 h-100" style="object-fit: cover;" alt="Product Image">
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-end p-3" style="background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%);">
+                    <h4 class="text-white fw-bold mb-0" id="customization-item-name-header"></h4>
                 </div>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark-primary" id="confirmCheckoutBtn">
-                    <i class="bi bi-check-lg me-2"></i>Place Order
+            
+            <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center" id="customization-header-standard">
+                <div class="flex-grow-1">
+                    <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
+                    <span class="badge bg-dark rounded-pill fs-6 mt-1" id="customization-item-price">0.00 L.E.</span>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
+                <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+                
+                <!-- Add-Ons Section -->
+                <div id="addons-section" class="mb-4" style="display: none;">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order
+                    </h6>
+                    <div id="addons-list" class="row g-2">
+                        <!-- Custom options -->
+                    </div>
+                </div>
+                
+                <!-- Recommendations Section -->
+                <div id="recommendations-section" class="mb-2" style="display: none;">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-star-fill text-warning me-2"></i>Frequently Ordered Together
+                    </h6>
+                    <div id="recommendations-list" class="d-flex flex-column gap-2">
+                        <!-- Recommendations -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sticky bottom bar -->
+            <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                <!-- Quantity selector -->
+                <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
+                    <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" id="customization-qty-minus">-</button>
+                    <span class="px-2 fw-bold text-dark fs-5" id="customization-qty-val">1</span>
+                    <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" id="customization-qty-plus">+</button>
+                </div>
+                
+                <!-- Action Button -->
+                <button type="button" class="btn btn-dark rounded-pill px-4 py-2 fw-bold flex-grow-1 ms-3" id="add-customized-to-cart-btn">
+                    Add to Cart - <span id="customization-total-price">0.00 L.E.</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white">
+            <div class="modal-header bg-black text-white py-3 px-4" style="background-color: #0b0b0b !important;">
+                <h5 class="modal-title fw-bold" id="checkoutModalLabel">
+                    <i class="bi bi-cart-check-fill text-warning me-2"></i>Confirm Order
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="checkout-summary" class="mb-3">
+                    <!-- Summary -->
+                </div>
+                <div class="form-group mt-3">
+                    <label for="orderNote" class="form-label fw-bold">Note to Chef (Optional) / ملاحظات للمطبخ</label>
+                    <textarea class="form-control" id="orderNote" rows="2" placeholder="e.g., No onions, extra spicy..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 bg-light d-flex">
+                <button type="button" class="btn btn-outline-dark rounded-pill px-4 flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark rounded-pill px-4 flex-grow-1" id="confirmCheckoutBtn">
+                    <i class="bi bi-check-lg me-2"></i>Place Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
@@ -114,11 +304,9 @@
     </div>
 </div>
 
-
-
 <!-- Toast Notification -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div id="cartToast" class="toast align-items-center text-white bg-success border-0 rounded-3 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body">
                 <i class="bi bi-check-circle-fill me-2"></i> Item added to cart!
@@ -128,20 +316,198 @@
     </div>
 </div>
 
+<!-- Custom Page Styling -->
+<style>
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+        overflow: hidden;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05) !important;
+    }
+    .category-stories-section {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background-color: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(10px);
+        padding-top: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    .story-circle-ring {
+        position: relative;
+        padding: 3px;
+        border-radius: 50%;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .category-story-item:hover .story-circle-ring,
+    .category-story-item.active .story-circle-ring {
+        transform: scale(1.05);
+    }
+    .story-inner-circle {
+        padding: 2px;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+    }
+    .pulse-ready-glow {
+        animation: pulse-ready-border 2s infinite;
+        background-color: rgba(25, 135, 84, 0.03) !important;
+    }
+    @@keyframes pulse-ready-border {
+        0% { box-shadow: 0 0 0 0px rgba(25, 135, 84, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+        100% { box-shadow: 0 0 0 0px rgba(25, 135, 84, 0); }
+    }
+    .pulse-ready-text {
+        animation: pulse-ready-bg 2s infinite;
+    }
+    @@keyframes pulse-ready-bg {
+        0% { background-color: rgba(25, 135, 84, 0.1); }
+        50% { background-color: rgba(25, 135, 84, 0.2); }
+        100% { background-color: rgba(25, 135, 84, 0.1); }
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .animate-slide-up {
+        animation: slideUp 0.3s ease-out;
+    }
+    @@keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+    }
+    .addon-card {
+        border: 2px solid #e2e8f0;
+        transition: all 0.15s ease;
+    }
+    .addon-card:hover {
+        border-color: #94a3b8 !important;
+    }
+    /* Premium Dark Theme Override Styles */
+    .dark-theme {
+        background-color: #121212 !important;
+        color: #e2e8f0 !important;
+    }
+    .dark-theme .card,
+    .dark-theme .modal-content,
+    .dark-theme #cart-summary {
+        background-color: #1e1e1e !important;
+        color: #f1f5f9 !important;
+        border-color: #2d2d2d !important;
+    }
+    .dark-theme .text-dark,
+    .dark-theme h4,
+    .dark-theme h5,
+    .dark-theme h6,
+    .dark-theme .fw-bold,
+    .dark-theme .fw-black {
+        color: #ffffff !important;
+    }
+    .dark-theme .text-muted,
+    .dark-theme small {
+        color: #94a3b8 !important;
+    }
+    .dark-theme .bg-white {
+        background-color: #1e1e1e !important;
+    }
+    .dark-theme .category-stories-section {
+        background-color: rgba(18, 18, 18, 0.96) !important;
+        border-bottom: 1px solid #2d2d2d !important;
+    }
+    .dark-theme .story-inner-circle {
+        background-color: #1e1e1e !important;
+    }
+    .dark-theme .list-group-item {
+        color: #e2e8f0 !important;
+        border-color: #2d2d2d !important;
+    }
+    .dark-theme .sidebar-category-link:not(.active) {
+        color: #e2e8f0 !important;
+        background-color: transparent !important;
+    }
+    .dark-theme .sidebar-category-link.active {
+        background-color: #f59e0b !important;
+        color: #000000 !important;
+    }
+    .dark-theme .border,
+    .dark-theme .border-top,
+    .dark-theme .border-bottom {
+        border-color: #2d2d2d !important;
+    }
+    .dark-theme input,
+    .dark-theme textarea,
+    .dark-theme select {
+        background-color: #2d2d2d !important;
+        color: #ffffff !important;
+        border-color: #404040 !important;
+    }
+    .dark-theme .modal-header,
+    .dark-theme .modal-footer {
+        background-color: #1a1a1a !important;
+        border-color: #2d2d2d !important;
+    }
+    .dark-theme .mobile-floating-cart-bar {
+        background-color: #1e1e1e !important;
+        border-top: 1px solid #2d2d2d !important;
+    }
+    .dark-theme .btn-outline-dark {
+        color: #ffffff !important;
+        border-color: #e2e8f0 !important;
+    }
+    .dark-theme .btn-outline-dark:hover {
+        background-color: #ffffff !important;
+        color: #121212 !important;
+    }
+</style>
+
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
-        // Table number handling
+        // Table parameters
         let tableNumber = @(ViewData["TableNumber"] ?? "null");
         let selectedCategoryId = @(ViewData["SelectedCategoryId"] ?? "null");
         
-        const ORDER_HISTORY_KEY = 'guestOrderHistory';
-        const ORDER_EXPIRY_HOURS = 8;
+        // Static category mapping from Razor models
+        const categoriesList = [
+            @foreach (var cat in Model)
+            {
+                <text>{ id: @cat.Id, name: "@Html.Raw(cat.Name)" },</text>
+            }
+        ];
 
-        // --- CART & MENU ---
+        // --- CART MAPPINGS ---
         let cart = [];
+        let activeCustomItem = null;
+        let selectedAddOns = [];
+        let customizationQty = 1;
 
-        // Load cart from local storage
+        // Load cart
         function loadCart() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
@@ -150,22 +516,152 @@
             }
         }
 
-        // Save cart to local storage
+        // Save cart
         function saveCart() {
             localStorage.setItem('cart', JSON.stringify(cart));
         }
 
-        // Add item to cart
-        function addToCart(menuItem) {
-            const existingItem = cart.find(item => item.id === menuItem.id);
+        // Open customization modal
+        function openCustomizationModal(menuItemId) {
+            fetch(`/Menu/GetMenuItemCustomizationDetails?id=${menuItemId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to load details");
+                    return response.json();
+                })
+                .then(item => {
+                    activeCustomItem = item;
+                    selectedAddOns = [];
+                    customizationQty = 1;
+                    
+                    document.getElementById('customization-item-name').textContent = item.name;
+                    document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} L.E.`;
+                    document.getElementById('customization-item-description').textContent = item.description || '';
+                    document.getElementById('customization-qty-val').textContent = customizationQty;
+
+                    // Image handling
+                    const imgContainer = document.getElementById('customization-image-container');
+                    const imgEl = document.getElementById('customization-item-image');
+                    const standardHeader = document.getElementById('customization-header-standard');
+                    const headerName = document.getElementById('customization-item-name-header');
+
+                    if (item.imageUrl) {
+                        imgEl.src = item.imageUrl;
+                        headerName.textContent = item.name;
+                        imgContainer.style.display = 'block';
+                        standardHeader.style.display = 'none';
+                    } else {
+                        imgContainer.style.display = 'none';
+                        standardHeader.style.display = 'flex';
+                    }
+
+                    // Render Add-ons
+                    const addonsSection = document.getElementById('addons-section');
+                    const addonsList = document.getElementById('addons-list');
+                    if (item.addOns && item.addOns.length > 0) {
+                        addonsSection.style.display = 'block';
+                        addonsList.innerHTML = item.addOns.map(addon => `
+                            <div class="col-12">
+                                <div class="card border p-2.5 px-3 rounded-3 d-flex flex-row align-items-center justify-content-between cursor-pointer addon-card" 
+                                     id="addon-card-${addon.id}"
+                                     onclick="toggleAddonCard(${addon.id})">
+                                    <div class="form-check m-0" style="pointer-events: none;">
+                                        <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.extraPrice}" data-name="${addon.name}" onclick="event.stopPropagation()">
+                                        <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                            ${addon.name}
+                                        </label>
+                                    </div>
+                                    <span class="fw-bold text-warning small">+ ${addon.extraPrice.toFixed(2)} L.E.</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        addonsSection.style.display = 'none';
+                        addonsList.innerHTML = '';
+                    }
+
+                    // Render Recommendations
+                    const recSection = document.getElementById('recommendations-section');
+                    const recList = document.getElementById('recommendations-list');
+                    if (item.recommendations && item.recommendations.length > 0) {
+                        recSection.style.display = 'block';
+                        recList.innerHTML = item.recommendations.map(rec => `
+                            <div class="card border rounded-3 overflow-hidden bg-white p-2 mb-1" style="box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <div class="d-flex align-items-center gap-3">
+                                    ${rec.imageUrl ? `<img src="${rec.imageUrl}" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">` : ''}
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold text-dark mb-0 small">${rec.name}</h6>
+                                        <div class="fw-bold text-dark small">${rec.price.toFixed(2)} L.E.</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 fw-bold text-uppercase" 
+                                            onclick="addRecommendedDirect(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
+                                        + Add
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        recSection.style.display = 'none';
+                        recList.innerHTML = '';
+                    }
+
+                    updateCustomizationTotal();
+
+                    // Open bootstrap modal
+                    const bsRequest = window.bootstrap || bootstrap;
+                    const customModal = new bsRequest.Modal(document.getElementById('customizationModal'));
+                    customModal.show();
+                })
+                .catch(err => {
+                    console.error("Error opening customization:", err);
+                    alert("Unable to fetch item details.");
+                });
+        }
+
+        // Toggle addon card
+        function toggleAddonCard(addonId) {
+            const checkbox = document.getElementById(`addon-${addonId}`);
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                const card = document.getElementById(`addon-card-${addonId}`);
+                if (checkbox.checked) {
+                    card.classList.add('border-warning', 'bg-warning-subtle');
+                } else {
+                    card.classList.remove('border-warning', 'bg-warning-subtle');
+                }
+                updateCustomizationTotal();
+            }
+        }
+
+        // Update customization total
+        function updateCustomizationTotal() {
+            if (!activeCustomItem) return;
+            
+            let total = activeCustomItem.price;
+            
+            const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                total += parseFloat(cb.getAttribute('data-price'));
+            });
+
+            total = total * customizationQty;
+
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} L.E.`;
+        }
+
+        // Add recommended direct
+        function addRecommendedDirect(recItem) {
+            const cartItemId = `${recItem.id}_`;
+            const existingItem = cart.find(item => item.cartItemId === cartItemId);
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
                 cart.push({
-                    id: menuItem.id,
-                    name: menuItem.name,
-                    price: menuItem.price,
-                    quantity: 1
+                    cartItemId: cartItemId,
+                    id: recItem.id,
+                    name: recItem.name,
+                    price: recItem.price,
+                    quantity: 1,
+                    addOns: []
                 });
             }
             saveCart();
@@ -173,7 +669,7 @@
             showToast();
         }
 
-        // Show toast notification
+        // Show Toast
         function showToast() {
             const toastEl = document.getElementById('cartToast');
             const bsRequest = window.bootstrap || bootstrap;
@@ -181,7 +677,7 @@
             toast.show();
         }
 
-        // Open image preview
+        // Image preview
         function openImagePreview(imageUrl) {
             const bsRequest = window.bootstrap || bootstrap;
             const modal = new bsRequest.Modal(document.getElementById('imagePreviewModal'));
@@ -189,20 +685,20 @@
             modal.show();
         }
 
-        // Remove item from cart
-        function removeFromCart(itemId) {
-            cart = cart.filter(item => item.id !== itemId);
+        // Remove from cart
+        function removeFromCart(cartItemId) {
+            cart = cart.filter(item => item.cartItemId !== cartItemId);
             saveCart();
             updateCartUI();
         }
 
-        // Update cart quantity
-        function updateQuantity(itemId, change) {
-            const item = cart.find(item => item.id === itemId);
+        // Update quantity
+        function updateQuantity(cartItemId, change) {
+            const item = cart.find(item => item.cartItemId === cartItemId);
             if (item) {
                 item.quantity += change;
                 if (item.quantity <= 0) {
-                    removeFromCart(itemId);
+                    removeFromCart(cartItemId);
                 } else {
                     saveCart();
                     updateCartUI();
@@ -212,149 +708,152 @@
 
         // Update cart UI
         function updateCartUI() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartCount = document.getElementById('cart-count');
-            const cartTotal = document.getElementById('cart-total');
-            const checkoutBtn = document.getElementById('checkout-btn');
+            const universalBar = document.getElementById('universal-cart-bar');
+            const universalBadge = document.getElementById('universal-cart-badge');
+            const universalTotalText = document.getElementById('universal-cart-total-text');
 
             if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-muted">Your cart is empty</p>';
-                cartCount.textContent = '0';
-                cartTotal.textContent = '$0.00';
-                checkoutBtn.disabled = true;
+                if (universalBar) universalBar.style.display = 'none';
+                
+                // If cart is empty and checkout modal is open, hide it
+                const checkoutModalEl = document.getElementById('checkoutModal');
+                if (checkoutModalEl) {
+                    const bsRequest = window.bootstrap || bootstrap;
+                    const modalInstance = bsRequest.Modal.getInstance(checkoutModalEl);
+                    if (modalInstance) modalInstance.hide();
+                }
             } else {
-                let cartHtml = '<ul class="list-group">';
                 let total = 0;
+                let totalQty = 0;
                 
                 cart.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-                    cartHtml += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6>${item.name}</h6>
-                                <p class="mb-0">$${item.price.toFixed(2)} x ${item.quantity}</p>
-                            </div>
-                            <div>
-                                <button class="btn btn-sm btn-outline-secondary mr-1" onclick="updateQuantity(${item.id}, -1)">-</button>
-                                <button class="btn btn-sm btn-outline-secondary mr-1" onclick="updateQuantity(${item.id}, 1)">+</button>
-                                <button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id})">Remove</button>
-                            </div>
-                        </li>
-                    `;
+                    const addonsTotal = item.addOns ? item.addOns.reduce((sum, a) => sum + a.price, 0) : 0;
+                    const itemPrice = item.price + addonsTotal;
+                    total += itemPrice * item.quantity;
+                    totalQty += item.quantity;
                 });
                 
-                cartHtml += '</ul>';
-                cartItemsContainer.innerHTML = cartHtml;
-                cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-                cartTotal.textContent = '$' + total.toFixed(2);
-                checkoutBtn.disabled = false;
+                if (universalBadge) universalBadge.textContent = totalQty;
+                if (universalTotalText) universalTotalText.textContent = total.toFixed(2) + ' L.E.';
+                if (universalBar) universalBar.style.display = 'block';
+
+                // If checkout modal is open, refresh its content dynamically!
+                const checkoutModalEl = document.getElementById('checkoutModal');
+                if (checkoutModalEl && checkoutModalEl.classList.contains('show')) {
+                    renderCheckoutSummary();
+                }
             }
         }
 
-        // Load menu items by category
-        function loadMenuItems(categoryId) {
-            fetch(`/Menu/GetMenuItemsByCategory?categoryId=${categoryId}`)
-                .then(response => response.json())
-                .then(menuItems => {
-                    const container = document.getElementById('menu-items-container');
-                    
-                    if (menuItems.length === 0) {
-                        container.innerHTML = '<h3>No items available in this category</h3>';
-                        return;
-                    }
+        // Highlight category bubbles (Instagram Stories) & hide all sections except the active one
+        function highlightCategoryBubble(categoryId) {
+            document.querySelectorAll('.category-story-item').forEach(item => {
+                item.classList.remove('active');
+                const ring = item.querySelector('.story-circle-ring');
+                const label = item.querySelector('.story-label');
+                if (ring) ring.style.background = 'linear-gradient(45deg, #e2e8f0, #cbd5e1)';
+                if (label) label.style.color = '#475569';
+            });
 
-                    let html = '<div class="row">';
-                    menuItems.forEach(item => {
-                        let badges = '';
-                        if (item.isPopular) badges += '<span class="badge bg-danger me-1">Best Seller</span>';
-                        if (item.isTrending) badges += '<span class="badge bg-warning text-dark me-1">Trending</span>';
-                        if (item.isRecommended) badges += '<span class="badge bg-info text-dark me-1">Recommended</span>';
+            const activeStory = document.querySelector(`.category-story-item[data-category-id="${categoryId}"]`);
+            if (activeStory) {
+                activeStory.classList.add('active');
+                const ring = activeStory.querySelector('.story-circle-ring');
+                const label = activeStory.querySelector('.story-label');
+                if (ring) ring.style.background = 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)';
+                if (label) label.style.color = '#dc2743';
+                activeStory.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
 
-                        html += `
-                            <div class="col-md-6 mb-4">
-                                <div class="card h-100 shadow-sm border-0">
-                                    <div class="row g-0 h-100">
-                                        ${item.imageUrl ? `
-                                        <div class="col-md-4">
-                                            <img src="${item.imageUrl}" class="img-fluid rounded-start h-100 w-100" 
-                                                 style="object-fit: cover; cursor: pointer;" 
-                                                 alt="${item.name}"
-                                                 onclick="openImagePreview('${item.imageUrl}')">
-                                        </div>
-                                        ` : ''}
-                                        <div class="${item.imageUrl ? 'col-md-8' : 'col-12'}">
-                                            <div class="card-body d-flex flex-column h-100">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <div>
-                                                        <h5 class="card-title fw-bold text-dark mb-1">${item.name}</h5>
-                                                        <div class="mb-2">${badges}</div>
-                                                    </div>
-                                                    <span class="badge bg-dark rounded-pill">$${item.price.toFixed(2)}</span>
-                                                </div>
-                                                <p class="card-text text-muted small flex-grow-1">${item.description || ''}</p>
-                                                <div class="mt-3 text-end">
-                                                    <button class="btn btn-sm btn-dark-primary rounded-pill px-4" 
-                                                            onclick="addToCart(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                                                        <i class="bi bi-plus-lg me-1"></i> Add
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    html += '</div>';
-                    container.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error loading menu items:', error);
+            selectedCategoryId = categoryId;
+
+            // Show ONLY the active category section in normal mode (if no search query is active)
+            const query = document.getElementById('menu-search-input')?.value.toLowerCase().trim() || '';
+            if (!query) {
+                document.querySelectorAll('.category-section').forEach(section => {
+                    const sectionId = parseInt(section.getAttribute('id').replace('category-section-', ''));
+                    section.style.display = (sectionId === categoryId) ? 'block' : 'none';
                 });
+            }
         }
 
-        // Checkout - Step 1: Open Modal
-        async function checkout() {
+        // Category selection handler (Stories navigation with smooth scrolling to top)
+        function selectCategory(categoryId, element) {
+            highlightCategoryBubble(categoryId);
+            
+            const storiesSection = document.querySelector('.category-stories-section');
+            if (storiesSection) {
+                const offset = storiesSection.offsetTop - 20;
+                window.scrollTo({
+                    top: offset,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Render cart items inside Checkout Modal dynamically with +/- quantity controls
+        function renderCheckoutSummary() {
+            let summaryHtml = '<ul class="list-group list-group-flush mb-2 bg-transparent">';
+            let total = 0;
+            
+            cart.forEach(item => {
+                const addonsTotal = item.addOns ? item.addOns.reduce((sum, a) => sum + a.price, 0) : 0;
+                const itemPrice = item.price + addonsTotal;
+                const itemTotal = itemPrice * item.quantity;
+                total += itemTotal;
+                
+                let addonsText = '';
+                if (item.addOns && item.addOns.length > 0) {
+                    addonsText = `<div class="text-muted small ps-2">${item.addOns.map(a => `+ ${a.name} (+${a.price.toFixed(2)} L.E.)`).join('<br>')}</div>`;
+                }
+
+                summaryHtml += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 bg-transparent" style="border-bottom: 1px solid rgba(0,0,0,0.08);">
+                        <div style="max-width: 60%;">
+                            <h6 class="my-0 fw-bold text-dark">${item.name}</h6>
+                            ${addonsText}
+                            <small class="text-muted mt-1 d-block">${itemPrice.toFixed(2)} L.E. x ${item.quantity}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-outline-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', -1)">-</button>
+                                <span class="fw-bold text-dark px-1" style="font-size: 0.9rem;">${item.quantity}</span>
+                                <button class="btn btn-sm btn-outline-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', 1)">+</button>
+                            </div>
+                            <button class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none fs-5" onclick="removeFromCart('${item.cartItemId}')">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+            
+            summaryHtml += `
+                <li class="list-group-item d-flex justify-content-between bg-light py-3 px-3 rounded-3 mt-3 border-0 shadow-sm">
+                    <span class="fw-bold text-dark">Order Total (إجمالي الطلب)</span>
+                    <strong class="text-dark fs-5 fw-extrabold">${total.toFixed(2)} L.E.</strong>
+                </li>
+            </ul>`;
+            
+            document.getElementById('checkout-summary').innerHTML = summaryHtml;
+        }
+
+        // Open checkout modal
+        function checkout() {
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
             }
 
-            // Table number is already set from server-side
-
-             // Populate summary in modal
-            let summaryHtml = '<ul class="list-group mb-2">';
-            let total = 0;
-            cart.forEach(item => {
-                total += item.price * item.quantity;
-                summaryHtml += `
-                    <li class="list-group-item d-flex justify-content-between lh-sm">
-                        <div>
-                            <h6 class="my-0">${item.name}</h6>
-                            <small class="text-muted">x ${item.quantity}</small>
-                        </div>
-                        <span class="text-muted">$${(item.price * item.quantity).toFixed(2)}</span>
-                    </li>
-                `;
-            });
-            summaryHtml += `
-                <li class="list-group-item d-flex justify-content-between bg-light">
-                    <span>Total (USD)</span>
-                    <strong>$${total.toFixed(2)}</strong>
-                </li>
-            </ul>`;
-            
-            document.getElementById('checkout-summary').innerHTML = summaryHtml;
-            document.getElementById('orderNote').value = ''; // Clean previous note
+            renderCheckoutSummary();
+            document.getElementById('orderNote').value = '';
 
             const bsRequest = window.bootstrap || bootstrap;
             const checkoutModal = new bsRequest.Modal(document.getElementById('checkoutModal'));
             checkoutModal.show();
         }
 
-        // Checkout - Step 2: Confirm Order
+        // Confirm placing order
         async function confirmCheckout() {
             const note = document.getElementById('orderNote').value;
             const confirmBtn = document.getElementById('confirmCheckoutBtn');
@@ -366,10 +865,9 @@
 
             const orderItems = cart.map(item => ({
                 menuItemId: item.id,
-                quantity: item.quantity
+                quantity: item.quantity,
+                addOnIds: item.addOns ? item.addOns.map(a => a.id) : []
             }));
-            
-            // tableNumber is already set
 
             fetch('/Order/Create', {
                 method: 'POST',
@@ -391,21 +889,15 @@
                 }
             })
             .then(data => {
-                // Success
                 checkoutModal.hide();
                 
-                // Save to local Order History
-                let orderTotal = 0;
-                cart.forEach(i => orderTotal += (i.price * i.quantity));
-                // saveOrderToHistory(data.orderId, orderTotal, cart, note);
-
                 alert(`Order placed successfully! Order ID: ${data.orderId}`);
                 cart = [];
                 saveCart();
                 updateCartUI();
 
-                // Show orders immediately to confirm? or just let them check
-                // showOrderHistory(); 
+                // Instantly update tracking active list
+                fetchAndRefreshMyOrders();
             })
             .catch(error => {
                 console.error('Error placing order:', error);
@@ -421,32 +913,319 @@
             });
         }
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load cart from local storage
-            loadCart();
+        // --- CLIENT REAL-TIME ORDER TRACKING ---
+        function renderOrderTrackingCard(order) {
+            let statusText = 'Pending';
+            let statusBadgeClass = 'bg-warning text-dark';
+            let progressPercent = 20;
+            let pulseClass = '';
 
-            // Auto-load category if selected
-            if (typeof selectedCategoryId !== 'undefined' && selectedCategoryId !== null) {
-                loadMenuItems(selectedCategoryId);
+            switch (order.status) {
+                case 'Pending':
+                    statusText = 'Pending (قيد الانتظار)';
+                    statusBadgeClass = 'bg-warning text-dark';
+                    progressPercent = 20;
+                    break;
+                case 'Confirmed':
+                    statusText = 'Confirmed (مؤكد)';
+                    statusBadgeClass = 'bg-primary text-white';
+                    progressPercent = 40;
+                    break;
+                case 'InPreparation':
+                    statusText = 'Preparing (تحت التحضير)';
+                    statusBadgeClass = 'bg-info text-white';
+                    progressPercent = 70;
+                    break;
+                case 'Ready':
+                    statusText = 'READY (جاهز للاستلام)';
+                    statusBadgeClass = 'bg-success text-white';
+                    progressPercent = 90;
+                    pulseClass = 'pulse-ready-glow';
+                    break;
+                case 'Served':
+                    statusText = 'Served (تم التقديم)';
+                    statusBadgeClass = 'bg-dark text-white';
+                    progressPercent = 100;
+                    break;
+                case 'Paid':
+                    statusText = 'Paid (تم الدفع)';
+                    statusBadgeClass = 'bg-secondary text-white';
+                    progressPercent = 100;
+                    break;
             }
 
-            // Category navigation
-            document.querySelectorAll('.category-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    // Basic active state toggling
-                    document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active', 'bg-primary', 'text-white'));
-                    this.classList.add('active', 'bg-dark', 'text-white');
+            let barColor = '#dc3545';
+            if (order.status === 'Confirmed' || order.status === 'InPreparation') {
+                barColor = '#fd7e14';
+            } else if (order.status === 'Ready') {
+                barColor = '#ffc107';
+            } else if (order.status === 'Served' || order.status === 'Paid') {
+                barColor = '#198754';
+            }
 
-                    const categoryId = parseInt(this.getAttribute('data-category-id'));
-                    loadMenuItems(categoryId);
+            let itemsHtml = '';
+            if (order.items && order.items.length > 0) {
+                itemsHtml = `
+                    <ul class="list-unstyled mb-2 small text-muted ps-2 border-start border-2 ms-1" style="font-size: 0.82rem;">
+                        ${order.items.map(i => {
+                            let addonsText = '';
+                            if (i.addOns && i.addOns.length > 0) {
+                                addonsText = ` <span class="text-warning" style="font-size: 0.75rem;">(+ ${i.addOns.map(a => a.name).join(', ')})</span>`;
+                            }
+                            return `<li><strong>${i.quantity}x</strong> ${i.name}${addonsText}</li>`;
+                        }).join('')}
+                    </ul>
+                `;
+            }
+
+            const time = order.orderDate ? new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+            return `
+                <div class="card border rounded-3 mb-3 shadow-sm ${pulseClass}" style="transition: all 0.3s; border-color: ${order.status === 'Ready' ? '#198754' : '#e2e8f0'} !important;">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="fw-bold text-dark" style="font-size: 0.95rem;">Order #${order.id}</span>
+                                <small class="text-muted ms-2">${time}</small>
+                            </div>
+                            <span class="badge ${statusBadgeClass} rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">${statusText}</span>
+                        </div>
+                        
+                        ${itemsHtml}
+ 
+                        ${order.note ? `
+                            <div class="bg-light p-2 rounded mb-2 border-start border-3 border-warning small" style="font-size: 0.8rem;">
+                                <i class="bi bi-pencil-fill me-1 text-warning"></i> <em>Note: ${order.note}</em>
+                            </div>
+                        ` : ''}
+ 
+                        <div class="mt-2">
+                            <div class="progress rounded-pill shadow-inner" style="height: 8px; background-color: #f1f5f9;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: ${progressPercent}%; background-color: ${barColor} !important;" 
+                                     aria-valuenow="${progressPercent}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1 text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                <span>Placed</span>
+                                <span>Cooking</span>
+                                <span>Ready</span>
+                                <span>Served</span>
+                            </div>
+                        </div>
+
+                        ${order.status === 'Ready' ? `
+                            <div class="alert alert-success py-2 px-3 mb-0 mt-3 d-flex align-items-center rounded-3 border-0 pulse-ready-text">
+                                <i class="bi bi-check-circle-fill me-2 fs-5 text-success"></i>
+                                <div class="fw-bold small text-success">وجبتك جاهزة الآن! سيسلمها النادل إليك فوراً. (Your meal is ready! Waiter will serve it shortly.)</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fetch active orders
+        function fetchAndRefreshMyOrders() {
+            if (!tableNumber) return;
+            
+            fetch(`/Order/GetActiveSessionOrders?tableNumber=${tableNumber}`)
+                .then(response => response.json())
+                .then(orders => {
+                    const myOrdersCard = document.getElementById('my-orders-card');
+                    const myOrdersList = document.getElementById('my-orders-list');
+
+                    if (orders && orders.length > 0) {
+                        myOrdersCard.style.display = 'block';
+                        myOrdersList.innerHTML = orders.map(order => renderOrderTrackingCard(order)).join('');
+                    } else {
+                        myOrdersCard.style.display = 'none';
+                        myOrdersList.innerHTML = '<p class="text-muted small mb-0">No active orders yet.</p>';
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching guest orders:", err);
+                });
+        }
+
+        // Establish SignalR hub
+        function setupGuestSignalR() {
+            if (typeof signalR === 'undefined') return;
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/orderHub")
+                .withAutomaticReconnect()
+                .build();
+
+            const eventsToRefresh = [
+                "OrderStatusChanged", "NewOrderReceived", "OrderAccepted", 
+                "OrderReady", "OrderCompleted", "PaymentProcessed", 
+                "TableCleared", "ReceiveWaiterUpdate", "ReceiveChefUpdate"
+            ];
+
+            eventsToRefresh.forEach(eventName => {
+                connection.on(eventName, function(orderData) {
+                    if (!orderData || orderData.tableNumber === undefined || orderData.tableNumber === tableNumber) {
+                        fetchAndRefreshMyOrders();
+                    }
                 });
             });
 
-            // Button Events
-            document.getElementById('checkout-btn').addEventListener('click', checkout);
+            connection.start()
+                .then(() => console.log("SignalR connected for Guest Tracking"))
+                .catch(err => console.error("SignalR connection error:", err));
+        }
+
+        // Default category fallback
+        function selectDefaultCategory() {
+            const firstStory = document.querySelector('.category-story-item');
+            if (firstStory) {
+                const catId = parseInt(firstStory.getAttribute('data-category-id'));
+                highlightCategoryBubble(catId);
+            }
+        }
+
+        // Bind layout events on DOM Load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+
+            // Initialize theme switcher
+            const themeBtn = document.getElementById('theme-accent-btn');
+            if (themeBtn) {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                if (currentTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    document.body.classList.remove('bg-light');
+                    document.body.style.backgroundColor = '#121212';
+                    themeBtn.innerHTML = '<i class="bi bi-sun-fill text-warning"></i>';
+                }
+                themeBtn.addEventListener('click', function() {
+                    if (document.body.classList.contains('dark-theme')) {
+                        document.body.classList.remove('dark-theme');
+                        document.body.classList.add('bg-light');
+                        document.body.style.backgroundColor = '';
+                        localStorage.setItem('theme', 'light');
+                        themeBtn.innerHTML = '<i class="bi bi-moon-stars-fill text-warning"></i>';
+                    } else {
+                        document.body.classList.add('dark-theme');
+                        document.body.classList.remove('bg-light');
+                        document.body.style.backgroundColor = '#121212';
+                        localStorage.setItem('theme', 'dark');
+                        themeBtn.innerHTML = '<i class="bi bi-sun-fill text-warning"></i>';
+                    }
+                });
+            }
+
+            // Initial active category detection
+            if (typeof selectedCategoryId !== 'undefined' && selectedCategoryId !== null) {
+                const activeStory = document.querySelector(`.category-story-item[data-category-id="${selectedCategoryId}"]`);
+                if (activeStory) {
+                    highlightCategoryBubble(selectedCategoryId);
+                } else {
+                    selectDefaultCategory();
+                }
+            } else {
+                selectDefaultCategory();
+            }
+
+            // Real-time local search handler across all categories (with tab fallback)
+            document.getElementById('menu-search-input').addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                const sections = document.querySelectorAll('.category-section');
+                
+                sections.forEach(section => {
+                    const items = section.querySelectorAll('.menu-item-card-col');
+                    let sectionHasVisibleItems = false;
+                    
+                    items.forEach(item => {
+                        const name = item.getAttribute('data-name');
+                        const desc = item.getAttribute('data-description');
+                        if (name.includes(query) || desc.includes(query)) {
+                            item.style.display = 'block';
+                            sectionHasVisibleItems = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    if (query) {
+                        // Search mode: show the section only if it has matching items
+                        section.style.display = sectionHasVisibleItems ? 'block' : 'none';
+                    } else {
+                        // Normal mode: show only the active category
+                        const sectionId = parseInt(section.getAttribute('id').replace('category-section-', ''));
+                        section.style.display = (sectionId === selectedCategoryId) ? 'block' : 'none';
+                    }
+                });
+            });
+
+            // Bind triggers
             document.getElementById('confirmCheckoutBtn').addEventListener('click', confirmCheckout);
+
+            document.getElementById('customization-qty-minus').addEventListener('click', function(e) {
+                e.preventDefault();
+                if (customizationQty > 1) {
+                    customizationQty--;
+                    document.getElementById('customization-qty-val').textContent = customizationQty;
+                    updateCustomizationTotal();
+                }
+            });
+
+            document.getElementById('customization-qty-plus').addEventListener('click', function(e) {
+                e.preventDefault();
+                customizationQty++;
+                document.getElementById('customization-qty-val').textContent = customizationQty;
+                updateCustomizationTotal();
+            });
+
+            document.getElementById('add-customized-to-cart-btn').addEventListener('click', function() {
+                if (!activeCustomItem) return;
+
+                const selectedAddOnsList = [];
+                const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+                checkboxes.forEach(cb => {
+                    selectedAddOnsList.push({
+                        id: parseInt(cb.value),
+                        name: cb.getAttribute('data-name'),
+                        price: parseFloat(cb.getAttribute('data-price'))
+                    });
+                });
+
+                const addonIdsStr = selectedAddOnsList.map(a => a.id).sort().join(',');
+                const cartItemId = `${activeCustomItem.id}_${addonIdsStr}`;
+
+                const existingItem = cart.find(item => item.cartItemId === cartItemId);
+                if (existingItem) {
+                    existingItem.quantity += customizationQty;
+                } else {
+                    cart.push({
+                        cartItemId: cartItemId,
+                        id: activeCustomItem.id,
+                        name: activeCustomItem.name,
+                        price: activeCustomItem.price,
+                        quantity: customizationQty,
+                        addOns: selectedAddOnsList
+                    });
+                }
+
+                saveCart();
+                updateCartUI();
+                
+                const bsRequest = window.bootstrap || bootstrap;
+                const modalEl = document.getElementById('customizationModal');
+                const modal = bsRequest.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                showToast();
+            });
+
+            // Initial guest updates & polling schedules
+            fetchAndRefreshMyOrders();
+            setupGuestSignalR();
+            setInterval(fetchAndRefreshMyOrders, 10000);
         });
     </script>
-}
+}

@@ -20,6 +20,9 @@ namespace Resturant.Core.Entities
         [Display(Name = "Is Active")]
         public bool IsActive { get; set; } = true;
 
+        [Display(Name = "Order Number")]
+        public int OrderNumber { get; set; } = 0;
+
         public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
     }
 }

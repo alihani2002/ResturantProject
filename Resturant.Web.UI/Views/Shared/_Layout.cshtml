@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
+    @if (ViewData["Title"]?.ToString() != "Qore Menu")
+    {
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm mb-4 py-3">
             <div class="container d-flex flex-column align-items-center">
@@ -52,12 +54,15 @@
             </div>
         </nav>
     </header>
+    }
     <main role="main" class="pb-0">
         @RenderBody()
     </main>
     
     <partial name="_OrderHistoryPartial" />
 
+    @if (ViewData["Title"]?.ToString() != "Qore Menu")
+    {
     <footer class="footer-custom mt-5 border-top" id="contact">
         <div class="container">
             <div class="row">
@@ -96,6 +101,7 @@
             </div>
         </div>
     </footer>
+    }
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

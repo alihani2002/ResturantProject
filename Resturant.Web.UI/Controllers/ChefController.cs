@@ -27,7 +27,10 @@ namespace Resturant.Web.UI.Controllers
         {
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
                 .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
                 .OrderBy(o => o.ConfirmedDate)
                 .ToListAsync();
@@ -40,7 +43,10 @@ namespace Resturant.Web.UI.Controllers
         {
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.AddOns)
+                        .ThenInclude(a => a.AddOn)
                 .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
                 .OrderBy(o => o.ConfirmedDate)
                 .Select(o => new
@@ -55,7 +61,12 @@ namespace Resturant.Web.UI.Controllers
                         id = oi.Id,
                         menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
                         quantity = oi.Quantity,
-                        price = oi.Price
+                        price = oi.Price,
+                        addOns = oi.AddOns.Select(a => new
+                        {
+                            id = a.Id,
+                            name = a.AddOn != null ? a.AddOn.Name : ""
+                        }).ToList()
                     })
                 })
                 .ToListAsync();
@@ -92,10 +103,11 @@ namespace Resturant.Web.UI.Controllers
                     })
                 };
 
-                // Notify all dashboards
+                // Notify all dashboards and guest tracking
                 await _hubContext.Clients.Group("waiter").SendAsync("OrderReady", orderData);
                 await _hubContext.Clients.Group("cashier").SendAsync("OrderReady", orderData);
                 await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events
                 await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");

@@ -22,6 +22,13 @@ namespace Resturant.Infrastructure.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<OrderItemAddOn> OrderItemAddOns { get; set; }
 
+        // Enterprise ERP Tables
+        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<WasteLog> WasteLogs { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

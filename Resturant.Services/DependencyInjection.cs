@@ -23,6 +23,7 @@ namespace Resturant.Services
             services.AddScoped<ITableService, TableService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
             
             return services;
         }

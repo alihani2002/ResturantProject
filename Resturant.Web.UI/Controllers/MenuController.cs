@@ -49,9 +49,10 @@ namespace Resturant.Web.UI.Controllers
             }
 
             var menu = await _context.MenuCategories
-                .Include(c => c.MenuItems.Where(i => i.IsAvailable))
+                .Include(c => c.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
                 .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
+                .OrderBy(c => c.OrderNumber)
+                .ThenBy(c => c.Name)
                 .ToListAsync();
 
             ViewData["TableNumber"] = tableNumber;
@@ -66,7 +67,8 @@ namespace Resturant.Web.UI.Controllers
         {
             var menuItems = await _context.MenuItems
                 .Where(i => i.MenuCategoryId == categoryId && i.IsAvailable)
-                .OrderBy(i => i.Name)
+                .OrderBy(i => i.OrderNumber)
+                .ThenBy(i => i.Name)
                 .Select(i => new 
                 {
                     id = i.Id,
@@ -78,11 +80,57 @@ namespace Resturant.Web.UI.Controllers
                     menuCategoryId = i.MenuCategoryId,
                     isPopular = i.IsPopular,
                     isTrending = i.IsTrending,
-                    isRecommended = i.IsRecommended
+                    isRecommended = i.IsRecommended,
+                    orderNumber = i.OrderNumber
                 })
                 .ToListAsync();
 
             return Json(menuItems);
+        }
+
+        // GET: Menu/GetMenuItemCustomizationDetails
+        [HttpGet]
+        public async Task<IActionResult> GetMenuItemCustomizationDetails(int id)
+        {
+            var menuItem = await _context.MenuItems
+                .Include(m => m.AddOns)
+                .Include(m => m.Recommendations)
+                    .ThenInclude(r => r.RecommendedMenuItem)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (menuItem == null)
+            {
+                return NotFound();
+            }
+
+            var result = new
+            {
+                id = menuItem.Id,
+                name = menuItem.Name,
+                description = menuItem.Description,
+                price = menuItem.Price,
+                imageUrl = menuItem.ImageUrl,
+                addOns = menuItem.AddOns
+                    .Where(a => a.IsAvailable)
+                    .Select(a => new
+                    {
+                        id = a.Id,
+                        name = a.Name,
+                        extraPrice = a.ExtraPrice
+                    }).ToList(),
+                recommendations = menuItem.Recommendations
+                    .Where(r => r.RecommendedMenuItem != null && r.RecommendedMenuItem.IsAvailable)
+                    .Select(r => new
+                    {
+                        id = r.RecommendedMenuItem.Id,
+                        name = r.RecommendedMenuItem.Name,
+                        description = r.RecommendedMenuItem.Description,
+                        price = r.RecommendedMenuItem.Price,
+                        imageUrl = r.RecommendedMenuItem.ImageUrl
+                    }).ToList()
+            };
+
+            return Json(result);
         }
 
         // GET: Menu/GetAllCategories
@@ -91,7 +139,8 @@ namespace Resturant.Web.UI.Controllers
         {
             var categories = await _context.MenuCategories
                 .Where(c => c.IsActive)
-                .OrderBy(c => c.Name)
+                .OrderBy(c => c.OrderNumber)
+                .ThenBy(c => c.Name)
                 .ToListAsync();
 
             return Json(categories);

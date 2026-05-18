@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Resturant.Core.Common;
 using Resturant.Core.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Resturant.Infrastructure.Data
@@ -58,6 +60,83 @@ namespace Resturant.Infrastructure.Data
                 context.MenuItems.AddRange(menuItems);
                 await context.SaveChangesAsync();
             }
+
+            // Seed specific items for Recommendations & Add-Ons (Burger -> Fries + Cola)
+            var burger = await context.MenuItems.FirstOrDefaultAsync(m => m.Name == "Burger");
+            if (burger == null)
+            {
+                var mainCoursesCategory = await context.MenuCategories.FirstOrDefaultAsync(c => c.Name == "Main Courses");
+                burger = new MenuItem
+                {
+                    Name = "Burger",
+                    Description = "Premium beef patty with lettuce, tomato, and house sauce on a toasted bun",
+                    Price = 14.99m,
+                    IsAvailable = true,
+                    IsPopular = true,
+                    MenuCategoryId = mainCoursesCategory?.Id ?? 1
+                };
+                context.MenuItems.Add(burger);
+                await context.SaveChangesAsync();
+            }
+
+            var fries = await context.MenuItems.FirstOrDefaultAsync(m => m.Name == "Fries");
+            if (fries == null)
+            {
+                var appetizersCategory = await context.MenuCategories.FirstOrDefaultAsync(c => c.Name == "Appetizers");
+                fries = new MenuItem
+                {
+                    Name = "Fries",
+                    Description = "Crispy golden french fries salted to perfection",
+                    Price = 4.99m,
+                    IsAvailable = true,
+                    IsTrending = true,
+                    MenuCategoryId = appetizersCategory?.Id ?? 1
+                };
+                context.MenuItems.Add(fries);
+                await context.SaveChangesAsync();
+            }
+
+            var cola = await context.MenuItems.FirstOrDefaultAsync(m => m.Name == "Cola");
+            if (cola == null)
+            {
+                var beveragesCategory = await context.MenuCategories.FirstOrDefaultAsync(c => c.Name == "Beverages");
+                cola = new MenuItem
+                {
+                    Name = "Cola",
+                    Description = "Ice-cold refreshing classic cola",
+                    Price = 2.49m,
+                    IsAvailable = true,
+                    MenuCategoryId = beveragesCategory?.Id ?? 1
+                };
+                context.MenuItems.Add(cola);
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Add-ons for Burger
+            if (!context.MenuItemAddOns.Any(a => a.MenuItemId == burger.Id))
+            {
+                var addons = new List<MenuItemAddOn>
+                {
+                    new MenuItemAddOn { MenuItemId = burger.Id, Name = "Extra Cheese", ExtraPrice = 1.50m, IsAvailable = true },
+                    new MenuItemAddOn { MenuItemId = burger.Id, Name = "Sauces", ExtraPrice = 0.50m, IsAvailable = true },
+                    new MenuItemAddOn { MenuItemId = burger.Id, Name = "Double Patty", ExtraPrice = 4.00m, IsAvailable = true }
+                };
+                context.MenuItemAddOns.AddRange(addons);
+                await context.SaveChangesAsync();
+            }
+
+            // Seed Recommendations for Burger -> Recommend Fries + Cola
+            if (!context.MenuItemRecommendations.Any(r => r.PrimaryMenuItemId == burger.Id))
+            {
+                var recs = new List<MenuItemRecommendation>
+                {
+                    new MenuItemRecommendation { PrimaryMenuItemId = burger.Id, RecommendedMenuItemId = fries.Id },
+                    new MenuItemRecommendation { PrimaryMenuItemId = burger.Id, RecommendedMenuItemId = cola.Id }
+                };
+                context.MenuItemRecommendations.AddRange(recs);
+                await context.SaveChangesAsync();
+            }
+
 
             // Seed Admin User
             var adminEmail = "admin@resturant.com";
