@@ -22,9 +22,14 @@ namespace Resturant.Web.UI.Controllers
         // GET: Menu
         public async Task<IActionResult> Index(int? tableNumber, int? categoryId)
         {
+            string tableNumberStr = Request.Cookies["TableNumber"];
+            if (string.IsNullOrEmpty(tableNumberStr))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             if (tableNumber == null)
             {
-                string tableNumberStr = Request.Cookies["TableNumber"];
                 if (int.TryParse(tableNumberStr, out int cachedTableNumber))
                 {
                     tableNumber = cachedTableNumber;

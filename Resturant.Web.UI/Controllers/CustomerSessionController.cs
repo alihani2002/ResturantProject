@@ -52,6 +52,11 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public IActionResult Register()
         {
+            string tableNumberStr = Request.Cookies["TableNumber"];
+            if (string.IsNullOrEmpty(tableNumberStr))
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 

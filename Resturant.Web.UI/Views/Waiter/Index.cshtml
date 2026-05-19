@@ -24,7 +24,7 @@
         @foreach (var table in Model)
         {
             <div class="col-lg-3 col-md-4 col-sm-6" id="table-card-@table.TableNumber">
-                <div class="card h-100 shadow-sm border-0 @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : "bg-white"))">
+                <div class="card h-100 shadow-sm border-0 @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : (table.ActiveSessionId.HasValue ? "bg-info bg-opacity-10 border border-info border-opacity-25" : "bg-white")))">
                     <div class="card-body text-center d-flex flex-column p-2">
                         <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
                             <h3 class="card-title h4 fw-bold mb-0">Table @table.TableNumber</h3>
@@ -127,10 +127,20 @@
                             }
                             else
                             {
-                                <div class="text-muted small mt-4">
-                                    <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
-                                    Available
-                                </div>
+                                @if (table.ActiveSessionId.HasValue)
+                                {
+                                    <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
+                                        <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
+                                        Waiting for Order
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted small mt-4">
+                                        <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                                        Available
+                                    </div>
+                                }
                             }
                         </div>
                     </div>
@@ -197,6 +207,8 @@
                 cardInner.classList.add('bg-warning', 'bg-opacity-25');
             } else if (tableData.status === 'Active') {
                 cardInner.classList.add('bg-success', 'bg-opacity-25');
+            } else if (tableData.sessionId) {
+                cardInner.classList.add('bg-info', 'bg-opacity-10', 'border', 'border-info', 'border-opacity-25');
             } else {
                 cardInner.classList.add('bg-white');
             }
@@ -330,12 +342,21 @@
                     `;
                 });
             } else {
-                 ordersHtml = `
-                    <div class="text-muted small mt-4">
-                        <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
-                        Available
-                    </div>
-                `;
+                if (tableData.sessionId) {
+                    ordersHtml = `
+                        <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
+                            <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
+                            Waiting for Order
+                        </div>
+                    `;
+                } else {
+                     ordersHtml = `
+                        <div class="text-muted small mt-4">
+                            <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                            Available
+                        </div>
+                    `;
+                }
             }
 
             // Replace content

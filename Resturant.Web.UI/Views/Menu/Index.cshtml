@@ -178,24 +178,24 @@
 
     <!-- Sticky Floating Action Cart Bar for Mobile & Tablet -->
     <!-- Unified Talabat-Style Floating Cart Bar (Universal for Mobile & Desktop) -->
-    <div class="floating-talabat-cart-bar fixed-bottom py-3 px-4 shadow animate-slide-up" id="universal-cart-bar" 
-         style="display: none; z-index: 1040; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 600px; border-radius: 20px; background: linear-gradient(135deg, #18181b 0%, #09090b 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;">
+    <div class="floating-talabat-cart-bar fixed-bottom py-2.5 px-3 shadow animate-slide-up" id="universal-cart-bar" 
+         style="display: none; z-index: 1040; bottom: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 500px; border-radius: 16px; background: linear-gradient(135deg, #18181b 0%, #09090b 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;">
         <div class="d-flex justify-content-between align-items-center">
             <!-- Left Info Panel -->
-            <div class="d-flex align-items-center gap-3 cursor-pointer" onclick="checkout()">
-                <div class="position-relative bg-warning text-black rounded-circle p-2.5 d-flex align-items-center justify-content-center shadow" style="width: 48px; height: 48px; min-width: 48px;">
-                    <i class="bi bi-bag-fill fs-5"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.72rem; padding: 4px 6px;">0</span>
+            <div class="d-flex align-items-center gap-2.5 cursor-pointer" onclick="checkout()">
+                <div class="position-relative bg-warning text-black rounded-circle p-2 d-flex align-items-center justify-content-center shadow" style="width: 38px; height: 38px; min-width: 38px;">
+                    <i class="bi bi-bag-fill fs-6"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.65rem; padding: 3px 5px;">0</span>
                 </div>
                 <div>
-                    <span class="text-white-50 d-block outfit-font" style="font-size: 0.68rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
-                    <strong class="text-warning fs-5 outfit-font fw-extrabold" id="universal-cart-total-text">0.00 L.E.</strong>
+                    <span class="text-white-50 d-block outfit-font" style="font-size: 0.62rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
+                    <strong class="text-warning outfit-font fw-extrabold" id="universal-cart-total-text" style="font-size: 1.05rem !important;">0.00 L.E.</strong>
                 </div>
             </div>
             <!-- Right CTA Button -->
-            <button class="btn btn-warning rounded-pill px-4 py-2.5 fw-bold outfit-font d-flex align-items-center gap-2 shadow" style="font-size: 0.88rem; font-weight: 800 !important; color: #000; transition: all 0.3s;" onclick="checkout()">
-                <span>Proceed to Checkout</span>
-                <i class="bi bi-arrow-right-short fs-5 fw-bold"></i>
+            <button class="btn btn-warning rounded-pill px-3.5 py-2 fw-bold outfit-font d-flex align-items-center gap-1.5 shadow" style="font-size: 0.8rem; font-weight: 800 !important; color: #000; transition: all 0.3s;" onclick="checkout()">
+                <span>Checkout</span>
+                <i class="bi bi-arrow-right-short fs-6 fw-bold"></i>
             </button>
         </div>
     </div>
@@ -318,6 +318,51 @@
 
 <!-- Custom Page Styling -->
 <style>
+    .menu-app-container {
+        padding-bottom: 110px !important;
+    }
+    
+    @@media (max-width: 480px) {
+        .floating-talabat-cart-bar {
+            padding: 6px 12px !important;
+            bottom: 10px !important;
+            width: calc(100% - 16px) !important;
+            border-radius: 12px !important;
+        }
+        
+        .floating-talabat-cart-bar .bg-warning {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            padding: 0 !important;
+        }
+
+        .floating-talabat-cart-bar .bg-warning i {
+            font-size: 0.85rem !important;
+        }
+
+        .floating-talabat-cart-bar #universal-cart-badge {
+            font-size: 0.58rem !important;
+            padding: 2px 4px !important;
+        }
+
+        .floating-talabat-cart-bar .text-white-50 {
+            font-size: 0.55rem !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .floating-talabat-cart-bar #universal-cart-total-text {
+            font-size: 0.9rem !important;
+            white-space: nowrap !important;
+        }
+
+        .floating-talabat-cart-bar .btn-warning {
+            padding: 5px 12px !important;
+            font-size: 0.72rem !important;
+            gap: 4px !important;
+        }
+    }
+
     .line-clamp-1 {
         display: -webkit-box;
         -webkit-line-clamp: 1;

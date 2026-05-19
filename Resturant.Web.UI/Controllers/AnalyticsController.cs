@@ -465,7 +465,11 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("menu")]
         public async Task<IActionResult> GetMenuItems()
         {
-            var items = await _context.MenuItems.Include(m => m.MenuCategory).OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
+            var items = await _context.MenuItems
+                .Include(m => m.MenuCategory)
+                .Include(m => m.AddOns)
+                .Include(m => m.Recommendations)
+                .OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
             return Ok(items.Select(i => new {
                 i.Id,
                 i.Name,
@@ -478,7 +482,9 @@ namespace Resturant.Web.UI.Controllers
                 i.IsPopular,
                 i.IsTrending,
                 i.IsRecommended,
-                i.OrderNumber
+                i.OrderNumber,
+                AddOns = i.AddOns.Select(a => new { a.Id, a.Name, a.ExtraPrice, a.IsAvailable }),
+                Recommendations = i.Recommendations.Select(r => r.RecommendedMenuItemId)
             }));
         }
 
@@ -487,7 +493,7 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> CreateMenuItem(
             [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int menuCategoryId,
             [FromForm] bool isAvailable, [FromForm] bool isPopular, [FromForm] bool isTrending, [FromForm] bool isRecommended,
-            [FromForm] int orderNumber,
+            [FromForm] int orderNumber, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
             [FromForm] Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
             if (string.IsNullOrWhiteSpace(name) || price <= 0 || menuCategoryId <= 0)
@@ -495,27 +501,90 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Invalid item details. Name, Price, and Category are required." });
             }
 
-            var item = new MenuItem
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                Name = name,
-                Description = description,
-                Price = price,
-                MenuCategoryId = menuCategoryId,
-                IsAvailable = isAvailable,
-                IsPopular = isPopular,
-                IsTrending = isTrending,
-                IsRecommended = isRecommended,
-                OrderNumber = orderNumber
-            };
+                try
+                {
+                    var item = new MenuItem
+                    {
+                        Name = name,
+                        Description = description,
+                        Price = price,
+                        MenuCategoryId = menuCategoryId,
+                        IsAvailable = isAvailable,
+                        IsPopular = isPopular,
+                        IsTrending = isTrending,
+                        IsRecommended = isRecommended,
+                        OrderNumber = orderNumber
+                    };
 
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+                    }
+
+                    _context.MenuItems.Add(item);
+                    await _context.SaveChangesAsync(); // Generates the item.Id
+
+                    // Parse and save add-ons
+                    if (!string.IsNullOrEmpty(addonsJson))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var addons = System.Text.Json.JsonSerializer.Deserialize<List<MenuItemAddOnDto>>(addonsJson, options);
+                        if (addons != null)
+                        {
+                            foreach (var addon in addons)
+                            {
+                                if (!string.IsNullOrWhiteSpace(addon.Name))
+                                {
+                                    _context.MenuItemAddOns.Add(new MenuItemAddOn
+                                    {
+                                        MenuItemId = item.Id,
+                                        Name = addon.Name,
+                                        ExtraPrice = addon.ExtraPrice,
+                                        IsAvailable = true
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    // Parse and save recommendations
+                    if (!string.IsNullOrEmpty(recommendationsJson))
+                    {
+                        var recIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(recommendationsJson);
+                        if (recIds != null)
+                        {
+                            foreach (var recId in recIds)
+                            {
+                                _context.MenuItemRecommendations.Add(new MenuItemRecommendation
+                                {
+                                    PrimaryMenuItemId = item.Id,
+                                    RecommendedMenuItemId = recId
+                                });
+                            }
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return Ok(new { 
+                        Id = item.Id, 
+                        Name = item.Name, 
+                        Description = item.Description, 
+                        Price = item.Price, 
+                        ImageUrl = item.ImageUrl, 
+                        IsAvailable = item.IsAvailable 
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error creating menu item with addons/recommendations");
+                    return StatusCode(500, new { Message = "Internal Server Error during creation", Details = ex.Message });
+                }
             }
-
-            _context.MenuItems.Add(item);
-            await _context.SaveChangesAsync();
-            return Ok(item);
         }
 
         // POST: api/analytics/menu/delete/{id}
@@ -528,6 +597,13 @@ namespace Resturant.Web.UI.Controllers
                 return NotFound(new { Message = "Menu item not found." });
             }
 
+            // Clear relationships to avoid foreign key constraints issues
+            var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
+            _context.MenuItemAddOns.RemoveRange(existingAddOns);
+
+            var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id || r.RecommendedMenuItemId == id).ToListAsync();
+            _context.MenuItemRecommendations.RemoveRange(existingRecs);
+
             _context.MenuItems.Remove(item);
             await _context.SaveChangesAsync();
             return Ok(new { Success = true });
@@ -538,10 +614,10 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> EditMenuItem(int id,
             [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int menuCategoryId,
             [FromForm] bool isAvailable, [FromForm] bool isPopular, [FromForm] bool isTrending, [FromForm] bool isRecommended,
-            [FromForm] int orderNumber,
+            [FromForm] int orderNumber, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
             [FromForm] Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
-            var item = await _context.MenuItems.FindAsync(id);
+            var item = await _context.MenuItems.Include(m => m.AddOns).Include(m => m.Recommendations).FirstOrDefaultAsync(m => m.Id == id);
             if (item == null)
             {
                 return NotFound(new { Message = "Menu item not found." });
@@ -552,24 +628,98 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Invalid item details. Name, Price, and Category are required." });
             }
 
-            item.Name = name;
-            item.Description = description;
-            item.Price = price;
-            item.MenuCategoryId = menuCategoryId;
-            item.IsAvailable = isAvailable;
-            item.IsPopular = isPopular;
-            item.IsTrending = isTrending;
-            item.IsRecommended = isRecommended;
-            item.OrderNumber = orderNumber;
-
-            if (imageFile != null && imageFile.Length > 0)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
-            }
+                try
+                {
+                    item.Name = name;
+                    item.Description = description;
+                    item.Price = price;
+                    item.MenuCategoryId = menuCategoryId;
+                    item.IsAvailable = isAvailable;
+                    item.IsPopular = isPopular;
+                    item.IsTrending = isTrending;
+                    item.IsRecommended = isRecommended;
+                    item.OrderNumber = orderNumber;
 
-            _context.MenuItems.Update(item);
-            await _context.SaveChangesAsync();
-            return Ok(item);
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+                    }
+
+                    // Clear existing child entities from the database context first
+                    var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
+                    _context.MenuItemAddOns.RemoveRange(existingAddOns);
+
+                    var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id).ToListAsync();
+                    _context.MenuItemRecommendations.RemoveRange(existingRecs);
+
+                    // Clear the local navigation collections so EF doesn't get confused or try to track deleted entities
+                    item.AddOns.Clear();
+                    item.Recommendations.Clear();
+
+                    await _context.SaveChangesAsync(); // Flush deletions to the database first!
+
+                    // Add new add-ons directly to DbContext
+                    if (!string.IsNullOrEmpty(addonsJson))
+                    {
+                        var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var addons = System.Text.Json.JsonSerializer.Deserialize<List<MenuItemAddOnDto>>(addonsJson, options);
+                        if (addons != null)
+                        {
+                            foreach (var addon in addons)
+                            {
+                                if (!string.IsNullOrWhiteSpace(addon.Name))
+                                {
+                                    _context.MenuItemAddOns.Add(new MenuItemAddOn
+                                    {
+                                        MenuItemId = id,
+                                        Name = addon.Name,
+                                        ExtraPrice = addon.ExtraPrice,
+                                        IsAvailable = true
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    // Add new recommendations directly to DbContext
+                    if (!string.IsNullOrEmpty(recommendationsJson))
+                    {
+                        var recIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(recommendationsJson);
+                        if (recIds != null)
+                        {
+                            foreach (var recId in recIds)
+                            {
+                                _context.MenuItemRecommendations.Add(new MenuItemRecommendation
+                                {
+                                    PrimaryMenuItemId = id,
+                                    RecommendedMenuItemId = recId
+                                });
+                            }
+                        }
+                    }
+
+                    _context.MenuItems.Update(item);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return Ok(new { 
+                        Id = item.Id, 
+                        Name = item.Name, 
+                        Description = item.Description, 
+                        Price = item.Price, 
+                        ImageUrl = item.ImageUrl, 
+                        IsAvailable = item.IsAvailable 
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error updating menu item with addons/recommendations");
+                    return StatusCode(500, new { Message = "Internal Server Error during modification", Details = ex.Message });
+                }
+            }
         }
 
         // --- HELPER FUNCTION: QR IMAGE GENERATION ---
@@ -632,6 +782,12 @@ namespace Resturant.Web.UI.Controllers
             }
 
             return Ok(result);
+        }
+
+        public class MenuItemAddOnDto
+        {
+            public string Name { get; set; }
+            public decimal ExtraPrice { get; set; }
         }
     }
 }

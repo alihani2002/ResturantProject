@@ -30,6 +30,13 @@ namespace Resturant.Web.UI.Controllers
                 }
             }
 
+            // Check if user has scanned the QR code (has the TableNumber cookie)
+            string tableNumberStr = Request.Cookies["TableNumber"];
+            if (string.IsNullOrEmpty(tableNumberStr))
+            {
+                return View("ScanQrCodeAgain");
+            }
+
             var categories = await _unitOfWork.Repository<MenuCategory>().GetAllWithIncludesAsync();
             var activeCategories = categories.Where(c => c.IsActive).ToList();
 

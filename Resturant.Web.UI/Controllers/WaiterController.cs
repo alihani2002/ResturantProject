@@ -77,7 +77,12 @@ namespace Resturant.Web.UI.Controllers
                 viewModels.Add(viewModel);
             }
 
-            return View(viewModels);
+            var sortedViewModels = viewModels
+                .OrderByDescending(v => v.ActiveSessionId.HasValue)
+                .ThenBy(v => v.TableNumber)
+                .ToList();
+
+            return View(sortedViewModels);
         }
 
         [HttpGet]
@@ -128,7 +133,10 @@ namespace Resturant.Web.UI.Controllers
                         }).ToList()
                     }).ToList()
                 };
-            });
+            })
+            .OrderByDescending(t => t.sessionId.HasValue)
+            .ThenBy(t => t.tableNumber)
+            .ToList();
 
             return Json(result);
         }
