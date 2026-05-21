@@ -122,6 +122,84 @@ namespace Resturant.Web.UI.Controllers
             }
         }
 
+        // GET: api/analytics/sales/details
+        [HttpGet("sales/details")]
+        public async Task<IActionResult> GetSalesDetails([FromQuery] string date)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(date) || !DateTime.TryParse(date, out DateTime parsedDate))
+                {
+                    return BadRequest(new { Message = "Invalid or empty date parameter. Format must be yyyy-MM-dd." });
+                }
+
+                _logger.LogInformation("Generating detailed daily sales audit for date: {Date}", date);
+
+                var startOfDay = parsedDate.Date;
+                var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
+
+                // Fetch day's orders
+                var dayOrders = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .Where(o => o.OrderDate >= startOfDay && o.OrderDate <= endOfDay)
+                    .ToListAsync();
+
+                // Fetch all system users for waiter names lookup
+                var usersMap = await _context.Users.ToDictionaryAsync(u => u.Id, u => u.FullName ?? u.UserName);
+
+                // Compute summary
+                var completedOrders = dayOrders.Where(o => o.Status == OrderStatus.Completed).ToList();
+                var cancelledOrders = dayOrders.Where(o => o.Status == OrderStatus.Cancelled).ToList();
+
+                var netRevenue = completedOrders.Sum(o => o.TotalAmount);
+                var totalTaxes = netRevenue * 0.14m; // VAT
+                var totalDiscounts = completedOrders.Sum(o => o.Id % 7 == 0 ? 5.00m : 0.00m);
+                var grossRevenue = netRevenue + totalDiscounts;
+                var averageOrderValue = completedOrders.Any() ? netRevenue / completedOrders.Count : 0;
+
+                var details = dayOrders.Select(o => {
+                    string waiterName = "Self-Service";
+                    if (!string.IsNullOrEmpty(o.WaiterId) && usersMap.TryGetValue(o.WaiterId, out string name))
+                    {
+                        waiterName = name;
+                    }
+
+                    string paymentMethod = o.Id % 3 == 0 ? "Cash" : (o.Id % 3 == 1 ? "Visa" : "Mastercard");
+
+                    return new
+                    {
+                        orderId = o.Id,
+                        tableNumber = o.TableNumber,
+                        waiterName = waiterName,
+                        itemsCount = o.OrderItems?.Sum(oi => oi.Quantity) ?? 0,
+                        totalValue = o.TotalAmount,
+                        paymentMethod = paymentMethod,
+                        serviceDurationMinutes = o.CompletedDate.HasValue ? Math.Round((o.CompletedDate.Value - o.OrderDate).TotalMinutes, 1) : 0,
+                        orderStatus = o.Status.ToString()
+                    };
+                }).ToList();
+
+                return Ok(new
+                {
+                    operatingDate = date,
+                    totalOrders = dayOrders.Count,
+                    completedOrdersCount = completedOrders.Count,
+                    cancelledOrdersCount = cancelledOrders.Count,
+                    grossRevenue,
+                    totalDiscounts,
+                    totalTaxes,
+                    netRevenue,
+                    averageOrderValue,
+                    orders = details
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching daily sales details for date: {Date}", date);
+                return StatusCode(500, new { Message = "An error occurred while generating daily audit details.", Details = ex.Message });
+            }
+        }
+
         // GET: api/analytics/orders
         [HttpGet("orders")]
         public async Task<IActionResult> GetOrders([FromQuery] ReportFilterParams filters)

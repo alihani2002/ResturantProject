@@ -615,10 +615,20 @@
         <h2 class="welcome-title-en">Welcome to Qore</h2>
         
         <!-- Bilingual Subtitle Box -->
-        <div class="welcome-subtitle-container">
-            <p class="subtitle-ar ar-text">يرجى إدخال اسمك ورقم هاتفك لبدء تجربة طلب فريدة ومميزة.</p>
-            <p class="subtitle-en">Please provide your details to start your digital ordering experience.</p>
-        </div>
+        @if (ViewBag.Error != null)
+        {
+            <div class="welcome-subtitle-container" style="border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04);">
+                <p class="subtitle-ar ar-text" style="color: #fca5a5;">هذه الطاولة محجوزة. يرجى إدخال نفس الاسم ورقم الهاتف المسجّل لهذه الطاولة.</p>
+                <p class="subtitle-en" style="color: #fca5a5;">This table is occupied. Enter the exact name &amp; phone used when you first sat down.</p>
+            </div>
+        }
+        else
+        {
+            <div class="welcome-subtitle-container">
+                <p class="subtitle-ar ar-text">يرجى إدخال اسمك ورقم هاتفك لبدء تجربة طلب فريدة ومميزة.</p>
+                <p class="subtitle-en">Please provide your details to start your digital ordering experience.</p>
+            </div>
+        }
 
         <!-- Validation Alert Banner -->
         @if (ViewBag.Error != null)
@@ -694,7 +704,57 @@
                     form.classList.add('was-validated')
                 }, false)
             })
-        })()
+        })();
+
+        // Handle auto-caching of Guest details
+        document.addEventListener("DOMContentLoaded", function() {
+            const CACHE_KEY_NAME = 'qore_guest_name';
+            const CACHE_KEY_PHONE = 'qore_guest_phone';
+            const CACHE_KEY_EXPIRY = 'qore_guest_expiry';
+            const hasServerError = @(ViewBag.Error != null ? "true" : "false");
+
+            const nameInput = document.getElementById('nameInput');
+            const phoneInput = document.getElementById('phoneInput');
+            const form = document.querySelector('form');
+
+            // On submit, save to cache for 6 hours
+            form.addEventListener('submit', function(e) {
+                if (form.checkValidity()) {
+                    localStorage.setItem(CACHE_KEY_NAME, nameInput.value.trim());
+                    localStorage.setItem(CACHE_KEY_PHONE, phoneInput.value.trim());
+                    localStorage.setItem(CACHE_KEY_EXPIRY, Date.now() + (6 * 60 * 60 * 1000));
+                }
+            });
+
+            if (hasServerError) {
+                // Server rejected cached data (mismatch) — clear stale cache
+                localStorage.removeItem(CACHE_KEY_NAME);
+                localStorage.removeItem(CACHE_KEY_PHONE);
+                localStorage.removeItem(CACHE_KEY_EXPIRY);
+            } else {
+                // Check cache on load — auto-fill & auto-submit if valid
+                const expiry = localStorage.getItem(CACHE_KEY_EXPIRY);
+                if (expiry && Date.now() < parseInt(expiry)) {
+                    const cachedName = localStorage.getItem(CACHE_KEY_NAME);
+                    const cachedPhone = localStorage.getItem(CACHE_KEY_PHONE);
+                    if (cachedName && cachedPhone) {
+                        nameInput.value = cachedName;
+                        phoneInput.value = cachedPhone;
+                        // Auto-submit with loader
+                        const btn = document.querySelector('.btn-gold-glow');
+                        btn.textContent = 'Authenticating...';
+                        btn.disabled = true;
+                        form.submit();
+                    }
+                } else {
+                    // Expired — clean up
+                    localStorage.removeItem(CACHE_KEY_NAME);
+                    localStorage.removeItem(CACHE_KEY_PHONE);
+                    localStorage.removeItem(CACHE_KEY_EXPIRY);
+                }
+            }
+        });
     </script>
 </body>
 </html>
+

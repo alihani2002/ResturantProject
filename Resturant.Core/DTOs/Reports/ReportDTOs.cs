@@ -80,6 +80,50 @@ namespace Resturant.Core.DTOs.Reports
         public List<SalesByDimensionDto> OrdersByCategory { get; set; } = new List<SalesByDimensionDto>();
         public List<SalesByDimensionDto> OrdersByProduct { get; set; } = new List<SalesByDimensionDto>();
         public List<SalesByDimensionDto> OrdersByWaiter { get; set; } = new List<SalesByDimensionDto>();
+        
+        // Daily Grouped Orders and Detailed Orders
+        public List<DailyGroupedOrderDto> DailyGroups { get; set; } = new List<DailyGroupedOrderDto>();
+        public List<DetailedOrderDto> DetailedOrders { get; set; } = new List<DetailedOrderDto>();
+    }
+
+    public class DailyGroupedOrderDto
+    {
+        public string Date { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal Revenue { get; set; }
+        public int CompletedCount { get; set; }
+        public int CancelledCount { get; set; }
+        public int PendingCount { get; set; }
+        public decimal Aov { get; set; }
+        public string MostOrderedItem { get; set; }
+        public int MostActiveTable { get; set; }
+        public int GuestsCount { get; set; }
+    }
+
+    public class DetailedOrderDto
+    {
+        public int OrderId { get; set; }
+        public DateTime OrderDate { get; set; }
+        public DateTime? CompletedDate { get; set; }
+        public int TableNumber { get; set; }
+        public string GuestName { get; set; }
+        public string GuestPhone { get; set; }
+        public string PaymentMethod { get; set; }
+        public string Status { get; set; }
+        public decimal Subtotal { get; set; }
+        public decimal Tax { get; set; }
+        public decimal ServiceCharge { get; set; }
+        public decimal Discount { get; set; }
+        public decimal TotalAmount { get; set; }
+        public List<DetailedOrderItemDto> OrderItems { get; set; } = new List<DetailedOrderItemDto>();
+    }
+
+    public class DetailedOrderItemDto
+    {
+        public string ItemName { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public decimal TotalPrice { get; set; }
     }
 
     public class TableTurnoverDto
@@ -114,6 +158,15 @@ namespace Resturant.Core.DTOs.Reports
         public decimal Profit { get; set; }
         public double PopularityScore { get; set; } // Calculated index 0-100
         public string Badge { get; set; } // "Best Seller", "Trending", "Recommended", "Regular"
+        
+        // Extended Menu Item Analytics fields
+        public int GuestsCount { get; set; }
+        public double AvgQtyPerOrder { get; set; }
+        public decimal AvgRevenuePerOrder { get; set; }
+        public decimal CurrentPrice { get; set; }
+        public int TotalOrdersContaining { get; set; }
+        public DateTime? LastOrderedDate { get; set; }
+        public bool IsAvailable { get; set; }
     }
 
     public class CategoryPerformanceDto
@@ -157,6 +210,18 @@ namespace Resturant.Core.DTOs.Reports
         public decimal CustomerLifetimeValue { get; set; }
         public string FavoriteProduct { get; set; }
         public DateTime LastVisit { get; set; }
+        
+        // Extended CRM fields
+        public string GuestId { get; set; }
+        public string Email { get; set; }
+        public int TableNumber { get; set; }
+        public decimal Aov { get; set; }
+        public DateTime FirstVisit { get; set; }
+        public int CompletedOrdersCount { get; set; }
+        public int PendingOrdersCount { get; set; }
+        public int CancelledOrdersCount { get; set; }
+        public string Notes { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 
     public class CustomerSegmentDto
@@ -347,6 +412,25 @@ namespace Resturant.Core.DTOs.Reports
         // Trends comparing with yesterday
         public decimal RevenueGrowthRate { get; set; } // +5.4% etc.
         public decimal ActiveSessionsTodayCount { get; set; }
+        
+        // Extended Dashboard Analytics Page statistics
+        public int TotalOrdersCount { get; set; }
+        public int TotalCompletedOrders { get; set; }
+        public int TotalPendingOrders { get; set; }
+        public int TotalCancelledOrders { get; set; }
+        public decimal TotalRevenueStarted { get; set; }
+        public decimal TotalRevenueThisWeek { get; set; }
+        public decimal TotalRevenueThisMonth { get; set; }
+        public int TotalGuestsCount { get; set; }
+        public int TotalTablesCount { get; set; }
+        public int TotalMenuItemsCount { get; set; }
+        public int TotalCategoriesCount { get; set; }
+        public int TotalActiveOrders { get; set; }
+        public int TotalDeliveredOrders { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public string BestSellingItem { get; set; }
+        public int MostActiveTable { get; set; }
+        public string MostOrderedCategory { get; set; }
         
         // Quick Live charts data
         public List<decimal> LiveSalesIntervals { get; set; } = new List<decimal>();

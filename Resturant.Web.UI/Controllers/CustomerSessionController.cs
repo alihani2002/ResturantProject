@@ -31,21 +31,38 @@ namespace Resturant.Web.UI.Controllers
             };
             Response.Cookies.Append("TableNumber", tableNumber.ToString(), option);
 
-            // Check if there is already an active session for this table
             var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber);
             var table = tables.FirstOrDefault();
             
             if (table == null) return NotFound("Table not found");
 
+            // Check if guest already has valid cookies from a previous session today
+            string guestName = Request.Cookies["GuestName"];
+            string guestPhone = Request.Cookies["GuestPhone"];
+
             var activeSession = await _sessionService.GetActiveSessionByTableAsync(table.Id);
             
             if (activeSession != null)
             {
-                // Session already active, redirect to Menu
-                return RedirectToAction("Index", "Menu");
+                // Table is occupied. If cookies match, let them directly in!
+                if (!string.IsNullOrEmpty(guestName) && !string.IsNullOrEmpty(guestPhone) &&
+                    string.Equals(activeSession.CustomerName, guestName, StringComparison.OrdinalIgnoreCase) && 
+                    activeSession.PhoneNumber == guestPhone)
+                {
+                    return RedirectToAction("Index", "Menu");
+                }
+            }
+            else
+            {
+                // Table is free. If they have cookies, auto-start a new session!
+                if (!string.IsNullOrEmpty(guestName) && !string.IsNullOrEmpty(guestPhone))
+                {
+                    await _sessionService.StartSessionAsync(table.Id, guestName, guestPhone);
+                    return RedirectToAction("Index", "Menu");
+                }
             }
 
-            // No active session, redirect to Register
+            // No valid cookies or mismatch, redirect to Register to verify identity or start new session
             return RedirectToAction("Register");
         }
 
@@ -83,11 +100,42 @@ namespace Resturant.Web.UI.Controllers
             var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber);
             var table = tables.FirstOrDefault();
             
-            if (table == null) return NotFound("Table not found");
+            var activeSession = await _sessionService.GetActiveSessionByTableAsync(table.Id);
+            
+            if (activeSession != null)
+            {
+                // Verify if the guest is the one who created the session
+                if (string.Equals(activeSession.CustomerName, customerName, StringComparison.OrdinalIgnoreCase) && 
+                    activeSession.PhoneNumber == phoneNumber)
+                {
+                    // Identity verified! Set cookies and proceed.
+                    SetGuestCookies(customerName, phoneNumber);
+                    return RedirectToAction("Index", "Menu");
+                }
+                else
+                {
+                    ViewBag.Error = "This table is currently occupied by another guest. Please verify your details or contact staff.";
+                    return View();
+                }
+            }
 
+            // Table is free, start new session
             await _sessionService.StartSessionAsync(table.Id, customerName, phoneNumber);
+            SetGuestCookies(customerName, phoneNumber);
             
             return RedirectToAction("Index", "Menu");
+        }
+
+        private void SetGuestCookies(string name, string phone)
+        {
+            CookieOptions options = new CookieOptions
+            {
+                Expires = DateTime.Now.AddHours(12),
+                HttpOnly = true,
+                Secure = true
+            };
+            Response.Cookies.Append("GuestName", name, options);
+            Response.Cookies.Append("GuestPhone", phone, options);
         }
     }
 }

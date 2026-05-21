@@ -25,22 +25,10 @@ namespace Resturant.Web.UI.Controllers
         }
 
         // URL: /Customer/Order/5
-        public async Task<IActionResult> Order(int tableNumber)
+        public IActionResult Order(int tableNumber)
         {
-            var table = await _tableService.GetTableByNumberAsync(tableNumber);
-            if (table == null) return NotFound("Table not found");
-
-            var activeSession = await _sessionService.GetActiveSessionByTableAsync(table.Id);
-            
-            ViewBag.TableNumber = tableNumber;
-            ViewBag.TableId = table.Id;
-
-            if (activeSession == null)
-            {
-                return View("StartSession"); // View to enter Name/Phone
-            }
-
-            return RedirectToAction("Menu", new { sessionId = activeSession.Id });
+            // Redirect legacy QR codes to the secure CustomerSession flow
+            return RedirectToAction("Scan", "CustomerSession", new { tableNumber = tableNumber });
         }
 
         [HttpPost]

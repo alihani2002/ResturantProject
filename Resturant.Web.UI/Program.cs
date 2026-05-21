@@ -51,6 +51,12 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Identity/Account/Login");
+    return Task.CompletedTask;
+});
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")

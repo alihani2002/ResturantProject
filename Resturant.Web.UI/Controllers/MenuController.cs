@@ -52,6 +52,21 @@ namespace Resturant.Web.UI.Controllers
                 // No active session for this table, redirect to registration
                 return RedirectToAction("Register", "CustomerSession");
             }
+            else
+            {
+                // Table is occupied, verify identity using cookies
+                string guestName = Request.Cookies["GuestName"];
+                string guestPhone = Request.Cookies["GuestPhone"];
+
+                if (string.IsNullOrEmpty(guestName) || 
+                    string.IsNullOrEmpty(guestPhone) || 
+                    !activeSession.CustomerName.Equals(guestName, StringComparison.OrdinalIgnoreCase) || 
+                    activeSession.PhoneNumber != guestPhone)
+                {
+                    // Identity not verified, must register/authenticate
+                    return RedirectToAction("Register", "CustomerSession");
+                }
+            }
 
             var menu = await _context.MenuCategories
                 .Include(c => c.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))

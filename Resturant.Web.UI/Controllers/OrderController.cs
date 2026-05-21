@@ -147,23 +147,9 @@ namespace Resturant.Web.UI.Controllers
                 return Json(new { available = false, message = $"Table {tableNumber} does not exist." });
             }
 
-            // Check if there's an active session for this table
-            var activeSession = await _context.Set<TableSession>()
-                .FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
-
-            if (activeSession != null)
-            {
-                // If the current user has the cookie for this table, allow them in
-                string cachedTable = Request.Cookies["TableNumber"];
-                if (cachedTable == tableNumber.ToString())
-                {
-                    return Json(new { available = true, message = "Table session is active." });
-                }
-                
-                return Json(new { available = false, message = $"Table {tableNumber} is occupied." });
-            }
-
-            return Json(new { available = true, message = "Table is free." });
+            // Always return true so that table-prompt.js allows proceeding to the Menu Controller.
+            // The Menu Controller will redirect to CustomerSession/Register which handles secure validation.
+            return Json(new { available = true, message = "Table found, proceeding to secure verification." });
         }
 
         // GET: Order/GetOrdersByStatus
