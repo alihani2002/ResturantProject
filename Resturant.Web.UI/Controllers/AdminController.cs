@@ -81,5 +81,34 @@ namespace Resturant.Web.UI.Controllers
                 totalRevenueToday
             });
         }
+        [HttpGet]
+        public async Task<IActionResult> GetWaiterAssignments()
+        {
+            var tables = await _context.RestaurantTables
+                .Select(t => new {
+                    id = t.Id,
+                    tableNumber = t.TableNumber,
+                    waiterId = t.WaiterId
+                })
+                .OrderBy(t => t.tableNumber)
+                .ToListAsync();
+
+            var waiters = await _userManager.GetUsersInRoleAsync(AppRoles.Waiter);
+            var waiterList = waiters.Select(w => new { id = w.Id, fullName = w.FullName ?? w.UserName }).ToList();
+
+            return Json(new { tables, waiters = waiterList });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignWaiter(int tableId, string? waiterId)
+        {
+            var table = await _context.RestaurantTables.FindAsync(tableId);
+            if (table == null) return Json(new { success = false, message = "Table not found." });
+
+            table.WaiterId = string.IsNullOrEmpty(waiterId) ? null : waiterId;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
     }
 }

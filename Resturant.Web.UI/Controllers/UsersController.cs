@@ -77,7 +77,7 @@ namespace Resturant.Web.UI.Controllers
                             await _userManager.AddToRoleAsync(user, model.Role);
                         }
                     }
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" || (Request.HasFormContentType && Request.Form["iframe"] == "true") ? "true" : null });
                 }
 
                 foreach (var error in result.Errors)
@@ -141,7 +141,7 @@ namespace Resturant.Web.UI.Controllers
                         await _userManager.RemoveFromRolesAsync(user, currentRoles);
                         await _userManager.AddToRoleAsync(user, model.Role);
                     }
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" || (Request.HasFormContentType && Request.Form["iframe"] == "true") ? "true" : null });
                 }
                 foreach (var error in result.Errors)
                 {
@@ -162,7 +162,7 @@ namespace Resturant.Web.UI.Controllers
             user.IsActive = false; // Optionally deactivate on delete
             await _userManager.UpdateAsync(user);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" ? "true" : null });
         }
 
         public async Task<IActionResult> ToggleActive(string id)
@@ -174,7 +174,7 @@ namespace Resturant.Web.UI.Controllers
             user.IsActive = !user.IsActive;
             await _userManager.UpdateAsync(user);
             
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" ? "true" : null });
         }
     }
 }

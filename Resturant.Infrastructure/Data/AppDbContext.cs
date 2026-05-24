@@ -58,6 +58,14 @@ namespace Resturant.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<RestaurantTable>(entity =>
+            {
+                entity.HasOne(t => t.Waiter)
+                    .WithMany()
+                    .HasForeignKey(t => t.WaiterId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
             // Configure TableSession - Order relationship explicitly
             modelBuilder.Entity<Order>()
                 .HasOne<TableSession>()

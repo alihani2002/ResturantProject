@@ -175,6 +175,11 @@
                 <i class="bi bi-grid text-base text-orange-500"></i>
                 <span>Add / Manage Tables</span>
             </button>
+
+            <button onclick="switchTab('waiter-assignment')" id="btn-tab-waiter-assignment" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-person-lines-fill text-base text-indigo-500"></i>
+                <span>Assign Waiter Tables</span>
+            </button>
         </nav>
 
         <!-- Footer Operations Link -->
@@ -1442,6 +1447,33 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ========================================== -->
+            <!-- 13. WAITER ASSIGNMENT TAB -->
+            <!-- ========================================== -->
+            <div id="tab-waiter-assignment" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                    <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i class="bi bi-person-lines-fill text-indigo-500"></i> Assign Waiters to Tables
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Select a waiter for each table. Waiters will only see and receive notifications for the tables assigned to them.</p>
+                    <div class="overflow-x-auto mt-4">
+                        <table id="table-waiter-assignment-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                    <th class="py-3">Table Number</th>
+                                    <th class="py-3">Assigned Waiter</th>
+                                    <th class="py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 9: USER MANAGEMENT -->
             <div id="tab-user-mgmt" class="hidden h-full flex flex-col">
                 <div class="mb-6 flex justify-between items-end shrink-0">
@@ -1553,7 +1585,8 @@
                 inventory: 'Inventory Valuations & Food Costs',
                 'menu-mgmt': 'Add / Manage Menu Products',
                 'category-mgmt': 'Add / Manage Categories',
-                'table-mgmt': 'Add / Manage Restaurant Tables'
+                'table-mgmt': 'Add / Manage Restaurant Tables',
+                'waiter-assignment': 'Assign Waiters to Tables'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
             
@@ -1567,6 +1600,8 @@
                 loadCategoriesList();
             } else if (tabId === 'table-mgmt') {
                 loadTablesList();
+            } else if (tabId === 'waiter-assignment') {
+                loadWaiterAssignmentsList();
             } else {
                 fetchTabReport(tabId);
             }
@@ -4353,6 +4388,66 @@
             modal.classList.add('opacity-0');
             modalContent.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- WAITER ASSIGNMENT LOGIC ---
+        async function loadWaiterAssignmentsList() {
+            try {
+                const response = await fetch('/Admin/GetWaiterAssignments');
+                if (!response.ok) throw new Error('Failed to load table assignments');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#table-waiter-assignment-list tbody');
+                tbody.innerHTML = '';
+                
+                if (data.tables.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">No tables configured yet.</td></tr>`;
+                    return;
+                }
+
+                data.tables.forEach(table => {
+                    let waiterSelectHtml = `<select class="w-full max-w-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-3 py-2 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="assignWaiterToTable(${table.id}, this.value)">
+                        <option value="">-- Unassigned / No Waiter --</option>`;
+                    data.waiters.forEach(waiter => {
+                        const isSelected = table.waiterId === waiter.id ? 'selected' : '';
+                        waiterSelectHtml += `<option value="${waiter.id}" ${isSelected}>${waiter.fullName}</option>`;
+                    });
+                    waiterSelectHtml += `</select>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-2 font-bold text-slate-800 dark:text-white">Table ${table.tableNumber}</td>
+                        <td class="py-3 px-2">${waiterSelectHtml}</td>
+                        <td class="py-3 px-2 text-right">
+                            <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-opacity opacity-0" id="waiter-status-${table.id}">Saved <i class="bi bi-check-circle-fill"></i></span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading waiter assignments:', error);
+            }
+        }
+
+        async function assignWaiterToTable(tableId, waiterId) {
+            try {
+                const response = await fetch(`/Admin/AssignWaiter?tableId=${tableId}&waiterId=${waiterId || ''}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if(result.success) {
+                    const statusSpan = document.getElementById(`waiter-status-${tableId}`);
+                    statusSpan.classList.remove('opacity-0');
+                    setTimeout(() => statusSpan.classList.add('opacity-0'), 2500);
+                } else {
+                    alert(result.message || "Failed to assign waiter");
+                }
+            } catch (error) {
+                console.error('Error saving waiter assignment:', error);
+                alert("An error occurred while saving.");
+            }
         }
 
         // Close on escape key

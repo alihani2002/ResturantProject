@@ -22,16 +22,27 @@ namespace Resturant.Web.UI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager;
 
-        public WaiterController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public WaiterController(AppDbContext context, IHubContext<OrderHub> hubContext, Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _hubContext = hubContext;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
         {
-            var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var userId = _userManager.GetUserId(User);
+            var isWaiter = User.IsInRole(AppRoles.Waiter);
+
+            var query = _context.RestaurantTables.AsQueryable();
+            if (isWaiter)
+            {
+                query = query.Where(t => t.WaiterId == userId);
+            }
+
+            var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
                 .Where(s => s.IsActive)
                 .ToListAsync();
@@ -91,7 +102,16 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTablesData()
         {
-            var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var userId = _userManager.GetUserId(User);
+            var isWaiter = User.IsInRole(AppRoles.Waiter);
+
+            var query = _context.RestaurantTables.AsQueryable();
+            if (isWaiter)
+            {
+                query = query.Where(t => t.WaiterId == userId);
+            }
+
+            var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
                 .Where(s => s.IsActive)
                 .ToListAsync();
