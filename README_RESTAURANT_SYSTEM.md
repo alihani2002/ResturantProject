@@ -1,12 +1,33 @@
 # Restaurant Ordering System - User Guide
 
+> [!NOTE]
+> didn't create migration or database
+
+## New Smart Features (Added)
+
+### 1. Table Sessions & Order Merging
+- **Automated Sessions**: A session starts when a customer scans the QR and enters their name/phone.
+- **Order Merging**: Customers can add items to an existing order. The system automatically merges new items into the active session's pending order or creates a linked order.
+- **Manual Session Closure**: Waiters can close a table session manually from their dashboard when the table is cleared.
+
+### 2. Smart Recommendations & Add-Ons
+- **Upselling**: Admin can link "Add-Ons" (e.g., Extra Cheese) and "Recommendations" (e.g., Fries with Burger) to menu items.
+- **Badges**: Items can be marked as "Best Seller", "Trending", or "Recommended" to help customers choose faster.
+
+### 3. Customer Order Tracking
+- **No Account Required**: Customers can track their order status in real-time by searching with their phone number.
+- **Status Lifecycle**: Pending → In Preparation → Ready → Served → Paid.
+
+### 4. Multi-Language Support
+- Full support for **Arabic** and **English** in the customer UI.
+
 ## Quick Start
 
 ### 1. Database Setup
-Run the following commands to set up the database:
+Run the following commands to set up the database (Note: Migrations for new features need to be created):
 ```bash
 cd Resturant.Web.UI
-dotnet ef migrations add AddMenuAndOrderEntities
+dotnet ef migrations add AddSmartRestaurantFeatures
 dotnet ef database update
 ```
 
@@ -27,6 +48,9 @@ Add your Cloudinary credentials to `appsettings.json`:
 cd Resturant.Web.UI
 dotnet run
 ```
+
+... (rest of the content)
+
 
 ## User Roles
 
