@@ -89,15 +89,26 @@
             }
             @foreach (var order in allOrders)
             {
-                grandTotal += order.TotalAmount;
+                // Only sum non-cancelled items for the amount the customer actually pays
+                var activeItems = order.OrderItems.Where(i => !i.IsCancelled).ToList();
+                var orderEffectiveTotal = activeItems.Sum(i => i.EffectiveTotal);
+                grandTotal += orderEffectiveTotal;
+
                 @foreach (var item in order.OrderItems)
                 {
-                    <tr>
+                    var isItemCancelled = item.IsCancelled;
+                    var lineStyle = isItemCancelled ? "text-decoration: line-through; color: #999;" : "";
+                    var displayPrice = isItemCancelled ? 0m : item.EffectiveTotal;
+                    <tr style="@lineStyle">
                         <td>
                             <span style="font-weight: bold;">@item.MenuItem.Name</span>
+                            @if (isItemCancelled)
+                            {
+                                <span style="color:#dc3545; font-size:0.7rem; margin-left:6px;">(Cancelled)</span>
+                            }
                             @if (item.AddOns != null && item.AddOns.Any())
                             {
-                                <div style="font-size: 0.75rem; padding-left: 8px; color: #444; font-style: italic;">
+                                <div style="font-size: 0.75rem; padding-left: 8px; color: #666; font-style: italic;">
                                     @foreach (var addon in item.AddOns)
                                     {
                                         <div>+ @addon.AddOn?.Name (+@addon.Price.ToString("F2") L.E.)</div>
@@ -106,7 +117,7 @@
                             }
                         </td>
                         <td>@item.Quantity</td>
-                        <td style="text-align: right;">@((item.Total).ToString("F2"))</td>
+                        <td style="text-align: right;">@displayPrice.ToString("F2")</td>
                     </tr>
                 }
             }
@@ -114,7 +125,11 @@
     </table>
 
     <div class="total-section">
-        Total: @grandTotal.ToString("F2") L.E.
+        <strong>Total Due: @grandTotal.ToString("F2") L.E.</strong>
+        @if (ViewBag.HadCancellations == true)
+        {
+            <div style="font-size: 0.75rem; color: #dc3545; margin-top: 4px;">(Some items were cancelled — only active items are charged)</div>
+        }
     </div>
 
     <div class="footer">

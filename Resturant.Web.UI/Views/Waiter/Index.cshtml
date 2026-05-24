@@ -64,7 +64,7 @@
                                         <div class="card-body p-2 text-start">
                                             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                                                 <small class="text-muted">Total:</small>
-                                                <small class="fw-bold">@order.TotalAmount.ToString("0.00") L.E.</small>
+                                                 <small class="fw-bold">@(order.OrderItems.Where(i => !i.IsCancelled).Sum(i => i.EffectiveTotal).ToString("0.00")) L.E.</small>
                                             </div>
 
                                             @if (order.OrderItems != null && order.OrderItems.Any())
@@ -72,14 +72,14 @@
                                                 <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
                                                     @foreach (var item in order.OrderItems)
                                                     {
-                                                        <li>
-                                                            <strong>@item.Quantity x @item.Name</strong>
-                                                            @if (!string.IsNullOrEmpty(item.AddOns))
-                                                            {
-                                                                <div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">
-                                                                    + @item.AddOns
-                                                                </div>
-                                                            }
+                                                        <li class="d-flex align-items-center justify-content-between gap-1 mb-1" id="waiter-item-@order.OrderId-@item.Name.Replace(" ","-")">
+                                                            <div>
+                                                                <strong>@item.Quantity x @item.Name</strong>
+                                                                @if (!string.IsNullOrEmpty(item.AddOns))
+                                                                {
+                                                                    <div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ @item.AddOns</div>
+                                                                }
+                                                            </div>
                                                         </li>
                                                     }
                                                 </ul>
@@ -272,11 +272,20 @@
                         itemsHtml = `
                             <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
                                 ${order.items.map(i => {
+                                    const itemName = i.name || i.menuItemName || 'Item';
+                                    const isCancelled = i.isCancelled === true;
                                     let addonsList = '';
-                                    if (i.addOns && i.addOns.length > 0) {
+                                    if (!isCancelled && i.addOns && i.addOns.length > 0) {
                                         addonsList = `<div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ ${i.addOns.map(a => a.name).join(', ')}</div>`;
                                     }
-                                    return `<li><strong>${i.quantity} x ${(i.name || i.menuItemName)}</strong>${addonsList}</li>`;
+                                    const cancelBtn = !isCancelled && i.id
+                                        ? `<button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" style="font-size:0.65rem;" onclick="cancelOrderItem(${i.id})" title="Cancel item"><i class="bi bi-x"></i></button>`
+                                        : (isCancelled ? `<span class="badge bg-danger ms-1" style="font-size:0.6rem;">Cancelled</span>` : '');
+                                    const lineStyle = isCancelled ? 'text-decoration: line-through; color: #ef4444; opacity:0.7;' : '';
+                                    return `<li class="d-flex align-items-start justify-content-between gap-1 mb-1" style="${lineStyle}">
+                                        <div><strong>${i.quantity} x ${itemName}</strong>${addonsList}</div>
+                                        ${cancelBtn}
+                                    </li>`;
                                 }).join('')}
                             </ul>
                         `;
@@ -448,6 +457,11 @@
             fetchAndRefreshTables();
         });
 
+        connection.on("OrderItemCancelled", function (data) {
+            showNotification(`Item cancelled: ${data.cancelledItemName} on Table ${data.tableNumber}`, 'warning');
+            fetchAndRefreshTables();
+        });
+
         // Fetch and refresh tables data
         async function fetchAndRefreshTables() {
             try {
@@ -531,6 +545,18 @@
             }).then(r => r.ok && fetchAndRefreshTables());
         }
 
+        function cancelOrderItem(orderItemId) {
+            if (!confirm('Cancel this single item from the order?')) return;
+            fetch('/Waiter/CancelOrderItem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderItemId=${orderItemId}`
+            }).then(r => {
+                if (r.ok) { showNotification('Item cancelled successfully', 'warning'); fetchAndRefreshTables(); }
+                else alert('Failed to cancel item');
+            });
+        }
+
         function clearTable(orderId) {
             if (!confirm('Is this order/table empty and ready to be cleared?')) return;
             fetch('/Waiter/CompleteOrder', {
@@ -549,4 +575,4 @@
             }).then(r => r.ok && fetchAndRefreshTables());
         }
     </script>
-}
+}

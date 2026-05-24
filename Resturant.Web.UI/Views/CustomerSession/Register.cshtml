@@ -615,11 +615,11 @@
         <h2 class="welcome-title-en">Welcome to Qore</h2>
         
         <!-- Bilingual Subtitle Box -->
-        @if (ViewBag.Error != null)
+        @if (ViewBag.Error != null || ViewBag.TableIsOccupied == true)
         {
             <div class="welcome-subtitle-container" style="border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04);">
-                <p class="subtitle-ar ar-text" style="color: #fca5a5;">هذه الطاولة محجوزة. يرجى إدخال نفس الاسم ورقم الهاتف المسجّل لهذه الطاولة.</p>
-                <p class="subtitle-en" style="color: #fca5a5;">This table is occupied. Enter the exact name &amp; phone used when you first sat down.</p>
+                <p class="subtitle-ar ar-text" style="color: #fca5a5;">هذه الطاولة محجوزة. يرجى إدخال نفس الاسم ورقم الهاتف المسجّل لهذه الطاولة (أو البيانات المخزنة على هاتفك إن كنت أنت الحاجز).</p>
+                <p class="subtitle-en" style="color: #fca5a5;">This table is occupied. Enter the exact name &amp; phone used when it was reserved (or the data cached on your phone if you are the original guest).</p>
             </div>
         }
         else
@@ -706,7 +706,7 @@
             })
         })();
 
-        // Handle auto-caching of Guest details
+        // Handle client-side caching of Guest details (localStorage on the user's phone)
         document.addEventListener("DOMContentLoaded", function() {
             const CACHE_KEY_NAME = 'qore_guest_name';
             const CACHE_KEY_PHONE = 'qore_guest_phone';
@@ -717,7 +717,7 @@
             const phoneInput = document.getElementById('phoneInput');
             const form = document.querySelector('form');
 
-            // On submit, save to cache for 6 hours
+            // Always save to localStorage on successful submit (6-hour client cache)
             form.addEventListener('submit', function(e) {
                 if (form.checkValidity()) {
                     localStorage.setItem(CACHE_KEY_NAME, nameInput.value.trim());
@@ -727,12 +727,13 @@
             });
 
             if (hasServerError) {
-                // Server rejected cached data (mismatch) — clear stale cache
+                // Previous attempt failed (wrong name/phone for occupied table) → clear bad cache
                 localStorage.removeItem(CACHE_KEY_NAME);
                 localStorage.removeItem(CACHE_KEY_PHONE);
                 localStorage.removeItem(CACHE_KEY_EXPIRY);
             } else {
-                // Check cache on load — auto-fill & auto-submit if valid
+                // Pre-fill from phone cache if still valid (helps user re-use same data)
+                // BUT do NOT auto-submit — the form must always be visibly displayed to the user.
                 const expiry = localStorage.getItem(CACHE_KEY_EXPIRY);
                 if (expiry && Date.now() < parseInt(expiry)) {
                     const cachedName = localStorage.getItem(CACHE_KEY_NAME);
@@ -740,14 +741,11 @@
                     if (cachedName && cachedPhone) {
                         nameInput.value = cachedName;
                         phoneInput.value = cachedPhone;
-                        // Auto-submit with loader
-                        const btn = document.querySelector('.btn-gold-glow');
-                        btn.textContent = 'Authenticating...';
-                        btn.disabled = true;
-                        form.submit();
+                        // Form is pre-filled from your phone's cache.
+                        // User still sees the form and must tap the button to confirm.
                     }
                 } else {
-                    // Expired — clean up
+                    // Expired cache — clean up
                     localStorage.removeItem(CACHE_KEY_NAME);
                     localStorage.removeItem(CACHE_KEY_PHONE);
                     localStorage.removeItem(CACHE_KEY_EXPIRY);

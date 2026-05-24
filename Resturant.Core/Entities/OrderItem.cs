@@ -28,6 +28,15 @@ namespace Resturant.Core.Entities
 
         public decimal Total => Quantity * (Price + (AddOns != null ? AddOns.Sum(a => a.Price) : 0));
 
+        /// <summary>
+        /// The amount that actually counts toward payment.
+        /// Returns 0 if the item was cancelled by the waiter.
+        /// </summary>
+        public decimal EffectiveTotal => IsCancelled ? 0m : Total;
+
         public ICollection<OrderItemAddOn> AddOns { get; set; } = new List<OrderItemAddOn>();
+
+        /// <summary>Waiter can cancel a single item without cancelling the full order.</summary>
+        public bool IsCancelled { get; set; } = false;
     }
 }

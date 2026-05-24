@@ -28,12 +28,12 @@ namespace Resturant.Web.UI.Controllers
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served)
+                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                            o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
+                            o.Status == OrderStatus.Cancelled)
                 .OrderBy(o => o.OrderDate)
                 .ToListAsync();
 
-            // We will pass the raw list but the View will handle grouping or we can group here.
-            // For consistency with GetOrdersData, let's prepare the grouped data.
             return View(activeOrders);
         }
 
@@ -43,7 +43,9 @@ namespace Resturant.Web.UI.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served)
+                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                            o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
+                            o.Status == OrderStatus.Cancelled)
                 .ToListAsync();
 
             // Group by TableSessionId (if present) or TableNumber (fallback)
@@ -54,15 +56,18 @@ namespace Resturant.Web.UI.Controllers
                     tableNumber = g.First().TableNumber,
                     customerName = g.First().CustomerName ?? "Guest",
                     phoneNumber = g.First().PhoneNumber ?? "N/A",
+                    isCancelled = g.All(o => o.Status == OrderStatus.Cancelled),
                     status = g.Any(o => o.Status == OrderStatus.Ready) ? (int)OrderStatus.Ready : (int)g.First().Status,
-                    totalAmount = g.Sum(o => o.TotalAmount),
+                    // Use effective total (excludes cancelled items) so the customer only pays for what they actually receive
+                    totalAmount = g.SelectMany(o => o.OrderItems).Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                     orderIds = g.Select(o => o.Id).ToList(),
                     orderItems = g.SelectMany(o => o.OrderItems).Select(oi => new
                     {
                         id = oi.Id,
                         menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
                         quantity = oi.Quantity,
-                        price = oi.Price
+                        price = oi.Price,
+                        isCancelled = oi.IsCancelled
                     })
                 })
                 .ToList();
@@ -128,6 +133,21 @@ namespace Resturant.Web.UI.Controllers
             return View(orders);
         }
 
+        /// <summary>All orders for a date, filterable by date. Shows full history for cashier.</summary>
+        public async Task<IActionResult> AllOrders(DateTime? date)
+        {
+            var targetDate = date?.Date ?? DateTime.Today;
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.OrderDate.Date == targetDate)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            ViewBag.SelectedDate = targetDate;
+            return View(orders);
+        }
+
         public async Task<IActionResult> Receipt(string ids)
         {
             if (string.IsNullOrEmpty(ids)) return NotFound();
@@ -144,8 +164,11 @@ namespace Resturant.Web.UI.Controllers
 
             if (!orders.Any()) return NotFound();
 
-            // Pass the first order to get Customer info (they should all be same for same table)
+            // Detect if any cancelled items exist so we can show a note on the receipt
+            bool hadCancellations = orders.Any(o => o.OrderItems.Any(oi => oi.IsCancelled));
+            ViewBag.HadCancellations = hadCancellations;
             ViewBag.AllOrders = orders;
+
             return View(orders.First());
         }
     }

@@ -54,7 +54,9 @@ namespace Resturant.Web.UI.Controllers
                     id = o.Id,
                     tableNumber = o.TableNumber,
                     status = (int)o.Status,
-                    totalAmount = o.TotalAmount,
+                    note = o.Note,
+                    // Effective total (cancelled items are free)
+                    totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                     orderDate = o.OrderDate,
                     orderItems = o.OrderItems.Select(oi => new
                     {
@@ -62,6 +64,7 @@ namespace Resturant.Web.UI.Controllers
                         menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
+                        isCancelled = oi.IsCancelled,
                         addOns = oi.AddOns.Select(a => new
                         {
                             id = a.Id,
@@ -74,46 +77,75 @@ namespace Resturant.Web.UI.Controllers
             return Json(orders);
         }
 
+        // Chef clicks "Start Preparing" → sets InPreparation
+        [HttpPost]
+        public async Task<IActionResult> StartOrder(int orderId)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+            if (order.Status != OrderStatus.Confirmed) return BadRequest();
+
+            order.Status = OrderStatus.InPreparation;
+            await _context.SaveChangesAsync();
+
+            var orderData = BuildOrderData(order);
+
+            await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+
+            return Ok();
+        }
+
+        // Chef clicks "Mark Ready" → sets Ready, removes from chef board
         [HttpPost]
         public async Task<IActionResult> FinishOrder(int orderId)
         {
             var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.MenuItem)
+                .Include(o => o.OrderItems).ThenInclude(oi => oi.MenuItem)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
-            if (order != null)
-            {
-                order.Status = OrderStatus.Ready;
-                await _context.SaveChangesAsync();
+            if (order == null) return NotFound();
 
-                var orderData = new
-                {
-                    id = order.Id,
-                    tableNumber = order.TableNumber,
-                    status = (int)order.Status,
-                    totalAmount = order.TotalAmount,
-                    orderDate = order.OrderDate,
-                    orderItems = order.OrderItems.Select(oi => new
-                    {
-                        id = oi.Id,
-                        menuItemName = oi.MenuItem?.Name,
-                        quantity = oi.Quantity,
-                        price = oi.Price
-                    })
-                };
+            order.Status = OrderStatus.Ready;
+            await _context.SaveChangesAsync();
 
-                // Notify all dashboards and guest tracking
-                await _hubContext.Clients.Group("waiter").SendAsync("OrderReady", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderReady", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            var orderData = BuildOrderData(order);
 
-                // Legacy events
-                await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Ready");
-            }
+            await _hubContext.Clients.Group("waiter").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group("cashier").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+
+            await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
+            await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Ready");
+
             return Ok();
+        }
+
+        private object BuildOrderData(Order order)
+        {
+            return new
+            {
+                id = order.Id,
+                tableNumber = order.TableNumber,
+                status = (int)order.Status,
+                totalAmount = order.TotalAmount,
+                orderDate = order.OrderDate,
+                note = order.Note,
+                orderItems = order.OrderItems.Select(oi => new
+                {
+                    id = oi.Id,
+                    menuItemName = oi.MenuItem?.Name ?? "",
+                    quantity = oi.Quantity,
+                    price = oi.Price,
+                    isCancelled = oi.IsCancelled
+                })
+            };
         }
     }
 }

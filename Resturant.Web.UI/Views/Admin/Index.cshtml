@@ -695,7 +695,7 @@
                             <span class="text-xs font-bold text-purple-800 dark:text-purple-400 uppercase tracking-widest">RECOMMENDED UPSELLS</span>
                         </div>
                         <h4 id="badge-recommended" class="outfit-font text-lg font-black text-slate-800 dark:text-white">-</h4>
-                        <p class="text-xs text-slate-400 mt-1">Cross-selling conversion rate 22.5%</p>
+                        <p class="text-xs text-slate-400 mt-1">Cross-selling conversion rate 0%</p>
                     </div>
                 </div>
 
@@ -787,11 +787,11 @@
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Upsell Recommendation Rate</h4>
                         <div class="relative w-36 h-36 mx-auto flex items-center justify-center border-8 border-brand-500/20 border-t-brand-500 rounded-full animate-spin">
                             <div class="absolute w-28 h-28 bg-white dark:bg-darkCard rounded-full flex flex-col items-center justify-center border border-slate-100 dark:border-darkBorder rotate-[-360deg] animate-[spin_5s_linear_infinite]">
-                                <span class="outfit-font text-2xl font-black text-slate-800 dark:text-white" id="badge-upsell-rate">22.5%</span>
+                                <span class="outfit-font text-2xl font-black text-slate-800 dark:text-white" id="badge-upsell-rate">0%</span>
                                 <span class="text-[8px] font-bold text-slate-400">Upsell Conversion</span>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-400 mt-4 leading-relaxed" id="badge-upsell-rate-desc">System successfully upsold add-ons and extra ingredients on 22.5% of order baskets.</p>
+                        <p class="text-xs text-slate-400 mt-4 leading-relaxed" id="badge-upsell-rate-desc">System successfully upsold add-ons and extra ingredients on 0% of order baskets.</p>
                     </div>
                 </div>
             </div>
@@ -959,7 +959,7 @@
                     <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase">Kitchen Load Efficiency</p>
-                            <h4 id="kitchen-efficiency-score" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">91.5%</h4>
+                            <h4 id="kitchen-efficiency-score" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0%</h4>
                         </div>
                         <div class="p-3 bg-emerald-50 text-emerald-500 rounded-lg"><i class="bi bi-lightning-charge-fill text-xl"></i></div>
                     </div>
@@ -1115,28 +1115,28 @@
                     <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase">Valuation of Stock</p>
-                            <h4 id="inv-valuation" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$8,750.40</h4>
+                            <h4 id="inv-valuation" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
                         </div>
                         <div class="p-3 bg-teal-50 text-teal-500 rounded-lg"><i class="bi bi-wallet2 text-xl"></i></div>
                     </div>
                     <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase">Purchases (Stock In)</p>
-                            <h4 id="inv-purchases" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$3,450.00</h4>
+                            <h4 id="inv-purchases" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
                         </div>
                         <div class="p-3 bg-blue-50 text-blue-500 rounded-lg"><i class="bi bi-cart-check text-xl"></i></div>
                     </div>
                     <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase">Kitchen Waste Logs</p>
-                            <h4 id="inv-waste" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$145.50</h4>
+                            <h4 id="inv-waste" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
                         </div>
                         <div class="p-3 bg-red-50 text-red-500 rounded-lg"><i class="bi bi-trash3 text-xl"></i></div>
                     </div>
                     <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase">Average Food Cost %</p>
-                            <h4 id="inv-foodcost" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">31.8%</h4>
+                            <h4 id="inv-foodcost" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0%</h4>
                         </div>
                         <div class="p-3 bg-amber-50 text-amber-500 rounded-lg"><i class="bi bi-percent text-xl"></i></div>
                     </div>
@@ -1657,210 +1657,104 @@
         // DYNAMIC HIGH-FIDELITY DEMO SANDBOX FALLBACK GENERATOR
         // ==============================================
         function generateFallbackData(tabId) {
-            const now = new Date();
             switch (tabId) {
                 case 'dashboard':
                     return {
-                        totalRevenueToday: 12450.50,
-                        activeTablesCount: 4,
-                        activeSessionsTodayCount: 12,
-                        pendingOrdersCount: 2,
-                        completedOrdersToday: 32,
-                        revenueGrowthRate: 15.8,
-                        totalRevenueThisWeek: 48320.00,
-                        totalRevenueThisMonth: 168500.00,
-                        totalRevenueSinceSystemStarted: 734200.00,
-                        totalOrdersCount: 1850,
-                        totalGuestsCount: 294,
-                        totalTablesCount: 15,
-                        totalMenuItemsCount: 64,
-                        totalCategoriesCount: 8,
-                        recentNotifications: [
-                            {
-                                timestamp: new Date().toISOString(),
-                                type: "success",
-                                title: "Order Paid Successfully",
-                                message: "Table 4 settled payment of 750.00 L.E. via Visa."
-                            },
-                            {
-                                timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-                                type: "info",
-                                title: "New Table Scanned",
-                                message: "Table 12 session initialized via QR Scan code."
-                            },
-                            {
-                                timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
-                                type: "warning",
-                                title: "Waiter Call Requested",
-                                message: "Table 7 requested physical service."
-                            },
-                            {
-                                timestamp: new Date(Date.now() - 90 * 60000).toISOString(),
-                                type: "error",
-                                title: "Order Item Cancelled",
-                                message: "Chef cancelled Ribeye Steak on Order #1043 (Out of Stock)."
-                            }
-                        ]
+                        totalRevenueToday: 0,
+                        activeTablesCount: 0,
+                        activeSessionsTodayCount: 0,
+                        pendingOrdersCount: 0,
+                        completedOrdersToday: 0,
+                        revenueGrowthRate: 0,
+                        totalRevenueThisWeek: 0,
+                        totalRevenueThisMonth: 0,
+                        totalRevenueSinceSystemStarted: 0,
+                        totalOrdersCount: 0,
+                        totalGuestsCount: 0,
+                        totalTablesCount: 0,
+                        totalMenuItemsCount: 0,
+                        totalCategoriesCount: 0,
+                        recentNotifications: []
                     };
 
                 case 'sales':
                     return {
-                        grossRevenue: 12450.50,
-                        netRevenue: 11320.00,
-                        totalTaxes: 1130.50,
-                        averageOrderValue: 389.00,
-                        totalDiscounts: 420.00,
-                        salesTrend: [
-                            { dateLabel: "2026-05-15", revenue: 9500.00, orderCount: 28, expectedDrawer: 9500.00, actualDrawer: 9500.00, variance: 0, auditedBy: "Admin" },
-                            { dateLabel: "2026-05-16", revenue: 11200.00, orderCount: 34, expectedDrawer: 11200.00, actualDrawer: 11200.00, variance: 0, auditedBy: "Admin" },
-                            { dateLabel: "2026-05-17", revenue: 12100.00, orderCount: 38, expectedDrawer: 12100.00, actualDrawer: 12100.00, variance: 0, auditedBy: "Admin" },
-                            { dateLabel: "2026-05-18", revenue: 8900.00, orderCount: 25, expectedDrawer: 8900.00, actualDrawer: 8900.00, variance: 0, auditedBy: "Admin" },
-                            { dateLabel: "2026-05-19", revenue: 10400.00, orderCount: 30, expectedDrawer: 10400.00, actualDrawer: 10400.00, variance: 0, auditedBy: "Admin" },
-                            { dateLabel: "2026-05-20", revenue: 12450.50, orderCount: 45, expectedDrawer: 12450.50, actualDrawer: 12450.50, variance: 0, auditedBy: "Admin" }
-                        ],
-                        salesByTable: [
-                            { dimensionValue: "Table 4", orderCount: 15, revenue: 4500.00 },
-                            { dimensionValue: "Table 12", orderCount: 12, revenue: 3200.00 },
-                            { dimensionValue: "Table 2", orderCount: 10, revenue: 2800.00 }
-                        ],
-                        salesByPaymentMethod: [
-                            { dimensionValue: "Cash", orderCount: 25, revenue: 7800.00 },
-                            { dimensionValue: "Visa/Card", orderCount: 20, revenue: 4650.50 }
-                        ],
-                        salesByWaiter: [
-                            { dimensionValue: "John Waiter", orderCount: 18, revenue: 5400.00 },
-                            { dimensionValue: "Sarah Cashier", orderCount: 15, revenue: 4200.00 }
-                        ]
+                        grossRevenue: 0,
+                        netRevenue: 0,
+                        totalTaxes: 0,
+                        averageOrderValue: 0,
+                        totalDiscounts: 0,
+                        salesTrend: [],
+                        salesByTable: [],
+                        salesByPaymentMethod: [],
+                        salesByWaiter: []
                     };
 
                 case 'orders':
                     return {
-                        totalOrders: 185,
-                        averagePreparationTimeMinutes: 18,
-                        averageServingTimeMinutes: 24,
-                        averageTableTurnoverMinutes: 55,
-                        ordersByCategory: [
-                            { dimensionValue: "Main Dishes", orderCount: 85, revenue: 18450.00 },
-                            { dimensionValue: "Appetizers", orderCount: 64, revenue: 5200.00 },
-                            { dimensionValue: "Desserts", orderCount: 32, revenue: 2100.00 },
-                            { dimensionValue: "Drinks", orderCount: 110, revenue: 3200.00 }
-                        ],
-                        mostBusyTables: [
-                            { tableNumber: 4, totalSessions: 8, totalOrders: 15, totalRevenue: 4500.00, averageSessionDurationMinutes: 52 },
-                            { tableNumber: 12, totalSessions: 6, totalOrders: 12, totalRevenue: 3200.00, averageSessionDurationMinutes: 45 },
-                            { tableNumber: 2, totalSessions: 5, totalOrders: 10, totalRevenue: 2800.00, averageSessionDurationMinutes: 60 }
-                        ]
+                        totalOrders: 0,
+                        averagePreparationTimeMinutes: 0,
+                        averageServingTimeMinutes: 0,
+                        averageTableTurnoverMinutes: 0,
+                        ordersByCategory: [],
+                        mostBusyTables: []
                     };
 
                 case 'products':
                     return {
-                        bestSellers: [
-                            { productName: "Ribeye Steak Special", salesCount: 124, revenue: 37200.00, categoryName: "Main Dishes", price: 300.00, profit: 12400.00, orderCount: 98, uniqueGuests: 112, averageQuantityPerOrder: 1.2, averageRevenuePerOrder: 360.00, isAvailable: true },
-                            { productName: "Grilled Chicken Platter", salesCount: 98, revenue: 19600.00, categoryName: "Main Dishes", price: 200.00, profit: 6800.00, orderCount: 82, uniqueGuests: 90, averageQuantityPerOrder: 1.1, averageRevenuePerOrder: 220.00, isAvailable: true },
-                            { productName: "Mushroom Fettuccine", salesCount: 75, revenue: 11250.00, categoryName: "Pasta", price: 150.00, profit: 4500.00, orderCount: 65, uniqueGuests: 70, averageQuantityPerOrder: 1.1, averageRevenuePerOrder: 165.00, isAvailable: true },
-                            { productName: "Caesar Salad", salesCount: 64, revenue: 6400.00, categoryName: "Appetizers", price: 100.00, profit: 2400.00, orderCount: 58, uniqueGuests: 60, averageQuantityPerOrder: 1.1, averageRevenuePerOrder: 110.00, isAvailable: true }
-                        ],
-                        trendingProducts: [
-                            { productName: "Ribeye Steak Special", popularityScore: 98.4 },
-                            { productName: "Grilled Chicken Platter", popularityScore: 88.2 }
-                        ],
-                        upsellPerformanceRate: 22.5,
-                        recommendationConversionRate: 18.2
+                        bestSellers: [],
+                        trendingProducts: [],
+                        upsellPerformanceRate: 0,
+                        recommendationConversionRate: 0
                     };
 
                 case 'customers':
                     return {
-                        newCustomersCount: 45,
-                        returningCustomersCount: 182,
-                        customerRetentionRate: 80.2,
-                        averageCustomerSpend: 389.00,
-                        vipList: [
-                            { name: "Aly Hani", phoneNumber: "01002345678", email: "aly@mail.com", totalOrders: 42, totalRevenue: 18500.00, averageOrderValue: 440.00, notes: "Prefers outdoor seating, rare steak." },
-                            { name: "Omar Sherif", phoneNumber: "01124567890", email: "omar@mail.com", totalOrders: 28, totalRevenue: 11200.00, averageOrderValue: 400.00, notes: "Prefers quick prep, pays via Card." },
-                            { name: "Mariam Ali", phoneNumber: "01235678901", email: "mariam@mail.com", totalOrders: 19, totalRevenue: 7800.00, averageOrderValue: 410.00, notes: "Vegetarian preferences." }
-                        ]
+                        newCustomersCount: 0,
+                        returningCustomersCount: 0,
+                        customerRetentionRate: 0,
+                        averageCustomerSpend: 0,
+                        vipList: []
                     };
 
                 case 'staff':
                     return {
-                        waiterRankings: [
-                            { waiterName: "John Waiter", totalRevenue: 18500.00, ordersHandled: 42, averageServiceTimeMinutes: 18, tablesManagedCount: 15, activeSessionsCount: 2, customerRating: 4.8, performanceBadge: "Highest Sales" },
-                            { waiterName: "Ahmed Waiter", totalRevenue: 15400.00, ordersHandled: 36, averageServiceTimeMinutes: 15, tablesManagedCount: 12, activeSessionsCount: 1, customerRating: 4.9, performanceBadge: "Fastest Waiter" },
-                            { waiterName: "Sarah Cashier", totalRevenue: 12300.00, ordersHandled: 28, averageServiceTimeMinutes: 22, tablesManagedCount: 10, activeSessionsCount: 0, customerRating: 4.7, performanceBadge: "Star Performer" }
-                        ],
-                        shifts: [
-                            { shiftName: "Day Shift", hours: "08:00 AM - 04:00 PM", totalRevenue: 18500.00, ordersHandled: 54, activeStaff: 5 },
-                            { shiftName: "Night Shift", hours: "04:00 PM - 12:00 AM", totalRevenue: 28450.50, ordersHandled: 78, activeStaff: 7 }
-                        ]
+                        waiterRankings: [],
+                        shifts: []
                     };
 
                 case 'kitchen':
                     return {
-                        averagePreparationTimeMinutes: 18,
-                        delayedOrdersCount: 2,
-                        kitchenEfficiencyScore: 94.5,
-                        kitchenLoadByHour: [
-                            { hourLabel: "12:00 PM", ordersCount: 12, delayedOrdersCount: 1, averagePrepTimeMinutes: 15, loadPercentage: 40.0 },
-                            { hourLabel: "02:00 PM", ordersCount: 18, delayedOrdersCount: 0, averagePrepTimeMinutes: 16, loadPercentage: 60.0 },
-                            { hourLabel: "04:00 PM", ordersCount: 15, delayedOrdersCount: 0, averagePrepTimeMinutes: 14, loadPercentage: 50.0 },
-                            { hourLabel: "06:00 PM", ordersCount: 28, delayedOrdersCount: 2, averagePrepTimeMinutes: 20, loadPercentage: 90.0 },
-                            { hourLabel: "08:00 PM", ordersCount: 35, delayedOrdersCount: 3, averagePrepTimeMinutes: 22, loadPercentage: 95.0 }
-                        ],
-                        fastestItems: [
-                            { itemName: "Caesar Salad", averagePrepTimeMinutes: 6.2, timesPrepared: 45 },
-                            { itemName: "Tomato Soup", averagePrepTimeMinutes: 8.5, timesPrepared: 32 }
-                        ],
-                        slowestItems: [
-                            { itemName: "Ribeye Steak Special", averagePrepTimeMinutes: 24.5, timesPrepared: 28 },
-                            { itemName: "Grilled Salmon", averagePrepTimeMinutes: 21.0, timesPrepared: 22 }
-                        ]
+                        averagePreparationTimeMinutes: 0,
+                        delayedOrdersCount: 0,
+                        kitchenEfficiencyScore: 0,
+                        kitchenLoadByHour: [],
+                        fastestItems: [],
+                        slowestItems: []
                     };
 
                 case 'financials':
                     return {
-                        netProfit: 8450.50,
-                        profitMarginPercentage: 67.8,
-                        totalRevenue: 12450.50,
-                        totalExpenses: 2869.50,
-                        totalTaxAmount: 1130.50,
-                        expensesBreakdown: [
-                            { category: "Raw Materials & Ingredients", amount: 1520.00 },
-                            { category: "Staff Salaries & Bonuses", amount: 800.00 },
-                            { category: "Utilities (Electricity, Water)", amount: 350.00 },
-                            { category: "Logistics & Maintenance", amount: 199.50 }
-                        ],
-                        paymentReconciliations: [
-                            { paymentMethod: "Cash", systemTransactionCount: 25, systemRevenue: 7800.00, physicalReceiptsCount: 25, physicalRevenue: 7800.00, discrepancy: 0.0 },
-                            { paymentMethod: "Visa/Card", systemTransactionCount: 20, systemRevenue: 4650.50, physicalReceiptsCount: 20, physicalRevenue: 4650.50, discrepancy: 0.0 }
-                        ],
-                        closingReports: [
-                            { date: now.toISOString(), closedBy: "Admin", expectedCash: 7800.00, actualCash: 7800.00, cashDiscrepancy: 0.0, cardRevenue: 4650.50, onlineRevenue: 0.0, totalClosedRevenue: 12450.50 }
-                        ]
+                        netProfit: 0,
+                        profitMarginPercentage: 0,
+                        totalRevenue: 0,
+                        totalExpenses: 0,
+                        totalTaxAmount: 0,
+                        expensesBreakdown: [],
+                        paymentReconciliations: [],
+                        closingReports: []
                     };
 
                 case 'inventory':
                     return {
-                        totalInventoryValuation: 85400.00,
-                        totalPurchasesAmount: 12450.00,
-                        totalWasteAmount: 320.00,
-                        averageFoodCostPercentage: 24.5,
-                        lowStockAlerts: [
-                            { ingredientName: "Beef Tenderloin Cuts", currentStock: "3.5 kg", reorderLevel: "10.0 kg", unit: "Kg", supplierName: "Al-Baraka Meats", stockStatus: "Critical" },
-                            { ingredientName: "Fresh Salmon Fillet", currentStock: "2.1 kg", reorderLevel: "5.0 kg", unit: "Kg", supplierName: "RedSea Fishery", stockStatus: "Warning" },
-                            { ingredientName: "Cooking Cream 35%", currentStock: "4.0 L", reorderLevel: "8.0 L", unit: "Liters", supplierName: "Juhayna Foods", stockStatus: "Warning" }
-                        ],
-                        supplierPurchases: [
-                            { supplierName: "Al-Baraka Meats", purchaseOrdersCount: 8, totalPurchaseAmount: 8500.00, leadTimeDays: 2 },
-                            { supplierName: "Juhayna Foods", purchaseOrdersCount: 12, totalPurchaseAmount: 2450.00, leadTimeDays: 1 }
-                        ],
-                        recipeCosts: [
-                            { menuItemName: "Ribeye Steak Special", sellingPrice: 300.00, rawIngredientCost: 85.00, marginAmount: 215.00, foodCostPercentage: 28.3 },
-                            { menuItemName: "Grilled Chicken Platter", sellingPrice: 200.00, rawIngredientCost: 52.00, marginAmount: 148.00, foodCostPercentage: 26.0 }
-                        ],
-                        wasteLogs: [
-                            { ingredientName: "Fresh Tomatoes", quantityWasted: 5, unit: "Kg", cost: 120.00, reason: "Spoiled / Overripe", wasteDate: now.toISOString() },
-                            { ingredientName: "Cooking Cream 35%", quantityWasted: 2, unit: "Liters", cost: 200.00, reason: "Expired", wasteDate: now.toISOString() }
-                        ]
+                        totalInventoryValuation: 0,
+                        totalPurchasesAmount: 0,
+                        totalWasteAmount: 0,
+                        averageFoodCostPercentage: 0,
+                        lowStockAlerts: [],
+                        supplierPurchases: [],
+                        recipeCosts: [],
+                        wasteLogs: []
                     };
 
                 default:
@@ -2696,13 +2590,13 @@
                 document.getElementById('badge-recommended').textContent = data.bestSellers[1].productName;
             }
 
-            const upsellRate = (data.upsellPerformanceRate ?? 22.5).toFixed(1);
+            const upsellRate = (data.upsellPerformanceRate ?? 0).toFixed(1);
             const upsellSpan = document.getElementById('badge-upsell-rate');
             if (upsellSpan) upsellSpan.textContent = `${upsellRate}%`;
             const upsellDesc = document.getElementById('badge-upsell-rate-desc');
             if (upsellDesc) upsellDesc.textContent = `System successfully upsold add-ons and extra ingredients on ${upsellRate}% of order baskets.`;
 
-            const recommendationRate = (data.recommendationConversionRate ?? 22.5).toFixed(1);
+            const recommendationRate = (data.recommendationConversionRate ?? 0).toFixed(1);
             const recStats = document.getElementById('badge-recommended-stats');
             if (recStats) recStats.textContent = `Cross-selling conversion rate ${recommendationRate}%`;
 

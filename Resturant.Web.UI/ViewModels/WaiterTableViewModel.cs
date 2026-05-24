@@ -43,7 +43,12 @@ namespace Resturant.Web.UI.ViewModels
     {
         public string Name { get; set; }
         public int Quantity { get; set; }
+        public decimal Price { get; set; }
+        public bool IsCancelled { get; set; }
         public string? AddOns { get; set; }
+
+        // Helper for display calculations (respects cancellation)
+        public decimal EffectiveTotal => IsCancelled ? 0m : Quantity * Price;
     }
 }
 

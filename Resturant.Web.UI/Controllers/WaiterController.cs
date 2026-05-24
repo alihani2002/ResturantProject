@@ -61,16 +61,19 @@ namespace Resturant.Web.UI.Controllers
                     Orders = tableOrders.Select(o => new WaiterOrderViewModel 
                     {
                         OrderId = o.Id,
-                        TotalAmount = o.TotalAmount,
+                        // Effective amount the customer will pay (excludes cancelled items)
+                        TotalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         OrderTime = o.OrderDate,
                         Note = o.Note,
                         Status = o.Status.ToString(),
-                        OrderItems = o.OrderItems.Select(oi => new WaiterOrderItemViewModel
-                        {
-                            Name = oi.MenuItem?.Name ?? "Unknown",
-                            Quantity = oi.Quantity,
-                            AddOns = string.Join(", ", oi.AddOns.Select(a => a.AddOn?.Name ?? ""))
-                        }).ToList()
+                         OrderItems = o.OrderItems.Select(oi => new WaiterOrderItemViewModel
+                         {
+                             Name = oi.MenuItem?.Name ?? "Unknown",
+                             Quantity = oi.Quantity,
+                             Price = oi.Price,
+                             IsCancelled = oi.IsCancelled,
+                             AddOns = string.Join(", ", oi.AddOns.Select(a => a.AddOn?.Name ?? ""))
+                         }).ToList()
                     }).ToList()
                 };
 
@@ -122,13 +125,16 @@ namespace Resturant.Web.UI.Controllers
                     orders = tableOrders.Select(o => new 
                     {
                         id = o.Id,
-                        totalAmount = o.TotalAmount,
+                        // Effective total for display (excludes cancelled items)
+                        totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         orderTime = o.OrderDate,
                         note = o.Note,
                         status = o.Status.ToString(),
                         items = o.OrderItems.Select(oi => new {
+                            id = oi.Id,
                             name = oi.MenuItem?.Name ?? "Unknown",
                             quantity = oi.Quantity,
+                            isCancelled = oi.IsCancelled,
                             addOns = oi.AddOns.Select(a => new { name = a.AddOn?.Name ?? "" }).ToList()
                         }).ToList()
                     }).ToList()
@@ -280,6 +286,50 @@ namespace Resturant.Web.UI.Controllers
                 await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Table Cleared");
             }
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrderItem(int orderItemId)
+        {
+            var orderItem = await _context.OrderItems
+                .Include(oi => oi.Order)
+                    .ThenInclude(o => o.OrderItems)
+                        .ThenInclude(oi2 => oi2.MenuItem)
+                .FirstOrDefaultAsync(oi => oi.Id == orderItemId);
+
+            if (orderItem == null) return NotFound();
+
+            // Mark item as cancelled (soft delete)
+            orderItem.IsCancelled = true;
+            await _context.SaveChangesAsync();
+
+            var order = orderItem.Order;
+
+            var itemCancelledData = new
+            {
+                orderId = order.Id,
+                tableNumber = order.TableNumber,
+                cancelledItemId = orderItemId,
+                cancelledItemName = orderItem.MenuItem?.Name ?? "Item",
+                orderItems = order.OrderItems.Select(oi => new
+                {
+                    id = oi.Id,
+                    menuItemName = oi.MenuItem?.Name ?? "",
+                    quantity = oi.Quantity,
+                    price = oi.Price,
+                    isCancelled = oi.IsCancelled
+                })
+            };
+
+            // Notify chef: remove this item from view
+            await _hubContext.Clients.Group("chef").SendAsync("OrderItemCancelled", itemCancelledData);
+            // Notify cashier: show item in red (don't remove)
+            await _hubContext.Clients.Group("cashier").SendAsync("OrderItemCancelled", itemCancelledData);
+            // Notify all
+            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", new { tableNumber = order.TableNumber });
+            await _hubContext.Clients.All.SendAsync("OrderItemCancelled", itemCancelledData);
+
+            return Ok(new { message = $"Item cancelled: {orderItem.MenuItem?.Name}" });
         }
 
         [HttpPost]

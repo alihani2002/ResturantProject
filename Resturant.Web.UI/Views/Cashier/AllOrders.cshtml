@@ -1,0 +1,196 @@
+@model IEnumerable<Resturant.Core.Entities.Order>
+
+@{
+    ViewData["Title"] = "All Orders";
+    var selectedDate = (DateTime)ViewBag.SelectedDate;
+}
+
+<style>
+    .status-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 50px; }
+    .status-pending    { background: #fef3c7; color: #92400e; }
+    .status-confirmed  { background: #dbeafe; color: #1e40af; }
+    .status-inprep     { background: #e0e7ff; color: #3730a3; }
+    .status-ready      { background: #d1fae5; color: #065f46; }
+    .status-served     { background: #f0fdf4; color: #166534; }
+    .status-completed  { background: #dcfce7; color: #14532d; }
+    .status-cancelled  { background: #fee2e2; color: #991b1b; }
+    .row-cancelled td  { text-decoration: line-through; opacity: 0.6; color: #dc2626; }
+    .summary-bar { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 12px; padding: 1rem 1.5rem; }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2><i class="bi bi-calendar-range text-primary me-2"></i>All Orders — <span class="text-muted fs-5">@selectedDate.ToString("dddd, MMM dd yyyy")</span></h2>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="@Url.Action("Index", "Cashier")" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Active
+            </a>
+            <form method="get" class="d-flex align-items-center gap-2">
+                <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+            </form>
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(-1).ToString("yyyy-MM-dd") })" class="btn btn-outline-dark btn-sm">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(1).ToString("yyyy-MM-dd") })" class="btn btn-outline-dark btn-sm" @(selectedDate.Date >= DateTime.Today ? "disabled" : "")>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    @{
+        var totalOrders = Model.Count();
+        var completedCount = Model.Count(o => o.Status == Resturant.Core.Entities.OrderStatus.Completed);
+        var cancelledCount = Model.Count(o => o.Status == Resturant.Core.Entities.OrderStatus.Cancelled);
+        var activeCount = totalOrders - completedCount - cancelledCount;
+        var totalRevenue = Model.Where(o => o.Status == Resturant.Core.Entities.OrderStatus.Completed).Sum(o => o.TotalAmount);
+    }
+
+    <!-- Summary Bar -->
+    <div class="summary-bar text-white mb-4">
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="fs-2 fw-bold">@totalOrders</div>
+                <div class="small text-secondary">Total Orders</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="fs-2 fw-bold text-success">@completedCount</div>
+                <div class="small text-secondary">Completed</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="fs-2 fw-bold text-danger">@cancelledCount</div>
+                <div class="small text-secondary">Cancelled</div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="fs-2 fw-bold text-warning">$@totalRevenue.ToString("0.00")</div>
+                <div class="small text-secondary">Revenue</div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-secondary opacity-25"></i>
+            <h3 class="mt-3 text-muted">No orders on this date</h3>
+            <p class="text-muted">Try selecting a different date above.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul me-2 text-primary"></i>Order List</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search table, name, item..." style="width: 220px;" oninput="filterTable()" />
+                    <select id="statusFilter" class="form-select form-select-sm" style="width: 140px;" onchange="filterTable()">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="InPreparation">In Prep</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Served">Served</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="ordersTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="cursor-pointer" onclick="sortTable(0)">Order # <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th onclick="sortTable(1)">Table <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th onclick="sortTable(2)">Customer <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th>Items</th>
+                            <th onclick="sortTable(4)">Amount <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th onclick="sortTable(5)">Status <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th onclick="sortTable(6)">Time <i class="bi bi-arrow-down-up ms-1 small"></i></th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        @foreach (var order in Model)
+                        {
+                            var isCancelled = order.Status == Resturant.Core.Entities.OrderStatus.Cancelled;
+                            var statusClass = order.Status switch
+                            {
+                                Resturant.Core.Entities.OrderStatus.Pending => "status-pending",
+                                Resturant.Core.Entities.OrderStatus.Confirmed => "status-confirmed",
+                                Resturant.Core.Entities.OrderStatus.InPreparation => "status-inprep",
+                                Resturant.Core.Entities.OrderStatus.Ready => "status-ready",
+                                Resturant.Core.Entities.OrderStatus.Served => "status-served",
+                                Resturant.Core.Entities.OrderStatus.Completed => "status-completed",
+                                Resturant.Core.Entities.OrderStatus.Cancelled => "status-cancelled",
+                                _ => ""
+                            };
+                            <tr class="@(isCancelled ? "row-cancelled" : "")" data-status="@order.Status">
+                                <td class="fw-bold">#@order.Id</td>
+                                <td><span class="badge bg-dark rounded-pill">T@order.TableNumber</span></td>
+                                <td>
+                                    <div class="fw-semibold">@(order.CustomerName ?? "Guest")</div>
+                                    <div class="small text-muted">@(order.PhoneNumber ?? "")</div>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <div class="@(item.IsCancelled ? "text-decoration-line-through text-danger" : "")">
+                                                @item.Quantity × @(item.MenuItem?.Name ?? "?")
+                                                @if (item.IsCancelled) { <span class="badge bg-danger" style="font-size:0.6rem;">Cancelled</span> }
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="fw-bold @(isCancelled ? "text-danger" : "text-success")">$@order.TotalAmount.ToString("0.00")</td>
+                                <td><span class="status-badge @statusClass">@order.Status</span></td>
+                                <td class="small text-muted">@order.OrderDate.ToString("HH:mm")</td>
+                                <td><small class="fst-italic text-muted">@(order.Note ?? "")</small></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        let sortDir = {};
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#ordersTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const rowStatus = row.dataset.status;
+                const matchesSearch = !search || text.includes(search);
+                const matchesStatus = !status || rowStatus === status;
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            });
+        }
+
+        function sortTable(colIdx) {
+            const tbody = document.getElementById('ordersTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            sortDir[colIdx] = !sortDir[colIdx];
+            rows.sort((a, b) => {
+                const aText = a.cells[colIdx]?.textContent.trim() || '';
+                const bText = b.cells[colIdx]?.textContent.trim() || '';
+                const aNum = parseFloat(aText.replace(/[^0-9.]/g, ''));
+                const bNum = parseFloat(bText.replace(/[^0-9.]/g, ''));
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return sortDir[colIdx] ? aNum - bNum : bNum - aNum;
+                }
+                return sortDir[colIdx] ? aText.localeCompare(bText) : bText.localeCompare(aText);
+            });
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+}

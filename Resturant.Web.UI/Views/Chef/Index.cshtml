@@ -4,88 +4,111 @@
     ViewData["Title"] = "Chef Dashboard";
 }
 
+<style>
+    .order-card-confirmed { border-color: #f59e0b !important; }
+    .order-card-inprep { border-color: #3b82f6 !important; }
+    .order-item-cancelled { text-decoration: line-through; color: #ef4444; opacity: 0.65; }
+    .status-badge-confirmed { background: #f59e0b; }
+    .status-badge-inprep { background: #3b82f6; }
+    .card-header-confirmed { background: #f59e0b !important; }
+    .card-header-inprep { background: #3b82f6 !important; }
+    @@keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .new-order-anim { animation: slideIn 0.4s ease; }
+</style>
+
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-fire text-danger me-2"></i>Kitchen Orders <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
-        <span class="badge bg-danger">@Model.Count() Pending</span>
+        <div class="d-flex gap-2">
+            <span class="badge bg-warning text-dark fs-6" id="confirmed-count">0 Waiting</span>
+            <span class="badge bg-primary fs-6" id="inprep-count">0 In Prep</span>
+        </div>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-check-circle display-1 text-success"></i>
-            <h3 class="mt-3">All caught up!</h3>
-            <p class="text-muted">No pending orders in the queue.</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4" id="orders-container">
-            @foreach (var order in Model)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6" id="order-card-@order.Id">
-                    <div class="card h-100 border-danger shadow-sm">
-                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Table @order.TableNumber</h5>
+    <div id="empty-state" class="text-center py-5" style="display: @(Model.Any() ? "none" : "block")!important;">
+        <i class="bi bi-check-circle display-1 text-success"></i>
+        <h3 class="mt-3">All caught up!</h3>
+        <p class="text-muted">No pending orders in the queue.</p>
+    </div>
+
+    <div class="row g-4" id="orders-container">
+        @foreach (var order in Model)
+        {
+            var isInPrep = order.Status == Resturant.Core.Entities.OrderStatus.InPreparation;
+            <div class="col-lg-3 col-md-4 col-sm-6" id="order-card-@order.Id">
+                <div class="card h-100 shadow-sm @(isInPrep ? "order-card-inprep" : "order-card-confirmed")">
+                    <div class="card-header @(isInPrep ? "card-header-inprep" : "card-header-confirmed") text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Table @order.TableNumber</h5>
+                        <div class="d-flex flex-column align-items-end gap-1">
                             <small>@order.OrderDate.ToString("HH:mm")</small>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush mb-3">
-                                @foreach (var item in order.OrderItems)
-                                {
-                                     <li class="list-group-item px-0">
-                                         <div class="d-flex justify-content-between align-items-center">
-                                             <div class="d-flex align-items-center">
-                                                 <span class="badge bg-secondary rounded-pill me-2">@item.Quantity x</span>
-                                                 <span class="fw-bold fs-6">@item.MenuItem.Name</span>
-                                             </div>
-                                         </div>
-                                         @if (item.AddOns != null && item.AddOns.Any())
-                                         {
-                                             <div class="ms-4 mt-1">
-                                                 @foreach (var addOn in item.AddOns)
-                                                 {
-                                                     <span class="badge bg-info text-white me-1 font-monospace" style="font-size: 0.75rem;">+ @addOn.AddOn?.Name</span>
-                                                 }
-                                             </div>
-                                         }
-                                     </li>
-                                 }
-                            </ul>
-                            @if (!string.IsNullOrEmpty(order.Note))
-                            {
-                                <div class="alert alert-warning py-2 mb-3">
-                                    <small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
-                                    <p class="mb-0 small fst-italic">@order.Note</p>
-                                </div>
-                            }
-                            <div class="mt-auto text-end">
-                                <small class="text-muted d-block mb-2">Order ID: #@order.Id</small>
-                            </div>
-                        </div>
-                         <div class="card-footer bg-white border-top-0 pb-3">
-                             <button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(@order.Id)">
-                                <i class="bi bi-check-lg me-1"></i> Order Ready
-                            </button>
+                            <span class="badge bg-white @(isInPrep ? "text-primary" : "text-warning") text-dark" style="font-size:0.7rem;">
+                                @(isInPrep ? "🔵 Preparing" : "🟡 Waiting")
+                            </span>
                         </div>
                     </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush mb-3">
+                             @foreach (var item in order.OrderItems.Where(i => !i.IsCancelled))
+                             {
+                                 <li class="list-group-item px-0" id="chef-item-@item.Id">
+                                     <div class="d-flex justify-content-between align-items-center">
+                                         <div class="d-flex align-items-center">
+                                             <span class="badge bg-secondary rounded-pill me-2">@item.Quantity x</span>
+                                             <span class="fw-bold fs-6">@item.MenuItem.Name</span>
+                                         </div>
+                                     </div>
+                                     @if (item.AddOns != null && item.AddOns.Any())
+                                     {
+                                         <div class="ms-4 mt-1">
+                                             @foreach (var addOn in item.AddOns)
+                                             {
+                                                 <span class="badge bg-info text-white me-1 font-monospace" style="font-size: 0.75rem;">+ @addOn.AddOn?.Name</span>
+                                             }
+                                         </div>
+                                     }
+                                 </li>
+                             }
+                        </ul>
+                        @if (!string.IsNullOrEmpty(order.Note))
+                        {
+                            <div class="alert alert-warning py-2 mb-3">
+                                <small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
+                                <p class="mb-0 small fst-italic">@order.Note</p>
+                            </div>
+                        }
+                        <div class="mt-auto text-end">
+                            <small class="text-muted d-block mb-2">Order ID: #@order.Id</small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 d-flex flex-column gap-2 pb-3">
+                        @if (!isInPrep)
+                        {
+                            <button class="btn btn-warning w-100 fw-bold" onclick="startOrder(@order.Id)">
+                                <i class="bi bi-play-circle me-1"></i> Start Preparing
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(@order.Id)">
+                                <i class="bi bi-check-lg me-1"></i> Mark Ready
+                            </button>
+                        }
+                    </div>
                 </div>
-            }
-        </div>
-    }
+            </div>
+        }
+    </div>
 </div>
 
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
-        // SignalR Connection with auto-reconnect
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub")
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)
             .build();
 
-        // Connection state indicator
         function updateConnectionStatus(connected) {
             const badge = document.getElementById('connection-status');
             if (badge) {
@@ -94,269 +117,251 @@
             }
         }
 
-        // Update pending count
-        function updatePendingCount() {
+        function updateCounts() {
             const container = document.getElementById('orders-container');
-            const count = container ? container.querySelectorAll('.col-lg-3').length : 0;
-            const badge = document.querySelector('.badge.bg-danger');
-            if (badge) badge.textContent = count + ' Pending';
+            if (!container) return;
+            const confirmed = container.querySelectorAll('.order-card-confirmed').length;
+            const inPrep = container.querySelectorAll('.order-card-inprep').length;
+            document.getElementById('confirmed-count').textContent = confirmed + ' Waiting';
+            document.getElementById('inprep-count').textContent = inPrep + ' In Prep';
+
+            const empty = document.getElementById('empty-state');
+            if (empty) empty.style.display = (confirmed + inPrep === 0) ? 'block' : 'none';
         }
 
-        // Create order card HTML
         function createOrderCard(order) {
+            const isInPrep = order.status === 2; // InPreparation
+            const headerClass = isInPrep ? 'card-header-inprep' : 'card-header-confirmed';
+            const cardClass = isInPrep ? 'order-card-inprep' : 'order-card-confirmed';
+            const statusLabel = isInPrep ? '🔵 Preparing' : '🟡 Waiting';
             const orderTime = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
             let itemsHtml = '';
-            if (order.orderItems && order.orderItems.length > 0) {
-                order.orderItems.forEach(item => {
-                    let addonsHtml = '';
-                    if (item.addOns && item.addOns.length > 0) {
-                        addonsHtml = `
-                            <div class="ms-4 mt-1">
-                                ${item.addOns.map(a => `<span class="badge bg-info text-white me-1 font-monospace" style="font-size: 0.75rem;">+ ${a.name}</span>`).join('')}
+            (order.orderItems || []).filter(item => !item.isCancelled).forEach(item => {
+                let addonsHtml = '';
+                if (item.addOns && item.addOns.length > 0) {
+                    addonsHtml = `<div class="ms-4 mt-1">${item.addOns.map(a => `<span class="badge bg-info text-white me-1 font-monospace" style="font-size:0.75rem;">+ ${a.name}</span>`).join('')}</div>`;
+                }
+                itemsHtml += `
+                    <li class="list-group-item px-0" id="chef-item-${item.id}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
+                                <span class="fw-bold fs-6">${item.menuItemName}</span>
                             </div>
-                        `;
-                    }
-                    itemsHtml += `
-                        <li class="list-group-item px-0">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
-                                    <span class="fw-bold fs-6">${item.menuItemName || item.name || 'Item'}</span>
-                                </div>
-                            </div>
-                            ${addonsHtml}
-                        </li>
-                    `;
-                });
-            }
+                        </div>
+                        ${addonsHtml}
+                    </li>`;
+            });
+
+            const noteHtml = order.note ? `<div class="alert alert-warning py-2 mb-3"><small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small><p class="mb-0 small fst-italic">${order.note}</p></div>` : '';
+            const actionBtn = isInPrep
+                ? `<button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(${order.id})"><i class="bi bi-check-lg me-1"></i> Mark Ready</button>`
+                : `<button class="btn btn-warning w-100 fw-bold" onclick="startOrder(${order.id})"><i class="bi bi-play-circle me-1"></i> Start Preparing</button>`;
 
             return `
-                <div class="col-lg-3 col-md-4 col-sm-6" id="order-card-${order.id}">
-                    <div class="card h-100 border-danger shadow-sm">
-                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <div class="col-lg-3 col-md-4 col-sm-6 new-order-anim" id="order-card-${order.id}">
+                    <div class="card h-100 shadow-sm ${cardClass}">
+                        <div class="card-header ${headerClass} text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Table ${order.tableNumber}</h5>
-                            <small>${orderTime}</small>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush mb-3">
-                                ${itemsHtml}
-                            </ul>
-                            ${order.note ? `
-                                <div class="alert alert-warning py-2 mb-3">
-                                    <small class="fw-bold"><i class="bi bi-pencil-fill me-1"></i>Note:</small>
-                                    <p class="mb-0 small fst-italic">${order.note}</p>
-                                </div>
-                            ` : ''}
-                            <div class="mt-auto text-end">
-                                <small class="text-muted d-block mb-2">Order ID: #${order.id}</small>
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <small>${orderTime}</small>
+                                <span class="badge bg-white text-dark" style="font-size:0.7rem;">${statusLabel}</span>
                             </div>
                         </div>
-                        <div class="card-footer bg-white border-top-0 pb-3">
-                            <button class="btn btn-outline-success w-100 fw-bold" onclick="finishOrder(${order.id})">
-                                <i class="bi bi-check-lg me-1"></i> Order Ready
-                            </button>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush mb-3">${itemsHtml}</ul>
+                            ${noteHtml}
+                            <div class="mt-auto text-end"><small class="text-muted d-block mb-2">Order ID: #${order.id}</small></div>
                         </div>
+                        <div class="card-footer bg-white border-top-0 d-flex flex-column gap-2 pb-3">${actionBtn}</div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
-        // Add new order to the grid
-        function addOrderCard(order) {
-            const container = document.getElementById('orders-container');
-            if (!container) {
-                // If there's no container (empty state), refresh the page once
-                location.reload();
-                return;
+        function updateOrderCard(order) {
+            const existing = document.getElementById(`order-card-${order.id}`);
+            const html = createOrderCard(order);
+            if (existing) {
+                existing.outerHTML = html;
+            } else {
+                const container = document.getElementById('orders-container');
+                if (container) container.insertAdjacentHTML('afterbegin', html);
             }
-
-            // Check if order already exists
-            if (document.getElementById(`order-card-${order.id}`)) return;
-
-            const cardHtml = createOrderCard(order);
-            container.insertAdjacentHTML('afterbegin', cardHtml);
-
-            // Flash animation
-            const newCard = document.getElementById(`order-card-${order.id}`);
-            if (newCard) {
-                newCard.style.animation = 'pulse 0.5s ease-in-out';
-            }
-
-            updatePendingCount();
-            playNotificationSound();
-            showNotification(`New order for Table ${order.tableNumber}!`, 'warning');
+            updateCounts();
         }
 
-        // Remove order card
         function removeOrderCard(orderId) {
             const card = document.getElementById(`order-card-${orderId}`);
             if (card) {
                 card.style.transition = 'opacity 0.3s, transform 0.3s';
                 card.style.opacity = '0';
                 card.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    card.remove();
-                    updatePendingCount();
-                    checkEmptyState();
-                }, 300);
+                setTimeout(() => { card.remove(); updateCounts(); }, 300);
             }
         }
 
-        // Check if we should show empty state
-        function checkEmptyState() {
-            const container = document.getElementById('orders-container');
-            if (container && container.children.length === 0) {
-                container.outerHTML = `
-                    <div class="text-center py-5" id="empty-state">
-                        <i class="bi bi-check-circle display-1 text-success"></i>
-                        <h3 class="mt-3">All caught up!</h3>
-                        <p class="text-muted">No pending orders in the queue.</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Play notification sound
-        function playNotificationSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 600;
-                oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.4);
-            } catch (e) { }
-        }
-
-        // Show toast notification
-        function showNotification(message, type = 'info') {
-            const container = document.querySelector('.toast-container') || createToastContainer();
-            const toastId = 'toast-' + Date.now();
-            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
-
-            const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', toastHtml);
-            const toastEl = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
-            toast.show();
-            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-        }
-
-        function createToastContainer() {
-            const container = document.createElement('div');
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            document.body.appendChild(container);
-            return container;
-        }
-
-        // SignalR event handlers
+        // SignalR handlers
         connection.on("OrderAccepted", function (order) {
-            // Remove empty state if exists
-            const emptyState = document.getElementById('empty-state');
-            if (emptyState) {
-                emptyState.outerHTML = '<div class="row g-4" id="orders-container"></div>';
+            const container = document.getElementById('orders-container');
+            if (!container) location.reload();
+            else if (!document.getElementById(`order-card-${order.id}`)) {
+                container.insertAdjacentHTML('afterbegin', createOrderCard(order));
+                updateCounts();
+                playSound();
+                showNotification(`New order for Table ${order.tableNumber}!`, 'warning');
             }
-            addOrderCard(order);
+        });
+
+        connection.on("OrderStatusChanged", function (order) {
+            if (!order || !order.id) return;
+
+            // Chef only shows Confirmed (1) and InPreparation (2).
+            // Anything else (Cancelled, Ready, Completed, etc.) must be removed immediately.
+            const isStillRelevantForChef = (order.status === 1 || order.status === 2);
+
+            if (!isStillRelevantForChef) {
+                removeOrderCard(order.id);
+            } else {
+                updateOrderCard(order);
+            }
+        });
+
+        connection.on("OrderItemCancelled", function (data) {
+            // Remove the cancelled item completely from Chef view (to prevent preparation mistakes)
+            const itemEl = document.getElementById(`chef-item-${data.cancelledItemId}`);
+            if (itemEl) {
+                const ul = itemEl.parentElement;
+                itemEl.remove();
+                showNotification(`Item cancelled: ${data.cancelledItemName} on Table ${data.tableNumber}`, 'warning');
+
+                // If the order now has no active items left, remove the entire order card
+                if (ul && ul.children.length === 0) {
+                    const orderCard = ul.closest('[id^="order-card-"]');
+                    if (orderCard) {
+                        orderCard.style.transition = 'opacity 0.3s';
+                        orderCard.style.opacity = '0';
+                        setTimeout(() => {
+                            orderCard.remove();
+                            updateCounts();
+                        }, 300);
+                    }
+                } else {
+                    updateCounts();
+                }
+            }
         });
 
         connection.on("OrderCancelled", function (order) {
+            // Always remove cancelled order from Chef immediately
             removeOrderCard(order.id);
-            showNotification(`Order #${order.id} for Table ${order.tableNumber} was cancelled`, 'warning');
+            
+            // Extra safety: force a full refresh shortly after, in case the order was still in "Waiting" state
+            // and the direct removal didn't catch it for some reason.
+            setTimeout(() => {
+                fetchAndRefreshOrders();
+            }, 400);
+
+            showNotification(`Order #${order.id} for Table ${order.tableNumber} was cancelled`, 'danger');
         });
 
-        // Legacy event handlers
-        connection.on("ReceiveChefUpdate", function (message) {
-            // Refresh orders
-            fetchAndRefreshOrders();
-        });
+        connection.on("ReceiveChefUpdate", function () { fetchAndRefreshOrders(); });
 
-        connection.on("ReceiveWaiterUpdate", function (message) {
-            // May affect orders
-        });
-
-        // Fetch and refresh orders
         async function fetchAndRefreshOrders() {
             try {
-                const response = await fetch('/Chef/GetOrdersData');
-                if (response.ok) {
-                    const orders = await response.json();
-                    const container = document.getElementById('orders-container');
-                    if (container) {
-                        // Get current order IDs
-                        const currentIds = new Set(Array.from(container.querySelectorAll('[id^="order-card-"]'))
-                            .map(el => parseInt(el.id.replace('order-card-', ''))));
-                        const newIds = new Set(orders.map(o => o.id));
-
-                        // Remove orders not in new list
-                        currentIds.forEach(id => {
-                            if (!newIds.has(id)) removeOrderCard(id);
-                        });
-
-                        // Add new orders
-                        orders.forEach(order => {
-                            if (!currentIds.has(order.id)) addOrderCard(order);
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching orders:', error);
-            }
+                const res = await fetch('/Chef/GetOrdersData');
+                if (!res.ok) return;
+                const orders = await res.json();
+                const container = document.getElementById('orders-container');
+                if (!container) return;
+                const currentIds = new Set(Array.from(container.querySelectorAll('[id^="order-card-"]')).map(el => parseInt(el.id.replace('order-card-', ''))));
+                const newIds = new Set(orders.map(o => o.id));
+                currentIds.forEach(id => { if (!newIds.has(id)) removeOrderCard(id); });
+                orders.forEach(o => updateOrderCard(o));
+            } catch(e) { console.error(e); }
         }
 
-        // Start connection and join dashboard group
         async function startConnection() {
             try {
                 await connection.start();
-                console.log("SignalR Connected");
                 await connection.invoke("JoinDashboard", "chef");
                 updateConnectionStatus(true);
-            } catch (err) {
-                console.error("SignalR Connection Error:", err);
+                updateCounts();
+            } catch(err) {
                 updateConnectionStatus(false);
                 setTimeout(startConnection, 5000);
             }
         }
-
         connection.onreconnecting(() => updateConnectionStatus(false));
-        connection.onreconnected(() => {
-            connection.invoke("JoinDashboard", "chef");
-            updateConnectionStatus(true);
-            fetchAndRefreshOrders();
-        });
+        connection.onreconnected(() => { connection.invoke("JoinDashboard", "chef"); updateConnectionStatus(true); fetchAndRefreshOrders(); });
         connection.onclose(() => updateConnectionStatus(false));
-
         startConnection();
 
+        function startOrder(orderId) {
+            const card = document.getElementById(`order-card-${orderId}`);
+            const btn = card?.querySelector('button');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Starting...'; }
+
+            fetch('/Chef/StartOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(res => {
+                if (res.ok) {
+                    showNotification('Order started — now in preparation!', 'info');
+                    fetchAndRefreshOrders();
+                } else {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Start Preparing'; }
+                }
+            }).catch(() => {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Start Preparing'; }
+            });
+        }
+
         function finishOrder(orderId) {
-            if (!confirm('Mark order as Ready?')) return;
+            if (!confirm('Mark this order as Ready?')) return;
+            const card = document.getElementById(`order-card-${orderId}`);
+            const btn = card?.querySelector('button');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Marking ready...'; }
 
             fetch('/Chef/FinishOrder', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
-            })
-            .then(response => {
-                if (response.ok) {
-                    removeOrderCard(orderId);
-                    showNotification('Order marked as ready!', 'success');
-                } else {
-                    alert('Error updating order');
+            }).then(res => {
+                if (res.ok) { removeOrderCard(orderId); showNotification('Order marked as ready!', 'success'); }
+                else {
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Mark Ready'; }
                 }
             });
+        }
+
+        function playSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = 600; osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        function showNotification(message, type = 'info') {
+            let container = document.querySelector('.toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(container);
+            }
+            const id = 'toast-' + Date.now();
+            const bg = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : type === 'danger' ? 'bg-danger' : 'bg-info';
+            container.insertAdjacentHTML('beforeend', `<div id="${id}" class="toast align-items-center text-white ${bg} border-0" role="alert"><div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`);
+            const el = document.getElementById(id);
+            new bootstrap.Toast(el, { delay: 4000 }).show();
+            el.addEventListener('hidden.bs.toast', () => el.remove());
         }
     </script>
 }
