@@ -3,6 +3,7 @@ using Resturant.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Resturant.Core.Entities;
+using Resturant.Web.UI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ResturantWebUIContextConnection") ?? throw new InvalidOperationException("Connection string 'ResturantWebUIContextConnection' not found.");;
@@ -13,9 +14,14 @@ var connectionString = builder.Configuration.GetConnectionString("ResturantWebUI
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
+
+// Configure SignalR
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -23,7 +29,9 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await Resturant.Infrastructure.Data.DbInitializer.SeedRolesAsync(roleManager);
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var context = services.GetRequiredService<Resturant.Infrastructure.Data.AppDbContext>();
+    await Resturant.Infrastructure.Data.DbInitializer.SeedDataAsync(roleManager, userManager, context);
 }
 
 
@@ -38,14 +46,25 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Identity/Account/Login");
+    return Task.CompletedTask;
+});
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapRazorPages();
+
+// Configure SignalR endpoint
+app.MapHub<OrderHub>("/orderHub");
 
 app.Run();

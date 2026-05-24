@@ -40,6 +40,11 @@ namespace Resturant.Infrastructure.Repositories
             await _context.Set<T>().CountAsync(predicate);
 
         public async Task<T?> GetByIdAsync(int id) => await _context.Set<T>().FindAsync(id);
+        public async Task<IEnumerable<T>> ListAsync(Expression<Func<T, bool>> predicate) =>
+            await _context.Set<T>().Where(predicate).ToListAsync();
+
+        public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate) =>
+            await _context.Set<T>().FirstOrDefaultAsync(predicate);
 
         public async Task<List<T>> GetAllWithIncludesAsync(params Expression<Func<T, object>>[] includes)
         {

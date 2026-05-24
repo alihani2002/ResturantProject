@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "QR Codes";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card stretch stretch-full">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <div class="d-flex justify-content-between align-items-center p-3">
+                        <h3>Generated QR Codes</h3>
+                        <div>
+                            <a asp-action="Create" class="btn btn-primary me-2">Generate New QR</a>
+                        </div>
+                    </div>
+                    <table class="table table-hover" id="qrCodesTable" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Preview</th>
+                                <th>Target URL</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            $("#qrCodesTable").DataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "ajax": {
+                    "url": "/QrCodes/LoadData",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columnDefs": [{
+                    "targets": [1],
+                    "visible": true,
+                    "searchable": true
+                }],
+                "columns": [
+                    { 
+                        "data": "qrCodeUrl", 
+                        "name": "QrCodeUrl", 
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            if (data) {
+                                return `<img src="${data}" alt="QR Code" style="width: 80px; height: 80px;" class="img-thumbnail" />`;
+                            }
+                            return '<span class="text-muted">No Image</span>';
+                        }
+                    },
+                    { 
+                        "data": "url", 
+                        "name": "Url", 
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                             return `<a href="${data}" target="_blank" class="text-truncate d-inline-block" style="max-width: 300px;">${data}</a>`;
+                        }
+                    },
+                    {
+                        "data": "qrCodeUrl",
+                        "render": function (data, type, row) {
+                            if (data) {
+                                return `<a href="${data}" download="QRCode.png" class="btn btn-sm btn-outline-primary">Download</a>`;
+                            }
+                             return '';
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}

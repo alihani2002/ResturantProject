@@ -1,0 +1,70 @@
+@model Resturant.Web.UI.ViewModels.UserViewModel
+@using Resturant.Core.Common
+
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = Context.Request.Query["iframe"] == "true" ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4>Edit User</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" name="iframe" value="@Context.Request.Query["iframe"]" />
+                    <div class="form-group mb-3">
+                        <label asp-for="FullName" class="control-label"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Password" class="control-label">Password (Leave blank to keep unchanged)</label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Role" class="control-label"></label>
+                        <select asp-for="Role" class="form-control">
+                            <option value="">Select Role</option>
+                            <option value="@AppRoles.Admin">@AppRoles.Admin</option>
+                            <option value="@AppRoles.Manager">@AppRoles.Manager</option>
+                            <option value="@AppRoles.Chief">@AppRoles.Chief</option>
+                            <option value="@AppRoles.Waiter">@AppRoles.Waiter</option>
+                            <option value="@AppRoles.Accountant">@AppRoles.Accountant</option>
+                            <option value="@AppRoles.User">@AppRoles.User</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                    </div>
+                    <div class="form-group form-check mb-3">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                        </label>
+                    </div>
+                    <div class="form-group form-check mb-3">
+                        <label class="form-check-label text-danger">
+                            <input class="form-check-input" asp-for="IsDeleted" /> Is Deleted (Soft Delete)
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <a asp-action="Index" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-secondary">Back to List</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

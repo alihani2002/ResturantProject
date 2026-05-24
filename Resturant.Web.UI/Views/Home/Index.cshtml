@@ -1,8 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<Resturant.Core.Entities.MenuCategory>
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    body {
+        background-color: #ffffff;
+    }
+    .category-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        border-radius: 15px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        color: inherit;
+    }
+    .category-img {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+    }
+    .card-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">Our Menu</h1>
+        <p class="lead text-black-pure">Choose a category to start your order</p>
+        <div class="mx-auto bg-warning" style="height: 3px; width: 60px;"></div>
+    </div>
+
+    <div class="row g-4">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 col-sm-6">
+                    <a href="@Url.Action("Index", "Menu", new { categoryId = item.Id })" class="text-decoration-none">
+                        <div class="card card-professional h-100"> <!-- Used card-professional here -->
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="category-img" alt="@item.Name">
+                            }
+                            else
+                            {
+                                <div class="category-img d-flex align-items-center justify-content-center bg-light text-muted">
+                                    <i class="bi bi-image fs-1 opacity-50"></i>
+                                </div>
+                            }
+                            <div class="card-body text-center p-4">
+                                <h3 class="card-title text-black-pure mb-2">@item.Name</h3>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <p class="card-text text-black-pure small">@item.Description</p>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">No categories available at the moment.</p>
+            </div>
+        }
+    </div>
 </div>
+
+<partial name="_TableNumberModal" />
+
+@section Scripts {
+    <script src="~/js/table-prompt.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            TablePrompt.init();
+            
+            // If table number is not set, prompt for it
+            const currentTable = TablePrompt.get();
+            if (!currentTable) {
+                setTimeout(() => {
+                    TablePrompt.prompt();
+                }, 1000); // 1s delay for better UX
+            }
+        });
+    </script>
+}

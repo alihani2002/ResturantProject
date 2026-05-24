@@ -1,0 +1,758 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome - Qore Premium Menu</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
+    <style>
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-gradient: radial-gradient(circle at center, #1e1b18 0%, #0a0908 100%);
+            --gold-primary: #fbbf24;
+            --gold-secondary: #d97706;
+            --gold-glow: rgba(251, 191, 36, 0.15);
+            --glass-bg: rgba(18, 17, 16, 0.75);
+            --glass-border: rgba(251, 191, 36, 0.15);
+            --text-light: #f5f5f4;
+            --text-muted: #a8a29e;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Ambient Glowing Background Blobs */
+        .ambient-glow {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: drift 15s infinite alternate ease-in-out;
+        }
+        .glow-1 {
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.05) 50%, transparent 100%);
+            top: -10%;
+            left: -10%;
+        }
+        .glow-2 {
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.12) 0%, rgba(251, 191, 36, 0.03) 60%, transparent 100%);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        /* Global Arabic helper to fix disconnected rendering and letter-spacing bugs */
+        .ar-text {
+            font-family: 'Cairo', sans-serif !important;
+            letter-spacing: normal !important;
+            direction: rtl !important;
+            unicode-bidi: embed;
+        }
+
+        /* Glassmorphic Luxury Card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 30px;
+            padding: 50px 40px 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8),
+                        0 0 50px rgba(251, 191, 36, 0.02),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            max-width: 480px;
+            width: 100%;
+            z-index: 10;
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Logo Badge Container */
+        .logo-container {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: -105px auto 30px;
+            z-index: 12;
+        }
+
+        .logo-ring-outer {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-secondary) 100%);
+            border-radius: 50%;
+            padding: 3px;
+            box-shadow: 0 12px 30px rgba(217, 119, 6, 0.4),
+                        0 0 30px rgba(251, 191, 36, 0.2);
+            animation: logoPulse 4s infinite ease-in-out;
+            position: relative;
+        }
+
+        .logo-ring-outer::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border-radius: 50%;
+            border: 1px dashed rgba(251, 191, 36, 0.4);
+            animation: spin 20s linear infinite;
+        }
+
+        .logo-inner {
+            background: #0d0c0b;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #1e1b18;
+        }
+
+        .logo-inner img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            transition: transform 0.5s ease;
+        }
+
+        .logo-container:hover .logo-inner img {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Headings & Typography */
+        .welcome-title-ar {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--gold-primary);
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.15);
+        }
+
+        .welcome-title-en {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .welcome-subtitle-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 15px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .subtitle-ar {
+            font-size: 0.95rem;
+            color: #e7e5e4;
+            line-height: 1.7;
+            margin-bottom: 6px;
+        }
+
+        .subtitle-en {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Elegant Form Labels & Inputs */
+        .input-group-premium {
+            position: relative;
+            margin-bottom: 28px;
+        }
+
+        .labels-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-label-en {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .input-label-ar {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin: 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control-premium {
+            background: rgba(10, 9, 8, 0.6) !important;
+            border: 1.5px solid rgba(251, 191, 36, 0.12) !important;
+            color: #ffffff !important;
+            padding: 16px 20px 16px 52px !important;
+            border-radius: 16px !important;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 100%;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-control-premium::placeholder {
+            color: rgba(255, 255, 255, 0.25) !important;
+            font-size: 0.9rem;
+        }
+
+        .form-control-premium:focus {
+            border-color: var(--gold-primary) !important;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.15),
+                        inset 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+            outline: none;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            z-index: 5;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-control-premium:focus + .input-icon {
+            color: var(--gold-primary);
+            filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Action Submit Button with Shiny Hover and Glow */
+        .btn-gold-glow {
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-secondary) 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 18px 35px;
+            color: #000000 !important;
+            font-weight: 800;
+            font-size: 1.05rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 12px 25px rgba(217, 119, 6, 0.3),
+                        0 0 20px rgba(251, 191, 36, 0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        /* Shimmering effect overlay */
+        .btn-gold-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .btn-gold-glow:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 18px 35px rgba(217, 119, 6, 0.45),
+                        0 0 30px rgba(251, 191, 36, 0.3);
+        }
+
+        .btn-gold-glow:hover::after {
+            left: 120%;
+            transition: all 0.8s ease;
+            opacity: 1;
+        }
+
+        .btn-gold-glow:active {
+            transform: translateY(-1px) scale(0.99);
+        }
+
+        .btn-gold-glow i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-gold-glow:hover i {
+            transform: translateX(5px);
+        }
+
+        .btn-label-en {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-label-ar {
+            font-weight: 700;
+        }
+
+        .btn-divider {
+            width: 1px;
+            height: 14px;
+            background: rgba(0, 0, 0, 0.25);
+            margin: 0 4px;
+        }
+
+        /* Premium Privacy & Security Footer Badge */
+        .footer-note {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 35px;
+            padding-top: 22px;
+            text-align: center;
+        }
+
+        .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+            padding: 6px 14px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+        }
+
+        .footer-badge i {
+            color: var(--gold-primary);
+            font-size: 0.95rem;
+            animation: pulseShield 2s infinite ease-in-out;
+        }
+
+        .footer-badge span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #d6d3d1;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-note-ar {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Error Banner Custom Design */
+        .custom-error-alert {
+            background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            color: #fca5a5 !important;
+            border-radius: 16px !important;
+            padding: 14px 18px !important;
+            margin-bottom: 25px;
+            font-size: 0.88rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            animation: shake 0.5s ease;
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(45px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes drift {
+            from {
+                transform: translate(0, 0) scale(1);
+            }
+            to {
+                transform: translate(40px, 30px) scale(1.1);
+            }
+        }
+
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @@keyframes logoPulse {
+            0%, 100% {
+                box-shadow: 0 12px 30px rgba(217, 119, 6, 0.4), 0 0 30px rgba(251, 191, 36, 0.2);
+            }
+            50% {
+                box-shadow: 0 18px 40px rgba(217, 119, 6, 0.6), 0 0 45px rgba(251, 191, 36, 0.4);
+            }
+        }
+
+        @@keyframes pulseShield {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5)); }
+        }
+
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Responsive Media Queries to prevent overflow and enhance layout on mobile devices */
+        @@media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .main-wrapper {
+                padding: 55px 10px 15px; /* Offset the 80px logo protrusion for perfect visual vertical centering */
+            }
+            
+            .glass-card {
+                padding: 35px 22px 25px;
+                border-radius: 24px;
+                width: 95%;
+                max-width: 420px;
+            }
+
+            .logo-container {
+                width: 90px;
+                height: 90px;
+                margin: -80px auto 20px;
+            }
+
+            .welcome-title-ar {
+                font-size: 1.55rem;
+                margin-bottom: 6px;
+            }
+
+            .welcome-title-en {
+                font-size: 1.15rem;
+                margin-bottom: 12px;
+            }
+
+            .welcome-subtitle-container {
+                padding: 12px 15px;
+                margin-bottom: 25px;
+                border-radius: 12px;
+            }
+
+            .subtitle-ar {
+                font-size: 0.85rem;
+                line-height: 1.6;
+            }
+
+            .subtitle-en {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+
+            .input-group-premium {
+                margin-bottom: 20px;
+            }
+
+            .labels-row {
+                margin-bottom: 8px;
+            }
+
+            .input-label-en {
+                font-size: 0.72rem;
+                letter-spacing: 1px;
+            }
+
+            .input-label-ar {
+                font-size: 0.78rem;
+            }
+
+            .form-control-premium {
+                padding: 14px 18px 14px 46px !important;
+                font-size: 0.92rem;
+                border-radius: 12px !important;
+            }
+
+            .input-icon {
+                left: 18px;
+                font-size: 1.15rem;
+            }
+
+            .btn-gold-glow {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+                gap: 4px;
+                border-radius: 30px;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .btn-divider {
+                display: none;
+            }
+
+            .btn-label-en {
+                font-size: 0.8rem;
+                font-weight: 500;
+                opacity: 0.8;
+                order: 2;
+            }
+
+            .btn-label-ar {
+                font-size: 1.05rem;
+                font-weight: 700;
+                order: 1;
+            }
+
+            .btn-gold-glow i {
+                display: none;
+            }
+
+            .footer-note {
+                margin-top: 25px;
+                padding-top: 18px;
+            }
+
+            .footer-badge {
+                padding: 5px 12px;
+            }
+
+            .footer-badge span {
+                font-size: 0.7rem;
+            }
+
+            .footer-note-ar {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background ambient glowing particles -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="main-wrapper">
+        <div class="glass-card">
+            <!-- Circular Qore Brand Logo Badge -->
+            <div class="logo-container">
+                <div class="logo-ring-outer">
+                    <div class="logo-inner">
+                        <img src="/assets/images/QORELogo.png" alt="Qore Logo" onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=200'">
+                    </div>
+                </div>
+            </div>
+
+        <!-- Bilingual Welcome Headings -->
+        <h1 class="welcome-title-ar ar-text">أهلاً بك في مطعمنا</h1>
+        <h2 class="welcome-title-en">Welcome to Qore</h2>
+        
+        <!-- Bilingual Subtitle Box -->
+        @if (ViewBag.Error != null || ViewBag.TableIsOccupied == true)
+        {
+            <div class="welcome-subtitle-container" style="border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.04);">
+                <p class="subtitle-ar ar-text" style="color: #fca5a5;">هذه الطاولة محجوزة. يرجى إدخال نفس الاسم ورقم الهاتف المسجّل لهذه الطاولة (أو البيانات المخزنة على هاتفك إن كنت أنت الحاجز).</p>
+                <p class="subtitle-en" style="color: #fca5a5;">This table is occupied. Enter the exact name &amp; phone used when it was reserved (or the data cached on your phone if you are the original guest).</p>
+            </div>
+        }
+        else
+        {
+            <div class="welcome-subtitle-container">
+                <p class="subtitle-ar ar-text">يرجى إدخال اسمك ورقم هاتفك لبدء تجربة طلب فريدة ومميزة.</p>
+                <p class="subtitle-en">Please provide your details to start your digital ordering experience.</p>
+            </div>
+        }
+
+        <!-- Validation Alert Banner -->
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert custom-error-alert d-flex align-items-center gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger flex-shrink-0"></i>
+                <div class="flex-grow-1">@ViewBag.Error</div>
+            </div>
+        }
+
+        <!-- Registration Form -->
+        <form asp-action="Register" method="post" class="needs-validation" novalidate>
+            
+            <!-- Full Name Input Group -->
+            <div class="input-group-premium">
+                <div class="labels-row">
+                    <label for="nameInput" class="input-label-en">Full Name</label>
+                    <label for="nameInput" class="input-label-ar ar-text">الاسم بالكامل</label>
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" name="customerName" class="form-control-premium" id="nameInput" placeholder="e.g. Aly Hani" required autocomplete="name">
+                    <i class="bi bi-person-fill input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Phone Number Input Group -->
+            <div class="input-group-premium">
+                <div class="labels-row">
+                    <label for="phoneInput" class="input-label-en">Phone Number</label>
+                    <label for="phoneInput" class="input-label-ar ar-text">رقم الهاتف المحمول</label>
+                </div>
+                <div class="input-wrapper">
+                    <input type="tel" name="phoneNumber" class="form-control-premium" id="phoneInput" placeholder="e.g. 01xxxxxxxxx" required autocomplete="tel">
+                    <i class="bi bi-telephone-fill input-icon"></i>
+                </div>
+            </div>
+
+            <!-- Start Ordering Action Button -->
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-gold-glow">
+                    <span class="btn-label-en">Start Ordering</span>
+                    <span class="btn-divider"></span>
+                    <span class="btn-label-ar ar-text">ابدأ الطلب الآن</span>
+                    <i class="bi bi-arrow-right-short fs-4"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Premium Footer Privacy Note -->
+        <div class="footer-note">
+            <div class="footer-badge">
+                <i class="bi bi-shield-fill-check"></i>
+                <span>SECURE & PRIVATE SESSION</span>
+            </div>
+            <div class="footer-note-ar ar-text">بياناتك الشخصية آمنة طوال فترة تواجدك على الطاولة.</div>
+        </div>
+    </div>
+</div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple form validation styling for premium feedback
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })();
+
+        // Handle client-side caching of Guest details (localStorage on the user's phone)
+        document.addEventListener("DOMContentLoaded", function() {
+            const CACHE_KEY_NAME = 'qore_guest_name';
+            const CACHE_KEY_PHONE = 'qore_guest_phone';
+            const CACHE_KEY_EXPIRY = 'qore_guest_expiry';
+            const hasServerError = @(ViewBag.Error != null ? "true" : "false");
+
+            const nameInput = document.getElementById('nameInput');
+            const phoneInput = document.getElementById('phoneInput');
+            const form = document.querySelector('form');
+
+            // Always save to localStorage on successful submit (6-hour client cache)
+            form.addEventListener('submit', function(e) {
+                if (form.checkValidity()) {
+                    localStorage.setItem(CACHE_KEY_NAME, nameInput.value.trim());
+                    localStorage.setItem(CACHE_KEY_PHONE, phoneInput.value.trim());
+                    localStorage.setItem(CACHE_KEY_EXPIRY, Date.now() + (6 * 60 * 60 * 1000));
+                }
+            });
+
+            if (hasServerError) {
+                // Previous attempt failed (wrong name/phone for occupied table) → clear bad cache
+                localStorage.removeItem(CACHE_KEY_NAME);
+                localStorage.removeItem(CACHE_KEY_PHONE);
+                localStorage.removeItem(CACHE_KEY_EXPIRY);
+            } else {
+                // Pre-fill from phone cache if still valid (helps user re-use same data)
+                // BUT do NOT auto-submit — the form must always be visibly displayed to the user.
+                const expiry = localStorage.getItem(CACHE_KEY_EXPIRY);
+                if (expiry && Date.now() < parseInt(expiry)) {
+                    const cachedName = localStorage.getItem(CACHE_KEY_NAME);
+                    const cachedPhone = localStorage.getItem(CACHE_KEY_PHONE);
+                    if (cachedName && cachedPhone) {
+                        nameInput.value = cachedName;
+                        phoneInput.value = cachedPhone;
+                        // Form is pre-filled from your phone's cache.
+                        // User still sees the form and must tap the button to confirm.
+                    }
+                } else {
+                    // Expired cache — clean up
+                    localStorage.removeItem(CACHE_KEY_NAME);
+                    localStorage.removeItem(CACHE_KEY_PHONE);
+                    localStorage.removeItem(CACHE_KEY_EXPIRY);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

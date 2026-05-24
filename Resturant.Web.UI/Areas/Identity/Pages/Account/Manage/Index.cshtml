@@ -5,23 +5,40 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
-            </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
-        </form>
+<div class="content-area-header bg-white sticky-top">
+    <div class="page-header-left">
+        <a href="javascript:void(0);" class="app-sidebar-open-trigger me-2">
+            <i class="feather-align-left fs-24"></i>
+        </a>
+         <h4 class="mb-0 fw-bold">@ViewData["Title"]</h4>
+    </div>
+    <div class="page-header-right ms-auto">
+        <div class="d-flex align-items-center gap-3 page-header-right-items-wrapper">
+             <button id="update-profile-button" type="submit" form="profile-form" class="btn btn-primary">
+                <i class="feather-save me-2"></i>
+                <span>Save Changes</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="content-area-body">
+    <div class="card mb-0">
+        <div class="card-body">
+            <partial name="_StatusMessage" for="StatusMessage" />
+            <form id="profile-form" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="mb-5">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
+                </div>
+                <div class="mb-5">
+                    <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

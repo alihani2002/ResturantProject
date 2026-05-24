@@ -1,0 +1,578 @@
+@* 
+ * NOTE: didn't create migration or database
+ *@
+@model IEnumerable<Resturant.Web.UI.ViewModels.WaiterTableViewModel>
+
+@{
+    ViewData["Title"] = "Table Management";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-grid-3x3-gap-fill text-warning me-2"></i>Table Management <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-dark btn-sm" onclick="fetchAndRefreshTables()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+           <span class="badge bg-white text-dark border me-2"><i class="bi bi-circle-fill text-secondary me-1"></i> Empty</span>
+           <span class="badge bg-warning text-dark me-2"><i class="bi bi-clock-fill me-1"></i> Pending Order</span>
+           <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Active/Served</span>
+        </div>
+    </div>
+
+    <div class="row g-4" id="tables-container">
+        @foreach (var table in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6" id="table-card-@table.TableNumber">
+                <div class="card h-100 shadow-sm border-0 @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : (table.ActiveSessionId.HasValue ? "bg-info bg-opacity-10 border border-info border-opacity-25" : "bg-white")))">
+                    <div class="card-body text-center d-flex flex-column p-2">
+                        <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
+                            <h3 class="card-title h4 fw-bold mb-0">Table @table.TableNumber</h3>
+                            @if (table.ActiveSessionId.HasValue)
+                            {
+                                <button class="btn btn-xs btn-outline-danger" onclick="closeSession(@table.ActiveSessionId)" title="Close Session">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(table.CustomerName))
+                        {
+                            <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded">
+                                <div><i class="bi bi-person-fill text-secondary me-1"></i><strong>@table.CustomerName</strong></div>
+                                <div class="text-muted"><i class="bi bi-telephone-fill me-1"></i>@table.PhoneNumber</div>
+                            </div>
+                        }
+                        
+                        <div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">
+                            @if (table.Orders != null && table.Orders.Any())
+                            {
+                                foreach (var order in table.Orders)
+                                {
+                                    <div class="card mb-2 shadow-sm order-card border-@((order.Status == "Pending") ? "warning" : "success")">
+                                        <div class="card-header py-1 @((order.Status == "Pending") ? "bg-warning text-dark" : (order.Status == "Ready" ? "bg-info text-white" : "bg-success text-white")) d-flex justify-content-between align-items-center">
+                                            <small class="fw-bold">Order #@order.OrderId</small>
+                                            @if (order.Status == "Ready")
+                                            {
+                                                <span class="badge bg-white text-info fw-bold pulse-green">READY</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-white text-dark small">@order.Status</span>
+                                            }
+                                        </div>
+                                        <div class="card-body p-2 text-start">
+                                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                                <small class="text-muted">Total:</small>
+                                                 <small class="fw-bold">@(order.OrderItems.Where(i => !i.IsCancelled).Sum(i => i.EffectiveTotal).ToString("0.00")) L.E.</small>
+                                            </div>
+
+                                            @if (order.OrderItems != null && order.OrderItems.Any())
+                                            {
+                                                <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                                                    @foreach (var item in order.OrderItems)
+                                                    {
+                                                        <li class="d-flex align-items-center justify-content-between gap-1 mb-1" id="waiter-item-@order.OrderId-@item.Name.Replace(" ","-")">
+                                                            <div>
+                                                                <strong>@item.Quantity x @item.Name</strong>
+                                                                @if (!string.IsNullOrEmpty(item.AddOns))
+                                                                {
+                                                                    <div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ @item.AddOns</div>
+                                                                }
+                                                            </div>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(order.Note))
+                                            {
+                                                <div class="alert alert-warning py-1 px-2 mb-2">
+                                                    <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>@order.Note</small>
+                                                </div>
+                                            }
+                                            
+                                            <div class="d-flex gap-1 mt-2">
+                                                @if (order.Status == "Pending")
+                                                {
+                                                    <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(@order.OrderId)" title="Accept Order">
+                                                        <i class="bi bi-check2"></i> Accept
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                        <i class="bi bi-x"></i> 
+                                                    </button>
+                                                }
+                                                else if (order.Status == "Ready")
+                                                {
+                                                    <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(@order.OrderId)" title="Serve Order">
+                                                        <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                        <i class="bi bi-x"></i> 
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                        <i class="bi bi-x"></i> 
+                                                     </button>
+                                                     <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(@order.OrderId)" title="Clear Table">
+                                                        <i class="bi bi-check-circle"></i> Clear
+                                                     </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                @if (table.ActiveSessionId.HasValue)
+                                {
+                                    <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
+                                        <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
+                                        Waiting for Order
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted small mt-4">
+                                        <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                                        Available
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .pulse-green {
+        animation: pulse-green-animation 2s infinite;
+        border: 2px solid #0dcaf0 !important;
+    }
+
+    @@keyframes pulse-green-animation {
+        0% { box-shadow: 0 0 0 0px rgba(13, 202, 240, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(13, 202, 240, 0); }
+        100% { box-shadow: 0 0 0 0px rgba(13, 202, 240, 0); }
+    }
+    
+    .order-card {
+        transition: all 0.3s ease;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // SignalR Connection with auto-reconnect and fallback
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/orderHub", {
+                transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
+            })
+            .withAutomaticReconnect([0, 1000, 3000, 5000, 10000])
+            .configureLogging(signalR.LogLevel.Information) // Increased logging for debugging
+            .build();
+            
+        console.log("SignalR Connection object created");
+
+        // Connection state indicator
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connection-status');
+            if (badge) {
+                badge.className = connected ? 'badge bg-success ms-2 shadow-sm' : 'badge bg-danger ms-2';
+                badge.innerHTML = connected 
+                    ? '<i class="bi bi-wifi"></i> Live' 
+                    : '<i class="bi bi-wifi-off"></i> Out of Connection <button class="btn btn-xs btn-light ms-2 py-0 px-1 text-danger fw-bold" onclick="startConnection()">Try Now</button>';
+            }
+        }
+
+        // Update table card UI dynamically
+        function updateTableCard(tableData) {
+            const tableNumber = tableData.tableNumber;
+            const card = document.getElementById(`table-card-${tableNumber}`);
+            if (!card) return;
+
+            const cardInner = card.querySelector('.card');
+            const ordersContainer = card.querySelector('.orders-container');
+
+            // Update card background based on aggregate status
+            cardInner.className = 'card h-100 shadow-sm border-0'; // Reset
+            if (tableData.status === 'Pending') {
+                cardInner.classList.add('bg-warning', 'bg-opacity-25');
+            } else if (tableData.status === 'Active') {
+                cardInner.classList.add('bg-success', 'bg-opacity-25');
+            } else if (tableData.sessionId) {
+                cardInner.classList.add('bg-info', 'bg-opacity-10', 'border', 'border-info', 'border-opacity-25');
+            } else {
+                cardInner.classList.add('bg-white');
+            }
+
+            // Update Header with Session Info
+            let headerHtml = `
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
+                    <h3 class="card-title h4 fw-bold mb-0">Table ${tableNumber}</h3>
+                    ${tableData.sessionId ? `
+                        <button class="btn btn-xs btn-outline-danger" onclick="closeSession(${tableData.sessionId})" title="Close Session">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            let sessionHtml = '';
+            if (tableData.customerName) {
+                sessionHtml = `
+                    <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded">
+                        <div><i class="bi bi-person-fill text-secondary me-1"></i><strong>${tableData.customerName}</strong></div>
+                        <div class="text-muted"><i class="bi bi-telephone-fill me-1"></i>${tableData.phoneNumber}</div>
+                    </div>
+                `;
+            }
+
+            let ordersHtml = '';
+            if (tableData.orders && tableData.orders.length > 0) {
+                tableData.orders.forEach(order => {
+                    const isPending = order.status === 'Pending' || order.status === 0;
+                    const isReady = order.status === 'Ready' || order.status === 3;
+                    const isConfirmed = order.status === 'Confirmed' || order.status === 1;
+                    const isInPrep = order.status === 'InPreparation' || order.status === 2;
+                    
+                    let statusText = 'Active';
+                    let themeColor = 'success';
+                    let badgeHtml = `<span class="badge bg-white text-dark small">Active</span>`;
+
+                    if (isPending) {
+                        statusText = 'Pending';
+                        themeColor = 'warning';
+                        badgeHtml = `<span class="badge bg-white text-dark small">Pending</span>`;
+                    } else if (isReady) {
+                        statusText = 'Ready';
+                        themeColor = 'info';
+                        badgeHtml = `<span class="badge bg-white text-info fw-bold pulse-green shadow-sm">READY</span>`;
+                    } else if (isInPrep) {
+                         statusText = 'Cooking';
+                         themeColor = 'primary';
+                         badgeHtml = `<span class="badge bg-white text-primary small">Cooking</span>`;
+                    } else if (isConfirmed) {
+                         statusText = 'Confirmed';
+                         themeColor = 'success';
+                         badgeHtml = `<span class="badge bg-white text-success small">Confirmed</span>`;
+                    }
+
+                    const time = order.orderTime ? new Date(order.orderTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+                    let itemsHtml = '';
+                    if (order.items && order.items.length > 0) {
+                        itemsHtml = `
+                            <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                                ${order.items.map(i => {
+                                    const itemName = i.name || i.menuItemName || 'Item';
+                                    const isCancelled = i.isCancelled === true;
+                                    let addonsList = '';
+                                    if (!isCancelled && i.addOns && i.addOns.length > 0) {
+                                        addonsList = `<div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ ${i.addOns.map(a => a.name).join(', ')}</div>`;
+                                    }
+                                    const cancelBtn = !isCancelled && i.id
+                                        ? `<button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" style="font-size:0.65rem;" onclick="cancelOrderItem(${i.id})" title="Cancel item"><i class="bi bi-x"></i></button>`
+                                        : (isCancelled ? `<span class="badge bg-danger ms-1" style="font-size:0.6rem;">Cancelled</span>` : '');
+                                    const lineStyle = isCancelled ? 'text-decoration: line-through; color: #ef4444; opacity:0.7;' : '';
+                                    return `<li class="d-flex align-items-start justify-content-between gap-1 mb-1" style="${lineStyle}">
+                                        <div><strong>${i.quantity} x ${itemName}</strong>${addonsList}</div>
+                                        ${cancelBtn}
+                                    </li>`;
+                                }).join('')}
+                            </ul>
+                        `;
+                    }
+                    
+                     let noteHtml = '';
+                    if (order.note) {
+                        noteHtml = `
+                            <div class="alert alert-warning py-1 px-2 mb-2">
+                                <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>${order.note}</small>
+                            </div>
+                        `;
+                    }
+
+                    let actionsHtml = '';
+                    if (isPending) {
+                        actionsHtml = `
+                             <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(${order.id})" title="Accept Order">
+                                <i class="bi bi-check2"> Accept</i> 
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                        `;
+                    } else if (isReady) {
+                        actionsHtml = `
+                             <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(${order.id})" title="Serve Order">
+                                <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                            </button>
+                             <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                        `;
+                    } else {
+                         actionsHtml = `
+                             <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                                <i class="bi bi-x"></i> 
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(${order.id})" title="Clear Table">
+                                <i class="bi bi-check-circle"></i> Clear
+                            </button>
+                        `;
+                    }
+
+                    ordersHtml += `
+                        <div class="card mb-2 shadow-sm order-card border-${themeColor} ${isReady ? 'border-3' : ''}">
+                            <div class="card-header py-1 bg-${themeColor} ${isPending ? 'text-dark' : 'text-white'} d-flex justify-content-between align-items-center">
+                                <small class="fw-bold">Order #${order.id}</small>
+                                ${badgeHtml}
+                            </div>
+                            <div class="card-body p-2 text-start">
+                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                                    <small class="text-muted">${time}</small>
+                                    <small class="fw-bold">${(order.totalAmount || 0).toFixed(2)} L.E.</small>
+                                </div>
+                                ${itemsHtml}
+                                ${noteHtml}
+                                <div class="d-flex gap-1 mt-2">
+                                    ${actionsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                if (tableData.sessionId) {
+                    ordersHtml = `
+                        <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
+                            <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
+                            Waiting for Order
+                        </div>
+                    `;
+                } else {
+                     ordersHtml = `
+                        <div class="text-muted small mt-4">
+                            <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
+                            Available
+                        </div>
+                    `;
+                }
+            }
+
+            // Replace content
+            card.querySelector('.card-body').innerHTML = headerHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>`;
+
+            // Flash animation
+            cardInner.style.transition = 'transform 0.2s';
+            cardInner.style.transform = 'scale(1.02)';
+            setTimeout(() => { cardInner.style.transform = 'scale(1)'; }, 200);
+        }
+
+        // Play notification sound
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') audioContext.resume();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) { console.error(e); }
+        }
+
+        // Show toast notification
+        function showNotification(message, type = 'info') {
+            const container = document.querySelector('.toast-container') || createToastContainer();
+            const toastId = 'toast-' + Date.now();
+            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+            toast.show();
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // SignalR event handlers
+        connection.on("NewOrderReceived", function (order) {
+            playNotificationSound();
+            showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
+            fetchAndRefreshTables();
+        });
+
+        connection.on("OrderStatusChanged", function (order) {
+            fetchAndRefreshTables();
+        });
+
+        connection.on("OrderReady", function (order) {
+             showNotification(`Order for Table ${order.tableNumber} is ready!`, 'success');
+             fetchAndRefreshTables();
+        });
+
+        connection.on("PaymentProcessed", function (order) {
+            showNotification(`Payment received for Table ${order.tableNumber}`, 'success');
+            fetchAndRefreshTables();
+        });
+
+        connection.on("TableCleared", function (order) {
+            fetchAndRefreshTables();
+        });
+        
+        connection.on("ReceiveOrderDetails", function (order) {
+            playNotificationSound();
+             fetchAndRefreshTables();
+        });
+
+        connection.on("ReceiveWaiterUpdate", function (message) {
+            fetchAndRefreshTables();
+        });
+
+        connection.on("OrderItemCancelled", function (data) {
+            showNotification(`Item cancelled: ${data.cancelledItemName} on Table ${data.tableNumber}`, 'warning');
+            fetchAndRefreshTables();
+        });
+
+        // Fetch and refresh tables data
+        async function fetchAndRefreshTables() {
+            try {
+                const response = await fetch('/Waiter/GetTablesData');
+                if (response.ok) {
+                    const tables = await response.json();
+                    tables.forEach(table => {
+                        updateTableCard(table);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching tables:', error);
+            }
+        }
+
+        // Start connection
+        let isConnecting = false;
+        async function startConnection() {
+            if (isConnecting || connection.state === signalR.HubConnectionState.Connected) return;
+            isConnecting = true;
+            
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+                await connection.invoke("JoinDashboard", "waiter");
+                updateConnectionStatus(true);
+            } catch (err) {
+                console.error("SignalR Connection Error:", err);
+                updateConnectionStatus(false);
+                setTimeout(startConnection, 5000);
+            } finally {
+                isConnecting = false;
+            }
+        }
+
+        connection.onreconnecting(() => updateConnectionStatus(false));
+        connection.onreconnected(async () => {
+            console.log("SignalR Reconnected");
+            try {
+                await connection.invoke("JoinDashboard", "waiter");
+                updateConnectionStatus(true);
+                fetchAndRefreshTables();
+            } catch (e) { console.error(e); }
+        });
+        connection.onclose(() => {
+            updateConnectionStatus(false);
+            setTimeout(startConnection, 5000);
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial fetch to show data even if SignalR is connecting
+            fetchAndRefreshTables();
+            
+            // Start SignalR with a small delay to ensure everything is ready
+            setTimeout(startConnection, 500);
+        });
+
+        function acceptOrder(orderId) {
+            fetch('/Waiter/AcceptOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+
+        function serveOrder(orderId) {
+            fetch('/Waiter/ServeOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+
+        function cancelOrder(orderId, tableNumber) {
+            if (!confirm('Are you sure you want to cancel this order?')) return;
+            fetch('/Waiter/CancelOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+
+        function cancelOrderItem(orderItemId) {
+            if (!confirm('Cancel this single item from the order?')) return;
+            fetch('/Waiter/CancelOrderItem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderItemId=${orderItemId}`
+            }).then(r => {
+                if (r.ok) { showNotification('Item cancelled successfully', 'warning'); fetchAndRefreshTables(); }
+                else alert('Failed to cancel item');
+            });
+        }
+
+        function clearTable(orderId) {
+            if (!confirm('Is this order/table empty and ready to be cleared?')) return;
+            fetch('/Waiter/CompleteOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `orderId=${orderId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+
+        function closeSession(sessionId) {
+            if (!confirm('Are you sure you want to CLOSE this table session? This will clear guest info.')) return;
+            fetch('/Waiter/CloseSession', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `sessionId=${sessionId}`
+            }).then(r => r.ok && fetchAndRefreshTables());
+        }
+    </script>
+}

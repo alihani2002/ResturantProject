@@ -1,0 +1,604 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scan QR Code Again - Qore Premium</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
+    <style>
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-gradient: radial-gradient(circle at center, #1e1b18 0%, #0a0908 100%);
+            --gold-primary: #fbbf24;
+            --gold-secondary: #d97706;
+            --gold-glow: rgba(251, 191, 36, 0.15);
+            --glass-bg: rgba(18, 17, 16, 0.75);
+            --glass-border: rgba(251, 191, 36, 0.15);
+            --text-light: #f5f5f4;
+            --text-muted: #a8a29e;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Ambient Glowing Background Blobs */
+        .ambient-glow {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: drift 15s infinite alternate ease-in-out;
+        }
+        .glow-1 {
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(217, 119, 6, 0.05) 50%, transparent 100%);
+            top: -10%;
+            left: -10%;
+        }
+        .glow-2 {
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.12) 0%, rgba(251, 191, 36, 0.03) 60%, transparent 100%);
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        /* Global Arabic helper to fix disconnected rendering and letter-spacing bugs */
+        .ar-text {
+            font-family: 'Cairo', sans-serif !important;
+            letter-spacing: normal !important;
+            direction: rtl !important;
+            unicode-bidi: embed;
+        }
+
+        /* Glassmorphic Luxury Card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 30px;
+            padding: 50px 40px 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8),
+                        0 0 50px rgba(251, 191, 36, 0.02),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.05);
+            max-width: 520px;
+            width: 100%;
+            z-index: 10;
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Header Brand Title */
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .brand-header i {
+            color: var(--gold-primary);
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 6px var(--gold-primary));
+        }
+
+        .brand-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 2.5px;
+            color: #ffffff;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        /* Animated Scanner Graphic */
+        .scanner-container {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            margin: 0 auto 35px;
+            background: rgba(251, 191, 36, 0.02);
+            border: 2px dashed rgba(251, 191, 36, 0.25);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseBox 3s infinite ease-in-out;
+        }
+
+        .scanner-corner {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-color: var(--gold-primary);
+            border-style: solid;
+            pointer-events: none;
+        }
+        .corner-tl { top: -2px; left: -2px; border-width: 4px 0 0 4px; border-top-left-radius: 14px; }
+        .corner-tr { top: -2px; right: -2px; border-width: 4px 4px 0 0; border-top-right-radius: 14px; }
+        .corner-bl { bottom: -2px; left: -2px; border-width: 0 0 4px 4px; border-bottom-left-radius: 14px; }
+        .corner-br { bottom: -2px; right: -2px; border-width: 0 4px 4px 0; border-bottom-right-radius: 14px; }
+
+        .scanner-icon {
+            font-size: 6rem;
+            color: rgba(251, 191, 36, 0.95);
+            filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.35));
+            animation: scanLogo 2.5s infinite alternate ease-in-out;
+        }
+
+        .scan-laser {
+            position: absolute;
+            left: 5%;
+            width: 90%;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(251,191,36,0) 0%, rgba(251,191,36,1) 50%, rgba(251,191,36,0) 100%);
+            box-shadow: 0 0 15px 3px rgba(251, 191, 36, 0.8);
+            animation: laserMove 2.5s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        /* Bilingual Copy Headings */
+        .title-ar {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--gold-primary);
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.15);
+        }
+
+        .title-en {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .desc-container {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 20px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 30px;
+        }
+
+        .desc-ar {
+            font-size: 0.95rem;
+            color: #e7e5e4;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .desc-en {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* Warning Alert Box */
+        .custom-warn-alert {
+            background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            color: #fca5a5 !important;
+            border-radius: 16px !important;
+            padding: 14px 18px !important;
+            margin-bottom: 30px;
+            font-size: 0.88rem;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            animation: softAlertPulse 2.5s infinite ease-in-out;
+        }
+
+        /* Interactive Steps */
+        .steps-container {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 25px;
+            margin-bottom: 35px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 15px;
+        }
+
+        .step-item-ar {
+            flex-direction: row-reverse;
+        }
+
+        .step-badge {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--gold-primary);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            flex-shrink: 0;
+            font-size: 0.95rem;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.05);
+        }
+
+        .step-text {
+            font-size: 0.9rem;
+            color: #e7e5e4;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .step-text-ar {
+            text-align: right;
+        }
+
+        /* Premium Help Button Styling */
+        .help-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 50px;
+            padding: 16px 28px;
+            color: var(--text-light) !important;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.4s ease;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .help-btn:hover {
+            background: rgba(251, 191, 36, 0.08);
+            border-color: var(--gold-primary);
+            color: var(--gold-primary) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(251, 191, 36, 0.15),
+                        0 0 15px rgba(251, 191, 36, 0.05);
+        }
+
+        .help-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .help-btn i {
+            font-size: 1.1rem;
+            animation: ringBell 2.5s infinite ease-in-out;
+        }
+
+        .help-btn span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-btn-divider {
+            width: 1px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(45px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes drift {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(40px, 30px) scale(1.1); }
+        }
+
+        @@keyframes laserMove {
+            0%, 100% { top: 6%; }
+            50% { top: 92%; }
+        }
+
+        @@keyframes pulseBox {
+            0%, 100% { border-color: rgba(251, 191, 36, 0.25); box-shadow: 0 0 10px rgba(251, 191, 36, 0); }
+            50% { border-color: rgba(251, 191, 36, 0.5); box-shadow: 0 0 20px rgba(251, 191, 36, 0.08); }
+        }
+
+        @@keyframes scanLogo {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.04); opacity: 1; filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.5)); }
+        }
+
+        @@keyframes softAlertPulse {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.08); }
+            50% { border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.12); }
+        }
+
+        @@keyframes ringBell {
+            0%, 100%, 50% { transform: rotate(0deg); }
+            5%, 15%, 25% { transform: rotate(-8deg); }
+            10%, 20%, 30% { transform: rotate(8deg); }
+            35% { transform: rotate(-3deg); }
+            40% { transform: rotate(3deg); }
+            45% { transform: rotate(0deg); }
+        }
+
+        /* Responsive Media Queries to prevent overflow and enhance layout on mobile devices */
+        @@media (max-width: 480px) {
+            body {
+                padding: 0;
+            }
+
+            .main-wrapper {
+                padding: 15px 10px;
+            }
+
+            .glass-card {
+                padding: 35px 22px 25px;
+                border-radius: 24px;
+                width: 95%;
+                max-width: 420px;
+            }
+
+            .brand-header {
+                margin-bottom: 20px;
+            }
+
+            .brand-header i {
+                font-size: 1.5rem;
+            }
+
+            .brand-title {
+                font-size: 1.2rem;
+                letter-spacing: 1.5px;
+            }
+
+            .scanner-container {
+                width: 140px;
+                height: 140px;
+                margin-bottom: 25px;
+                border-radius: 20px;
+            }
+
+            .scanner-corner {
+                width: 20px;
+                height: 20px;
+            }
+
+            .corner-tl { border-top-left-radius: 10px; }
+            .corner-tr { border-top-right-radius: 10px; }
+            .corner-bl { border-bottom-left-radius: 10px; }
+            .corner-br { border-bottom-right-radius: 10px; }
+
+            .scanner-icon {
+                font-size: 4.8rem;
+            }
+
+            .title-ar {
+                font-size: 1.5rem;
+                margin-bottom: 6px;
+            }
+
+            .title-en {
+                font-size: 1.1rem;
+                margin-bottom: 18px;
+            }
+
+            .desc-container {
+                padding: 14px 18px;
+                margin-bottom: 20px;
+                border-radius: 14px;
+            }
+
+            .desc-ar {
+                font-size: 0.85rem;
+                line-height: 1.6;
+                margin-bottom: 8px;
+            }
+
+            .desc-en {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+
+            .custom-warn-alert {
+                padding: 12px 15px !important;
+                margin-bottom: 20px;
+                font-size: 0.82rem;
+                border-radius: 12px !important;
+            }
+
+            .steps-container {
+                padding-top: 18px;
+                margin-bottom: 25px;
+            }
+
+            .step-item {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+
+            .step-badge {
+                width: 30px;
+                height: 30px;
+                font-size: 0.85rem;
+            }
+
+            .step-text {
+                font-size: 0.82rem;
+            }
+
+            .help-btn {
+                padding: 12px 20px;
+                font-size: 0.88rem;
+                flex-direction: column;
+                gap: 8px;
+                border-radius: 24px;
+                width: 100%;
+            }
+
+            .help-btn i {
+                font-size: 1.2rem;
+                margin-bottom: 2px;
+            }
+
+            .help-btn span {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .help-btn-divider {
+                display: none;
+            }
+
+            .help-btn .ar-text {
+                font-size: 1.05rem;
+                font-weight: 700;
+                order: 1;
+            }
+
+            .help-btn span span:not(.ar-text) {
+                font-size: 0.8rem;
+                font-weight: 500;
+                opacity: 0.8;
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background ambient glowing particles -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="main-wrapper">
+        <div class="glass-card">
+        <!-- Brand Header Title -->
+        <div class="brand-header">
+            <i class="bi bi-egg-fried"></i>
+            <h1 class="brand-title">Qore System</h1>
+        </div>
+
+        <!-- Animated Scanner Section -->
+        <div class="scanner-container">
+            <span class="scanner-corner corner-tl"></span>
+            <span class="scanner-corner corner-tr"></span>
+            <span class="scanner-corner corner-bl"></span>
+            <span class="scanner-corner corner-br"></span>
+            
+            <div class="scan-laser"></div>
+            <i class="bi bi-qr-code-scan scanner-icon"></i>
+        </div>
+
+        <!-- Custom Warning Alert -->
+        <div class="custom-warn-alert d-flex align-items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill fs-5 text-danger flex-shrink-0"></i>
+            <div class="flex-grow-1 ar-text">يجب استخدام رمز الـ QR المتواجد على الطاولة لطلب الطعام.</div>
+        </div>
+
+        <!-- Main Headings (Bilingual) -->
+        <h2 class="title-ar ar-text">امسح رمز الـ QR مرة أخرى</h2>
+        <h3 class="title-en">Scan QR Code Again</h3>
+
+        <!-- Main Descriptions -->
+        <div class="desc-container">
+            <p class="desc-ar ar-text">يرجى تصفح قائمة الطعام وطلب وجبتك عن طريق مسح رمز الاستجابة السريعة (QR Code) المثبّت على طاولتك الخاصة لنتمكن من تقديم طلبك بشكل صحيح.</p>
+            <p class="desc-en">Please scan the QR code located on your dining table to browse our luxury menu and place your order. This helps ensure your order is delivered to the correct table.</p>
+        </div>
+
+        <!-- Step Instructions -->
+        <div class="steps-container">
+            <!-- Step 1 (Arabic) -->
+            <div class="step-item step-item-ar">
+                <div class="step-badge">١</div>
+                <p class="step-text step-text-ar ar-text">امسح رمز الـ QR الملصق على طاولتك بالهاتف</p>
+            </div>
+            <!-- Step 2 (English) -->
+            <div class="step-item">
+                <div class="step-badge">2</div>
+                <p class="step-text">Add your favorite delicious dishes to your cart</p>
+            </div>
+            <!-- Step 3 (Arabic) -->
+            <div class="step-item step-item-ar">
+                <div class="step-badge">٣</div>
+                <p class="step-text step-text-ar ar-text">أكد طلبك وسيصلك ساخناً إلى طاولتك</p>
+            </div>
+        </div>
+
+        <!-- Interactive Help Action -->
+        <a href="javascript:void(0)" class="help-btn" onclick="alert('Please call a waiter to assist you with scanning the QR code!')">
+            <i class="bi bi-bell-fill"></i>
+            <span>
+                <span class="ar-text">اطلب المساعدة</span>
+                <span class="help-btn-divider"></span>
+                <span>Call Waiter for Assistance</span>
+            </span>
+        </a>
+    </div>
+</div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

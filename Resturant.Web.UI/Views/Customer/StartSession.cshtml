@@ -1,0 +1,52 @@
+@* 
+ * NOTE: didn't create migration or database
+ *@
+@{
+    ViewData["Title"] = "Welcome to Our Restaurant";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-dark text-gold text-center py-4">
+                    <h3 class="font-weight-light mb-0">Table @ViewBag.TableNumber</h3>
+                    <p class="mb-0">Please enter your details to start ordering</p>
+                </div>
+                <div class="card-body p-5">
+                    <form asp-action="StartSession" method="post">
+                        <input type="hidden" name="tableId" value="@ViewBag.TableId" />
+                        
+                        <div class="form-group mb-4">
+                            <label class="small mb-1 text-muted" for="name">Your Name</label>
+                            <input class="form-control py-4 rounded-pill" id="name" name="name" type="text" placeholder="Enter your name" required />
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="small mb-1 text-muted" for="phone">Phone Number</label>
+                            <input class="form-control py-4 rounded-pill" id="phone" name="phone" type="tel" placeholder="Enter your phone number" required />
+                            <small class="form-text text-muted">We use this to help you track your order.</small>
+                        </div>
+                        
+                        <div class="form-group mt-5">
+                            <button class="btn btn-dark btn-block btn-lg rounded-pill shadow-sm" type="submit">
+                                Start Ordering <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3 bg-light border-0">
+                    <div class="small">Already have an active order? <a asp-action="Track">Track it here</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gold { color: #d4af37; }
+    .bg-dark { background-color: #1a1a1a !important; }
+    .btn-dark { background-color: #1a1a1a; border-color: #1a1a1a; }
+    .btn-dark:hover { background-color: #d4af37; border-color: #d4af37; color: #1a1a1a; }
+    .card { border: none; }
+</style>

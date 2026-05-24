@@ -1,0 +1,120 @@
+Restaurant QR Ordering System – Core Features
+1. Table QR Code Generation
+•	Admin can create a new table from the dashboard. 
+•	A unique QR code should be automatically generated for each table. 
+•	The QR code must contain the table number . 
+•	Customers can scan the QR code to open the restaurant ordering web app directly. 
+•	Each QR code should be linked to its specific table. 
+________________________________________
+2. Fast Waiter Login
+•	Waiters should have a quick login system. 
+•	Avoid requiring email and password entry on every login. 
+•	Support persistent sessions or “Remember Me” functionality. 
+•	Allow fast access using PIN code, QR login, or saved device authentication. 
+•	Keep the login flow optimized for restaurant speed and workflow. 
+________________________________________
+3. Order Merge & Add-On Ordering
+•	Customers should be able to add more items to an existing order. 
+•	New items must be merged into the same active order. 
+•	Kitchen and cashier should receive updates in real time. 
+•	The order should remain under the same invoice/bill. 
+•	Prevent creating duplicate orders for the same table session. 
+________________________________________
+4. Customer Order Form
+•	When scan qr make user enter his name and phone number and take number of table from qr 
+Customer order form should include: 
+o	Customer Name 
+o	Phone Number 
+•	Table number should be detected automatically from the scanned QR code. 
+•	Customers should not enter the table number manually. 
+•	Form should be simple and mobile-friendly. 
+________________________________________
+5. Order Tracking by Phone Number
+•	Customers can search for their order using their phone number. 
+•	Customers should be able to track the order status in real time. 
+•	Example statuses: 
+o	Pending 
+o	Preparing 
+o	Ready 
+o	Served 
+o	Paid 
+•	Order tracking should work without requiring account creation. 
+________________________________________
+6. Table Session Management
+•	A table session should start once a customer places an order. 
+•	The session should remain active until the waiter closes it manually. 
+•	Multiple orders and add-ons should remain connected to the same session. 
+•	Session should store: 
+o	Table data 
+o	Orders 
+o	Invoice 
+o	Customer information 
+•	Prevent opening multiple active sessions for the same table. 
+________________________________________
+7. Product Recommendations & Add-Ons
+•	Show smart product recommendations while ordering. 
+•	Example: 
+o	Burger → Recommend Fries + Cola 
+•	Add-ons/extras should appear directly on the product page. 
+•	Example add-ons: 
+o	Extra Cheese 
+o	Sauces 
+o	Double Patty 
+•	Recommendations should help increase average order value. 
+________________________________________
+8. Admin Product Management
+•	Admin can create and manage products. 
+•	Admin can assign: 
+o	Recommended products 
+o	Add-ons / extras 
+o	Optional ingredients 
+•	Admin can control pricing for add-ons. 
+•	Recommendations should be customizable per product. 
+________________________________________
+9. Multi-Language Support
+•	Customer interface should support: 
+o	Arabic 
+o	English 
+•	Users should be able to switch language from the UI. 
+•	All menus, buttons, and order statuses should support localization.
+10. Analytics & Sales Dashboard
+•	Admin should have access to a complete analytics dashboard. 
+•	Dashboard should display: 
+o	Total sales 
+o	Daily / weekly / monthly revenue 
+o	Total orders 
+o	Most ordered products 
+o	Least ordered products 
+o	Average Order Value (AOV) 
+o	Peak order times 
+o	Best-performing categories 
+o	Active table sessions 
+•	Analytics should include charts and visual reports. 
+•	Admin should be able to filter data by: 
+o	Date range 
+o	Category 
+o	Product 
+o	Table 
+•	Suggested advanced analytics: 
+o	Customer return rate 
+o	Best-selling add-ons 
+o	Conversion rate of recommended products 
+o	Sales comparison between time periods 
+o	Most profitable products 
+o	Busy hours heatmap 
+________________________________________
+11. Popular & Recommended Orders for Customers
+•	Customers should see the most popular products in the menu. 
+•	Each category should include: 
+o	“Most Ordered” 
+o	“Recommended Order” 
+•	Example: 
+o	Burgers Category → “Recommended Combo” 
+•	Recommendations should help customers order faster. 
+•	Suggested products should update dynamically based on sales data. 
+•	Display trending items with badges like: 
+o	Best Seller 
+o	Trending 
+o	Recommended 
+•	Recommendations can be manually controlled by the admin or generated automatically from analytics.
+

@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Resturant.Core.Common;
 using Resturant.Core.Entities;
 
 namespace Resturant.Web.UI.Areas.Identity.Pages.Account
@@ -122,6 +123,9 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // Assign "User" role by default
+                    await _userManager.AddToRoleAsync(user, AppRoles.User);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

@@ -1,0 +1,94 @@
+@model Resturant.Web.UI.ViewModels.UserViewModel
+@using Resturant.Core.Common
+
+@{
+    ViewData["Title"] = "Create User";
+    Layout = Context.Request.Query["iframe"] == "true" ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-top border-0 border-4 border-primary">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                <h4 class="card-title mb-0 text-primary fw-bold"><i class="feather-user-plus me-2"></i>Create New User</h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-user"></i></span>
+                                <input asp-for="FullName" class="form-control" placeholder="Enter full name" />
+                            </div>
+                            <span asp-validation-for="FullName" class="text-danger fs-12"></span>
+                        </div>
+ 
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-mail"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger fs-12"></span>
+                        </div>
+ 
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-lock"></i></span>
+                                <input asp-for="Password" class="form-control" placeholder="Enter password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger fs-12"></span>
+                        </div>
+ 
+                        <div class="col-md-6">
+                            <label asp-for="Role" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-shield"></i></span>
+                                <select asp-for="Role" class="form-select">
+                                    <option value="">Select Role</option>
+                                    <option value="@AppRoles.Admin">@AppRoles.Admin</option>
+                                    <option value="@AppRoles.Manager">@AppRoles.Manager</option>
+                                    <option value="@AppRoles.Chief">@AppRoles.Chief</option>
+                                    <option value="@AppRoles.Waiter">@AppRoles.Waiter</option>
+                                    <option value="@AppRoles.Accountant">@AppRoles.Accountant</option>
+                                    <option value="@AppRoles.User">@AppRoles.User</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="Role" class="text-danger fs-12"></span>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" asp-for="IsActive" checked="checked" />
+                                <label class="form-check-label fw-semibold" asp-for="IsActive">
+                                    @Html.DisplayNameFor(model => model.IsActive)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <input type="hidden" name="iframe" value="@Context.Request.Query["iframe"]" />
+
+                    <hr class="my-4 border-dashed" />
+ 
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" asp-route-iframe="@(Context.Request.Query["iframe"] == "true" ? "true" : "")" class="btn btn-light text-muted">
+                            <i class="feather-arrow-left me-1"></i> Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="feather-plus-circle me-1"></i> Create User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
