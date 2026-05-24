@@ -107,7 +107,19 @@ namespace Resturant.Web.UI.Controllers
                 totalAmount += (orderItem.Price + addOnsTotal) * orderItem.Quantity;
             }
 
-            order.TotalAmount = totalAmount;
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync() 
+                           ?? new RestaurantSetting { TaxPercentage = 14, ServicePercentage = 12 };
+
+            decimal serviceAmount = totalAmount * (settings.ServicePercentage / 100);
+            decimal taxAmount = (totalAmount + serviceAmount) * (settings.TaxPercentage / 100);
+            decimal grandTotal = totalAmount + serviceAmount + taxAmount;
+
+            order.TaxPercentage = settings.TaxPercentage;
+            order.ServicePercentage = settings.ServicePercentage;
+            order.ServiceAmount = serviceAmount;
+            order.TaxAmount = taxAmount;
+            order.TotalAmount = grandTotal;
+
             await _context.SaveChangesAsync();
 
             // Prepare order data for SignalR

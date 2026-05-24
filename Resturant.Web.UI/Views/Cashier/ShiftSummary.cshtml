@@ -1,0 +1,286 @@
+@model Resturant.Core.Entities.CashierShift
+@{
+    Layout = null;
+    
+    decimal expected = Model.ExpectedAmount;
+    decimal actual = Model.ActualAmountEntered ?? 0;
+    decimal diff = Model.Difference ?? 0;
+    decimal baseSales = ViewBag.ShiftTotalSales;
+    decimal tips = ViewBag.ShiftTotalTips;
+
+    string diffLabel = "متزن / Balanced";
+    if (diff < 0) {
+        diffLabel = "عجز / Deficit";
+    } else if (diff > 0) {
+        diffLabel = "زيادة / Surplus";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ملخص الوردية - #@Model.Id</title>
+    <!-- Google Fonts Outfit & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Bootstrap RTL CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070708; /* Luxury obsidian black background */
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .outfit-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        .main-card {
+            background: linear-gradient(135deg, #1e1e2d 0%, #151521 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .gold-line {
+            height: 6px;
+            background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);
+        }
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @@media print {
+            body, html {
+                background-color: #fff !important;
+                color: #000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+                min-height: auto !important;
+            }
+            .d-print-none {
+                display: none !important;
+            }
+            .thermal-receipt {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================================================================ -->
+    <!-- [START] FULL SCREEN DARK-GOLD VIEW FOR INTERACTIVE BROWSER VIEW -->
+    <!-- ================================================================ -->
+    <div class="container py-5 d-print-none">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="main-card">
+                    <div class="gold-line"></div>
+                    
+                    <div class="card-body p-4 p-md-5">
+                        <!-- Title & Header Info -->
+                        <div class="text-center mb-5">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-dark rounded-circle mb-3" style="width: 80px; height: 80px; border: 2px solid #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);">
+                                <i class="bi bi-clock-history text-warning" style="font-size: 2.2rem;"></i>
+                            </div>
+                            <h2 class="fw-bold mb-1" style="color: #f8f9fa;">تم تقفيل الوردية بنجاح</h2>
+                            <p class="text-warning mb-0 fw-semibold">Shift Closed Successfully</p>
+                            <span class="badge bg-danger px-3 py-2 rounded-pill mt-3 fw-bold" style="font-size: 0.85rem; border: 1px solid rgba(220, 53, 69, 0.4);">شفت مغلق - Closed Shift</span>
+                        </div>
+
+                        <!-- Metadata Grid -->
+                        <div class="row g-3 mb-5 p-4 rounded-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div class="col-sm-6">
+                                <div class="text-secondary small mb-1">الموظف / Cashier</div>
+                                <div class="fw-bold text-light" style="font-size: 1.1rem;"><i class="bi bi-person-fill me-2 text-warning"></i>@Model.Cashier?.UserName</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-secondary small mb-1">معرف الوردية / Shift ID</div>
+                                <div class="fw-bold text-light" style="font-size: 1.1rem;"><i class="bi bi-hash me-1 text-warning"></i>@Model.Id</div>
+                            </div>
+                            <div class="col-12"><hr class="my-2" style="border-color: rgba(255,255,255,0.08);"></div>
+                            <div class="col-sm-6">
+                                <div class="text-secondary small mb-1">وقت البدء / Start Time</div>
+                                <div class="fw-bold text-light"><i class="bi bi-play-fill text-success me-1"></i>@Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-secondary small mb-1">وقت الإغلاق / End Time</div>
+                                <div class="fw-bold text-light"><i class="bi bi-stop-fill text-danger me-1"></i>@Model.EndTime?.ToString("yyyy-MM-dd hh:mm tt")</div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Summary Grid -->
+                        <h4 class="fw-bold text-warning mb-3 pb-2 border-bottom" style="border-color: rgba(212,175,55,0.2) !important;"><i class="bi bi-cash-coin me-2"></i>التقرير المالي / Financial Report</h4>
+                        <div class="row g-4 mb-5">
+                            <!-- Card 1: Base Sales -->
+                            <div class="col-md-6">
+                                <div class="p-4 rounded-4 h-100 text-center text-md-start" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
+                                    <div class="text-secondary small mb-1">المبيعات الأساسية / Base Sales</div>
+                                    <div class="fs-3 fw-bold text-light">@baseSales.ToString("N2") <span style="font-size: 0.9rem;">EGP</span></div>
+                                    <div class="text-muted small mt-1">إجمالي قيمة فواتير الطلبات</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Card 2: Total Tips -->
+                            <div class="col-md-6">
+                                <div class="p-4 rounded-4 h-100 text-center text-md-start" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
+                                    <div class="text-secondary small mb-1">إجمالي البقشيش / Total Tips</div>
+                                    <div class="fs-3 fw-bold text-warning">@tips.ToString("N2") <span style="font-size: 0.9rem; color: #fff;">EGP</span></div>
+                                    <div class="text-muted small mt-1">الزيادات المستلمة كبقشيش للدرج</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Drawer Reconciliation Breakdown -->
+                        <div class="p-4 rounded-4 mb-5" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15);">
+                            <div class="row align-items-center g-3">
+                                <div class="col-md-7">
+                                    <h5 class="fw-bold mb-1 text-warning"><i class="bi bi-calculator me-2"></i>حساب مطابقة الدرج</h5>
+                                    <p class="text-muted small mb-0">المتوقع بالدرج = إجمالي المبيعات + البقشيش</p>
+                                </div>
+                                <div class="col-md-5 text-md-end">
+                                    <div class="fs-4 fw-bold text-light">@expected.ToString("N2") <span style="font-size: 0.95rem;">EGP</span></div>
+                                    <span class="badge bg-secondary text-dark fw-bold">الرصيد المطلوب بالسيستم</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- The Reconciliation Result (Expected vs Actual) -->
+                        <h4 class="fw-bold text-warning mb-3 pb-2 border-bottom" style="border-color: rgba(212,175,55,0.2) !important;"><i class="bi bi-shield-check me-2"></i>التسوية والمطابقة / Drawer Reconciliation</h4>
+                        
+                        <div class="row g-4 text-center mb-5">
+                            <!-- Expected -->
+                            <div class="col-sm-4">
+                                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
+                                    <div class="text-secondary small mb-1">المتوقع بالسيستم</div>
+                                    <div class="fs-4 fw-bold text-info">@expected.ToString("N2")</div>
+                                    <div class="text-muted small">System Expected</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Actual Entered -->
+                            <div class="col-sm-4">
+                                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
+                                    <div class="text-secondary small mb-1">المدخل يدوياً</div>
+                                    <div class="fs-4 fw-bold text-warning">@actual.ToString("N2")</div>
+                                    <div class="text-muted small">Actual Entered</div>
+                                </div>
+                            </div>
+
+                            <!-- Difference -->
+                            <div class="col-sm-4">
+                                @{
+                                    string diffColorClass = "text-success";
+                                    string diffBg = "rgba(40, 167, 69, 0.1)";
+                                    string diffBorder = "rgba(40, 167, 69, 0.25)";
+                                    
+                                    if (diff < 0)
+                                    {
+                                        diffColorClass = "text-danger animate-pulse";
+                                        diffBg = "rgba(220, 53, 69, 0.1)";
+                                        diffBorder = "rgba(220, 53, 69, 0.25)";
+                                    }
+                                    else if (diff > 0)
+                                    {
+                                        diffColorClass = "text-success fw-bold";
+                                        diffBg = "rgba(40, 167, 69, 0.15)";
+                                        diffBorder = "rgba(40, 167, 69, 0.3)";
+                                    }
+                                }
+                                <div class="p-3 rounded-4" style="background: @diffBg; border: 1px solid @diffBorder;">
+                                    <div class="text-secondary small mb-1">الفارق</div>
+                                    <div class="fs-4 fw-bold @diffColorClass">
+                                        @(diff >= 0 ? "+" : "")@diff.ToString("N2")
+                                    </div>
+                                    <span class="badge @(diff < 0 ? "bg-danger" : "bg-success") px-2 py-1 rounded">@diffLabel</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="text-center pt-2 d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                            <a href="/Cashier" class="btn btn-warning px-5 py-3 fw-bold rounded-pill shadow" style="box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25) !important;">
+                                <i class="bi bi-cash-stack me-2"></i> العودة للوحة الكاشير / Back
+                            </a>
+                            <button onclick="window.print();" class="btn btn-outline-light px-5 py-3 fw-bold rounded-pill">
+                                <i class="bi bi-printer me-2"></i> طباعة التقرير / Print thermal
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- [START] PRINT-ONLY THERMAL RECEIPT CONTAINER (80MM PORTRAIT)      -->
+    <!-- ================================================================ -->
+    <div class="d-none d-print-block thermal-receipt" style="width: 76mm; margin: 0 auto; font-family: 'Courier New', monospace; font-size: 12px; color: #000; line-height: 1.4; padding: 2mm 0; direction: rtl; text-align: right;">
+        <div style="text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 2px;">
+            *** تقرير تقفيل الوردية ***
+        </div>
+        <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 8px;">
+            SHIFT SUMMARY REPORT
+        </div>
+        
+        <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+        
+        <div><strong>رقم الوردية:</strong> #@Model.Id</div>
+        <div><strong>الكاشير:</strong> @Model.Cashier?.UserName</div>
+        <div><strong>وقت البدء:</strong> @Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</div>
+        <div><strong>وقت الإغلاق:</strong> @Model.EndTime?.ToString("yyyy-MM-dd hh:mm tt")</div>
+        
+        <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+        
+        <div style="font-weight: bold; margin-bottom: 4px; text-decoration: underline;">التفاصيل المالية:</div>
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 2px 0;">المبيعات الأساسية:</td>
+                <td style="text-align: left; padding: 2px 0;">@baseSales.ToString("N2") EGP</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px 0;">إجمالي البقشيش:</td>
+                <td style="text-align: left; padding: 2px 0;">@tips.ToString("N2") EGP</td>
+            </tr>
+            <tr style="font-weight: bold;">
+                <td style="padding: 4px 0; border-top: 1px dotted #000;">المتوقع بالدرج:</td>
+                <td style="text-align: left; padding: 4px 0; border-top: 1px dotted #000;">@expected.ToString("N2") EGP</td>
+            </tr>
+            <tr style="font-weight: bold;">
+                <td style="padding: 2px 0;">المدخل الفعلي:</td>
+                <td style="text-align: left; padding: 2px 0;">@actual.ToString("N2") EGP</td>
+            </tr>
+        </table>
+        
+        <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+        
+        <div style="text-align: center; font-weight: bold; font-size: 13px; padding: 6px; border: 1px solid #000; margin: 5px 0;">
+            النتيجة: @diffLabel
+            <br />
+            الفارق: @(diff >= 0 ? "+" : "")@diff.ToString("N2") EGP
+        </div>
+        
+        <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+        
+        <div style="text-align: center; font-size: 10px; margin-top: 12px;">
+            طُبع بواسطة نظام الكاشير الذكي<br />
+            @DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt")
+        </div>
+    </div>
+
+</body>
+</html>

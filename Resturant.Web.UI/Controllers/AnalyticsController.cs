@@ -839,6 +839,38 @@ namespace Resturant.Web.UI.Controllers
                 }
             }
         }
+
+        [HttpGet("shifts")]
+        public async Task<IActionResult> GetShifts()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching cashier shift reports for admin.");
+                var shifts = await _context.Set<CashierShift>()
+                    .Include(s => s.Cashier)
+                    .OrderByDescending(s => s.StartTime)
+                    .ToListAsync();
+
+                var result = shifts.Select(s => new {
+                    id = s.Id,
+                    cashierName = s.Cashier?.FullName ?? s.Cashier?.UserName ?? "N/A",
+                    startTime = s.StartTime.ToString("yyyy-MM-dd hh:mm tt"),
+                    endTime = s.EndTime.HasValue ? s.EndTime.Value.ToString("yyyy-MM-dd hh:mm tt") : "-",
+                    expectedAmount = s.ExpectedAmount,
+                    actualAmount = s.ActualAmountEntered,
+                    difference = s.Difference,
+                    isActive = s.IsActive
+                }).ToList();
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching cashier shift reports.");
+                return StatusCode(500, new { Message = "An error occurred while fetching shifts.", Details = ex.Message });
+            }
+        }
+
         [HttpGet("users")]
         public async Task<IActionResult> GetUsersList()
         {

@@ -314,16 +314,35 @@ namespace Resturant.Web.UI.Controllers
             var orderItem = await _context.OrderItems
                 .Include(oi => oi.Order)
                     .ThenInclude(o => o.OrderItems)
-                        .ThenInclude(oi2 => oi2.MenuItem)
+                    .ThenInclude(oi2 => oi2.MenuItem)
                 .FirstOrDefaultAsync(oi => oi.Id == orderItemId);
 
             if (orderItem == null) return NotFound();
 
             // Mark item as cancelled (soft delete)
             orderItem.IsCancelled = true;
-            await _context.SaveChangesAsync();
 
             var order = orderItem.Order;
+            if (order != null)
+            {
+                // Recalculate Subtotal from remaining active items
+                decimal subtotal = 0;
+                foreach (var oi in order.OrderItems.Where(item => !item.IsDeleted && !item.IsCancelled))
+                {
+                    decimal addOnsTotal = oi.AddOns.Where(a => !a.IsDeleted).Sum(a => a.Price);
+                    subtotal += (oi.Price + addOnsTotal) * oi.Quantity;
+                }
+
+                decimal serviceAmount = subtotal * (order.ServicePercentage / 100);
+                decimal taxAmount = (subtotal + serviceAmount) * (order.TaxPercentage / 100);
+                decimal grandTotal = subtotal + serviceAmount + taxAmount;
+
+                order.ServiceAmount = serviceAmount;
+                order.TaxAmount = taxAmount;
+                order.TotalAmount = grandTotal;
+            }
+
+            await _context.SaveChangesAsync();
 
             var itemCancelledData = new
             {

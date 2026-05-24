@@ -76,6 +76,30 @@ namespace Resturant.Core.Entities
         [Display(Name = "Cancelled Date")]
         public DateTime? CancelledDate { get; set; }
 
+        public int? ShiftId { get; set; }
+        public CashierShift? Shift { get; set; }
+
+        [Display(Name = "Paid Amount")]
+        public decimal? PaidAmount { get; set; }
+
+        [Display(Name = "Change Returned")]
+        public decimal? ChangeReturned { get; set; }
+
+        [Display(Name = "Tips")]
+        public decimal? Tips { get; set; }
+
+        [Display(Name = "Tax Percentage")]
+        public decimal TaxPercentage { get; set; }
+
+        [Display(Name = "Service Percentage")]
+        public decimal ServicePercentage { get; set; }
+
+        [Display(Name = "Tax Amount")]
+        public decimal TaxAmount { get; set; }
+
+        [Display(Name = "Service Amount")]
+        public decimal ServiceAmount { get; set; }
+
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
