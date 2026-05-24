@@ -425,32 +425,38 @@
 
         // SignalR event handlers
         connection.on("NewOrderReceived", function (order) {
+            if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             playNotificationSound();
             showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
             fetchAndRefreshTables();
         });
 
         connection.on("OrderStatusChanged", function (order) {
+            if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             fetchAndRefreshTables();
         });
 
         connection.on("OrderReady", function (order) {
+             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
              showNotification(`Order for Table ${order.tableNumber} is ready!`, 'success');
              fetchAndRefreshTables();
         });
 
         connection.on("PaymentProcessed", function (order) {
+            if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             showNotification(`Payment received for Table ${order.tableNumber}`, 'success');
             fetchAndRefreshTables();
         });
 
         connection.on("TableCleared", function (order) {
+            if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             fetchAndRefreshTables();
         });
         
         connection.on("ReceiveOrderDetails", function (order) {
+            if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             playNotificationSound();
-             fetchAndRefreshTables();
+            fetchAndRefreshTables();
         });
 
         connection.on("ReceiveWaiterUpdate", function (message) {
@@ -458,6 +464,7 @@
         });
 
         connection.on("OrderItemCancelled", function (data) {
+            if (!data || !document.getElementById(`table-card-${data.tableNumber}`)) return;
             showNotification(`Item cancelled: ${data.cancelledItemName} on Table ${data.tableNumber}`, 'warning');
             fetchAndRefreshTables();
         });

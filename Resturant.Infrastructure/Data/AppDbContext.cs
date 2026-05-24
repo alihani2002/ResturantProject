@@ -21,6 +21,8 @@ namespace Resturant.Infrastructure.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<OrderItemAddOn> OrderItemAddOns { get; set; }
+        public DbSet<CashierShift> CashierShifts { get; set; }
+        public DbSet<RestaurantSetting> RestaurantSettings { get; set; }
 
         // Enterprise ERP Tables
         public DbSet<Expense> Expenses { get; set; }
@@ -58,12 +60,34 @@ namespace Resturant.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<RestaurantTable>(entity =>
+            {
+                entity.HasOne(t => t.Waiter)
+                    .WithMany()
+                    .HasForeignKey(t => t.WaiterId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
             // Configure TableSession - Order relationship explicitly
             modelBuilder.Entity<Order>()
                 .HasOne<TableSession>()
                 .WithMany(s => s.Orders)
                 .HasForeignKey(o => o.TableSessionId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Shift)
+                .WithMany()
+                .HasForeignKey(o => o.ShiftId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<RestaurantSetting>().HasData(new RestaurantSetting
+            {
+                Id = 1,
+                TaxPercentage = 14,
+                ServicePercentage = 12,
+                CreatedOn = new DateTime(2026, 1, 1)
+            });
 
             modelBuilder.Entity<OrderItemAddOn>(entity =>
             {

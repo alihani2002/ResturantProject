@@ -81,5 +81,112 @@ namespace Resturant.Web.UI.Controllers
                 totalRevenueToday
             });
         }
+        [HttpGet]
+        public async Task<IActionResult> GetWaiterAssignments()
+        {
+            var tables = await _context.RestaurantTables
+                .Select(t => new {
+                    id = t.Id,
+                    tableNumber = t.TableNumber,
+                    waiterId = t.WaiterId
+                })
+                .OrderBy(t => t.tableNumber)
+                .ToListAsync();
+
+            var waiters = await _userManager.GetUsersInRoleAsync(AppRoles.Waiter);
+            var waiterList = waiters.Select(w => new { id = w.Id, fullName = w.FullName ?? w.UserName }).ToList();
+
+            return Json(new { tables, waiters = waiterList });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AssignWaiter(int tableId, string? waiterId)
+        {
+            var table = await _context.RestaurantTables.FindAsync(tableId);
+            if (table == null) return Json(new { success = false, message = "Table not found." });
+
+            table.WaiterId = string.IsNullOrEmpty(waiterId) ? null : waiterId;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Settings()
+        {
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            if (settings == null)
+            {
+                settings = new RestaurantSetting
+                {
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = System.DateTime.Now
+                };
+                _context.RestaurantSettings.Add(settings);
+                await _context.SaveChangesAsync();
+            }
+
+            return View(settings);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Settings(RestaurantSetting model)
+        {
+            if (ModelState.IsValid)
+            {
+                var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+                if (settings == null)
+                {
+                    settings = new RestaurantSetting { CreatedOn = System.DateTime.Now };
+                    _context.RestaurantSettings.Add(settings);
+                }
+
+                settings.TaxPercentage = model.TaxPercentage;
+                settings.ServicePercentage = model.ServicePercentage;
+                settings.LastUpdatedOn = System.DateTime.Now;
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "تم تحديث إعدادات الضرائب والخدمة بنجاح!";
+                return RedirectToAction(nameof(Settings));
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSettings()
+        {
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            if (settings == null)
+            {
+                settings = new RestaurantSetting
+                {
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = System.DateTime.Now
+                };
+                _context.RestaurantSettings.Add(settings);
+                await _context.SaveChangesAsync();
+            }
+            return Json(new { taxPercentage = settings.TaxPercentage, servicePercentage = settings.ServicePercentage });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveSettings(decimal taxPercentage, decimal servicePercentage)
+        {
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            if (settings == null)
+            {
+                settings = new RestaurantSetting { CreatedOn = System.DateTime.Now };
+                _context.RestaurantSettings.Add(settings);
+            }
+
+            settings.TaxPercentage = taxPercentage;
+            settings.ServicePercentage = servicePercentage;
+            settings.LastUpdatedOn = System.DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
     }
 }

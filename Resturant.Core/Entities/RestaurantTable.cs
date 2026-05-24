@@ -15,6 +15,10 @@ namespace Resturant.Core.Entities
         [Display(Name = "QR Code Image URL")]
         public string? QrCodeImageUrl { get; set; }
 
+        [Display(Name = "Assigned Waiter")]
+        public string? WaiterId { get; set; }
+        public ApplicationUser? Waiter { get; set; }
+
         public ICollection<TableSession> Sessions { get; set; } = new List<TableSession>();
     }
 }

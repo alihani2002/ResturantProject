@@ -91,6 +91,12 @@
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Users" asp-action="Create">Create User</a></li>
                         </ul>
                     </li>
+                    <li class="nxl-item">
+                        <a class="nxl-link" asp-controller="Admin" asp-action="Settings">
+                            <span class="nxl-micon"><i class="feather-settings"></i></span>
+                            <span class="nxl-mtext">System Settings</span>
+                        </a>
+                    </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-book"></i></span>
@@ -109,6 +115,15 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Tables" asp-action="Index">All Tables</a></li>
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Tables" asp-action="Create">Add Table</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-clock"></i></span>
+                            <span class="nxl-mtext">Shift Reports</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Cashier" asp-action="ShiftHistory">Shift History</a></li>
                         </ul>
                     </li>
 

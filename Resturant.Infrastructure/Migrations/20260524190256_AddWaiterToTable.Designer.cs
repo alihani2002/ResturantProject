@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Resturant.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Resturant.Infrastructure.Data;
 namespace Resturant.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260524190256_AddWaiterToTable")]
+    partial class AddWaiterToTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -249,58 +252,6 @@ namespace Resturant.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Resturant.Core.Entities.CashierShift", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("ActualAmountEntered")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CashierId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("Difference")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("ExpectedAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastUpdatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("LastUpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CashierId");
-
-                    b.ToTable("CashierShifts");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.Expense", b =>
@@ -614,9 +565,6 @@ namespace Resturant.Infrastructure.Migrations
                     b.Property<string>("CashierId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("ChangeReturned")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("ChefId")
                         .HasColumnType("nvarchar(max)");
 
@@ -650,20 +598,8 @@ namespace Resturant.Infrastructure.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ServiceAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ServicePercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("ShiftId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -674,15 +610,6 @@ namespace Resturant.Infrastructure.Migrations
                     b.Property<int?>("TableSessionId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TaxAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TaxPercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("Tips")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -690,8 +617,6 @@ namespace Resturant.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ShiftId");
 
                     b.HasIndex("TableSessionId");
 
@@ -859,50 +784,6 @@ namespace Resturant.Infrastructure.Migrations
                     b.HasIndex("MenuItemId");
 
                     b.ToTable("Recipes");
-                });
-
-            modelBuilder.Entity("Resturant.Core.Entities.RestaurantSetting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastUpdatedById")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("LastUpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("ServicePercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("TaxPercentage")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("RestaurantSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedOn = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsDeleted = false,
-                            ServicePercentage = 12m,
-                            TaxPercentage = 14m
-                        });
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.RestaurantTable", b =>
@@ -1143,17 +1024,6 @@ namespace Resturant.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Resturant.Core.Entities.CashierShift", b =>
-                {
-                    b.HasOne("Resturant.Core.Entities.ApplicationUser", "Cashier")
-                        .WithMany()
-                        .HasForeignKey("CashierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cashier");
-                });
-
             modelBuilder.Entity("Resturant.Core.Entities.Ingredient", b =>
                 {
                     b.HasOne("Resturant.Core.Entities.Supplier", "Supplier")
@@ -1206,17 +1076,10 @@ namespace Resturant.Infrastructure.Migrations
 
             modelBuilder.Entity("Resturant.Core.Entities.Order", b =>
                 {
-                    b.HasOne("Resturant.Core.Entities.CashierShift", "Shift")
-                        .WithMany()
-                        .HasForeignKey("ShiftId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("Resturant.Core.Entities.TableSession", null)
                         .WithMany("Orders")
                         .HasForeignKey("TableSessionId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Shift");
                 });
 
             modelBuilder.Entity("Resturant.Core.Entities.OrderItem", b =>

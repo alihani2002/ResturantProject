@@ -104,57 +104,13 @@
         <!-- Sidebar Navigation Tabs -->
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
             <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10">
-                <i class="bi bi-speedometer2 text-base"></i>
-                <span>Live Summary</span>
-                <span class="ml-auto w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                <i class="bi bi-grid-fill text-base"></i>
+                <span>All Features Map</span>
             </button>
 
-            <div class="pt-4 pb-2 px-4">
-                <p class="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">Analytical Reports</p>
-            </div>
-
-            <button onclick="switchTab('sales')" id="btn-tab-sales" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-cash-coin text-base text-green-500"></i>
-                <span>Sales Ledger</span>
-            </button>
-
-            <button onclick="switchTab('orders')" id="btn-tab-orders" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-receipt text-base text-blue-500"></i>
-                <span>Orders Analysis</span>
-            </button>
-
-            <button onclick="switchTab('products')" id="btn-tab-products" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-grid-3x3-gap text-base text-amber-500"></i>
-                <span>Product Profits</span>
-            </button>
-
-            <button onclick="switchTab('customers')" id="btn-tab-customers" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-people text-base text-purple-500"></i>
-                <span>Loyal Customers</span>
-            </button>
-
-            <button onclick="switchTab('staff')" id="btn-tab-staff" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-person-badge text-base text-indigo-500"></i>
-                <span>Staff & Waiters</span>
-            </button>
-
-            <button onclick="switchTab('kitchen')" id="btn-tab-kitchen" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-fire text-base text-red-500"></i>
-                <span>Kitchen Efficiency</span>
-            </button>
-
-            <div class="pt-4 pb-2 px-4">
-                <p class="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">Financials & Inventory</p>
-            </div>
-
-            <button onclick="switchTab('financials')" id="btn-tab-financials" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-calculator text-base text-emerald-500"></i>
-                <span>Profit & Loss</span>
-            </button>
-
-            <button onclick="switchTab('inventory')" id="btn-tab-inventory" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                <i class="bi bi-boxes text-base text-teal-500"></i>
-                <span>Inventory & Food Cost</span>
+            <button onclick="switchTab('shift-reports')" id="btn-tab-shift-reports" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-clock-history text-base text-warning"></i>
+                <span>Shift Reports</span>
             </button>
 
             <div class="pt-4 pb-2 px-4">
@@ -174,6 +130,16 @@
             <button onclick="switchTab('table-mgmt')" id="btn-tab-table-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                 <i class="bi bi-grid text-base text-orange-500"></i>
                 <span>Add / Manage Tables</span>
+            </button>
+
+            <button onclick="switchTab('waiter-assignment')" id="btn-tab-waiter-assignment" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-person-lines-fill text-base text-indigo-500"></i>
+                <span>Assign Waiter Tables</span>
+            </button>
+
+            <button onclick="switchTab('settings-mgmt')" id="btn-tab-settings-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-sliders text-base text-emerald-500"></i>
+                <span>Taxes & Service Settings</span>
             </button>
         </nav>
 
@@ -214,19 +180,13 @@
         <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-8 z-10 shrink-0">
             <!-- Breadcrumbs / Active Tab Title -->
             <div class="flex items-center gap-2">
-                <span class="text-slate-400 text-xs font-medium uppercase tracking-widest">Analytics</span>
+                <span class="text-slate-400 text-xs font-medium uppercase tracking-widest">QORE ERP</span>
                 <span class="text-slate-300 dark:text-slate-600">/</span>
-                <h2 id="active-tab-title" class="outfit-font text-slate-800 dark:text-white font-bold text-lg">Live Summary Overview</h2>
+                <h2 id="active-tab-title" class="outfit-font text-slate-800 dark:text-white font-bold text-lg">Operations Hub & Features Map</h2>
             </div>
 
             <!-- Header Actions -->
             <div class="flex items-center gap-4">
-                <!-- Live Hub Status -->
-                <span id="connection-status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                    <i class="bi bi-shield-check"></i> Ledger Sync Mode
-                </span>
-
                 <!-- Dark Mode Toggle -->
                 <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <i id="theme-toggle-icon" class="bi bi-moon-fill text-sm"></i>
@@ -234,225 +194,159 @@
             </div>
         </header>
 
-        <!-- SUB HEADER FILTER BAR -->
-        <section class="bg-white dark:bg-darkCard border-b border-slate-200 dark:border-darkBorder px-8 py-3 flex flex-wrap items-center gap-4 justify-between z-10 shrink-0">
-            <!-- Filter Actions -->
-            <div class="flex flex-wrap items-center gap-3">
-                <!-- Date Range Filters -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-slate-400 uppercase">Period:</span>
-                    <input type="date" id="filter-start-date" class="px-3 py-1.5 text-xs border rounded-lg dark:bg-slate-800 dark:border-darkBorder dark:text-white font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                    <span class="text-xs text-slate-400 font-bold">to</span>
-                    <input type="date" id="filter-end-date" class="px-3 py-1.5 text-xs border rounded-lg dark:bg-slate-800 dark:border-darkBorder dark:text-white font-medium focus:ring-1 focus:ring-brand-500 focus:outline-none">
-                </div>
-
-                <!-- Table Filter -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-slate-400 uppercase">Table:</span>
-                    <select id="filter-table" class="px-3 py-1.5 text-xs border rounded-lg dark:bg-slate-800 dark:border-darkBorder dark:text-white font-medium focus:outline-none">
-                        <option value="">All Tables</option>
-                        @for (int i = 1; i <= 15; i++)
-                        {
-                            <option value="@i">Table @i</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Waiter Filter -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-slate-400 uppercase">Waiter:</span>
-                    <select id="filter-waiter" class="px-3 py-1.5 text-xs border rounded-lg dark:bg-slate-800 dark:border-darkBorder dark:text-white font-medium focus:outline-none">
-                        <option value="">All Waiters</option>
-                        <!-- Filled dynamically -->
-                    </select>
-                </div>
-            </div>
-
-            <!-- Apply and Export Actions -->
-            <div class="flex items-center gap-2">
-                <button onclick="applyFilters()" class="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-bold hover:bg-brand-600 transition-all flex items-center gap-1.5">
-                    <i class="bi bi-filter"></i> Apply Filters
-                </button>
-                <button onclick="resetFilters()" class="px-4 py-1.5 border border-slate-200 dark:border-darkBorder rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    Reset
-                </button>
-                <div class="w-px h-6 bg-slate-200 dark:bg-darkBorder mx-1"></div>
-                <!-- Exports menu -->
-                <button onclick="exportReport('excel')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all flex items-center gap-1">
-                    <i class="bi bi-file-earmark-excel"></i> Excel
-                </button>
-                <button onclick="exportReport('pdf')" class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-all flex items-center gap-1">
-                    <i class="bi bi-file-earmark-pdf"></i> PDF
-                </button>
-            </div>
-        </section>
-
         <!-- CONTAINER FOR SCROLLABLE TABS -->
         <main class="flex-1 overflow-y-auto p-8 min-h-0 space-y-8 relative">
 
             <!-- ============================================== -->
-            <!-- TAB 0: LIVE DASHBOARD SUMMARY (CHARTS-FREE)    -->
+            <!-- TAB 0: ALL FEATURES HUB (DIRECTORY MAP)        -->
             <!-- ============================================== -->
             <div id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Top 4 Primary Live KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <!-- Revenue Today -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/50 dark:hover:border-brand-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.02)]">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Revenue Today</p>
-                            <h3 id="stat-revenue" class="outfit-font text-3xl font-black tracking-tight text-slate-900 dark:text-white">$0.00</h3>
-                            <span id="stat-revenue-growth" class="text-xs font-semibold text-emerald-500 flex items-center gap-1">
-                                <i class="bi bi-arrow-up-right"></i> +0% vs yesterday
-                            </span>
-                        </div>
-                        <div class="p-4 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="bi bi-cash-stack text-2xl"></i>
-                        </div>
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-200/10 dark:border-darkBorder p-8 rounded-3xl shadow-lg relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="space-y-2 text-center md:text-left z-10">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-500 uppercase tracking-widest border border-brand-500/25">Restaurant Management Portal</span>
+                        <h2 class="outfit-font text-3xl font-black text-white">QORE ERP Operations Directory</h2>
+                        <p class="text-sm text-slate-400 max-w-xl">Welcome to your central administrative workspace. Select a management module below to configure your restaurant menus, tables, staff, shifts, and global pricing settings in real-time.</p>
                     </div>
-
-                    <!-- Active Tables -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/50 dark:hover:border-brand-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.02)]">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Tables</p>
-                            <h3 id="stat-active-tables" class="outfit-font text-3xl font-black tracking-tight text-slate-900 dark:text-white">0</h3>
-                            <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">Tables in service now</span>
-                        </div>
-                        <div class="p-4 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="bi bi-grid-3x3-gap-fill text-2xl"></i>
-                        </div>
+                    <div class="p-6 bg-brand-500/10 text-brand-500 rounded-full border border-brand-500/20 z-10 shrink-0">
+                        <i class="bi bi-grid-fill text-4xl"></i>
                     </div>
-
-                    <!-- Active Sessions -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/50 dark:hover:border-brand-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.02)]">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Sessions</p>
-                            <h3 id="stat-active-sessions" class="outfit-font text-3xl font-black tracking-tight text-slate-900 dark:text-white">0</h3>
-                            <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">QR scans active today</span>
-                        </div>
-                        <div class="p-4 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="bi bi-qr-code-scan text-2xl"></i>
-                        </div>
-                    </div>
-
-                    <!-- Pending Orders -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/50 dark:hover:border-brand-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.02)]">
-                        <div class="space-y-1">
-                            <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Pending Orders</p>
-                            <h3 id="stat-pending-orders" class="outfit-font text-3xl font-black tracking-tight text-slate-900 dark:text-white">0</h3>
-                            <span id="stat-completed-orders" class="text-xs font-semibold text-brand-500">0 completed today</span>
-                        </div>
-                        <div class="p-4 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl group-hover:scale-110 transition-transform">
-                            <i class="bi bi-clock-history text-2xl"></i>
-                        </div>
-                    </div>
+                    <!-- Luxury background glow -->
+                    <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl"></div>
                 </div>
 
-                <!-- Secondary 8 KPI Counters (Grid of 8) -->
-                <div class="grid grid-cols-2 md:grid-cols-8 gap-4">
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Weekly Revenue</p>
-                        <h4 id="stat-rev-week" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">$0.00</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monthly Revenue</p>
-                        <h4 id="stat-rev-month" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">$0.00</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sales</p>
-                        <h4 id="stat-rev-total" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">$0.00</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Orders</p>
-                        <h4 id="stat-orders-count" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">0</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Guests</p>
-                        <h4 id="stat-guests-count" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">0</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tables</p>
-                        <h4 id="stat-tables-count" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">0</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Menu Items</p>
-                        <h4 id="stat-menu-count" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">0</h4>
-                    </div>
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-4 rounded-xl text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Categories</p>
-                        <h4 id="stat-categories-count" class="outfit-font text-sm font-extrabold text-slate-900 dark:text-white mt-1">0</h4>
-                    </div>
-                </div>
-
-                <!-- Ledger Grid (Event Logs & Dynamic Activity Ledger) -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Live Dynamic Transactions Ledger Table -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl shadow-sm lg:col-span-2 space-y-4">
-                        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
-                            <div>
-                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Live Operations Transaction Ledger</h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Real-time database records generated from scan-to-order terminal events</p>
+                <!-- Features Directory Map Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1: Add / Manage Menu -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-rose-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-xl">
+                                    <i class="bi bi-journal-plus text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Menu</h3>
                             </div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 uppercase tracking-widest animate-pulse border border-brand-500/30">System Active</span>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Create, edit, and archive dishes or drinks, configure their prices, popularity badges, and upload high-resolution food images to Cloudinary.</p>
                         </div>
-
-                        <!-- Live Search & Filtering tools for the live ledger -->
-                        <div class="flex flex-wrap items-center gap-2 justify-between">
-                            <div class="relative w-full md:w-72">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                    <i class="bi bi-search text-xs"></i>
-                                </span>
-                                <input type="text" id="live-ledger-search" onkeyup="filterLiveLedger()" placeholder="Search live ledger records..." class="w-full pl-9 pr-4 py-2 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 dark:border-darkBorder focus:ring-1 focus:ring-brand-500 focus:outline-none dark:text-white">
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <select id="live-ledger-type" onchange="filterLiveLedger()" class="px-3 py-2 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 dark:border-darkBorder focus:outline-none dark:text-white">
-                                    <option value="">All Event Types</option>
-                                    <option value="success">Success / Paid</option>
-                                    <option value="info">Info / In-service</option>
-                                    <option value="warning">Warning / Waiter Call</option>
-                                    <option value="error">Cancelled / Alert</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table id="table-live-ledger" class="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                                        <th class="py-3">Timestamp</th>
-                                        <th class="py-3">Source Event</th>
-                                        <th class="py-3">Type</th>
-                                        <th class="py-3">Record Details</th>
-                                        <th class="py-3 text-right">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Filled dynamically -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Table Pagination -->
-                        <div class="flex items-center justify-between border-t pt-4 border-slate-100 dark:border-darkBorder text-xs text-slate-400">
-                            <span id="live-ledger-pagination-info">Showing 0 to 0 of 0 events</span>
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="paginateLiveLedger('prev')" class="px-3 py-1.5 border dark:border-darkBorder rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50">Prev</button>
-                                <button onclick="paginateLiveLedger('next')" class="px-3 py-1.5 border dark:border-darkBorder rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50">Next</button>
-                            </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('menu-mgmt')" class="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-rose-500/10">
+                                <span>Access Menu Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Live Notification Feed -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl shadow-sm space-y-4 flex flex-col max-h-[36rem]">
-                        <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
-                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-bell-fill text-brand-500 animate-bounce"></i> Real-time Operations Logs
-                            </h3>
-                            <span class="text-xs font-semibold text-slate-400" id="notification-count">0 logs</span>
+                    <!-- Card 2: Manage Categories -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-cyan-50 dark:bg-cyan-950/20 text-cyan-500 rounded-xl">
+                                    <i class="bi bi-tags text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Categories</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Organize your menu items into custom food and beverage categories (e.g. Appetizers, Desserts). Set display order numbers and descriptions.</p>
                         </div>
-                        
-                        <!-- Notifications List -->
-                        <div id="live-notifications-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                            <!-- Populated in JS -->
+                        <div class="mt-6">
+                            <button onclick="switchTab('category-mgmt')" class="w-full py-2.5 px-4 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-950/20 dark:hover:bg-cyan-950/40 text-cyan-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-cyan-500/10">
+                                <span>Access Category Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Add / Manage Tables -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-orange-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-orange-50 dark:bg-orange-950/20 text-orange-500 rounded-xl">
+                                    <i class="bi bi-grid text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Tables</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Register physical restaurant tables and instantly generate high-quality QR codes with custom branding ready to print for guest scanning.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('table-mgmt')" class="w-full py-2.5 px-4 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/20 dark:hover:bg-orange-950/40 text-orange-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-orange-500/10">
+                                <span>Access Table Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Assign Waiter Tables -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-indigo-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
+                                    <i class="bi bi-person-lines-fill text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Assign Waiter Tables</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Map dining room tables to specific active waiter accounts. Waiters will only receive customer call and order notifications for assigned tables.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('waiter-assignment')" class="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-indigo-500/10">
+                                <span>Access Waiter Assignment</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Shift Reports -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-warning/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl">
+                                    <i class="bi bi-clock-history text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Shift Reports</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Review historical cashier shift logs, expected cash register totals vs actual cash input, and audit balanced, shortage, or surplus reports.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('shift-reports')" class="w-full py-2.5 px-4 bg-brand-50 hover:bg-brand-100 dark:bg-brand-950/20 dark:hover:bg-brand-950/40 text-brand-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-brand-500/10">
+                                <span>Access Shift Reports</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Manage Users & Roles -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-sky-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-sky-50 dark:bg-sky-950/20 text-sky-500 rounded-xl">
+                                    <i class="bi bi-people-fill text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Manage Users & Roles</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Register new staff accounts, manage security access levels, assign waiter/chef/cashier roles, and toggle account activation status.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('user-mgmt')" class="w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/20 dark:hover:bg-sky-950/40 text-sky-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-sky-500/10">
+                                <span>Access User Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: Taxes & Service Settings -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300 md:col-span-2 lg:col-span-3">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
+                                    <i class="bi bi-sliders text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Global Taxes & Service settings</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Set up default VAT tax percentages and restaurant service/hall charge percentages applied dynamically to all new orders and customer billing invoices.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('settings-mgmt')" class="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 text-emerald-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-emerald-500/10">
+                                <span>Configure Global Settings</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1442,6 +1336,69 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ========================================== -->
+            <!-- 13. WAITER ASSIGNMENT TAB -->
+            <!-- ========================================== -->
+            <div id="tab-waiter-assignment" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                    <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                        <i class="bi bi-person-lines-fill text-indigo-500"></i> Assign Waiters to Tables
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Select a waiter for each table. Waiters will only see and receive notifications for the tables assigned to them.</p>
+                    <div class="overflow-x-auto mt-4">
+                        <table id="table-waiter-assignment-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                    <th class="py-3">Table Number</th>
+                                    <th class="py-3">Assigned Waiter</th>
+                                    <th class="py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- ========================================== -->
+            <!-- 14. CASHIER SHIFT REPORTS TAB -->
+            <!-- ========================================== -->
+            <div id="tab-shift-reports" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
+                        <div>
+                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="bi bi-clock-history text-warning"></i> Cashier Shift Reports
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Historical list of closed cashier shifts with cash reconciliations, shortages and surpluses.</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto mt-4">
+                        <table id="table-shifts-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                    <th class="py-3">Shift ID</th>
+                                    <th class="py-3">Cashier</th>
+                                    <th class="py-3">Start Time</th>
+                                    <th class="py-3">End Time</th>
+                                    <th class="py-3 text-right">System Expected</th>
+                                    <th class="py-3 text-right">Actual Entered</th>
+                                    <th class="py-3 text-center">Difference</th>
+                                    <th class="py-3 text-center">Status</th>
+                                    <th class="py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 9: USER MANAGEMENT -->
             <div id="tab-user-mgmt" class="hidden h-full flex flex-col">
                 <div class="mb-6 flex justify-between items-end shrink-0">
@@ -1453,6 +1410,51 @@
                 
                 <div class="flex-1 bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-200 dark:border-darkBorder overflow-hidden">
                     <iframe src="/Users?iframe=true" class="w-full h-full border-0"></iframe>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 15. GLOBAL TAX & SERVICE SETTINGS TAB -->
+            <!-- ========================================== -->
+            <div id="tab-settings-mgmt" class="tab-content hidden space-y-6">
+                <div class="max-w-2xl mx-auto bg-white dark:bg-darkCard p-8 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-6">
+                    <div class="text-center pb-4 border-b border-slate-100 dark:border-darkBorder">
+                        <div class="inline-flex items-center justify-center bg-brand-50 dark:bg-brand-950/20 p-4 rounded-full text-brand-500 mb-3">
+                            <i class="bi bi-sliders text-3xl"></i>
+                        </div>
+                        <h3 class="outfit-font text-lg font-bold text-slate-900 dark:text-white">System Taxes & Service Charges</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure global percentage charges applied automatically to all tickets.</p>
+                    </div>
+
+                    <form id="form-system-settings" onsubmit="submitSystemSettings(event)" class="space-y-6">
+                        <!-- Success Message -->
+                        <div id="settings-success-alert" class="hidden p-4 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-center">
+                            <i class="bi bi-check-circle-fill me-1"></i> Settings updated successfully!
+                        </div>
+
+                        <!-- Tax Percentage Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Value Added Tax (VAT) %</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-tax" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="14.00">
+                            </div>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">Default value-added tax percentage added to orders.</span>
+                        </div>
+
+                        <!-- Service Percentage Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Service Charge %</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-service" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="12.00">
+                            </div>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">Default dining room and hall service charge percentage.</span>
+                        </div>
+
+                        <!-- Action Button -->
+                        <button type="submit" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm transition-all shadow-md shadow-brand-500/10">Save Global Settings</button>
+                    </form>
                 </div>
             </div>
 
@@ -1471,24 +1473,11 @@
         // State Management
         let currentTab = 'dashboard';
         let charts = {};
-        let activeFilters = {
-            startDate: '',
-            endDate: '',
-            tableNumber: '',
-            waiterId: ''
-        };
 
         // Cache object to prevent over-fetching when toggling tabs
         let reportsData = {
             summary: null,
-            sales: null,
-            orders: null,
-            products: null,
-            customers: null,
-            staff: null,
-            kitchen: null,
-            financials: null,
-            inventory: null
+            'shift-reports': null
         };
 
         // Dark / Light Mode Toggle
@@ -1498,23 +1487,12 @@
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
-                icon.className = 'bi bi-moon-fill text-sm';
+                if (icon) icon.className = 'bi bi-moon-fill text-sm';
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
-                icon.className = 'bi bi-sun-fill text-sm';
+                if (icon) icon.className = 'bi bi-sun-fill text-sm';
             }
-            // Redraw active charts to fix font color in dark mode
-            setTimeout(redrawActiveTabCharts, 250);
-        }
-
-        // Initialize Theme from Storage
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            document.getElementById('theme-toggle-icon').className = 'bi bi-sun-fill text-sm';
-        } else {
-            document.documentElement.classList.remove('dark');
-            document.getElementById('theme-toggle-icon').className = 'bi bi-moon-fill text-sm';
         }
 
         // Tab Switcher
@@ -1528,32 +1506,26 @@
             });
 
             // Show active tab
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            if (document.getElementById(`tab-${tabId}`)) {
+                document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            }
 
             // Apply active class to the button
             const activeBtn = document.getElementById(`btn-tab-${tabId}`);
             if (activeBtn) {
-                if (tabId === 'dashboard') {
-                    activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10";
-                } else {
-                    activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10";
-                }
+                activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10";
             }
 
             // Update Breadcrumb
             const titles = {
-                dashboard: 'Live Summary Overview',
-                sales: 'Sales & Revenue Ledger',
-                orders: 'Orders Volumes & Timings',
-                products: 'Menu Product Profits',
-                customers: 'Customer Loyalty & Retention',
-                staff: 'Waiter Ratings & Staff Rankings',
-                kitchen: 'Kitchen Prep Efficiency',
-                financials: 'Operating Profit & Loss Statement',
-                inventory: 'Inventory Valuations & Food Costs',
+                dashboard: 'Operations Hub & Features Map',
                 'menu-mgmt': 'Add / Manage Menu Products',
                 'category-mgmt': 'Add / Manage Categories',
-                'table-mgmt': 'Add / Manage Restaurant Tables'
+                'table-mgmt': 'Add / Manage Restaurant Tables',
+                'waiter-assignment': 'Assign Waiters to Tables',
+                'shift-reports': 'Cashier Shift History & Reports',
+                'settings-mgmt': 'System Taxes & Service Settings',
+                'user-mgmt': 'System Access Control'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
             
@@ -1567,11 +1539,18 @@
                 loadCategoriesList();
             } else if (tabId === 'table-mgmt') {
                 loadTablesList();
+            } else if (tabId === 'waiter-assignment') {
+                loadWaiterAssignmentsList();
+            } else if (tabId === 'shift-reports') {
+                loadShiftReportsList();
+            } else if (tabId === 'settings-mgmt') {
+                loadSystemSettings();
+            } else if (tabId === 'dashboard' || tabId === 'user-mgmt') {
+                // Static views
             } else {
                 fetchTabReport(tabId);
             }
         }
-
         // Build API URL helper
         function buildUrl(endpoint) {
             let url = `/api/analytics/${endpoint}`;
@@ -4353,6 +4332,182 @@
             modal.classList.add('opacity-0');
             modalContent.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- WAITER ASSIGNMENT LOGIC ---
+        async function loadWaiterAssignmentsList() {
+            try {
+                const response = await fetch('/Admin/GetWaiterAssignments');
+                if (!response.ok) throw new Error('Failed to load table assignments');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#table-waiter-assignment-list tbody');
+                tbody.innerHTML = '';
+                
+                if (data.tables.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">No tables configured yet.</td></tr>`;
+                    return;
+                }
+
+                data.tables.forEach(table => {
+                    let waiterSelectHtml = `<select class="w-full max-w-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-3 py-2 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="assignWaiterToTable(${table.id}, this.value)">
+                        <option value="">-- Unassigned / No Waiter --</option>`;
+                    data.waiters.forEach(waiter => {
+                        const isSelected = table.waiterId === waiter.id ? 'selected' : '';
+                        waiterSelectHtml += `<option value="${waiter.id}" ${isSelected}>${waiter.fullName}</option>`;
+                    });
+                    waiterSelectHtml += `</select>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-2 font-bold text-slate-800 dark:text-white">Table ${table.tableNumber}</td>
+                        <td class="py-3 px-2">${waiterSelectHtml}</td>
+                        <td class="py-3 px-2 text-right">
+                            <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-opacity opacity-0" id="waiter-status-${table.id}">Saved <i class="bi bi-check-circle-fill"></i></span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading waiter assignments:', error);
+            }
+        }
+
+        async function assignWaiterToTable(tableId, waiterId) {
+            try {
+                const response = await fetch(`/Admin/AssignWaiter?tableId=${tableId}&waiterId=${waiterId || ''}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                if(result.success) {
+                    const statusSpan = document.getElementById(`waiter-status-${tableId}`);
+                    statusSpan.classList.remove('opacity-0');
+                    setTimeout(() => statusSpan.classList.add('opacity-0'), 2500);
+                } else {
+                    alert(result.message || "Failed to assign waiter");
+                }
+            } catch (error) {
+                console.error('Error saving waiter assignment:', error);
+                alert("An error occurred while saving.");
+            }
+        }
+
+        // --- CASHIER SHIFT REPORTS LOGIC ---
+        async function loadShiftReportsList() {
+            showLoader();
+            try {
+                const response = await fetch('/api/analytics/shifts');
+                if (response.ok) {
+                    const shifts = await response.json();
+                    const tbody = document.querySelector('#table-shifts-list tbody');
+                    tbody.innerHTML = '';
+                    
+                    if (shifts.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="text-center py-8 text-slate-400 dark:text-slate-500">
+                                    <i class="bi bi-clock-history text-3xl text-warning mb-2 d-block"></i>
+                                    No cashier shifts logged in the system.
+                                </td>
+                            </tr>`;
+                        return;
+                    }
+
+                    shifts.forEach(shift => {
+                        let diffBadge = '-';
+                        if (shift.difference !== null) {
+                            const diffVal = parseFloat(shift.difference);
+                            if (diffVal === 0) {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Balanced</span>`;
+                            } else if (diffVal > 0) {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">+${diffVal.toFixed(2)} EGP</span>`;
+                            } else {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">${diffVal.toFixed(2)} EGP (Short)</span>`;
+                            }
+                        }
+
+                        const statusBadge = shift.isActive
+                            ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse">Active</span>`
+                            : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-550/15 text-slate-400">Closed</span>`;
+
+                        const actualStr = shift.actualAmount !== null ? `${parseFloat(shift.actualAmount).toFixed(2)} EGP` : '-';
+                        const actionBtn = !shift.isActive
+                            ? `<button onclick="viewShiftDetails(${shift.id})" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-500/20 text-brand-500 hover:bg-brand-500/10 transition-all">View Details</button>`
+                            : `<span class="text-xs text-slate-400">Active Shift</span>`;
+
+                        tbody.innerHTML += `
+                            <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                <td class="py-3.5 px-2 font-bold text-brand-500">#${shift.id}</td>
+                                <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${shift.cashierName}</td>
+                                <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.startTime}</td>
+                                <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.endTime}</td>
+                                <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} EGP</td>
+                                <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${actualStr}</td>
+                                <td class="py-3.5 px-2 text-center">${diffBadge}</td>
+                                <td class="py-3.5 px-2 text-center">${statusBadge}</td>
+                                <td class="py-3.5 px-2 text-right">${actionBtn}</td>
+                            </tr>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load shifts:", err);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        function viewShiftDetails(shiftId) {
+            window.open('/Cashier/ShiftSummary/' + shiftId, '_blank');
+        }
+
+        // --- GLOBAL SYSTEM SETTINGS LOGIC ---
+        async function loadSystemSettings() {
+            showLoader();
+            try {
+                const response = await fetch('/Admin/GetSettings');
+                if (response.ok) {
+                    const settings = await response.json();
+                    document.getElementById('settings-tax').value = settings.taxPercentage;
+                    document.getElementById('settings-service').value = settings.servicePercentage;
+                }
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            } finally {
+                hideLoader();
+            }
+        }
+
+        async function submitSystemSettings(event) {
+            event.preventDefault();
+            const tax = document.getElementById('settings-tax').value;
+            const service = document.getElementById('settings-service').value;
+
+            const formData = new FormData();
+            formData.append('taxPercentage', tax);
+            formData.append('servicePercentage', service);
+
+            showLoader();
+            try {
+                const response = await fetch('/Admin/SaveSettings', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    const alert = document.getElementById('settings-success-alert');
+                    alert.classList.remove('hidden');
+                    setTimeout(() => alert.classList.add('hidden'), 3500);
+                    showToastAlert("Global system settings updated successfully!", "success");
+                } else {
+                    showToastAlert("Failed to update system settings.", "error");
+                }
+            } catch (err) {
+                console.error("Error updating settings:", err);
+                showToastAlert("Error saving settings.", "error");
+            } finally {
+                hideLoader();
+            }
         }
 
         // Close on escape key
