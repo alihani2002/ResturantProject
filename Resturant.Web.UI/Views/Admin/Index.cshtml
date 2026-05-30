@@ -141,6 +141,11 @@
                 <i class="bi bi-sliders text-base text-emerald-500"></i>
                 <span>Taxes & Service Settings</span>
             </button>
+
+            <button onclick="switchTab('branch-mgmt')" id="btn-tab-branch-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-geo-alt text-base text-brand-500"></i>
+                <span>Manage Branches</span>
+            </button>
         </nav>
 
         <!-- Footer Operations Link -->
@@ -187,6 +192,30 @@
 
             <!-- Header Actions -->
             <div class="flex items-center gap-4">
+                <!-- Branch Selector -->
+                <div class="relative flex items-center">
+                    <select id="header-branch-selector" onchange="onAdminBranchChanged(this.value)" class="pl-3 pr-8 py-2 border border-slate-200 dark:border-darkBorder rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-900 focus:outline-none dark:text-white appearance-none cursor-pointer">
+                        <option value="">Consolidated (All Branches)</option>
+                        @if (ViewBag.Branches != null)
+                        {
+                            foreach (var branch in ViewBag.Branches)
+                            {
+                                if (ViewBag.ActiveBranchId == branch.Id.ToString())
+                                {
+                                    <option value="@branch.Id" selected>@branch.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@branch.Id">@branch.Name</option>
+                                }
+                            }
+                        }
+                    </select>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+                        <i class="bi bi-chevron-down text-[10px]"></i>
+                    </span>
+                </div>
+
                 <!-- Dark Mode Toggle -->
                 <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <i id="theme-toggle-icon" class="bi bi-moon-fill text-sm"></i>
@@ -319,7 +348,7 @@
                     </div>
 
                     <!-- Card 7: Taxes & Service Settings -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300 md:col-span-2 lg:col-span-3">
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
                         <div class="space-y-3">
                             <div class="flex items-center gap-3">
                                 <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
@@ -332,6 +361,25 @@
                         <div class="mt-6">
                             <button onclick="switchTab('settings-mgmt')" class="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 text-emerald-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-emerald-500/10">
                                 <span>Configure Global Settings</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 8: Manage Branches -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl">
+                                    <i class="bi bi-geo-alt text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Manage Branches</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Create, configure, toggle active states, and coordinate multiple physical branches or cloud kitchens under your restaurant account.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('branch-mgmt')" class="w-full py-2.5 px-4 bg-brand-50 hover:bg-brand-100 dark:bg-brand-950/20 dark:hover:bg-brand-950/40 text-brand-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-brand-500/10">
+                                <span>Access Branch Manager</span>
                                 <i class="bi bi-arrow-right-short"></i>
                             </button>
                         </div>
@@ -1527,6 +1575,20 @@
                 </div>
             </div>
 
+            <!-- TAB 16: BRANCH MANAGEMENT -->
+            <div id="tab-branch-mgmt" class="tab-content hidden h-full flex flex-col">
+                <div class="mb-6 flex justify-between items-end shrink-0">
+                    <div>
+                        <h2 class="outfit-font text-2xl font-black text-slate-800 dark:text-white">Restaurant Branches</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Create, configure, toggle active states, and manage physical restaurant locations</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-200 dark:border-darkBorder overflow-hidden" style="min-height: 600px;">
+                    <iframe src="/Branches?iframe=true" class="w-full h-full border-0" style="min-height: 600px;"></iframe>
+                </div>
+            </div>
+
             <!-- ========================================== -->
             <!-- 15. GLOBAL TAX & SERVICE SETTINGS TAB -->
             <!-- ========================================== -->
@@ -1609,6 +1671,22 @@
             }
         }
 
+        function onAdminBranchChanged(branchId) {
+            $.post('/Admin/SwitchBranch', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function() {
+                 // Clear the cache of reportsData so everything reloads fresh for this branch
+                 reportsData = {
+                     summary: null,
+                     'shift-reports': null
+                 };
+                 // Reload page to reflect branch scoping
+                 location.reload();
+             })
+             .fail(function() {
+                 alert("Failed to switch branch.");
+             });
+        }
+
         // Tab Switcher
         function switchTab(tabId) {
             // Hide all tabs
@@ -1639,7 +1717,8 @@
                 'waiter-assignment': 'Assign Waiters to Tables',
                 'shift-reports': 'Cashier Shift History & Reports',
                 'settings-mgmt': 'System Taxes & Service Settings',
-                'user-mgmt': 'System Access Control'
+                'user-mgmt': 'System Access Control',
+                'branch-mgmt': 'Manage Restaurant Branches'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
             
@@ -1659,7 +1738,7 @@
                 loadShiftReportsList();
             } else if (tabId === 'settings-mgmt') {
                 loadSystemSettings();
-            } else if (tabId === 'dashboard' || tabId === 'user-mgmt') {
+            } else if (tabId === 'dashboard' || tabId === 'user-mgmt' || tabId === 'branch-mgmt') {
                 // Static views
             } else {
                 fetchTabReport(tabId);

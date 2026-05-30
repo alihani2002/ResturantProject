@@ -23,7 +23,8 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> Index(int? tableNumber, int? categoryId)
         {
             string tableNumberStr = Request.Cookies["TableNumber"];
-            if (string.IsNullOrEmpty(tableNumberStr))
+            string branchIdStr = Request.Cookies["BranchId"];
+            if (string.IsNullOrEmpty(tableNumberStr) || string.IsNullOrEmpty(branchIdStr))
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -36,20 +37,18 @@ namespace Resturant.Web.UI.Controllers
                 }
             }
 
-            if (tableNumber == null)
+            if (tableNumber == null || !int.TryParse(branchIdStr, out int branchId))
             {
-                // No table number found, redirect to a landing page or show error
                 return RedirectToAction("Index", "Home");
             }
 
-            // Check for active session
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            // Check for active session for this table in this branch
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             if (table == null) return NotFound("Table not found");
 
             var activeSession = await _context.Set<TableSession>().FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
             if (activeSession == null)
             {
-                // No active session for this table, redirect to registration
                 return RedirectToAction("Register", "CustomerSession");
             }
             else
@@ -63,19 +62,20 @@ namespace Resturant.Web.UI.Controllers
                     !activeSession.CustomerName.Equals(guestName, StringComparison.OrdinalIgnoreCase) || 
                     activeSession.PhoneNumber != guestPhone)
                 {
-                    // Identity not verified, must register/authenticate
                     return RedirectToAction("Register", "CustomerSession");
                 }
             }
 
+            // Filter categories and menu items by the table's BranchId
             var menu = await _context.MenuCategories
-                .Include(c => c.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
-                .Where(c => c.IsActive)
+                .Include(c => c.MenuItems.Where(i => i.IsAvailable && i.BranchId == branchId).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
+                .Where(c => c.IsActive && c.BranchId == branchId)
                 .OrderBy(c => c.OrderNumber)
                 .ThenBy(c => c.Name)
                 .ToListAsync();
 
             ViewData["TableNumber"] = tableNumber;
+            ViewData["BranchId"] = branchId;
             ViewData["CustomerName"] = activeSession.CustomerName;
             ViewData["SelectedCategoryId"] = categoryId;
             return View(menu);
@@ -158,8 +158,15 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllCategories()
         {
+            string branchIdStr = Request.Cookies["BranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(branchIdStr))
+            {
+                int.TryParse(branchIdStr, out branchId);
+            }
+
             var categories = await _context.MenuCategories
-                .Where(c => c.IsActive)
+                .Where(c => c.IsActive && c.BranchId == branchId)
                 .OrderBy(c => c.OrderNumber)
                 .ThenBy(c => c.Name)
                 .ToListAsync();

@@ -61,6 +61,17 @@
                             </div>
                             <span asp-validation-for="Role" class="text-danger fs-12"></span>
                         </div>
+
+                        <div class="col-md-6" id="branchSelectGroup">
+                            <label asp-for="BranchId" class="form-label fw-semibold">Branch Access</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-map-pin"></i></span>
+                                <select asp-for="BranchId" class="form-select" asp-items="@(new SelectList(ViewBag.Branches, "Id", "Name"))">
+                                    <option value="">Select Branch</option>
+                                </select>
+                            </div>
+                            <span asp-validation-for="BranchId" class="text-danger fs-12"></span>
+                        </div>
                         
                         <div class="col-12">
                             <div class="form-check form-switch">
@@ -92,4 +103,20 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            function toggleBranchVisibility() {
+                var selectedRole = $('#Role').val();
+                if (selectedRole === 'Admin') {
+                    $('#branchSelectGroup').hide();
+                    $('#BranchId').val(''); // Clear selection
+                } else {
+                    $('#branchSelectGroup').show();
+                }
+            }
+            
+            $('#Role').change(toggleBranchVisibility);
+            toggleBranchVisibility(); // Run on load
+        });
+    </script>
 }

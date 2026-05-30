@@ -15,6 +15,11 @@ namespace Resturant.Core.Entities
         public RestaurantTable? Table { get; set; }
 
         [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
         public string CustomerName { get; set; }
 
         [Required]

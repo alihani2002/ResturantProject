@@ -15,6 +15,9 @@
 <html lang="zxx">
 
 <head>
+    <script>
+        window.location.href = '/Admin';
+    </script>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -89,6 +92,16 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Users" asp-action="Index">All Users</a></li>
                             <li class="nxl-item"><a class="nxl-link" asp-controller="Users" asp-action="Create">Create User</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-map-pin"></i></span>
+                            <span class="nxl-mtext">Branches</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Branches" asp-action="Index">All Branches</a></li>
+                            <li class="nxl-item"><a class="nxl-link" asp-controller="Branches" asp-action="Create">Create Branch</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item">

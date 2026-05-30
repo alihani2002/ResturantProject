@@ -11,6 +11,11 @@ namespace Resturant.Core.Entities
         public ApplicationUser? Cashier { get; set; }
 
         [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
         public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime? EndTime { get; set; }
         public bool IsActive { get; set; } = true;

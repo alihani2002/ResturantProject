@@ -24,6 +24,16 @@ namespace Resturant.Web.UI.Controllers
         private readonly AppDbContext _context;
         private readonly ICloudinaryService _cloudinaryService;
 
+        private int? GetActiveBranchId()
+        {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                return parsedId;
+            }
+            return null;
+        }
+
         public TablesController(AppDbContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
@@ -37,6 +47,8 @@ namespace Resturant.Web.UI.Controllers
 
         public IActionResult Create()
         {
+            ViewBag.Branches = _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToList();
+            ViewBag.WebsiteUrl = $"{Request.Scheme}://{Request.Host}";
             return View();
         }
 
@@ -46,8 +58,8 @@ namespace Resturant.Web.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Generate QR code URL: [WebsiteUrl]/Scan?tableNumber=[Number]
-                string scanUrl = $"{WebsiteUrl.TrimEnd('/')}/CustomerSession/Scan?tableNumber={restaurantTable.TableNumber}";
+                // Generate QR code URL with branchId and tableNumber: [WebsiteUrl]/CustomerSession/Scan?branchId=[BranchId]&tableNumber=[Number]
+                string scanUrl = $"{WebsiteUrl.TrimEnd('/')}/CustomerSession/Scan?branchId={restaurantTable.BranchId}&tableNumber={restaurantTable.TableNumber}";
 
                 using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
                 {
@@ -65,6 +77,7 @@ namespace Resturant.Web.UI.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Branches = _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToList();
             return View(restaurantTable);
         }
 
@@ -97,11 +110,21 @@ namespace Resturant.Web.UI.Controllers
                 int pageSize = length != null ? Convert.ToInt32(length) : 0;
                 int skip = start != null ? Convert.ToInt32(start) : 0;
 
-                var customerData = (from tempcustomer in _context.RestaurantTables select tempcustomer);
+                var activeBranchId = GetActiveBranchId();
+                var customerData = _context.RestaurantTables
+                    .Include(t => t.Branch)
+                    .Include(t => t.Waiter)
+                    .Include(t => t.Sessions)
+                    .AsQueryable();
+
+                if (activeBranchId.HasValue)
+                {
+                    customerData = customerData.Where(t => t.BranchId == activeBranchId.Value);
+                }
 
                 if (!string.IsNullOrEmpty(searchValue))
                 {
-                    customerData = customerData.Where(m => m.TableNumber.ToString().Contains(searchValue));
+                    customerData = customerData.Where(m => m.TableNumber.ToString().Contains(searchValue) || m.Branch.Name.Contains(searchValue));
                 }
 
                 if (!(string.IsNullOrEmpty(sortColumn) && string.IsNullOrEmpty(sortColumnDirection)))
@@ -111,6 +134,9 @@ namespace Resturant.Web.UI.Controllers
                         case "TableNumber":
                             customerData = sortColumnDirection == "asc" ? customerData.OrderBy(c => c.TableNumber) : customerData.OrderByDescending(c => c.TableNumber);
                             break;
+                        case "BranchName":
+                            customerData = sortColumnDirection == "asc" ? customerData.OrderBy(c => c.Branch.Name) : customerData.OrderByDescending(c => c.Branch.Name);
+                            break;
                         default:
                             customerData = customerData.OrderBy(c => c.TableNumber);
                             break;
@@ -118,7 +144,18 @@ namespace Resturant.Web.UI.Controllers
                 }
 
                 int recordsTotal = customerData.Count();
-                var data = customerData.Skip(skip).Take(pageSize).ToList();
+                var dataList = customerData.Skip(skip).Take(pageSize).ToList();
+                var data = dataList.Select(t => new {
+                    t.Id,
+                    t.TableNumber,
+                    Capacity = 4, // Standard fallback table capacity
+                    t.QrCodeImageUrl,
+                    WaiterName = t.Waiter?.FullName ?? t.Waiter?.UserName ?? "Unassigned",
+                    IsOccupied = t.Sessions.Any(s => s.IsActive),
+                    t.BranchId,
+                    BranchName = t.Branch?.Name ?? "Unknown"
+                }).ToList();
+
                 return Json(new { draw = draw, recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = data });
             }
             catch (Exception)

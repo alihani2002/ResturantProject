@@ -23,6 +23,11 @@ namespace Resturant.Core.Entities
         [Display(Name = "Order Number")]
         public int OrderNumber { get; set; } = 0;
 
+        [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         public ICollection<MenuItem> MenuItems { get; set; } = new List<MenuItem>();
     }
 }
