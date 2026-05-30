@@ -31,15 +31,67 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task<int> GetSelectedBranchIdAsync()
         {
             var userId = _userManager.GetUserId(User);
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1; // Fallback to branch 1 if none found (e.g. global Admin)
+            
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            if (isAdminOrManager)
+            {
+                // Try query string
+                if (Request.Query.TryGetValue("branchId", out var qBranchIdStr) && int.TryParse(qBranchIdStr, out int qBranchId))
+                {
+                    Response.Cookies.Append("WaiterActiveBranchId", qBranchId.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                    return qBranchId;
+                }
+                
+                // Try cookie
+                string cookieBranchIdStr = Request.Cookies["WaiterActiveBranchId"];
+                if (!string.IsNullOrEmpty(cookieBranchIdStr) && int.TryParse(cookieBranchIdStr, out int cookieBranchId))
+                {
+                    return cookieBranchId;
+                }
+            }
+            
+            return dbUser?.BranchId ?? 1;
+        }
+
+        public async Task<IActionResult> SelectBranch()
+        {
+            Response.Cookies.Delete("WaiterActiveBranchId");
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Index(int? branchId = null)
+        {
+            var userId = _userManager.GetUserId(User);
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            
+            if (isAdminOrManager)
+            {
+                if (branchId.HasValue)
+                {
+                    Response.Cookies.Append("WaiterActiveBranchId", branchId.Value.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                }
+                else
+                {
+                    Response.Cookies.Delete("WaiterActiveBranchId");
+                    
+                    // Show branch selector
+                    ViewBag.TerminalName = "Waiter Terminal";
+                    ViewBag.TargetAction = "Index";
+                    ViewBag.TargetController = "Waiter";
+                    var branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+                    return View("_BranchSelector", branches);
+                }
+            }
+
+            int selectedBranchId = await GetSelectedBranchIdAsync();
 
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
-            var query = _context.RestaurantTables.Where(t => t.BranchId == branchId);
+            var query = _context.RestaurantTables.Where(t => t.BranchId == selectedBranchId);
             if (isWaiter)
             {
                 query = query.Where(t => t.WaiterId == userId);
@@ -47,7 +99,7 @@ namespace Resturant.Web.UI.Controllers
 
             var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
-                .Where(s => s.IsActive && s.BranchId == branchId)
+                .Where(s => s.IsActive && s.BranchId == selectedBranchId)
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -55,7 +107,7 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.BranchId == branchId)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.BranchId == selectedBranchId)
                 .ToListAsync();
 
             var viewModels = new List<WaiterTableViewModel>();
@@ -104,15 +156,14 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTablesData()
         {
-            var userId = _userManager.GetUserId(User);
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
             var query = _context.RestaurantTables.Where(t => t.BranchId == branchId);
             if (isWaiter)
             {
+                var userId = _userManager.GetUserId(User);
                 query = query.Where(t => t.WaiterId == userId);
             }
 
@@ -174,9 +225,7 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> StartSession(int tableNumber, string customerName, string phoneNumber)
         {
-            var userId = _userManager.GetUserId(User);
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             if (table == null) return NotFound("Table not found");
@@ -450,9 +499,7 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuData()
         {
-            var userId = _userManager.GetUserId(User);
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var categories = await _context.MenuCategories
                 .Include(c => c.MenuItems)

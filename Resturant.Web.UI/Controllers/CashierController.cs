@@ -25,14 +25,66 @@ namespace Resturant.Web.UI.Controllers
             _hubContext = hubContext;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task<int> GetSelectedBranchIdAsync()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            if (isAdminOrManager)
+            {
+                // Try query string
+                if (Request.Query.TryGetValue("branchId", out var qBranchIdStr) && int.TryParse(qBranchIdStr, out int qBranchId))
+                {
+                    Response.Cookies.Append("CashierActiveBranchId", qBranchId.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                    return qBranchId;
+                }
+                
+                // Try cookie
+                string cookieBranchIdStr = Request.Cookies["CashierActiveBranchId"];
+                if (!string.IsNullOrEmpty(cookieBranchIdStr) && int.TryParse(cookieBranchIdStr, out int cookieBranchId))
+                {
+                    return cookieBranchId;
+                }
+            }
+            
+            return dbUser?.BranchId ?? 1;
+        }
+
+        public async Task<IActionResult> SelectBranch()
+        {
+            Response.Cookies.Delete("CashierActiveBranchId");
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Index(int? branchId = null)
+        {
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            
+            if (isAdminOrManager)
+            {
+                if (branchId.HasValue)
+                {
+                    Response.Cookies.Append("CashierActiveBranchId", branchId.Value.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                }
+                else
+                {
+                    Response.Cookies.Delete("CashierActiveBranchId");
+                    
+                    // Show branch selector
+                    ViewBag.TerminalName = "Cashier Terminal";
+                    ViewBag.TargetAction = "Index";
+                    ViewBag.TargetController = "Cashier";
+                    var branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+                    return View("_BranchSelector", branches);
+                }
+            }
+
+            int selectedBranchId = await GetSelectedBranchIdAsync();
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             var activeShift = await _context.Set<CashierShift>()
-                .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);
+                .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == selectedBranchId);
 
             if (activeShift == null)
             {
@@ -45,7 +97,7 @@ namespace Resturant.Web.UI.Controllers
                 .ThenInclude(oi => oi.MenuItem)
                 .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
                             o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
-                            o.Status == OrderStatus.Cancelled) && o.BranchId == branchId)
+                            o.Status == OrderStatus.Cancelled) && o.BranchId == selectedBranchId)
                 .OrderBy(o => o.OrderDate)
                 .ToListAsync();
 
@@ -59,8 +111,7 @@ namespace Resturant.Web.UI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Challenge();
 
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var activeShift = await _context.Set<CashierShift>()
                 .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);
@@ -89,8 +140,7 @@ namespace Resturant.Web.UI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Challenge();
 
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var activeShift = await _context.Set<CashierShift>()
                 .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);
@@ -141,9 +191,7 @@ namespace Resturant.Web.UI.Controllers
 
         public async Task<IActionResult> ShiftHistory()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var shifts = await _context.Set<CashierShift>()
                 .Include(s => s.Cashier)
@@ -157,9 +205,7 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetOrdersData()
         {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -200,8 +246,7 @@ namespace Resturant.Web.UI.Controllers
             if (string.IsNullOrEmpty(orderIds)) return BadRequest();
 
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            int branchId = dbUser?.BranchId ?? 1;
+            int branchId = await GetSelectedBranchIdAsync();
 
             var activeShift = await _context.Set<CashierShift>()
                 .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);

@@ -24,9 +24,16 @@
                     <h2 class="fw-bold text-dark mb-2" style="letter-spacing: 0.5px;">بدء وردية الكاشير</h2>
                     <p class="text-warning fw-semibold mb-4">Start Cashier Shift</p>
                     
-                    <p class="text-muted mb-5 px-3">
+                    <p class="text-muted mb-4 px-3">
                         مرحباً بك في لوحة تحكم المبيعات. لدواعي الأمان المالي وضمان مطابقة الحسابات والدرج، يرجى تفعيل بدء الشفت قبل استقبال أو محاسبة أي طلبات.
                     </p>
+
+                    @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+                    {
+                        <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-2.5 fw-bold rounded-pill mb-3" style="font-size: 1rem;">
+                            <i class="bi bi-arrow-left-right me-1"></i> Switch Branch / تغيير الفرع
+                        </a>
+                    }
 
                     <form asp-action="StartShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                         <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px; transition: all 0.3s ease;">
@@ -61,6 +68,13 @@
                 
                 <!-- Quick Controls -->
                 <div class="d-flex flex-wrap gap-2">
+                    @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+                    {
+                        <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning fw-bold px-3 py-2 rounded-pill shadow-sm" style="color: #1e1e2d; border-color: #ffc107;">
+                            <i class="bi bi-arrow-left-right me-1"></i> Switch Branch
+                        </a>
+                    }
+
                     <button class="btn btn-warning fw-bold px-3 py-2 rounded-pill shadow-sm" onclick="openTakeawayModal()">
                         <i class="bi bi-bag-plus-fill me-1"></i> تيك أواي جديد / Takeaway
                     </button>
