@@ -46,6 +46,16 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
+        private int? GetActiveBranchId()
+        {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                return parsedId;
+            }
+            return null;
+        }
+
         // Helper to validate filter parameters
         private IActionResult ValidateFilters(ReportFilterParams filters)
         {
@@ -68,10 +78,11 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Fetching real-time dashboard summary stats.");
                 
-                string cacheKey = "DashboardSummaryLive";
+                var activeBranchId = GetActiveBranchId();
+                string cacheKey = $"DashboardSummaryLive_{activeBranchId}";
                 if (!_cache.TryGetValue(cacheKey, out DashboardSummaryDto summary))
                 {
-                    summary = await _analyticsService.GetDashboardSummaryAsync();
+                    summary = await _analyticsService.GetDashboardSummaryAsync(activeBranchId);
                     
                     var cacheEntryOptions = new MemoryCacheEntryOptions()
                         .SetAbsoluteExpiration(TimeSpan.FromSeconds(15)) // Cache live counter for only 15 seconds to keep it fresh
@@ -100,7 +111,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Sales Report with filters.");
                 
-                string cacheKey = $"SalesReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.MenuCategoryId}_{filters.PaymentMethod}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"SalesReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.MenuCategoryId}_{filters.PaymentMethod}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out SalesAnalyticsDto report))
                 {
@@ -139,7 +156,14 @@ namespace Resturant.Web.UI.Controllers
                 var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
 
                 // Fetch day's orders
-                var dayOrders = await _context.Orders
+                var query = _context.Orders.AsQueryable();
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    query = query.Where(o => o.BranchId == activeBranchId.Value);
+                }
+
+                var dayOrders = await query
                     .Include(o => o.OrderItems)
                     .Where(o => o.OrderDate >= startOfDay && o.OrderDate <= endOfDay)
                     .ToListAsync();
@@ -211,7 +235,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Orders Report with filters.");
                 
-                string cacheKey = $"OrdersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"OrdersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out OrderAnalyticsDto report))
                 {
@@ -239,7 +269,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Product Performance Report.");
                 
-                string cacheKey = $"ProductsReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.MenuCategoryId}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"ProductsReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.MenuCategoryId}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out ProductAnalyticsDto report))
                 {
@@ -267,7 +303,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Customer Segmentation & Retention Report.");
                 
-                string cacheKey = $"CustomersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"CustomersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out CustomerAnalyticsDto report))
                 {
@@ -295,7 +337,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Waiter & Staff Productivity Report.");
                 
-                string cacheKey = $"StaffReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"StaffReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out StaffAnalyticsDto report))
                 {
@@ -323,7 +371,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Kitchen Efficiency Report.");
                 
-                string cacheKey = $"KitchenReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"KitchenReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out KitchenAnalyticsDto report))
                 {
@@ -351,7 +405,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating P&L and Financial Reconciliations.");
                 
-                string cacheKey = $"FinancialReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"FinancialReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out FinancialAnalyticsDto report))
                 {
@@ -379,7 +439,13 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogInformation("Generating Food Cost and Recipe Cost Valuation Report.");
                 
-                string cacheKey = $"InventoryReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"InventoryReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
                 
                 if (!_cache.TryGetValue(cacheKey, out InventoryAnalyticsDto report))
                 {
@@ -406,7 +472,13 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("tables")]
         public async Task<IActionResult> GetTables()
         {
-            var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.RestaurantTables.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(t => t.BranchId == activeBranchId.Value);
+            }
+            var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             return Ok(tables);
         }
 
@@ -419,19 +491,22 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Invalid table number. Must be greater than zero." });
             }
 
-            if (await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber))
+            var activeBranchId = GetActiveBranchId();
+            int branchId = activeBranchId ?? 1;
+
+            if (await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId))
             {
-                return BadRequest(new { Message = "Table number already exists in your restaurant." });
+                return BadRequest(new { Message = "Table number already exists in this branch." });
             }
 
-            var table = new RestaurantTable { TableNumber = tableNumber };
+            var table = new RestaurantTable { TableNumber = tableNumber, BranchId = branchId };
 
             // Generate QR code URL using customized domain if provided
             string baseDomain = string.IsNullOrWhiteSpace(websiteUrl) 
                 ? $"{Request.Scheme}://{Request.Host}" 
                 : websiteUrl.Trim();
                 
-            string scanUrl = $"{baseDomain.TrimEnd('/')}/CustomerSession/Scan?tableNumber={tableNumber}";
+            string scanUrl = $"{baseDomain.TrimEnd('/')}/CustomerSession/Scan?branchId={branchId}&tableNumber={tableNumber}";
 
             using (var qrGenerator = new QRCoder.QRCodeGenerator())
             {
@@ -469,7 +544,13 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
-            var categories = await _context.MenuCategories.OrderBy(c => c.OrderNumber).ThenBy(c => c.Name).ToListAsync();
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.MenuCategories.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(c => c.BranchId == activeBranchId.Value);
+            }
+            var categories = await query.OrderBy(c => c.OrderNumber).ThenBy(c => c.Name).ToListAsync();
             return Ok(categories);
         }
 
@@ -482,7 +563,10 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Category name is required." });
             }
 
-            var category = new MenuCategory { Name = name, Description = description, IsActive = isActive, OrderNumber = orderNumber };
+            var activeBranchId = GetActiveBranchId();
+            int branchId = activeBranchId ?? 1;
+
+            var category = new MenuCategory { Name = name, Description = description, IsActive = isActive, OrderNumber = orderNumber, BranchId = branchId };
             if (imageFile != null && imageFile.Length > 0)
             {
                 category.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
@@ -543,11 +627,17 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("menu")]
         public async Task<IActionResult> GetMenuItems()
         {
-            var items = await _context.MenuItems
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.MenuItems
                 .Include(m => m.MenuCategory)
                 .Include(m => m.AddOns)
                 .Include(m => m.Recommendations)
-                .OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
+                .AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(m => m.BranchId == activeBranchId.Value);
+            }
+            var items = await query.OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
             return Ok(items.Select(i => new {
                 i.Id,
                 i.Name,
@@ -583,6 +673,9 @@ namespace Resturant.Web.UI.Controllers
             {
                 try
                 {
+                    var activeBranchId = GetActiveBranchId();
+                    int branchId = activeBranchId ?? 1;
+
                     var item = new MenuItem
                     {
                         Name = name,
@@ -593,7 +686,8 @@ namespace Resturant.Web.UI.Controllers
                         IsPopular = isPopular,
                         IsTrending = isTrending,
                         IsRecommended = isRecommended,
-                        OrderNumber = orderNumber
+                        OrderNumber = orderNumber,
+                        BranchId = branchId
                     };
 
                     if (imageFile != null && imageFile.Length > 0)
@@ -848,8 +942,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Fetching cashier shift reports for admin.");
-                var shifts = await _context.Set<CashierShift>()
+                var activeBranchId = GetActiveBranchId();
+                var query = _context.Set<CashierShift>()
                     .Include(s => s.Cashier)
+                    .AsQueryable();
+                if (activeBranchId.HasValue)
+                {
+                    query = query.Where(s => s.BranchId == activeBranchId.Value);
+                }
+                var shifts = await query
                     .OrderByDescending(s => s.StartTime)
                     .ToListAsync();
 

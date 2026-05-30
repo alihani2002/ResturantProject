@@ -8,6 +8,7 @@ using Resturant.Infrastructure.Data;
 using Resturant.Web.UI.Hubs;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace Resturant.Web.UI.Controllers
 {
@@ -16,22 +17,28 @@ namespace Resturant.Web.UI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ChefController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public ChefController(AppDbContext context, IHubContext<OrderHub> hubContext, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _hubContext = hubContext;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
         {
+            var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1;
+
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation) && o.BranchId == branchId)
                 .OrderBy(o => o.ConfirmedDate)
                 .ToListAsync();
 
@@ -41,13 +48,17 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetOrdersData()
         {
+            var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1;
+
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation) && o.BranchId == branchId)
                 .OrderBy(o => o.ConfirmedDate)
                 .Select(o => new
                 {
@@ -55,7 +66,6 @@ namespace Resturant.Web.UI.Controllers
                     tableNumber = o.TableNumber,
                     status = (int)o.Status,
                     note = o.Note,
-                    // Effective total (cancelled items are free)
                     totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                     orderDate = o.OrderDate,
                     orderItems = o.OrderItems.Select(oi => new
@@ -137,6 +147,7 @@ namespace Resturant.Web.UI.Controllers
             {
                 id = order.Id,
                 tableNumber = order.TableNumber,
+                branchId = order.BranchId,
                 status = (int)order.Status,
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate,

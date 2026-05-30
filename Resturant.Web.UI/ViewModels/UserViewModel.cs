@@ -23,6 +23,12 @@ namespace Resturant.Web.UI.ViewModels
         [Display(Name = "Role")]
         public string Role { get; set; }
 
+        [Display(Name = "Branch")]
+        public int? BranchId { get; set; }
+
+        [Display(Name = "Branch Name")]
+        public string? BranchName { get; set; }
+
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
     }

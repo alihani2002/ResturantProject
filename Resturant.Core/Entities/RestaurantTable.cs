@@ -19,6 +19,11 @@ namespace Resturant.Core.Entities
         public string? WaiterId { get; set; }
         public ApplicationUser? Waiter { get; set; }
 
+        [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         public ICollection<TableSession> Sessions { get; set; } = new List<TableSession>();
     }
 }

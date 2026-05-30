@@ -1,0 +1,134 @@
+@model IEnumerable<Resturant.Core.Entities.Branch>
+
+@{
+    ViewData["Title"] = "Branch Management";
+    bool isIframe = Context.Request.Query["iframe"] == "true";
+    Layout = isIframe ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3 border-light">
+                <h4 class="card-title mb-0 text-primary fw-bold">
+                    <i class="feather-map-pin me-2"></i>Restaurant Branches
+                </h4>
+                <a asp-action="Create" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-primary px-3 rounded-pill">
+                    <i class="feather-plus me-1"></i>Create New Branch
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover" id="branchesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Branch Name</th>
+                                <th>Address</th>
+                                <th>Contact Phone</th>
+                                <th>Status</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm bg-light-primary text-primary rounded me-3 p-2">
+                                                <i class="feather-home fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0 fw-semibold text-dark">@item.Name</h6>
+                                                <small class="text-muted">ID: #@item.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-secondary">@(string.IsNullOrEmpty(item.Address) ? "N/A" : item.Address)</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-secondary font-monospace">@(string.IsNullOrEmpty(item.ContactPhone) ? "N/A" : item.ContactPhone)</span>
+                                    </td>
+                                    <td>
+                                        <form asp-action="ToggleActive" asp-route-id="@item.Id" asp-route-iframe="@(isIframe ? "true" : "")" method="post" class="d-inline">
+                                            @if (item.IsActive)
+                                            {
+                                                <button type="submit" class="border-0 bg-transparent p-0">
+                                                    <span class="badge bg-light-success text-success px-3 py-2 rounded-pill cursor-pointer" title="Click to Deactivate">
+                                                        <i class="feather-check-circle me-1"></i>Active
+                                                    </span>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="border-0 bg-transparent p-0">
+                                                    <span class="badge bg-light-warning text-warning px-3 py-2 rounded-pill cursor-pointer" title="Click to Activate">
+                                                        <i class="feather-alert-circle me-1"></i>Inactive
+                                                    </span>
+                                                </button>
+                                            }
+                                        </form>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex gap-2">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                                <i class="feather-edit-2 me-1"></i>Edit
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteBranch(@item.Id, '@item.Name')">
+                                                <i class="feather-trash-2 me-1"></i>Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" type="text/css" href="/assets/vendors/css/dataTables.bs5.min.css">
+    <script src="/assets/vendors/js/dataTables.min.js"></script>
+    <script src="/assets/vendors/js/dataTables.bs5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#branchesTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "Search branches:",
+                    "lengthMenu": "Show _MENU_ per page"
+                }
+            });
+        });
+
+        function deleteBranch(id, name) {
+            if (confirm("Are you sure you want to delete the branch '" + name + "'? All tables, staff, and order contexts associated with it will remain scoped, but the branch itself will be marked deleted.")) {
+                $.ajax({
+                    url: '/Branches/Delete/' + id,
+                    type: 'POST',
+                    success: function (result) {
+                        if (result.success) {
+                            alert(result.message);
+                            location.reload();
+                        } else {
+                            alert("Error: " + result.message);
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while deleting the branch.");
+                    }
+                });
+            }
+        }
+    </script>
+}

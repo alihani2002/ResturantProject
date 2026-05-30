@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Resturant.Core.Entities
@@ -18,5 +18,9 @@ namespace Resturant.Core.Entities
         public DateTime? LastUpdatedOn { get; set; }
         // public Client? ClientProfile { get; set; }
         public string? Role { get; set; }
+
+        [Display(Name = "Branch")]
+        public int? BranchId { get; set; }
+        public Branch? Branch { get; set; }
     }
 }

@@ -34,9 +34,12 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1; // Fallback to branch 1 if none found (e.g. global Admin)
+
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
-            var query = _context.RestaurantTables.AsQueryable();
+            var query = _context.RestaurantTables.Where(t => t.BranchId == branchId);
             if (isWaiter)
             {
                 query = query.Where(t => t.WaiterId == userId);
@@ -44,7 +47,7 @@ namespace Resturant.Web.UI.Controllers
 
             var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive && s.BranchId == branchId)
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -52,7 +55,7 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.BranchId == branchId)
                 .ToListAsync();
 
             var viewModels = new List<WaiterTableViewModel>();
@@ -72,7 +75,6 @@ namespace Resturant.Web.UI.Controllers
                     Orders = tableOrders.Select(o => new WaiterOrderViewModel 
                     {
                         OrderId = o.Id,
-                        // Effective amount the customer will pay (excludes cancelled items)
                         TotalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         OrderTime = o.OrderDate,
                         Note = o.Note,
@@ -103,9 +105,12 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> GetTablesData()
         {
             var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1;
+
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
-            var query = _context.RestaurantTables.AsQueryable();
+            var query = _context.RestaurantTables.Where(t => t.BranchId == branchId);
             if (isWaiter)
             {
                 query = query.Where(t => t.WaiterId == userId);
@@ -113,7 +118,7 @@ namespace Resturant.Web.UI.Controllers
 
             var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive && s.BranchId == branchId)
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -121,7 +126,7 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated && o.BranchId == branchId)
                 .ToListAsync();
 
             var result = tables.Select(table =>
@@ -145,7 +150,6 @@ namespace Resturant.Web.UI.Controllers
                     orders = tableOrders.Select(o => new 
                     {
                         id = o.Id,
-                        // Effective total for display (excludes cancelled items)
                         totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         orderTime = o.OrderDate,
                         note = o.Note,
@@ -170,7 +174,11 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> StartSession(int tableNumber, string customerName, string phoneNumber)
         {
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1;
+
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             if (table == null) return NotFound("Table not found");
 
             var activeSession = await _context.Set<TableSession>().FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
@@ -185,14 +193,15 @@ namespace Resturant.Web.UI.Controllers
                 CustomerName = string.IsNullOrEmpty(customerName) ? $"Table {tableNumber} Guest" : customerName,
                 PhoneNumber = string.IsNullOrEmpty(phoneNumber) ? "0000000000" : phoneNumber,
                 StartTime = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                BranchId = branchId
             };
 
             _context.Set<TableSession>().Add(newSession);
             await _context.SaveChangesAsync();
 
             // Notify dashboards to refresh
-            var notifyPayload = new { tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
+            var notifyPayload = new { branchId = branchId, tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
             await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
             await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
             await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
@@ -441,10 +450,14 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuData()
         {
+            var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            int branchId = dbUser?.BranchId ?? 1;
+
             var categories = await _context.MenuCategories
                 .Include(c => c.MenuItems)
                 .ThenInclude(m => m.AddOns)
-                .Where(c => c.IsActive && c.MenuItems.Any(mi => mi.IsAvailable))
+                .Where(c => c.IsActive && c.BranchId == branchId && c.MenuItems.Any(mi => mi.IsAvailable))
                 .OrderBy(c => c.OrderNumber)
                 .ToListAsync();
 
@@ -452,7 +465,7 @@ namespace Resturant.Web.UI.Controllers
             {
                 categoryId = c.Id,
                 categoryName = c.Name,
-                items = c.MenuItems.Where(mi => mi.IsAvailable).Select(mi => new
+                items = c.MenuItems.Where(mi => mi.IsAvailable && mi.BranchId == branchId).Select(mi => new
                 {
                     id = mi.Id,
                     name = mi.Name,

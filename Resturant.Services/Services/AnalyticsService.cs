@@ -57,7 +57,7 @@ namespace Resturant.Services.Services
 
         #region Live Dashboard Summary (SignalR & Real-Time)
 
-        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(int? branchId = null)
         {
             var today = DateTime.Today;
             var now = DateTime.Now;
@@ -65,30 +65,36 @@ namespace Resturant.Services.Services
             // Real DB metrics
             var activeTablesCount = await _context.Orders
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Paid)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .Select(o => o.TableNumber)
                 .Distinct()
                 .CountAsync();
 
             var pendingOrdersCount = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync();
 
             var completedOrdersToday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync();
 
             var totalRevenueToday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var activeSessionsTodayCount = await _context.TableSessions
                 .Where(s => s.IsActive && s.StartTime.Date == today)
+                .Where(s => !branchId.HasValue || s.BranchId == branchId.Value)
                 .CountAsync();
 
             // Calculate growth compared to yesterday
             var yesterday = today.AddDays(-1);
             var totalRevenueYesterday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == yesterday)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             decimal revenueGrowthRate = 0;
@@ -102,34 +108,38 @@ namespace Resturant.Services.Services
             }
 
             // --- Extended Dashboard Analytics Counters ---
-            var totalOrdersCount = await _context.Orders.CountAsync();
-            var totalCompletedOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Completed);
-            var totalPendingOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
-            var totalCancelledOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Cancelled);
+            var totalOrdersCount = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync();
+            var totalCompletedOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Completed);
+            var totalPendingOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Pending);
+            var totalCancelledOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Cancelled);
             var totalRevenueStarted = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
             var totalRevenueThisWeek = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value >= startOfWeek)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             var totalRevenueThisMonth = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value >= startOfMonth)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
-            var totalGuestsCount = await _context.TableSessions.Select(s => s.PhoneNumber).Distinct().CountAsync();
+            var totalGuestsCount = await _context.TableSessions.Where(s => !branchId.HasValue || s.BranchId == branchId.Value).Select(s => s.PhoneNumber).Distinct().CountAsync();
             if (totalGuestsCount == 0) totalGuestsCount = 38; // Elegant visual fallback
 
-            var totalTablesCount = await _context.RestaurantTables.CountAsync();
+            var totalTablesCount = await _context.RestaurantTables.Where(t => !branchId.HasValue || t.BranchId == branchId.Value).CountAsync();
             if (totalTablesCount == 0) totalTablesCount = 15; // Standard fallback
 
-            var totalMenuItemsCount = await _context.MenuItems.CountAsync();
-            var totalCategoriesCount = await _context.MenuCategories.CountAsync();
+            var totalMenuItemsCount = await _context.MenuItems.Where(i => !branchId.HasValue || i.BranchId == branchId.Value).CountAsync();
+            var totalCategoriesCount = await _context.MenuCategories.Where(c => !branchId.HasValue || c.BranchId == branchId.Value).CountAsync();
 
             var totalActiveOrders = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Ready || o.Status == OrderStatus.Served);
 
             var totalDeliveredOrders = totalCompletedOrders;
@@ -138,12 +148,14 @@ namespace Resturant.Services.Services
 
             var bestSellingItem = await _context.OrderItems
                 .Include(oi => oi.MenuItem)
+                .Where(oi => !branchId.HasValue || oi.Order.BranchId == branchId.Value)
                 .GroupBy(oi => oi.MenuItem.Name)
                 .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                 .Select(g => g.Key)
                 .FirstOrDefaultAsync() ?? "Ribeye Steak Special";
 
             var mostActiveTableObj = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .GroupBy(o => o.TableNumber)
                 .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
@@ -153,6 +165,7 @@ namespace Resturant.Services.Services
             var mostOrderedCategory = await _context.OrderItems
                 .Include(oi => oi.MenuItem)
                 .ThenInclude(mi => mi.MenuCategory)
+                .Where(oi => !branchId.HasValue || oi.Order.BranchId == branchId.Value)
                 .GroupBy(oi => oi.MenuItem.MenuCategory.Name)
                 .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                 .Select(g => g.Key)
@@ -170,6 +183,7 @@ namespace Resturant.Services.Services
 
                 var hourRevenue = await _context.Orders
                     .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate >= startHour && o.CompletedDate < endHour)
+                    .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                     .SumAsync(o => o.TotalAmount);
 
                 liveSalesIntervals.Add(hourRevenue == 0 ? (decimal)(new Random().Next(45, 120)) : hourRevenue); // Inject small visual fallback
@@ -180,6 +194,7 @@ namespace Resturant.Services.Services
             var recentNotifications = new List<LiveNotificationDto>();
 
             var recentOrders = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .OrderByDescending(o => o.OrderDate)
                 .Take(3)
                 .ToListAsync();
@@ -670,6 +685,7 @@ namespace Resturant.Services.Services
             if (filters.EndDate.HasValue) query = query.Where(oi => oi.Order.OrderDate <= filters.EndDate.Value);
             if (filters.MenuCategoryId.HasValue) query = query.Where(oi => oi.MenuItem.MenuCategoryId == filters.MenuCategoryId.Value);
             if (filters.MenuItemId.HasValue) query = query.Where(oi => oi.MenuItemId == filters.MenuItemId.Value);
+            if (filters.BranchId.HasValue) query = query.Where(oi => oi.Order.BranchId == filters.BranchId.Value);
 
             var items = await query.ToListAsync();
 
@@ -796,6 +812,7 @@ namespace Resturant.Services.Services
 
             if (filters.StartDate.HasValue) sessionsQuery = sessionsQuery.Where(s => s.StartTime >= filters.StartDate.Value);
             if (filters.EndDate.HasValue) sessionsQuery = sessionsQuery.Where(s => s.StartTime <= filters.EndDate.Value);
+            if (filters.BranchId.HasValue) sessionsQuery = sessionsQuery.Where(s => s.BranchId == filters.BranchId.Value);
 
             var sessions = await sessionsQuery.ToListAsync();
             if (!sessions.Any()) return new CustomerAnalyticsDto();
@@ -1206,7 +1223,12 @@ namespace Resturant.Services.Services
             };
 
             // Recipe margin calculations on actual database MenuItems
-            var menuItems = await _context.MenuItems.Take(5).ToListAsync();
+            var menuItemsQuery = _context.MenuItems.AsQueryable();
+            if (filters.BranchId.HasValue)
+            {
+                menuItemsQuery = menuItemsQuery.Where(i => i.BranchId == filters.BranchId.Value);
+            }
+            var menuItems = await menuItemsQuery.Take(5).ToListAsync();
             var recipeCosts = new List<RecipeCostAnalysisDto>();
 
             foreach (var item in menuItems)
@@ -1266,6 +1288,11 @@ namespace Resturant.Services.Services
         private IQueryable<Order> ApplyOrderFilters(IQueryable<Order> query, ReportFilterParams filters)
         {
             if (filters == null) return query;
+
+            if (filters.BranchId.HasValue)
+            {
+                query = query.Where(o => o.BranchId == filters.BranchId.Value);
+            }
 
             if (filters.StartDate.HasValue)
             {

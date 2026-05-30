@@ -45,6 +45,11 @@ namespace Resturant.Core.Entities
         public int MenuCategoryId { get; set; }
         public MenuCategory? MenuCategory { get; set; }
 
+        [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         public ICollection<MenuItemAddOn> AddOns { get; set; } = new List<MenuItemAddOn>();
         public ICollection<MenuItemRecommendation> Recommendations { get; set; } = new List<MenuItemRecommendation>();
 

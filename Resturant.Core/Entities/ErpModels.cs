@@ -9,6 +9,10 @@ namespace Resturant.Core.Entities
     public class Expense : BaseEntity
     {
         [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
         [MaxLength(100)]
         public string Title { get; set; }
 
@@ -37,6 +41,10 @@ namespace Resturant.Core.Entities
     public class Supplier : BaseEntity
     {
         [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
         [MaxLength(100)]
         public string Name { get; set; }
 
@@ -57,6 +65,10 @@ namespace Resturant.Core.Entities
     // Inventory: Ingredient Entity (represents raw materials)
     public class Ingredient : BaseEntity
     {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
@@ -97,6 +109,10 @@ namespace Resturant.Core.Entities
     // Inventory: WasteLog Entity
     public class WasteLog : BaseEntity
     {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         [Required]
         public int IngredientId { get; set; }
         public Ingredient? Ingredient { get; set; }

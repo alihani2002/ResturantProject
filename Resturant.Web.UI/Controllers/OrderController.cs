@@ -30,11 +30,31 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("Invalid order data");
             }
 
-            // Check if table exists
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == request.TableNumber);
+            // Determine active branch context (Staff user's assigned branch OR guest's cookie branch)
+            int branchId = 1;
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userName = User.Identity.Name;
+                var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+                if (dbUser != null && dbUser.BranchId.HasValue)
+                {
+                    branchId = dbUser.BranchId.Value;
+                }
+            }
+            else
+            {
+                string branchIdStr = Request.Cookies["BranchId"];
+                if (!string.IsNullOrEmpty(branchIdStr) && int.TryParse(branchIdStr, out int cachedBranchId))
+                {
+                    branchId = cachedBranchId;
+                }
+            }
+
+            // Check if table exists in this branch
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == request.TableNumber && t.BranchId == branchId);
             if (table == null)
             {
-                return BadRequest($"Table {request.TableNumber} does not exist");
+                return BadRequest($"Table {request.TableNumber} does not exist in this branch");
             }
 
             // Get Active Session
@@ -95,7 +115,8 @@ namespace Resturant.Web.UI.Controllers
                 ConfirmedDate = isStaff ? DateTime.Now : null,
                 Note = request.Note,
                 CustomerName = activeSession.CustomerName,
-                PhoneNumber = activeSession.PhoneNumber
+                PhoneNumber = activeSession.PhoneNumber,
+                BranchId = branchId
             };
 
             _context.Orders.Add(order);
@@ -148,7 +169,8 @@ namespace Resturant.Web.UI.Controllers
                 totalAmount += (orderItem.Price + addOnsTotal) * orderItem.Quantity;
             }
 
-            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync() 
+            // Load branch-specific restaurant settings
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId) 
                            ?? new RestaurantSetting { TaxPercentage = 14, ServicePercentage = 12 };
 
             decimal serviceAmount = totalAmount * (settings.ServicePercentage / 100);
@@ -168,6 +190,7 @@ namespace Resturant.Web.UI.Controllers
             {
                 id = order.Id,
                 tableNumber = order.TableNumber,
+                branchId = order.BranchId,
                 status = order.Status.ToString(),
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate,
@@ -201,14 +224,20 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> CheckTable(int tableNumber)
         {
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
-            if (table == null)
+            // Resolve branch from cookies if possible
+            int branchId = 1;
+            string branchIdStr = Request.Cookies["BranchId"];
+            if (!string.IsNullOrEmpty(branchIdStr))
             {
-                return Json(new { available = false, message = $"Table {tableNumber} does not exist." });
+                int.TryParse(branchIdStr, out branchId);
             }
 
-            // Always return true so that table-prompt.js allows proceeding to the Menu Controller.
-            // The Menu Controller will redirect to CustomerSession/Register which handles secure validation.
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
+            if (table == null)
+            {
+                return Json(new { available = false, message = $"Table {tableNumber} does not exist in this branch." });
+            }
+
             return Json(new { available = true, message = "Table found, proceeding to secure verification." });
         }
 
@@ -340,7 +369,15 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetActiveSessionOrders(int tableNumber)
         {
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            // Resolve branch from cookies if possible
+            int branchId = 1;
+            string branchIdStr = Request.Cookies["BranchId"];
+            if (!string.IsNullOrEmpty(branchIdStr))
+            {
+                int.TryParse(branchIdStr, out branchId);
+            }
+
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             if (table == null)
             {
                 return BadRequest("Table not found");

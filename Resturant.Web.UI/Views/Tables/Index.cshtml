@@ -23,6 +23,7 @@
                         <thead>
                             <tr>
                                 <th>Table Number</th>
+                                <th>Branch</th>
                                 <th>QR Code</th>
                                 <th>Actions</th>
                             </tr>
@@ -59,6 +60,14 @@
                         "autoWidth": true,
                         "render": function (data, type, row) {
                             return `<span class="fw-bold fs-16">Table ${data}</span>`;
+                        }
+                    },
+                    {
+                        "data": "branchName",
+                        "name": "BranchName",
+                        "autoWidth": true,
+                        "render": function (data, type, row) {
+                            return `<span class="badge bg-primary text-white">${data}</span>`;
                         }
                     },
                     {

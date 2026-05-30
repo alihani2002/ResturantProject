@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Resturant.Core.Common;
 using Resturant.Core.Entities;
+using Resturant.Infrastructure.Data;
 using Resturant.Web.UI.ViewModels;
 
 namespace Resturant.Web.UI.Controllers
@@ -14,17 +15,19 @@ namespace Resturant.Web.UI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
+        private readonly AppDbContext _context;
 
-        public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IPasswordHasher<ApplicationUser> passwordHasher)
+        public UsersController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IPasswordHasher<ApplicationUser> passwordHasher, AppDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _passwordHasher = passwordHasher;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.Include(u => u.Branch).ToListAsync();
             var userViewModels = new List<UserViewModel>();
 
             foreach (var user in users)
@@ -37,15 +40,18 @@ namespace Resturant.Web.UI.Controllers
                     Email = user.Email,
                     Role = role ?? "None",
                     IsActive = user.IsActive,
-                    IsDeleted = user.IsDeleted
+                    IsDeleted = user.IsDeleted,
+                    BranchId = user.BranchId,
+                    BranchName = user.Branch?.Name ?? "All Branches / Admin"
                 });
             }
 
             return View(userViewModels);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
             return View();
         }
 
@@ -53,6 +59,11 @@ namespace Resturant.Web.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserViewModel model)
         {
+            if (model.Role != AppRoles.Admin && !model.BranchId.HasValue)
+            {
+                ModelState.AddModelError("BranchId", "A branch must be selected for this role.");
+            }
+
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser
@@ -63,7 +74,8 @@ namespace Resturant.Web.UI.Controllers
                     IsActive = model.IsActive,
                     IsDeleted = false,
                     CreatedOn = DateTime.Now,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true,
+                    BranchId = model.Role == AppRoles.Admin ? null : model.BranchId
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -85,6 +97,8 @@ namespace Resturant.Web.UI.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
+            ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
             return View(model);
         }
 
@@ -104,9 +118,11 @@ namespace Resturant.Web.UI.Controllers
                 FullName = user.FullName,
                 IsActive = user.IsActive,
                 IsDeleted = user.IsDeleted,
-                Role = roles.FirstOrDefault()
+                Role = roles.FirstOrDefault(),
+                BranchId = user.BranchId
             };
 
+            ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
             return View(model);
         }
 
@@ -119,6 +135,11 @@ namespace Resturant.Web.UI.Controllers
             var user = await _userManager.FindByIdAsync(model.Id);
             if (user == null) return NotFound();
 
+            if (model.Role != AppRoles.Admin && !model.BranchId.HasValue)
+            {
+                ModelState.AddModelError("BranchId", "A branch must be selected for this role.");
+            }
+
             if (ModelState.IsValid)
             {
                 user.FullName = model.FullName;
@@ -126,6 +147,7 @@ namespace Resturant.Web.UI.Controllers
                 user.UserName = model.Email;
                 user.IsActive = model.IsActive;
                 user.IsDeleted = model.IsDeleted;
+                user.BranchId = model.Role == AppRoles.Admin ? null : model.BranchId;
 
                 if (!string.IsNullOrEmpty(model.Password))
                 {
@@ -148,6 +170,8 @@ namespace Resturant.Web.UI.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+
+            ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
             return View(model);
         }
 

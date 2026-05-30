@@ -44,32 +44,68 @@ namespace Resturant.Web.UI.Controllers
             else if (roles.Contains(AppRoles.Admin) || roles.Contains(AppRoles.Manager))
             {
                 // Admin and Manager can access all dashboards, show admin dashboard
+                ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+                ViewBag.ActiveBranchId = Request.Cookies["AdminActiveBranchId"];
                 return View();
             }
 
             return View();
         }
 
+        [HttpPost]
+        public IActionResult SwitchBranch(int? branchId)
+        {
+            CookieOptions option = new CookieOptions
+            {
+                Expires = DateTime.Now.AddYears(1),
+                HttpOnly = true,
+                Secure = true
+            };
+
+            if (branchId.HasValue && branchId.Value > 0)
+            {
+                Response.Cookies.Append("AdminActiveBranchId", branchId.Value.ToString(), option);
+            }
+            else
+            {
+                Response.Cookies.Delete("AdminActiveBranchId");
+            }
+
+            return Json(new { success = true });
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetDashboardStats()
         {
             var today = DateTime.Today;
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int? activeBranchId = null;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                activeBranchId = parsedId;
+            }
 
-            var activeTables = await _context.Orders
+            var ordersQuery = _context.Orders.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                ordersQuery = ordersQuery.Where(o => o.BranchId == activeBranchId.Value);
+            }
+
+            var activeTables = await ordersQuery
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
                 .Select(o => o.TableNumber)
                 .Distinct()
                 .CountAsync();
 
-            var pendingOrders = await _context.Orders
+            var pendingOrders = await ordersQuery
                 .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
                 .CountAsync();
 
-            var completedToday = await _context.Orders
+            var completedToday = await ordersQuery
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
                 .CountAsync();
 
-            var totalRevenueToday = await _context.Orders
+            var totalRevenueToday = await ordersQuery
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
                 .SumAsync(o => o.TotalAmount);
 
@@ -84,7 +120,20 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWaiterAssignments()
         {
-            var tables = await _context.RestaurantTables
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int? activeBranchId = null;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                activeBranchId = parsedId;
+            }
+
+            var tablesQuery = _context.RestaurantTables.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                tablesQuery = tablesQuery.Where(t => t.BranchId == activeBranchId.Value);
+            }
+
+            var tables = await tablesQuery
                 .Select(t => new {
                     id = t.Id,
                     tableNumber = t.TableNumber,
@@ -94,7 +143,10 @@ namespace Resturant.Web.UI.Controllers
                 .ToListAsync();
 
             var waiters = await _userManager.GetUsersInRoleAsync(AppRoles.Waiter);
-            var waiterList = waiters.Select(w => new { id = w.Id, fullName = w.FullName ?? w.UserName }).ToList();
+            var waiterList = waiters
+                .Where(w => !activeBranchId.HasValue || w.BranchId == activeBranchId.Value)
+                .Select(w => new { id = w.Id, fullName = w.FullName ?? w.UserName })
+                .ToList();
 
             return Json(new { tables, waiters = waiterList });
         }
@@ -114,14 +166,22 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> Settings()
         {
-            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId);
             if (settings == null)
             {
                 settings = new RestaurantSetting
                 {
                     TaxPercentage = 14,
                     ServicePercentage = 12,
-                    CreatedOn = System.DateTime.Now
+                    CreatedOn = System.DateTime.Now,
+                    BranchId = branchId
                 };
                 _context.RestaurantSettings.Add(settings);
                 await _context.SaveChangesAsync();
@@ -133,12 +193,19 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> Settings(RestaurantSetting model)
         {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
             if (ModelState.IsValid)
             {
-                var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+                var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId);
                 if (settings == null)
                 {
-                    settings = new RestaurantSetting { CreatedOn = System.DateTime.Now };
+                    settings = new RestaurantSetting { CreatedOn = System.DateTime.Now, BranchId = branchId };
                     _context.RestaurantSettings.Add(settings);
                 }
 
@@ -156,14 +223,22 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetSettings()
         {
-            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId);
             if (settings == null)
             {
                 settings = new RestaurantSetting
                 {
                     TaxPercentage = 14,
                     ServicePercentage = 12,
-                    CreatedOn = System.DateTime.Now
+                    CreatedOn = System.DateTime.Now,
+                    BranchId = branchId
                 };
                 _context.RestaurantSettings.Add(settings);
                 await _context.SaveChangesAsync();
@@ -174,10 +249,17 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveSettings(decimal taxPercentage, decimal servicePercentage)
         {
-            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync();
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId);
             if (settings == null)
             {
-                settings = new RestaurantSetting { CreatedOn = System.DateTime.Now };
+                settings = new RestaurantSetting { CreatedOn = System.DateTime.Now, BranchId = branchId };
                 _context.RestaurantSettings.Add(settings);
             }
 

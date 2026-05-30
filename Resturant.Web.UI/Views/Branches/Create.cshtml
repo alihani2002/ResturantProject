@@ -1,0 +1,79 @@
+@model Resturant.Core.Entities.Branch
+
+@{
+    ViewData["Title"] = "Create Branch";
+    bool isIframe = ViewBag.IsIframe == true;
+    Layout = isIframe ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card border-top border-0 border-4 border-primary shadow-sm rounded-3">
+            <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+                <h4 class="card-title mb-0 text-primary fw-bold">
+                    <i class="feather-plus-circle me-2"></i>Create New Branch
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-home"></i></span>
+                                <input asp-for="Name" class="form-control" placeholder="e.g. Cairo Downtown Branch" required />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger fs-12"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-map-pin"></i></span>
+                                <input asp-for="Address" class="form-control" placeholder="e.g. 15 Tahrir Square, Cairo, Egypt" />
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger fs-12"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="ContactPhone" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="feather-phone"></i></span>
+                                <input asp-for="ContactPhone" class="form-control" placeholder="e.g. +20 123 456 7890" />
+                            </div>
+                            <span asp-validation-for="ContactPhone" class="text-danger fs-12"></span>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" asp-for="IsActive" checked="checked" />
+                                <label class="form-check-label fw-semibold" asp-for="IsActive">
+                                    Set this branch active on creation
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="iframe" value="@(isIframe ? "true" : "")" />
+
+                    <hr class="my-4 border-dashed" />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a asp-action="Index" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-light text-muted rounded-pill px-3">
+                            <i class="feather-arrow-left me-1"></i>Back to List
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="feather-check-circle me-1"></i>Create Branch
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

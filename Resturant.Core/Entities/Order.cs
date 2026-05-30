@@ -36,6 +36,11 @@ namespace Resturant.Core.Entities
         [Display(Name = "Table Number")]
         public int TableNumber { get; set; }
 
+        [Required]
+        [Display(Name = "Branch")]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
         [Display(Name = "Customer Name")]
         public string? CustomerName { get; set; }
 
