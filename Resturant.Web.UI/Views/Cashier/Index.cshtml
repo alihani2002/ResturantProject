@@ -14,21 +14,21 @@
         <!-- ================================================================ -->
         <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
             <div class="col-xl-5 col-lg-7 col-md-9 text-center">
-                <div class="card border-0 shadow-lg p-5" style="background: linear-gradient(135deg, #1e1e2d 0%, #151521 100%); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                <div class="card border-0 shadow-sm p-5" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05);">
                     <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); position: absolute; top: 0; left: 0; right: 0; border-radius: 24px 24px 0 0;"></div>
                     
-                    <div class="d-inline-flex align-items-center justify-content-center bg-dark rounded-circle mb-4" style="width: 90px; height: 90px; border: 2px solid #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 90px; height: 90px; border: 2px solid #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);">
                         <i class="bi bi-shield-lock text-warning" style="font-size: 2.5rem;"></i>
                     </div>
                     
-                    <h2 class="fw-bold text-light mb-2" style="letter-spacing: 0.5px;">بدء وردية الكاشير</h2>
+                    <h2 class="fw-bold text-dark mb-2" style="letter-spacing: 0.5px;">بدء وردية الكاشير</h2>
                     <p class="text-warning fw-semibold mb-4">Start Cashier Shift</p>
                     
                     <p class="text-muted mb-5 px-3">
                         مرحباً بك في لوحة تحكم المبيعات. لدواعي الأمان المالي وضمان مطابقة الحسابات والدرج، يرجى تفعيل بدء الشفت قبل استقبال أو محاسبة أي طلبات.
                     </p>
 
-                    <form asp-action="StartShift" method="post">
+                    <form asp-action="StartShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                         <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px; transition: all 0.3s ease;">
                             <i class="bi bi-play-circle-fill me-2"></i> بدأ الشفت الآن / Start Shift
                         </button>
@@ -44,12 +44,12 @@
         <!-- ================================================================ -->
         
         <!-- Header & Info Panel -->
-        <div class="card border-0 mb-4 shadow-sm" style="background: #1e1e2d; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <div class="card border-0 mb-4 shadow-sm" style="border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
             <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 
                 <div>
-                    <h3 class="fw-bold text-light mb-1">
-                        <i class="bi bi-cash-coin text-warning me-2"></i>لوحة الكاشير والدفع
+                    <h3 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-cash-coin text-dark me-2"></i>لوحة الكاشير والدفع
                         <span id="connection-status" class="badge bg-secondary text-dark ms-2" style="font-size: 0.75rem;"><i class="bi bi-wifi"></i> Connecting...</span>
                     </h3>
                     <div class="d-flex align-items-center gap-3 mt-2 text-muted small">
@@ -170,15 +170,15 @@
 <!-- ================================================================ -->
 <div class="modal fade" id="closeShiftModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 text-white" style="background: #151521; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05) !important;">
+        <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 20px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 5px; background: linear-gradient(90deg, #dc3545, #ff6b6b); border-radius: 20px 20px 0 0;"></div>
             
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-light"><i class="bi bi-power text-danger me-2"></i>تقفيل وإنهاء الوردية</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-power text-danger me-2"></i>تقفيل وإنهاء الوردية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <form asp-action="CloseShift" method="post">
+            <form asp-action="CloseShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                 <div class="modal-body p-4">
                     <p class="text-muted small">
                         أنت على وشك إغلاق الوردية الحالية. لدواعي الأمان وضمان الشفافية، الرجاء جرد وكتابة المبلغ الفعلي المتواجد في صندوق الكاش (الدرج) حالياً بالجنيه المصري.
@@ -187,14 +187,14 @@
                     <div class="mb-3">
                         <label class="form-label text-warning small fw-bold">إجمالي الكاش الفعلي بالدرج / Actual Cash Amount</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-dark border-0 text-warning" style="border-radius: 12px 0 0 12px;"><i class="bi bi-wallet2"></i></span>
-                            <input type="number" step="0.01" min="0" required name="actualAmount" id="actualAmount" class="form-control bg-dark text-white border-0 py-3" style="border-radius: 0 12px 12px 0;" placeholder="0.00 EGP" />
+                            <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-wallet2"></i></span>
+                            <input type="number" step="0.01" min="0" required name="actualAmount" id="actualAmount" class="form-control bg-white text-dark border-1 py-3" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00 EGP" />
                         </div>
                     </div>
                 </div>
                 
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
                     <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">تأكيد إنهاء الوردية</button>
                 </div>
             </form>
@@ -207,19 +207,19 @@
 <!-- ================================================================ -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 text-white" style="background: #151521; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05) !important;">
+        <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 20px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 5px; background: linear-gradient(90deg, #4caf50, #81c784); border-radius: 20px 20px 0 0;"></div>
             
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-light"><i class="bi bi-calculator-fill text-success me-2"></i>حاسبة الدفع والبقشيش</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-calculator-fill text-success me-2"></i>حاسبة الدفع والبقشيش</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
             <div class="modal-body p-4">
                 <input type="hidden" id="payOrderIds" />
                 
                 <!-- Total Display -->
-                <div class="text-center p-3 rounded-4 mb-4" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
+                <div class="text-center p-3 rounded-4 mb-4" style="background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0, 0, 0, 0.04);">
                     <div class="text-secondary small mb-1">المبلغ المطلوب / Total Amount Due</div>
                     <div class="fs-2 fw-bold text-success" id="payTotalLabel">0.00 <span style="font-size: 1rem;">EGP</span></div>
                 </div>
@@ -228,8 +228,8 @@
                 <div class="mb-3">
                     <label class="form-label text-warning small fw-bold">المبلغ المدفوع من العميل / Amount Received</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-dark border-0 text-warning" style="border-radius: 12px 0 0 12px;"><i class="bi bi-cash-stack"></i></span>
-                        <input type="number" step="0.01" min="0" id="payAmountReceived" class="form-control bg-dark text-white border-0 py-2.5" style="border-radius: 0 12px 12px 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
+                        <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-cash-stack"></i></span>
+                        <input type="number" step="0.01" min="0" id="payAmountReceived" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                     </div>
                 </div>
 
@@ -237,8 +237,8 @@
                 <div class="mb-4">
                     <label class="form-label text-warning small fw-bold">المتبقي المرتجع للعميل / Change Returned</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-dark border-0 text-warning" style="border-radius: 12px 0 0 12px;"><i class="bi bi-arrow-return-left"></i></span>
-                        <input type="number" step="0.01" min="0" id="payChangeReturned" class="form-control bg-dark text-white border-0 py-2.5" style="border-radius: 0 12px 12px 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
+                        <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-arrow-return-left"></i></span>
+                        <input type="number" step="0.01" min="0" id="payChangeReturned" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                     </div>
                 </div>
 
@@ -253,7 +253,7 @@
             </div>
             
             <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
                 <button type="button" class="btn btn-success fw-bold rounded-pill px-4" onclick="submitProcessedPayment()">تأكيد واستلام النقد</button>
             </div>
         </div>
@@ -265,12 +265,12 @@
 <!-- ================================================================ -->
 <div class="modal fade modal-xl" id="takeawayModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 text-white" style="background: #151521; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.05) !important;">
+        <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); border-radius: 24px 24px 0 0;"></div>
             
             <div class="modal-header border-0 pb-0 px-4 pt-4">
-                <h5 class="modal-title fw-bold text-light"><i class="bi bi-bag-plus-fill text-warning me-2"></i>طلب تيك أواي جديد / Takeaway Order</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-bag-plus-fill text-warning me-2"></i>طلب تيك أواي جديد / Takeaway Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
             <div class="modal-body px-4 py-3">
@@ -279,8 +279,8 @@
                     <!-- Left: Menu Explorer (Categories and Items) -->
                     <div class="col-lg-8 d-flex flex-column h-100">
                         <div class="input-group mb-3 shadow-sm">
-                            <span class="input-group-text bg-dark border-0 text-warning" style="border-radius: 12px 0 0 12px;"><i class="bi bi-search"></i></span>
-                            <input type="text" id="menuSearchInput" class="form-control bg-dark text-white border-0" style="border-radius: 0 12px 12px 0; py: 2.5rem;" placeholder="ابحث عن صنف من المنيو..." oninput="filterMenuItems()" />
+                            <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-search"></i></span>
+                            <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; py: 2.5rem;" placeholder="ابحث عن صنف من المنيو..." oninput="filterMenuItems()" />
                         </div>
                         
                         <!-- Categories slider -->
@@ -295,7 +295,7 @@
                     </div>
                     
                     <!-- Right: Active Cart Pane -->
-                    <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
+                    <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
                         <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 me-2"></i>سلة الطلبات / Cart</h5>
                         
                         <!-- Cart list -->
@@ -308,7 +308,7 @@
                         </div>
                         
                         <!-- Summary and Checkout -->
-                        <div class="border-top pt-3" style="border-color: rgba(255,255,255,0.08) !important;">
+                        <div class="border-top pt-3" style="border-color: rgba(0,0,0,0.08) !important;">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">الإجمالي المبدئي:</span>
                                 <span class="fw-bold" id="cartSubtotal">0.00 EGP</span>
@@ -329,12 +329,42 @@
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
+        // Check for toast notifications to show after reload
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedToast = sessionStorage.getItem('cashier_toast');
+            if (storedToast) {
+                try {
+                    const toast = JSON.parse(storedToast);
+                    showNotification(toast.message, toast.type);
+                } catch (e) { console.error(e); }
+                sessionStorage.removeItem('cashier_toast');
+            }
+        });
+
         // SignalR Connection
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub")
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)
             .build();
+
+        // Client-side idempotency guard to prevent double-clicks/duplicate submissions
+        const pendingRequests = new Set();
+        function safeFetch(url, options = {}) {
+            const method = options.method || 'GET';
+            if (method !== 'GET') {
+                const requestKey = `${method}:${url}:${options.body || ''}`;
+                if (pendingRequests.has(requestKey)) {
+                    console.warn("Blocked duplicate request (idempotency guard):", requestKey);
+                    return Promise.reject(new Error("Request is already in progress."));
+                }
+                pendingRequests.add(requestKey);
+                return fetch(url, options).finally(() => {
+                    pendingRequests.delete(requestKey);
+                });
+            }
+            return fetch(url, options);
+        }
 
         function updateConnectionStatus(connected) {
             const badge = document.getElementById('connection-status');
@@ -404,7 +434,14 @@
                 return;
             }
 
-            fetch('/Cashier/ProcessPayment', {
+            const btn = document.querySelector('#paymentModal .btn-success');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري الحفظ...';
+            }
+
+            safeFetch('/Cashier/ProcessPayment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderIds=${orderIds}&paidAmount=${paidAmount}&changeReturned=${changeReturned}&tips=${tips}`
@@ -412,11 +449,16 @@
             .then(response => {
                 if (response.ok) {
                     if (payModalInstance) payModalInstance.hide();
-                    fetchAndRefreshOrders();
-                    showNotification('تم تأكيد الدفع ومطابقة الخزينة بنجاح!', 'success');
+                    sessionStorage.setItem('cashier_toast', JSON.stringify({ message: 'تم تأكيد الدفع ومطابقة الخزينة بنجاح!', type: 'success' }));
+                    location.reload();
                 } else {
                     alert('خطأ أثناء معالجة الدفع');
+                    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
             });
         }
 
@@ -451,10 +493,10 @@
 
         function renderCategories() {
             const container = document.getElementById('categoriesSlider');
-            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-light"} rounded-pill px-3" onclick="selectCategory(0)">All</button>`;
+            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">All</button>`;
             
             fullMenuData.forEach(cat => {
-                html += `<button class="btn btn-sm ${selectedCategory === cat.categoryId ? "btn-warning" : "btn-outline-light"} rounded-pill px-3" onclick="selectCategory(${cat.categoryId})">${cat.categoryName}</button>`;
+                html += `<button class="btn btn-sm ${selectedCategory === cat.categoryId ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(${cat.categoryId})">${cat.categoryName}</button>`;
             });
 
             container.innerHTML = html;
@@ -479,13 +521,13 @@
 
                     html += `
                         <div class="col-sm-6 col-md-4">
-                            <div class="card h-100 border-0 shadow-sm p-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05) !important; color: #fff;">
+                            <div class="card h-100 border-0 shadow-sm p-3" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08) !important; color: #1e1e2d;">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div class="fw-bold text-light" style="font-size: 0.95rem;">${item.name}</div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.95rem;">${item.name}</div>
                                     <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} EGP</span>
                                 </div>
                                 <div class="mt-3">
-                                    <button class="btn btn-outline-warning btn-xs w-100 py-1.5 fw-bold rounded-pill" onclick="addItemToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})">
+                                    <button class="btn btn-outline-warning btn-xs w-100 py-1.5 fw-bold rounded-pill text-dark" onclick="handleMenuAddClick(${item.id})">
                                         <i class="bi bi-plus-circle me-1"></i> إضافة للسلة
                                     </button>
                                 </div>
@@ -502,22 +544,49 @@
             renderMenuItems();
         }
 
-        function addItemToCart(id, name, price) {
-            const existing = cart.find(i => i.id === id);
+        function handleMenuAddClick(itemId) {
+            let foundItem = null;
+            for (const cat of fullMenuData) {
+                const item = cat.items.find(i => i.id === itemId);
+                if (item) {
+                    foundItem = item;
+                    break;
+                }
+            }
+            if (!foundItem) return;
+
+            const hasCustomization = (foundItem.sizes && foundItem.sizes.length > 0) || (foundItem.addOns && foundItem.addOns.length > 0);
+            if (hasCustomization) {
+                openCustomizationModal(itemId);
+            } else {
+                addItemToCartDirect(foundItem.id, foundItem.name, foundItem.price);
+            }
+        }
+
+        function addItemToCartDirect(id, name, price) {
+            const cartItemId = `${id}__`;
+            const existing = cart.find(i => i.cartItemId === cartItemId);
             if (existing) {
                 existing.quantity++;
             } else {
-                cart.push({ id: id, name: name, price: price, quantity: 1 });
+                cart.push({
+                    cartItemId: cartItemId,
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    addOns: []
+                });
             }
             updateCartUI();
         }
 
-        function updateQuantity(id, delta) {
-            const existing = cart.find(i => i.id === id);
+        function updateQuantity(cartItemId, delta) {
+            const existing = cart.find(i => i.cartItemId === cartItemId);
             if (existing) {
                 existing.quantity += delta;
                 if (existing.quantity <= 0) {
-                    cart = cart.filter(i => i.id !== id);
+                    cart = cart.filter(i => i.cartItemId !== cartItemId);
                 }
             }
             updateCartUI();
@@ -526,7 +595,6 @@
         function updateCartUI() {
             const container = document.getElementById('cartItemsList');
             const checkoutBtn = document.getElementById('btnCartCheckout');
-            const emptyState = document.getElementById('cartEmptyState');
             
             if (cart.length === 0) {
                 container.innerHTML = `
@@ -544,19 +612,26 @@
             let subtotal = 0;
 
             cart.forEach(item => {
-                const total = item.price * item.quantity;
+                const addonsTotal = item.addOns ? item.addOns.reduce((sum, a) => sum + a.price, 0) : 0;
+                const total = (item.price + addonsTotal) * item.quantity;
                 subtotal += total;
 
+                let addonsText = '';
+                if (item.addOns && item.addOns.length > 0) {
+                    addonsText = `<div class="text-muted small ps-2 border-start border-2 border-warning mt-1" style="font-size: 0.75rem; text-align: left;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
+                }
+
                 html += `
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-2.5 rounded-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.04);">
-                        <div class="text-start">
-                            <span class="fw-bold d-block text-light" style="font-size: 0.9rem;">${item.name}</span>
-                            <span class="text-muted small">${item.price.toFixed(2)} EGP</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2.5 rounded-3" style="background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0,0,0,0.08);">
+                        <div class="text-start" style="max-width: 65%;">
+                            <span class="fw-bold d-block text-dark" style="font-size: 0.9rem;">${item.name}</span>
+                            ${addonsText}
+                            <span class="text-muted small">${(item.price + addonsTotal).toFixed(2)} EGP</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity(${item.id}, -1)"><i class="bi bi-dash"></i></button>
-                            <span class="fw-bold">${item.quantity}</span>
-                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity(${item.id}, 1)"><i class="bi bi-plus"></i></button>
+                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', -1)"><i class="bi bi-dash"></i></button>
+                            <span class="fw-bold text-dark">${item.quantity}</span>
+                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', 1)"><i class="bi bi-plus"></i></button>
                         </div>
                     </div>
                 `;
@@ -568,7 +643,10 @@
         }
 
         function checkoutTakeawayOrder() {
-            let subtotal = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
+            let subtotal = cart.reduce((acc, i) => {
+                const addonsTotal = i.addOns ? i.addOns.reduce((sum, a) => sum + a.price, 0) : 0;
+                return acc + ((i.price + addonsTotal) * i.quantity);
+            }, 0);
             
             // Close Takeaway modal and open payment modal!
             if (takeawayModalInstance) takeawayModalInstance.hide();
@@ -582,34 +660,35 @@
                 document.getElementById('payAmountReceived').value = subtotal.toFixed(2);
                 document.getElementById('payChangeReturned').value = (0).toFixed(2);
                 document.getElementById('payTipsLabel').textContent = "0.00 EGP";
-
+ 
                 // Re-wire pay confirm to submit takeaway
                 const confirmBtn = document.querySelector('#paymentModal .btn-success');
                 confirmBtn.setAttribute('onclick', 'submitTakeawayPayment()');
-
+ 
                 payModalInstance = new bootstrap.Modal(document.getElementById('paymentModal'));
                 payModalInstance.show();
             }, 350);
         }
-
+ 
         function submitTakeawayPayment() {
             const paidAmount = parseFloat(document.getElementById('payAmountReceived').value) || 0;
             const changeReturned = parseFloat(document.getElementById('payChangeReturned').value) || 0;
             
             let tips = paidAmount - currentOrderTotal - changeReturned;
             if (tips < 0) tips = 0;
-
+ 
             if (paidAmount < currentOrderTotal) {
                 alert("المبلغ المدفوع أقل من القيمة المطلوبة للفاتورة!");
                 return;
             }
-
+ 
             const items = cart.map(i => ({
                 menuItemId: i.id,
                 quantity: i.quantity,
-                addOnIds: []
+                addOnIds: i.addOns ? i.addOns.map(a => a.id) : [],
+                price: i.price
             }));
-
+ 
             const payload = {
                 items: items,
                 paidAmount: paidAmount,
@@ -617,7 +696,14 @@
                 tips: tips
             };
 
-            fetch('/Cashier/CreateTakeawayOrder', {
+            const btn = document.querySelector('#paymentModal .btn-success');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري حفظ الطلب...';
+            }
+
+            safeFetch('/Cashier/CreateTakeawayOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -625,16 +711,16 @@
             .then(response => {
                 if (response.ok) {
                     if (payModalInstance) payModalInstance.hide();
-                    fetchAndRefreshOrders();
-                    
-                    // Reset confirm button action back to original processPayment
-                    const confirmBtn = document.querySelector('#paymentModal .btn-success');
-                    confirmBtn.setAttribute('onclick', 'submitProcessedPayment()');
-
-                    showNotification('تم تسجيل طلب التيك أواي ودفع الفاتورة بنجاح!', 'success');
+                    sessionStorage.setItem('cashier_toast', JSON.stringify({ message: 'تم تسجيل طلب التيك أواي ودفع الفاتورة بنجاح!', type: 'success' }));
+                    location.reload();
                 } else {
                     alert('خطأ أثناء إرسال طلب التيك أواي');
+                    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
                 }
+            })
+            .catch(err => {
+                console.error(err);
+                if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
             });
         }
 
@@ -828,15 +914,243 @@
 
         function dismissCancelled(orderIds) {
             if (!confirm('هل تريد بالتأكيد تجاهل هذه الطلبات الملغية وإخفائها؟')) return;
-            fetch('/Cashier/ProcessPayment', {
+            
+            const btn = document.activeElement;
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn && btn.tagName === 'BUTTON') {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري المعالجة...';
+            }
+
+            safeFetch('/Cashier/ProcessPayment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderIds=${orderIds}&paidAmount=0&changeReturned=0&tips=0`
             })
             .then(response => {
-                if (response.ok) { fetchAndRefreshOrders(); showNotification('تم تجاهل الطلب الملغي.', 'success'); }
-                else { alert('حدث خطأ'); }
+                if (response.ok) { 
+                    sessionStorage.setItem('cashier_toast', JSON.stringify({ message: 'تم تجاهل الطلب الملغي.', type: 'success' }));
+                    location.reload();
+                }
+                else { 
+                    alert('حدث خطأ'); 
+                    if (btn && btn.tagName === 'BUTTON') { btn.disabled = false; btn.innerHTML = originalText; }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                if (btn && btn.tagName === 'BUTTON') { btn.disabled = false; btn.innerHTML = originalText; }
             });
         }
+
+        // --- CUSTOMIZATION FLOW ---
+        let activeCustomItem = null;
+        let customizationQty = 1;
+
+        function openCustomizationModal(menuItemId) {
+            let item = null;
+            for (const cat of fullMenuData) {
+                const found = cat.items.find(i => i.id === menuItemId);
+                if (found) {
+                    item = found;
+                    break;
+                }
+            }
+            if (!item) return;
+
+            activeCustomItem = item;
+            customizationQty = 1;
+            
+            document.getElementById('customization-item-name').textContent = item.name;
+            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} EGP`;
+            document.getElementById('customization-item-description').textContent = item.description || '';
+            document.getElementById('customization-qty-val').textContent = customizationQty;
+
+            // Render Sizes
+            const sizesSection = document.getElementById('sizes-section');
+            const sizesList = document.getElementById('sizes-list');
+            if (item.sizes && item.sizes.length > 0) {
+                sizesSection.style.display = 'block';
+                sizesList.innerHTML = item.sizes.map((size, idx) => `
+                    <div class="flex-grow-1" style="min-width: 120px;">
+                        <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
+                        <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
+                            <span class="size-name small text-muted">${size.name}</span>
+                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} EGP</span>
+                        </label>
+                    </div>
+                `).join('');
+            } else {
+                sizesSection.style.display = 'none';
+                sizesList.innerHTML = '';
+            }
+
+            // Render Add-ons
+            const addonsSection = document.getElementById('addons-section');
+            const addonsList = document.getElementById('addons-list');
+            if (item.addOns && item.addOns.length > 0) {
+                addonsSection.style.display = 'block';
+                addonsList.innerHTML = item.addOns.map(addon => `
+                    <div class="col-12">
+                        <div class="card border p-2.5 px-3 rounded-3 d-flex flex-row align-items-center justify-content-between cursor-pointer addon-card mb-2" 
+                             id="addon-card-${addon.id}"
+                             onclick="toggleAddonCard(${addon.id})">
+                            <div class="form-check m-0" style="pointer-events: none;">
+                                <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.price}" data-name="${addon.name}" onclick="event.stopPropagation()">
+                                <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                    ${addon.name}
+                                </label>
+                            </div>
+                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} EGP</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                addonsSection.style.display = 'none';
+                addonsList.innerHTML = '';
+            }
+
+            updateCustomizationTotal();
+
+            const bsRequest = window.bootstrap || bootstrap;
+            const customModal = new bsRequest.Modal(document.getElementById('customizationModal'));
+            customModal.show();
+        }
+
+        function toggleAddonCard(addonId) {
+            const checkbox = document.getElementById(`addon-${addonId}`);
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                const card = document.getElementById(`addon-card-${addonId}`);
+                if (checkbox.checked) {
+                    card.classList.add('border-warning', 'bg-warning-subtle');
+                } else {
+                    card.classList.remove('border-warning', 'bg-warning-subtle');
+                }
+                updateCustomizationTotal();
+            }
+        }
+
+        function adjustCustomQty(delta) {
+            if (customizationQty + delta >= 1) {
+                customizationQty += delta;
+                document.getElementById('customization-qty-val').textContent = customizationQty;
+                updateCustomizationTotal();
+            }
+        }
+
+        function updateCustomizationTotal() {
+            if (!activeCustomItem) return;
+            
+            const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+            const basePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+            let total = basePrice;
+            
+            const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                total += parseFloat(cb.getAttribute('data-price'));
+            });
+
+            total = total * customizationQty;
+
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} EGP`;
+        }
+
+        function addCustomizedToCart() {
+            if (!activeCustomItem) return;
+
+            const selectedAddOnsList = [];
+            const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                selectedAddOnsList.push({
+                    id: parseInt(cb.value),
+                    name: cb.getAttribute('data-name'),
+                    price: parseFloat(cb.getAttribute('data-price'))
+                });
+            });
+
+            const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+            const sizeName = selectedSizeRadio ? selectedSizeRadio.value : '';
+            const sizePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+
+            const addonIdsStr = selectedAddOnsList.map(a => a.id).sort().join(',');
+            const cartItemId = `${activeCustomItem.id}_${sizeName}_${addonIdsStr}`;
+
+            const existingItem = cart.find(item => item.cartItemId === cartItemId);
+            if (existingItem) {
+                existingItem.quantity += customizationQty;
+            } else {
+                cart.push({
+                    cartItemId: cartItemId,
+                    id: activeCustomItem.id,
+                    name: activeCustomItem.name + (sizeName ? ` (${sizeName})` : ''),
+                    price: sizePrice,
+                    quantity: customizationQty,
+                    addOns: selectedAddOnsList,
+                    size: sizeName
+                });
+            }
+
+            updateCartUI();
+
+            const bsRequest = window.bootstrap || bootstrap;
+            const customModalElement = document.getElementById('customizationModal');
+            const customModal = bsRequest.Modal.getInstance(customModalElement);
+            if (customModal) customModal.hide();
+        }
     </script>
+
+    <!-- Customization Modal HTML -->
+    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content shadow-lg border-0 rounded-4 bg-white text-dark">
+                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
+                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 EGP</span>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
+                    <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+                    
+                    <!-- Sizes Section -->
+                    <div id="sizes-section" class="mb-4" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                        </h6>
+                        <div id="sizes-list" class="d-flex flex-wrap gap-2">
+                            <!-- Dynamic sizes -->
+                        </div>
+                    </div>
+
+                    <!-- Add-Ons Section -->
+                    <div id="addons-section" class="mb-4" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order / الإضافات
+                        </h6>
+                        <div id="addons-list" class="row g-2">
+                            <!-- Custom options -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                    <!-- Quantity selector -->
+                    <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
+                        <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(-1)">-</button>
+                        <span class="px-2 fw-bold text-dark fs-5" id="customization-qty-val">1</span>
+                        <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(1)">+</button>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark d-flex align-items-center shadow-sm" id="add-customized-to-cart-btn" onclick="addCustomizedToCart()">
+                        <span class="me-2">Add to Cart</span>
+                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 EGP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

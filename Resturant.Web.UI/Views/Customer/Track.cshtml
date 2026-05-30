@@ -11,14 +11,14 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow border-0 rounded-lg">
-                <div class="card-header bg-dark text-gold text-center py-4">
+                <div class="card-header bg-white text-dark text-center py-4">
                     <h3 class="font-weight-light mb-0"><i class="bi bi-search me-2"></i>Track Your Order</h3>
                 </div>
                 <div class="card-body p-4">
                     <form asp-action="Track" method="get" class="mb-5">
                         <div class="input-group">
                             <input type="tel" name="phone" class="form-control form-control-lg rounded-pill-start" placeholder="Enter your phone number..." required />
-                            <button type="submit" class="btn btn-dark btn-lg rounded-pill-end px-4">
+                            <button type="submit" class="btn btn-warning btn-lg rounded-pill-end px-4">
                                 <i class="bi bi-search"></i>
                             </button>
                         </div>
@@ -90,9 +90,8 @@
 
 <style>
     .text-gold { color: #d4af37; }
-    .bg-dark { background-color: #1a1a1a !important; }
-    .btn-dark { background-color: #1a1a1a; border-color: #1a1a1a; }
-    .btn-dark:hover { background-color: #d4af37; border-color: #d4af37; color: #1a1a1a; }
+    .btn-dark { background-color: #f8f9fa; border-color: #dee2e6; color: #212529; }
+    .btn-dark:hover { background-color: #e9ecef; border-color: #ced4da; }
     .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; padding-left: 1.5rem; }
     .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; }
 </style>

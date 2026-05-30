@@ -7,6 +7,7 @@
     decimal diff = Model.Difference ?? 0;
     decimal baseSales = ViewBag.ShiftTotalSales;
     decimal tips = ViewBag.ShiftTotalTips;
+    var shiftOrders = ViewBag.ShiftOrders as List<Resturant.Core.Entities.Order> ?? new List<Resturant.Core.Entities.Order>();
 
     string diffLabel = "متزن / Balanced";
     if (diff < 0) {
@@ -26,200 +27,171 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap RTL CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #070708; /* Luxury obsidian black background */
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: #f8f9fa;
+            color: #333;
         }
-        .outfit-font {
-            font-family: 'Outfit', sans-serif;
-        }
-        .main-card {
-            background: linear-gradient(135deg, #1e1e2d 0%, #151521 100%);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .outfit-font { font-family: 'Outfit', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
         }
         .gold-line {
             height: 6px;
             background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);
         }
-        .animate-pulse {
-            animation: pulse 2s infinite;
-        }
-        @@keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
         @@media print {
-            body, html {
-                background-color: #fff !important;
-                color: #000 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                display: block !important;
-                min-height: auto !important;
-            }
-            .d-print-none {
-                display: none !important;
-            }
-            .thermal-receipt {
-                display: block !important;
-            }
+            body, html { background-color: #fff !important; color: #000 !important; }
+            .d-print-none { display: none !important; }
+            .thermal-receipt { display: block !important; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ================================================================ -->
-    <!-- [START] FULL SCREEN DARK-GOLD VIEW FOR INTERACTIVE BROWSER VIEW -->
-    <!-- ================================================================ -->
     <div class="container py-5 d-print-none">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
-                <div class="main-card">
-                    <div class="gold-line"></div>
+            <div class="col-lg-10">
+                <div class="glass-panel rounded-4 p-4 p-md-5 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-50 translate-middle-x" style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #d4af37, transparent); opacity: 0.5;"></div>
                     
-                    <div class="card-body p-4 p-md-5">
-                        <!-- Title & Header Info -->
-                        <div class="text-center mb-5">
-                            <div class="d-inline-flex align-items-center justify-content-center bg-dark rounded-circle mb-3" style="width: 80px; height: 80px; border: 2px solid #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);">
-                                <i class="bi bi-clock-history text-warning" style="font-size: 2.2rem;"></i>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 pb-4 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                            <div class="d-flex justify-content-center align-items-center rounded-circle" style="width: 60px; height: 60px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2);">
+                                <i class="bi bi-clock-history fs-3 text-warning"></i>
                             </div>
-                            <h2 class="fw-bold mb-1" style="color: #f8f9fa;">تم تقفيل الوردية بنجاح</h2>
-                            <p class="text-warning mb-0 fw-semibold">Shift Closed Successfully</p>
-                            <span class="badge bg-danger px-3 py-2 rounded-pill mt-3 fw-bold" style="font-size: 0.85rem; border: 1px solid rgba(220, 53, 69, 0.4);">شفت مغلق - Closed Shift</span>
+                            <div>
+                                <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px;">تقرير وردية الكاشير</h2>
+                                <p class="text-muted mb-0 mt-1">Cashier Shift Summary</p>
+                            </div>
                         </div>
+                        <div class="text-md-end text-center">
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">Shift ID: #@Model.Id</span>
+                            <div class="text-muted small">تاريخ التقرير: @DateTime.Now.ToString("dd MMM yyyy, hh:mm tt")</div>
+                        </div>
+                    </div>
 
-                        <!-- Metadata Grid -->
-                        <div class="row g-3 mb-5 p-4 rounded-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                                <div class="text-muted small mb-1">اسم الكاشير</div>
+                                <div class="fw-bold fs-5 text-dark">@(Model.Cashier?.UserName ?? "N/A")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                                <div class="text-muted small mb-1">وقت بدء الوردية</div>
+                                <div class="fw-bold text-dark"><i class="bi bi-play-circle-fill text-success me-2"></i>@Model.StartTime.ToString("hh:mm tt")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                                <div class="text-muted small mb-1">وقت إغلاق الوردية</div>
+                                <div class="fw-bold text-dark"><i class="bi bi-stop-circle-fill text-danger me-2"></i>@(Model.EndTime?.ToString("hh:mm tt") ?? "N/A")</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 h-100 border border-dark border-opacity-10">
+                                <div class="text-muted small fw-semibold text-uppercase tracking-wider mb-2">إجمالي مبيعات الوردية (الطلبات)</div>
+                                <div class="fs-2 fw-bold text-dark mb-0">
+                                    @baseSales.ToString("N2") <span class="fs-5 text-muted">EGP</span>
+                                </div>
+                                <div class="small text-muted mt-2"><i class="bi bi-receipt me-1"></i> لا يشمل البقشيش</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 rounded-4 h-100 border border-success border-opacity-25" style="background: linear-gradient(145deg, rgba(40,167,69,0.1) 0%, rgba(40,167,69,0.02) 100%);">
+                                <div class="text-success small fw-semibold text-uppercase tracking-wider mb-2">البقشيش المستلم بالدرج</div>
+                                <div class="fs-2 fw-bold text-success mb-0">
+                                    @tips.ToString("N2") <span class="fs-5 opacity-75">EGP</span>
+                                </div>
+                                <div class="small text-success opacity-75 mt-2"><i class="bi bi-heart-fill me-1"></i> إجمالي الإضافيات</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-4 border border-warning border-opacity-25" style="background: rgba(212, 175, 55, 0.05);">
+                        <h5 class="fw-bold text-dark mb-4 border-bottom border-warning border-opacity-25 pb-2">مطابقة الدرج (Reconciliation)</h5>
+                        <div class="row gy-3">
                             <div class="col-sm-6">
-                                <div class="text-secondary small mb-1">الموظف / Cashier</div>
-                                <div class="fw-bold text-light" style="font-size: 1.1rem;"><i class="bi bi-person-fill me-2 text-warning"></i>@Model.Cashier?.UserName</div>
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-white border border-light">
+                                    <span class="text-muted"><i class="bi bi-calculator me-2"></i>المتوقع بالسيستم</span>
+                                    <span class="fw-bold text-dark fs-5">@expected.ToString("N2") EGP</span>
+                                </div>
                             </div>
                             <div class="col-sm-6">
-                                <div class="text-secondary small mb-1">معرف الوردية / Shift ID</div>
-                                <div class="fw-bold text-light" style="font-size: 1.1rem;"><i class="bi bi-hash me-1 text-warning"></i>@Model.Id</div>
-                            </div>
-                            <div class="col-12"><hr class="my-2" style="border-color: rgba(255,255,255,0.08);"></div>
-                            <div class="col-sm-6">
-                                <div class="text-secondary small mb-1">وقت البدء / Start Time</div>
-                                <div class="fw-bold text-light"><i class="bi bi-play-fill text-success me-1"></i>@Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="text-secondary small mb-1">وقت الإغلاق / End Time</div>
-                                <div class="fw-bold text-light"><i class="bi bi-stop-fill text-danger me-1"></i>@Model.EndTime?.ToString("yyyy-MM-dd hh:mm tt")</div>
-                            </div>
-                        </div>
-
-                        <!-- Financial Summary Grid -->
-                        <h4 class="fw-bold text-warning mb-3 pb-2 border-bottom" style="border-color: rgba(212,175,55,0.2) !important;"><i class="bi bi-cash-coin me-2"></i>التقرير المالي / Financial Report</h4>
-                        <div class="row g-4 mb-5">
-                            <!-- Card 1: Base Sales -->
-                            <div class="col-md-6">
-                                <div class="p-4 rounded-4 h-100 text-center text-md-start" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
-                                    <div class="text-secondary small mb-1">المبيعات الأساسية / Base Sales</div>
-                                    <div class="fs-3 fw-bold text-light">@baseSales.ToString("N2") <span style="font-size: 0.9rem;">EGP</span></div>
-                                    <div class="text-muted small mt-1">إجمالي قيمة فواتير الطلبات</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Card 2: Total Tips -->
-                            <div class="col-md-6">
-                                <div class="p-4 rounded-4 h-100 text-center text-md-start" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);">
-                                    <div class="text-secondary small mb-1">إجمالي البقشيش / Total Tips</div>
-                                    <div class="fs-3 fw-bold text-warning">@tips.ToString("N2") <span style="font-size: 0.9rem; color: #fff;">EGP</span></div>
-                                    <div class="text-muted small mt-1">الزيادات المستلمة كبقشيش للدرج</div>
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-white border border-light">
+                                    <span class="text-muted"><i class="bi bi-cash me-2"></i>الكاش المدخل يدوياً</span>
+                                    <span class="fw-bold text-dark fs-5">@actual.ToString("N2") EGP</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Drawer Reconciliation Breakdown -->
-                        <div class="p-4 rounded-4 mb-5" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15);">
-                            <div class="row align-items-center g-3">
-                                <div class="col-md-7">
-                                    <h5 class="fw-bold mb-1 text-warning"><i class="bi bi-calculator me-2"></i>حساب مطابقة الدرج</h5>
-                                    <p class="text-muted small mb-0">المتوقع بالدرج = إجمالي المبيعات + البقشيش</p>
-                                </div>
-                                <div class="col-md-5 text-md-end">
-                                    <div class="fs-4 fw-bold text-light">@expected.ToString("N2") <span style="font-size: 0.95rem;">EGP</span></div>
-                                    <span class="badge bg-secondary text-dark fw-bold">الرصيد المطلوب بالسيستم</span>
-                                </div>
+                    <div class="mt-5">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 border-bottom border-secondary border-opacity-25 pb-3 gap-3">
+                            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-list-ul text-warning me-2"></i>تفاصيل طلبات الوردية</h4>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <input type="text" id="orderSearchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="بحث بالرقم، الطاولة، العميل..." onkeyup="filterOrdersTable()" style="max-width: 220px;" />
+                                <button onclick="exportOrdersToExcel()" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1">
+                                    <i class="bi bi-file-earmark-excel"></i> تحميل Excel
+                                </button>
                             </div>
                         </div>
-
-                        <!-- The Reconciliation Result (Expected vs Actual) -->
-                        <h4 class="fw-bold text-warning mb-3 pb-2 border-bottom" style="border-color: rgba(212,175,55,0.2) !important;"><i class="bi bi-shield-check me-2"></i>التسوية والمطابقة / Drawer Reconciliation</h4>
-                        
-                        <div class="row g-4 text-center mb-5">
-                            <!-- Expected -->
-                            <div class="col-sm-4">
-                                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
-                                    <div class="text-secondary small mb-1">المتوقع بالسيستم</div>
-                                    <div class="fs-4 fw-bold text-info">@expected.ToString("N2")</div>
-                                    <div class="text-muted small">System Expected</div>
-                                </div>
+                        @if (shiftOrders.Any())
+                        {
+                            <div class="table-responsive rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.5);">
+                                <table class="table table-hover table-borderless align-middle mb-0 text-dark" id="shiftOrdersTable">
+                                    <thead style="background: rgba(0, 0, 0, 0.05); border-bottom: 2px solid rgba(0, 0, 0, 0.1);">
+                                        <tr>
+                                            <th class="py-3 ps-4 text-muted">رقم الطلب</th>
+                                            <th class="py-3 text-muted">الطاولة</th>
+                                            <th class="py-3 text-muted">العميل</th>
+                                            <th class="py-3 text-center text-muted">الإجمالي</th>
+                                            <th class="py-3 text-center text-muted">البقشيش</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var order in shiftOrders)
+                                        {
+                                            <tr style="border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
+                                                <td class="py-3 ps-4 fw-bold text-dark">#@order.Id</td>
+                                                <td class="py-3">@(order.TableNumber == 0 ? "تيك أواي" : "T" + order.TableNumber)</td>
+                                                <td class="py-3">@(order.CustomerName ?? "-")</td>
+                                                <td class="py-3 text-center fw-semibold text-primary">@order.TotalAmount.ToString("N2") EGP</td>
+                                                <td class="py-3 text-center fw-semibold text-success">@((order.Tips ?? 0).ToString("N2")) EGP</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
-                            
-                            <!-- Actual Entered -->
-                            <div class="col-sm-4">
-                                <div class="p-3 rounded-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
-                                    <div class="text-secondary small mb-1">المدخل يدوياً</div>
-                                    <div class="fs-4 fw-bold text-warning">@actual.ToString("N2")</div>
-                                    <div class="text-muted small">Actual Entered</div>
-                                </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(0, 0, 0, 0.02);">
+                                <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+                                <h5 class="text-dark">لا توجد طلبات مسجلة في هذه الوردية</h5>
                             </div>
+                        }
+                    </div>
 
-                            <!-- Difference -->
-                            <div class="col-sm-4">
-                                @{
-                                    string diffColorClass = "text-success";
-                                    string diffBg = "rgba(40, 167, 69, 0.1)";
-                                    string diffBorder = "rgba(40, 167, 69, 0.25)";
-                                    
-                                    if (diff < 0)
-                                    {
-                                        diffColorClass = "text-danger animate-pulse";
-                                        diffBg = "rgba(220, 53, 69, 0.1)";
-                                        diffBorder = "rgba(220, 53, 69, 0.25)";
-                                    }
-                                    else if (diff > 0)
-                                    {
-                                        diffColorClass = "text-success fw-bold";
-                                        diffBg = "rgba(40, 167, 69, 0.15)";
-                                        diffBorder = "rgba(40, 167, 69, 0.3)";
-                                    }
-                                }
-                                <div class="p-3 rounded-4" style="background: @diffBg; border: 1px solid @diffBorder;">
-                                    <div class="text-secondary small mb-1">الفارق</div>
-                                    <div class="fs-4 fw-bold @diffColorClass">
-                                        @(diff >= 0 ? "+" : "")@diff.ToString("N2")
-                                    </div>
-                                    <span class="badge @(diff < 0 ? "bg-danger" : "bg-success") px-2 py-1 rounded">@diffLabel</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="text-center pt-2 d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                            <a href="/Cashier" class="btn btn-warning px-5 py-3 fw-bold rounded-pill shadow" style="box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25) !important;">
-                                <i class="bi bi-cash-stack me-2"></i> العودة للوحة الكاشير / Back
-                            </a>
-                            <button onclick="window.print();" class="btn btn-outline-light px-5 py-3 fw-bold rounded-pill">
-                                <i class="bi bi-printer me-2"></i> طباعة التقرير / Print thermal
-                            </button>
-                        </div>
-
+                    <div class="d-flex justify-content-center gap-3 mt-5 pt-4 border-top border-secondary border-opacity-25">
+                        <button onclick="window.print()" class="btn btn-dark px-4 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2">
+                            <i class="bi bi-printer"></i> طباعة التقرير
+                        </button>
+                        <a href="/Cashier" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2">
+                            <i class="bi bi-arrow-right"></i> عودة للوحة الكاشير
+                        </a>
                     </div>
                 </div>
             </div>
@@ -281,6 +253,58 @@
             @DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt")
         </div>
     </div>
-
 </body>
 </html>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function filterOrdersTable() {
+            var input = document.getElementById("orderSearchInput").value.toLowerCase();
+            var table = document.getElementById("shiftOrdersTable");
+            if (!table) return;
+            
+            var tr = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+            for (var i = 0; i < tr.length; i++) {
+                var rowText = tr[i].textContent.toLowerCase();
+                
+                if (input === "" || rowText.includes(input)) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        function exportOrdersToExcel() {
+            var table = document.getElementById("shiftOrdersTable");
+            if (!table) return;
+            
+            // Clone table to manipulate for export
+            var cloneTable = table.cloneNode(true);
+            
+            var tbody = cloneTable.querySelector('tbody');
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Rebuild tbody only with visible rows
+            tbody.innerHTML = '';
+            rows.forEach(function(row) {
+                // Check if row was visible in the original table
+                var originalRow = table.rows[row.rowIndex];
+                if (originalRow && originalRow.style.display !== 'none') {
+                    // Clean up text content formatting
+                    for(let c=0; c<row.cells.length; c++) {
+                        row.cells[c].innerText = row.cells[c].innerText.trim().replace(/\s+/g, ' ');
+                    }
+                    tbody.appendChild(row);
+                }
+            });
+
+            var shiftId = '@Model.Id';
+            var wb = XLSX.utils.table_to_book(cloneTable, { sheet: "طلبات الوردية" });
+            var today = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, "Shift_" + shiftId + "_Orders_" + today + ".xlsx");
+        }
+    </script>
+}

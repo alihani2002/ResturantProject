@@ -143,10 +143,126 @@
                                 }
                             }
                         </div>
+
+                        <div class="mt-auto pt-2 border-top">
+                            @if (table.ActiveSessionId.HasValue)
+                            {
+                                <button class="btn btn-warning btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(@table.TableNumber, true)">
+                                    <i class="bi bi-cart-plus me-1"></i> Add Order
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(@table.TableNumber, false)">
+                                    <i class="bi bi-plus-circle me-1"></i> Open & Order
+                                </button>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
         }
+    </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- [START] MODAL: WAITER MENU & ORDER CREATOR                        -->
+<!-- ================================================================ -->
+<div class="modal fade modal-xl" id="waiterOrderModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
+            <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); border-radius: 24px 24px 0 0;"></div>
+            
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cart-plus-fill text-warning me-2"></i>Add Order - Table <span id="waiterOrderModalTitleTable"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body px-4 py-3">
+                <!-- Step 1: Start Table Session (if not active) -->
+                <div id="waiterSessionStep" class="py-4" style="display: none;">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 text-center">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 80px; height: 80px; border: 2px solid #d4af37;">
+                                <i class="bi bi-person-plus text-warning" style="font-size: 2.2rem;"></i>
+                            </div>
+                            <h4 class="fw-bold mb-2">Open Table Session</h4>
+                            <p class="text-muted small mb-4">Please register the guest name and phone number to start ordering.</p>
+                            
+                            <div class="text-start mb-3">
+                                <label class="form-label small fw-bold text-dark">Customer Name</label>
+                                <input type="text" id="waiterCustomerName" class="form-control py-2.5 rounded-3 bg-white text-dark" placeholder="e.g. Aly Hani" />
+                            </div>
+                            <div class="text-start mb-4">
+                                <label class="form-label small fw-bold text-dark">Phone Number</label>
+                                <input type="tel" id="waiterCustomerPhone" class="form-control py-2.5 rounded-3 bg-white text-dark" placeholder="e.g. 0123456789" />
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary w-50 py-2.5 rounded-pill fw-bold" onclick="quickStartSession()">Quick Open</button>
+                                <button class="btn btn-warning w-50 py-2.5 rounded-pill fw-bold" onclick="submitStartSession()">Start & Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Menu Selection (when session is active) -->
+                <div id="waiterMenuStep" style="display: none;">
+                    <div class="row g-4" style="height: 60vh;">
+                        
+                        <!-- Left: Menu Explorer (Categories and Items) -->
+                        <div class="col-lg-8 d-flex flex-column h-100">
+                            <div class="input-group mb-3 shadow-sm">
+                                <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-search"></i></span>
+                                <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="Search menu item..." oninput="filterMenuItems()" />
+                            </div>
+                            
+                            <!-- Categories slider -->
+                            <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categoriesSlider" style="scrollbar-width: thin;">
+                                <!-- Dynamically loaded -->
+                            </div>
+
+                            <!-- Menu items grid -->
+                            <div class="row g-3 overflow-auto flex-grow-1" id="menuItemsGrid" style="scrollbar-width: thin; max-height: calc(60vh - 120px);">
+                                <!-- Dynamically loaded -->
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Active Cart Pane -->
+                        <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                            <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 me-2"></i>Order Cart</h5>
+                            
+                            <!-- Cart list -->
+                            <div class="flex-grow-1 overflow-auto mb-3" id="cartItemsList" style="scrollbar-width: thin; max-height: calc(60vh - 240px);">
+                                <div class="text-center py-5 text-muted" id="cartEmptyState">
+                                    <i class="bi bi-cart-x display-4 mb-3 d-block text-secondary"></i>
+                                    Cart is Empty
+                                </div>
+                            </div>
+
+                            <!-- Note field -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Special Notes / Kitchen Instructions</label>
+                                <textarea id="orderNotesInput" class="form-control bg-white text-dark small" rows="2" placeholder="e.g. Extra sauce, no onions..."></textarea>
+                            </div>
+                            
+                            <!-- Summary and Checkout -->
+                            <div class="border-top pt-3" style="border-color: rgba(0,0,0,0.08) !important;">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Subtotal:</span>
+                                    <span class="fw-bold text-dark" id="cartSubtotal">0.00 EGP</span>
+                                </div>
+                                
+                                <button class="btn btn-warning w-100 py-3 fw-bold rounded-pill mt-2 shadow" id="btnCartCheckout" disabled onclick="submitWaiterOrder()">
+                                    <i class="bi bi-send-fill me-2"></i> Place Order
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -368,8 +484,22 @@
                 }
             }
 
+            let footerHtml = `
+                <div class="mt-auto pt-2 border-top">
+                    ${tableData.sessionId ? `
+                        <button class="btn btn-warning btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(${tableNumber}, true)">
+                            <i class="bi bi-cart-plus me-1"></i> Add Order
+                        </button>
+                    ` : `
+                        <button class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(${tableNumber}, false)">
+                            <i class="bi bi-plus-circle me-1"></i> Open & Order
+                        </button>
+                    `}
+                </div>
+            `;
+
             // Replace content
-            card.querySelector('.card-body').innerHTML = headerHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>`;
+            card.querySelector('.card-body').innerHTML = headerHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>` + footerHtml;
 
             // Flash animation
             cardInner.style.transition = 'transform 0.2s';
@@ -527,8 +657,26 @@
             setTimeout(startConnection, 500);
         });
 
+        // Client-side idempotency guard to prevent double-clicks/duplicate submissions
+        const pendingRequests = new Set();
+        function safeFetch(url, options = {}) {
+            const method = options.method || 'GET';
+            if (method !== 'GET') {
+                const requestKey = `${method}:${url}:${options.body || ''}`;
+                if (pendingRequests.has(requestKey)) {
+                    console.warn("Blocked duplicate request (idempotency guard):", requestKey);
+                    return Promise.reject(new Error("Request is already in progress."));
+                }
+                pendingRequests.add(requestKey);
+                return fetch(url, options).finally(() => {
+                    pendingRequests.delete(requestKey);
+                });
+            }
+            return fetch(url, options);
+        }
+
         function acceptOrder(orderId) {
-            fetch('/Waiter/AcceptOrder', {
+            safeFetch('/Waiter/AcceptOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
@@ -536,7 +684,7 @@
         }
 
         function serveOrder(orderId) {
-            fetch('/Waiter/ServeOrder', {
+            safeFetch('/Waiter/ServeOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
@@ -545,7 +693,7 @@
 
         function cancelOrder(orderId, tableNumber) {
             if (!confirm('Are you sure you want to cancel this order?')) return;
-            fetch('/Waiter/CancelOrder', {
+            safeFetch('/Waiter/CancelOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
@@ -554,7 +702,7 @@
 
         function cancelOrderItem(orderItemId) {
             if (!confirm('Cancel this single item from the order?')) return;
-            fetch('/Waiter/CancelOrderItem', {
+            safeFetch('/Waiter/CancelOrderItem', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderItemId=${orderItemId}`
@@ -566,7 +714,7 @@
 
         function clearTable(orderId) {
             if (!confirm('Is this order/table empty and ready to be cleared?')) return;
-            fetch('/Waiter/CompleteOrder', {
+            safeFetch('/Waiter/CompleteOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
@@ -575,11 +723,498 @@
 
         function closeSession(sessionId) {
             if (!confirm('Are you sure you want to CLOSE this table session? This will clear guest info.')) return;
-            fetch('/Waiter/CloseSession', {
+            safeFetch('/Waiter/CloseSession', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `sessionId=${sessionId}`
             }).then(r => r.ok && fetchAndRefreshTables());
         }
+
+        // ================================================================
+        // WAITER ORDER PLACEMENT JS SYSTEM
+        // ================================================================
+        let currentWaiterTable = 0;
+        let waiterOrderModalInstance = null;
+        let fullMenuData = [];
+        let selectedCategory = 0;
+        let cart = [];
+
+        function openWaiterOrderModal(tableNumber, hasActiveSession) {
+            currentWaiterTable = tableNumber;
+            document.getElementById('waiterOrderModalTitleTable').textContent = tableNumber;
+            
+            // Reset fields
+            cart = [];
+            document.getElementById('orderNotesInput').value = '';
+            document.getElementById('waiterCustomerName').value = '';
+            document.getElementById('waiterCustomerPhone').value = '';
+            updateCartUI();
+
+            waiterOrderModalInstance = new bootstrap.Modal(document.getElementById('waiterOrderModal'));
+            waiterOrderModalInstance.show();
+
+            const sessionStep = document.getElementById('waiterSessionStep');
+            const menuStep = document.getElementById('waiterMenuStep');
+
+            if (hasActiveSession) {
+                sessionStep.style.display = 'none';
+                menuStep.style.display = 'block';
+                loadWaiterMenuData();
+            } else {
+                sessionStep.style.display = 'block';
+                menuStep.style.display = 'none';
+            }
+        }
+
+        function loadWaiterMenuData() {
+            if (fullMenuData.length === 0) {
+                fetch('/Waiter/GetMenuData')
+                .then(res => res.json())
+                .then(data => {
+                    fullMenuData = data;
+                    renderCategories();
+                    renderMenuItems();
+                });
+            } else {
+                renderCategories();
+                renderMenuItems();
+            }
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoriesSlider');
+            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">All</button>`;
+            
+            fullMenuData.forEach(cat => {
+                html += `<button class="btn btn-sm ${selectedCategory === cat.categoryId ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(${cat.categoryId})">${cat.categoryName}</button>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectCategory(catId) {
+            selectedCategory = catId;
+            renderCategories();
+            renderMenuItems();
+        }
+
+        function renderMenuItems() {
+            const grid = document.getElementById('menuItemsGrid');
+            const search = document.getElementById('menuSearchInput').value.toLowerCase();
+            let html = '';
+
+            fullMenuData.forEach(cat => {
+                if (selectedCategory !== 0 && cat.categoryId !== selectedCategory) return;
+
+                cat.items.forEach(item => {
+                    if (search && !item.name.toLowerCase().includes(search)) return;
+
+                    html += `
+                        <div class="col-sm-6 col-md-4">
+                            <div class="card h-100 border-0 shadow-sm p-3 bg-light text-dark">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="fw-bold" style="font-size: 0.95rem;">${item.name}</div>
+                                    <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} EGP</span>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-warning btn-xs w-100 py-1.5 fw-bold rounded-pill text-dark" onclick="handleMenuAddClick(${item.id})">
+                                        <i class="bi bi-plus-circle me-1"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+
+            grid.innerHTML = html || `<div class="text-center py-5 text-muted col-12">No items match your search.</div>`;
+        }
+
+        function filterMenuItems() {
+            renderMenuItems();
+        }
+
+        function handleMenuAddClick(itemId) {
+            let foundItem = null;
+            for (const cat of fullMenuData) {
+                const item = cat.items.find(i => i.id === itemId);
+                if (item) {
+                    foundItem = item;
+                    break;
+                }
+            }
+            if (!foundItem) return;
+
+            const hasCustomization = (foundItem.sizes && foundItem.sizes.length > 0) || (foundItem.addOns && foundItem.addOns.length > 0);
+            if (hasCustomization) {
+                openCustomizationModal(itemId);
+            } else {
+                addItemToCartDirect(foundItem.id, foundItem.name, foundItem.price);
+            }
+        }
+
+        function addItemToCartDirect(id, name, price) {
+            const cartItemId = `${id}__`;
+            const existing = cart.find(i => i.cartItemId === cartItemId);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({
+                    cartItemId: cartItemId,
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    addOns: []
+                });
+            }
+            updateCartUI();
+        }
+
+        function updateQuantity(cartItemId, delta) {
+            const existing = cart.find(i => i.cartItemId === cartItemId);
+            if (existing) {
+                existing.quantity += delta;
+                if (existing.quantity <= 0) {
+                    cart = cart.filter(i => i.cartItemId !== cartItemId);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItemsList');
+            const checkoutBtn = document.getElementById('btnCartCheckout');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted" id="cartEmptyState">
+                        <i class="bi bi-cart-x display-4 mb-3 d-block text-secondary"></i>
+                        Cart is Empty
+                    </div>
+                `;
+                document.getElementById('cartSubtotal').textContent = "0.00 EGP";
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            let html = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                const addonsTotal = item.addOns ? item.addOns.reduce((sum, a) => sum + a.price, 0) : 0;
+                const total = (item.price + addonsTotal) * item.quantity;
+                subtotal += total;
+
+                let addonsText = '';
+                if (item.addOns && item.addOns.length > 0) {
+                    addonsText = `<div class="text-muted small ps-2 border-start border-2 border-warning mt-1" style="font-size: 0.75rem;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
+                }
+
+                html += `
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-white border border-light shadow-sm">
+                        <div class="text-start" style="max-width: 65%;">
+                            <span class="fw-bold d-block text-dark" style="font-size: 0.9rem;">${item.name}</span>
+                            ${addonsText}
+                            <span class="text-muted small" style="font-size: 0.8rem;">${(item.price + addonsTotal).toFixed(2)} EGP</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', -1)"><i class="bi bi-dash"></i></button>
+                            <span class="fw-bold text-dark">${item.quantity}</span>
+                            <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', 1)"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('cartSubtotal').textContent = `${subtotal.toFixed(2)} EGP`;
+            checkoutBtn.disabled = false;
+        }
+
+        function quickStartSession() {
+            document.getElementById('waiterCustomerName').value = `Table ${currentWaiterTable} Guest`;
+            document.getElementById('waiterCustomerPhone').value = '0000000000';
+            submitStartSession();
+        }
+
+        function submitStartSession() {
+            const customerName = document.getElementById('waiterCustomerName').value.trim();
+            const phoneNumber = document.getElementById('waiterCustomerPhone').value.trim();
+
+            if (!customerName || !phoneNumber) {
+                alert("Customer Name and Phone Number are required!");
+                return;
+            }
+
+            safeFetch('/Waiter/StartSession', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `tableNumber=${currentWaiterTable}&customerName=${encodeURIComponent(customerName)}&phoneNumber=${encodeURIComponent(phoneNumber)}`
+            })
+            .then(res => {
+                if (res.ok) {
+                    showNotification(`Table ${currentWaiterTable} session started!`, 'success');
+                    document.getElementById('waiterSessionStep').style.display = 'none';
+                    document.getElementById('waiterMenuStep').style.display = 'block';
+                    loadWaiterMenuData();
+                } else {
+                    alert("Failed to start session.");
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function submitWaiterOrder() {
+            const items = cart.map(i => ({
+                menuItemId: i.id,
+                quantity: i.quantity,
+                addOnIds: i.addOns ? i.addOns.map(a => a.id) : [],
+                price: i.price
+            }));
+
+            const payload = {
+                tableNumber: currentWaiterTable,
+                note: document.getElementById('orderNotesInput').value.trim(),
+                orderItems: items
+            };
+
+            const btn = document.getElementById('btnCartCheckout');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+
+            safeFetch('/Order/Create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    if (waiterOrderModalInstance) waiterOrderModalInstance.hide();
+                    showNotification('Order placed successfully!', 'success');
+                    fetchAndRefreshTables();
+                } else {
+                    alert('Error placing order');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+        
+        // --- CUSTOMIZATION FLOW ---
+        let activeCustomItem = null;
+        let customizationQty = 1;
+
+        function openCustomizationModal(menuItemId) {
+            let item = null;
+            for (const cat of fullMenuData) {
+                const found = cat.items.find(i => i.id === menuItemId);
+                if (found) {
+                    item = found;
+                    break;
+                }
+            }
+            if (!item) return;
+
+            activeCustomItem = item;
+            customizationQty = 1;
+            
+            document.getElementById('customization-item-name').textContent = item.name;
+            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} EGP`;
+            document.getElementById('customization-item-description').textContent = item.description || '';
+            document.getElementById('customization-qty-val').textContent = customizationQty;
+
+            // Render Sizes
+            const sizesSection = document.getElementById('sizes-section');
+            const sizesList = document.getElementById('sizes-list');
+            if (item.sizes && item.sizes.length > 0) {
+                sizesSection.style.display = 'block';
+                sizesList.innerHTML = item.sizes.map((size, idx) => `
+                    <div class="flex-grow-1" style="min-width: 120px;">
+                        <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
+                        <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
+                            <span class="size-name small text-muted">${size.name}</span>
+                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} EGP</span>
+                        </label>
+                    </div>
+                `).join('');
+            } else {
+                sizesSection.style.display = 'none';
+                sizesList.innerHTML = '';
+            }
+
+            // Render Add-ons
+            const addonsSection = document.getElementById('addons-section');
+            const addonsList = document.getElementById('addons-list');
+            if (item.addOns && item.addOns.length > 0) {
+                addonsSection.style.display = 'block';
+                addonsList.innerHTML = item.addOns.map(addon => `
+                    <div class="col-12">
+                        <div class="card border p-2.5 px-3 rounded-3 d-flex flex-row align-items-center justify-content-between cursor-pointer addon-card mb-2" 
+                             id="addon-card-${addon.id}"
+                             onclick="toggleAddonCard(${addon.id})">
+                            <div class="form-check m-0" style="pointer-events: none;">
+                                <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.price}" data-name="${addon.name}" onclick="event.stopPropagation()">
+                                <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                    ${addon.name}
+                                </label>
+                            </div>
+                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} EGP</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                addonsSection.style.display = 'none';
+                addonsList.innerHTML = '';
+            }
+
+            updateCustomizationTotal();
+
+            const bsRequest = window.bootstrap || bootstrap;
+            const customModal = new bsRequest.Modal(document.getElementById('customizationModal'));
+            customModal.show();
+        }
+
+        function toggleAddonCard(addonId) {
+            const checkbox = document.getElementById(`addon-${addonId}`);
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                const card = document.getElementById(`addon-card-${addonId}`);
+                if (checkbox.checked) {
+                    card.classList.add('border-warning', 'bg-warning-subtle');
+                } else {
+                    card.classList.remove('border-warning', 'bg-warning-subtle');
+                }
+                updateCustomizationTotal();
+            }
+        }
+
+        function adjustCustomQty(delta) {
+            if (customizationQty + delta >= 1) {
+                customizationQty += delta;
+                document.getElementById('customization-qty-val').textContent = customizationQty;
+                updateCustomizationTotal();
+            }
+        }
+
+        function updateCustomizationTotal() {
+            if (!activeCustomItem) return;
+            
+            const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+            const basePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+            let total = basePrice;
+            
+            const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                total += parseFloat(cb.getAttribute('data-price'));
+            });
+
+            total = total * customizationQty;
+
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} EGP`;
+        }
+
+        function addCustomizedToCart() {
+            if (!activeCustomItem) return;
+
+            const selectedAddOnsList = [];
+            const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => {
+                selectedAddOnsList.push({
+                    id: parseInt(cb.value),
+                    name: cb.getAttribute('data-name'),
+                    price: parseFloat(cb.getAttribute('data-price'))
+                });
+            });
+
+            const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+            const sizeName = selectedSizeRadio ? selectedSizeRadio.value : '';
+            const sizePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+
+            const addonIdsStr = selectedAddOnsList.map(a => a.id).sort().join(',');
+            const cartItemId = `${activeCustomItem.id}_${sizeName}_${addonIdsStr}`;
+
+            const existingItem = cart.find(item => item.cartItemId === cartItemId);
+            if (existingItem) {
+                existingItem.quantity += customizationQty;
+            } else {
+                cart.push({
+                    cartItemId: cartItemId,
+                    id: activeCustomItem.id,
+                    name: activeCustomItem.name + (sizeName ? ` (${sizeName})` : ''),
+                    price: sizePrice,
+                    quantity: customizationQty,
+                    addOns: selectedAddOnsList,
+                    size: sizeName
+                });
+            }
+
+            updateCartUI();
+
+            const bsRequest = window.bootstrap || bootstrap;
+            const customModalElement = document.getElementById('customizationModal');
+            const customModal = bsRequest.Modal.getInstance(customModalElement);
+            if (customModal) customModal.hide();
+        }
     </script>
+
+    <!-- Customization Modal HTML -->
+    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content shadow-lg border-0 rounded-4 bg-white text-dark">
+                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
+                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 EGP</span>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
+                    <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+                    
+                    <!-- Sizes Section -->
+                    <div id="sizes-section" class="mb-4" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                        </h6>
+                        <div id="sizes-list" class="d-flex flex-wrap gap-2">
+                            <!-- Dynamic sizes -->
+                        </div>
+                    </div>
+
+                    <!-- Add-Ons Section -->
+                    <div id="addons-section" class="mb-4" style="display: none;">
+                        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                            <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order / الإضافات
+                        </h6>
+                        <div id="addons-list" class="row g-2">
+                            <!-- Custom options -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                    <!-- Quantity selector -->
+                    <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
+                        <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(-1)">-</button>
+                        <span class="px-2 fw-bold text-dark fs-5" id="customization-qty-val">1</span>
+                        <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(1)">+</button>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark d-flex align-items-center shadow-sm" id="add-customized-to-cart-btn" onclick="addCustomizedToCart()">
+                        <span class="me-2">Add to Cart</span>
+                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 EGP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

@@ -633,7 +633,7 @@ namespace Resturant.Web.UI.Controllers
                         var recIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(recommendationsJson);
                         if (recIds != null)
                         {
-                            foreach (var recId in recIds)
+                            foreach (var recId in recIds.Distinct().Where(r => r != item.Id && r > 0))
                             {
                                 _context.MenuItemRecommendations.Add(new MenuItemRecommendation
                                 {
@@ -659,8 +659,9 @@ namespace Resturant.Web.UI.Controllers
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Error creating menu item with addons/recommendations");
-                    return StatusCode(500, new { Message = "Internal Server Error during creation", Details = ex.Message });
+                    var innerMsg = ex.InnerException?.Message ?? ex.Message;
+                    _logger.LogError(ex, "Error creating menu item with addons/recommendations. Inner: {Inner}", innerMsg);
+                    return StatusCode(500, new { Message = "Internal Server Error during creation", Details = innerMsg });
                 }
             }
         }
@@ -767,7 +768,7 @@ namespace Resturant.Web.UI.Controllers
                         var recIds = System.Text.Json.JsonSerializer.Deserialize<List<int>>(recommendationsJson);
                         if (recIds != null)
                         {
-                            foreach (var recId in recIds)
+                            foreach (var recId in recIds.Distinct().Where(r => r != id && r > 0))
                             {
                                 _context.MenuItemRecommendations.Add(new MenuItemRecommendation
                                 {
@@ -794,8 +795,9 @@ namespace Resturant.Web.UI.Controllers
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Error updating menu item with addons/recommendations");
-                    return StatusCode(500, new { Message = "Internal Server Error during modification", Details = ex.Message });
+                    var innerMsg = ex.InnerException?.Message ?? ex.Message;
+                    _logger.LogError(ex, "Error updating menu item with addons/recommendations. Inner: {Inner}", innerMsg);
+                    return StatusCode(500, new { Message = "Internal Server Error during modification", Details = innerMsg });
                 }
             }
         }
