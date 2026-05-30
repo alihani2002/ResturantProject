@@ -130,6 +130,7 @@ namespace Resturant.Web.UI.Controllers
                 description = menuItem.Description,
                 price = menuItem.Price,
                 imageUrl = menuItem.ImageUrl,
+                sizes = menuItem.GetParsedSizes().Select(s => new { name = s.Name, price = s.Price }).ToList(),
                 addOns = menuItem.AddOns
                     .Where(a => a.IsAvailable)
                     .Select(a => new

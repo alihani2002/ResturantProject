@@ -47,12 +47,12 @@
         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
             <div class="card-body p-3 d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="rounded-circle bg-dark text-white p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                    <span class="rounded-circle bg-secondary text-white p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                         <i class="bi bi-hash"></i>
                     </span>
                     <div>
                         <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">Your Table</small>
-                        <strong class="text-dark">Table <span class="badge bg-dark rounded-pill">@ViewData["TableNumber"]</span></strong>
+                        <strong class="text-dark">Table <span class="badge bg-secondary rounded-pill">@ViewData["TableNumber"]</span></strong>
                     </div>
                 </div>
                 @if (ViewData["CustomerName"] != null)
@@ -116,9 +116,9 @@
             <div class="col-12">
                 <!-- My Orders Tracking Card -->
                 <div id="my-orders-card" class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white" style="display: none;">
-                    <div class="card-header bg-black text-white d-flex justify-content-between align-items-center py-3" style="background-color: #0b0b0b !important;">
+                    <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center py-3" style="background-color: #ffffff !important;">
                         <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-warning me-2"></i>طلباتي النشطة (Active Orders)</h6>
-                        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1" onclick="fetchAndRefreshMyOrders()">
+                        <button class="btn btn-outline-dark btn-sm rounded-pill px-3 py-1" onclick="fetchAndRefreshMyOrders()">
                             <i class="bi bi-arrow-clockwise me-1"></i> Refresh
                         </button>
                     </div>
@@ -182,10 +182,10 @@
                                                             <span class="fw-extrabold text-slate-800" style="font-size: 0.95rem;">@item.Price.ToString("F2")</span>
                                                             <small class="text-muted d-block" style="font-size: 0.65rem; font-weight: bold; margin-top: -3px;">L.E. / ج.م</small>
                                                         </div>
-                                                        <button class="btn btn-dark btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" 
+                                                        <button class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" 
                                                                 onclick="openCustomizationModal(@item.Id)"
-                                                                style="width: 32px; height: 32px; background-color: #0b0b0b; border: none;">
-                                                            <i class="bi bi-plus-lg text-white"></i>
+                                                                style="width: 32px; height: 32px; background-color: #ffffff; color: #000000; border: 1px solid #dee2e6;">
+                                                            <i class="bi bi-plus-lg text-dark"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -202,7 +202,7 @@
     <!-- Sticky Floating Action Cart Bar for Mobile & Tablet -->
     <!-- Unified Talabat-Style Floating Cart Bar (Universal for Mobile & Desktop) -->
     <div class="floating-talabat-cart-bar fixed-bottom py-2.5 px-3 shadow animate-slide-up" id="universal-cart-bar" 
-         style="display: none; z-index: 1040; bottom: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 500px; border-radius: 16px; background: linear-gradient(135deg, #18181b 0%, #09090b 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;">
+         style="display: none; z-index: 1040; bottom: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 500px; border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;">
         <div class="d-flex justify-content-between align-items-center">
             <!-- Left Info Panel -->
             <div class="d-flex align-items-center gap-2.5 cursor-pointer" onclick="checkout()">
@@ -211,7 +211,7 @@
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.65rem; padding: 3px 5px;">0</span>
                 </div>
                 <div>
-                    <span class="text-white-50 d-block outfit-font" style="font-size: 0.62rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
+                    <span class="text-muted d-block outfit-font" style="font-size: 0.62rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
                     <strong class="text-warning outfit-font fw-extrabold" id="universal-cart-total-text" style="font-size: 1.05rem !important;">0.00 L.E.</strong>
                 </div>
             </div>
@@ -231,15 +231,15 @@
             <!-- Image Header -->
             <div class="position-relative bg-light text-center" id="customization-image-container" style="height: 220px; overflow: hidden; display: none;">
                 <img id="customization-item-image" src="" class="w-100 h-100" style="object-fit: cover;" alt="Product Image">
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-end p-3" style="background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%);">
-                    <h4 class="text-white fw-bold mb-0" id="customization-item-name-header"></h4>
+                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-end p-3" style="background: linear-gradient(0deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);">
+                    <h4 class="text-dark fw-bold mb-0" id="customization-item-name-header"></h4>
                 </div>
             </div>
             
             <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center" id="customization-header-standard">
                 <div class="flex-grow-1">
                     <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
-                    <span class="badge bg-dark rounded-pill fs-6 mt-1" id="customization-item-price">0.00 L.E.</span>
+                    <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 L.E.</span>
                 </div>
                 <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -247,6 +247,16 @@
             <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
                 <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
                 
+                <!-- Sizes Section -->
+                <div id="sizes-section" class="mb-4" style="display: none;">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                    </h6>
+                    <div id="sizes-list" class="d-flex flex-wrap gap-2">
+                        <!-- Dynamic sizes -->
+                    </div>
+                </div>
+
                 <!-- Add-Ons Section -->
                 <div id="addons-section" class="mb-4" style="display: none;">
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
@@ -278,7 +288,7 @@
                 </div>
                 
                 <!-- Action Button -->
-                <button type="button" class="btn btn-dark rounded-pill px-4 py-2 fw-bold flex-grow-1 ms-3" id="add-customized-to-cart-btn">
+                <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-bold flex-grow-1 ms-3" id="add-customized-to-cart-btn" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
                     Add to Cart - <span id="customization-total-price">0.00 L.E.</span>
                 </button>
             </div>
@@ -290,11 +300,11 @@
 <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white">
-            <div class="modal-header bg-black text-white py-3 px-4" style="background-color: #0b0b0b !important;">
+            <div class="modal-header bg-white text-dark py-3 px-4" style="background-color: #ffffff !important;">
                 <h5 class="modal-title fw-bold" id="checkoutModalLabel">
                     <i class="bi bi-cart-check-fill text-warning me-2"></i>Confirm Order
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div id="checkout-summary" class="mb-3">
@@ -307,7 +317,7 @@
             </div>
             <div class="modal-footer border-0 p-3 bg-light d-flex">
                 <button type="button" class="btn btn-outline-dark rounded-pill px-4 flex-grow-1" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark rounded-pill px-4 flex-grow-1" id="confirmCheckoutBtn">
+                <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1" id="confirmCheckoutBtn" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
                     <i class="bi bi-check-lg me-2"></i>Place Order
                 </button>
             </div>
@@ -622,6 +632,25 @@
                         standardHeader.style.display = 'flex';
                     }
 
+                    // Render Sizes
+                    const sizesSection = document.getElementById('sizes-section');
+                    const sizesList = document.getElementById('sizes-list');
+                    if (item.sizes && item.sizes.length > 0) {
+                        sizesSection.style.display = 'block';
+                        sizesList.innerHTML = item.sizes.map((size, idx) => `
+                            <div class="flex-grow-1" style="min-width: 120px;">
+                                <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
+                                <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
+                                    <span class="size-name small text-muted">${size.name}</span>
+                                    <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} L.E.</span>
+                                </label>
+                            </div>
+                        `).join('');
+                    } else {
+                        sizesSection.style.display = 'none';
+                        sizesList.innerHTML = '';
+                    }
+
                     // Render Add-ons
                     const addonsSection = document.getElementById('addons-section');
                     const addonsList = document.getElementById('addons-list');
@@ -704,7 +733,9 @@
         function updateCustomizationTotal() {
             if (!activeCustomItem) return;
             
-            let total = activeCustomItem.price;
+            const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+            const basePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+            let total = basePrice;
             
             const checkboxes = document.querySelectorAll('#addons-list input[type="checkbox"]:checked');
             checkboxes.forEach(cb => {
@@ -921,8 +952,12 @@
             checkoutModal.show();
         }
 
+        let isPlacingOrder = false;
         // Confirm placing order
         async function confirmCheckout() {
+            if (isPlacingOrder) return;
+            isPlacingOrder = true;
+
             const note = document.getElementById('orderNote').value;
             const confirmBtn = document.getElementById('confirmCheckoutBtn');
             const bsRequest = window.bootstrap || bootstrap;
@@ -934,7 +969,8 @@
             const orderItems = cart.map(item => ({
                 menuItemId: item.id,
                 quantity: item.quantity,
-                addOnIds: item.addOns ? item.addOns.map(a => a.id) : []
+                addOnIds: item.addOns ? item.addOns.map(a => a.id) : [],
+                price: item.price
             }));
 
             fetch('/Order/Create', {
@@ -978,6 +1014,7 @@
             .finally(() => {
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Place Order';
+                isPlacingOrder = false;
             });
         }
 
@@ -1262,8 +1299,12 @@
                     });
                 });
 
+                const selectedSizeRadio = document.querySelector('input[name="size-option"]:checked');
+                const sizeName = selectedSizeRadio ? selectedSizeRadio.value : '';
+                const sizePrice = selectedSizeRadio ? parseFloat(selectedSizeRadio.getAttribute('data-price')) : activeCustomItem.price;
+
                 const addonIdsStr = selectedAddOnsList.map(a => a.id).sort().join(',');
-                const cartItemId = `${activeCustomItem.id}_${addonIdsStr}`;
+                const cartItemId = `${activeCustomItem.id}_${sizeName}_${addonIdsStr}`;
 
                 const existingItem = cart.find(item => item.cartItemId === cartItemId);
                 if (existingItem) {
@@ -1272,10 +1313,11 @@
                     cart.push({
                         cartItemId: cartItemId,
                         id: activeCustomItem.id,
-                        name: activeCustomItem.name,
-                        price: activeCustomItem.price,
+                        name: activeCustomItem.name + (sizeName ? ` (${sizeName})` : ''),
+                        price: sizePrice,
                         quantity: customizationQty,
-                        addOns: selectedAddOnsList
+                        addOns: selectedAddOnsList,
+                        size: sizeName
                     });
                 }
 

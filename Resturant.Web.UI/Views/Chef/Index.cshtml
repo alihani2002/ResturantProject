@@ -267,6 +267,24 @@
 
         connection.on("ReceiveChefUpdate", function () { fetchAndRefreshOrders(); });
 
+        // Client-side idempotency guard to prevent double-clicks/duplicate submissions
+        const pendingRequests = new Set();
+        function safeFetch(url, options = {}) {
+            const method = options.method || 'GET';
+            if (method !== 'GET') {
+                const requestKey = `${method}:${url}:${options.body || ''}`;
+                if (pendingRequests.has(requestKey)) {
+                    console.warn("Blocked duplicate request (idempotency guard):", requestKey);
+                    return Promise.reject(new Error("Request is already in progress."));
+                }
+                pendingRequests.add(requestKey);
+                return fetch(url, options).finally(() => {
+                    pendingRequests.delete(requestKey);
+                });
+            }
+            return fetch(url, options);
+        }
+
         async function fetchAndRefreshOrders() {
             try {
                 const res = await fetch('/Chef/GetOrdersData');
@@ -302,7 +320,7 @@
             const btn = card?.querySelector('button');
             if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Starting...'; }
 
-            fetch('/Chef/StartOrder', {
+            safeFetch('/Chef/StartOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
@@ -324,7 +342,7 @@
             const btn = card?.querySelector('button');
             if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Marking ready...'; }
 
-            fetch('/Chef/FinishOrder', {
+            safeFetch('/Chef/FinishOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`

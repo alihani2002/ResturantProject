@@ -46,12 +46,53 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("No active session found for this table. Please scan the QR code again.");
             }
 
+            // Prevent duplicate customer orders in rapid succession (within 5 seconds)
+            var recentOrder = await _context.Orders
+                .Where(o => o.TableSessionId == activeSession.Id && o.OrderDate >= DateTime.Now.AddSeconds(-5))
+                .OrderByDescending(o => o.OrderDate)
+                .FirstOrDefaultAsync();
+
+            if (recentOrder != null && recentOrder.Note == request.Note)
+            {
+                var recentItems = await _context.OrderItems
+                    .Where(oi => oi.OrderId == recentOrder.Id)
+                    .OrderBy(oi => oi.MenuItemId)
+                    .ToListAsync();
+
+                var newItems = request.OrderItems.OrderBy(oi => oi.MenuItemId).ToList();
+
+                if (recentItems.Count == newItems.Count)
+                {
+                    bool isIdentical = true;
+                    for (int i = 0; i < recentItems.Count; i++)
+                    {
+                        if (recentItems[i].MenuItemId != newItems[i].MenuItemId || 
+                            recentItems[i].Quantity != newItems[i].Quantity)
+                        {
+                            isIdentical = false;
+                            break;
+                        }
+                    }
+
+                    if (isIdentical)
+                    {
+                        return Ok(new { OrderId = recentOrder.Id, TotalAmount = recentOrder.TotalAmount });
+                    }
+                }
+            }
+
+            bool isStaff = User?.Identity != null && User.Identity.IsAuthenticated && 
+                           (User.IsInRole(Resturant.Core.Common.AppRoles.Waiter) || 
+                            User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || 
+                            User.IsInRole(Resturant.Core.Common.AppRoles.Manager));
+
             Order order = new Order
             {
                 TableNumber = request.TableNumber,
                 TableSessionId = activeSession.Id,
-                Status = OrderStatus.Pending,
+                Status = isStaff ? OrderStatus.Confirmed : OrderStatus.Pending,
                 OrderDate = DateTime.Now,
+                ConfirmedDate = isStaff ? DateTime.Now : null,
                 Note = request.Note,
                 CustomerName = activeSession.CustomerName,
                 PhoneNumber = activeSession.PhoneNumber
@@ -76,7 +117,7 @@ namespace Resturant.Web.UI.Controllers
                     OrderId = order.Id,
                     MenuItemId = itemRequest.MenuItemId,
                     Quantity = itemRequest.Quantity,
-                    Price = menuItem.Price
+                    Price = itemRequest.Price ?? menuItem.Price
                 };
 
                 _context.OrderItems.Add(orderItem);
@@ -133,7 +174,7 @@ namespace Resturant.Web.UI.Controllers
                 note = order.Note,
                 items = orderItemsEntities.Select(oi => new
                 {
-                    menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.Name ?? "Unknown",
+                    menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.GetFormattedNameWithPrice(oi.Price) ?? "Unknown",
                     quantity = oi.Quantity,
                     price = oi.Price + oi.AddOns.Sum(a => a.Price),
                     total = oi.Total,
@@ -145,6 +186,13 @@ namespace Resturant.Web.UI.Controllers
 
             await _hubContext.Clients.Group("waiter").SendAsync("NewOrderReceived", orderData);
             await _hubContext.Clients.Group("admin").SendAsync("NewOrderReceived", orderData);
+
+            if (order.Status == OrderStatus.Confirmed)
+            {
+                await _hubContext.Clients.Group("chef").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "New Order to Prepare");
+            }
 
             return Ok(new { OrderId = order.Id, TotalAmount = totalAmount });
         }
@@ -213,7 +261,7 @@ namespace Resturant.Web.UI.Controllers
                 note = order.Note,
                 items = order.OrderItems.Select(oi => new
                 {
-                    menuItemName = oi.MenuItem?.Name ?? "Unknown",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "Unknown",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     total = oi.Total
@@ -348,5 +396,6 @@ namespace Resturant.Web.UI.Controllers
         public int MenuItemId { get; set; }
         public int Quantity { get; set; }
         public List<int>? AddOnIds { get; set; }
+        public decimal? Price { get; set; }
     }
 }

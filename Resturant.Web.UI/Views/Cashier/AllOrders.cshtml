@@ -15,7 +15,9 @@
     .status-completed  { background: #dcfce7; color: #14532d; }
     .status-cancelled  { background: #fee2e2; color: #991b1b; }
     .row-cancelled td  { text-decoration: line-through; opacity: 0.6; color: #dc2626; }
-    .summary-bar { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 12px; padding: 1rem 1.5rem; }
+    .summary-bar { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; padding: 1rem 1.5rem; }
+    .summary-bar .text-secondary { color: #6c757d !important; }
+    .summary-bar .text-warning { color: #ffc107 !important; }
 </style>
 
 <div class="container-fluid mt-4">
@@ -29,14 +31,22 @@
             </a>
             <form method="get" class="d-flex align-items-center gap-2">
                 <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
+                <select name="hour" class="form-select form-select-sm" style="width: auto;">
+                    <option value="">All Hours</option>
+                    @for (int h = 0; h < 24; h++)
+                    {
+                        var hourSelected = (int?)ViewBag.SelectedHour == h;
+                        <option value="@h" selected="@hourSelected">@h:00 - @(h+1):00</option>
+                    }
+                </select>
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="bi bi-search me-1"></i> Filter
                 </button>
             </form>
-            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(-1).ToString("yyyy-MM-dd") })" class="btn btn-outline-dark btn-sm">
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(-1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm">
                 <i class="bi bi-chevron-left"></i>
             </a>
-            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(1).ToString("yyyy-MM-dd") })" class="btn btn-outline-dark btn-sm" @(selectedDate.Date >= DateTime.Today ? "disabled" : "")>
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm" @(selectedDate.Date >= DateTime.Today ? "disabled" : "")>
                 <i class="bi bi-chevron-right"></i>
             </a>
         </div>
@@ -51,7 +61,7 @@
     }
 
     <!-- Summary Bar -->
-    <div class="summary-bar text-white mb-4">
+    <div class="summary-bar text-dark mb-4">
         <div class="row g-3 text-center">
             <div class="col-6 col-md-3">
                 <div class="fs-2 fw-bold">@totalOrders</div>
@@ -97,11 +107,14 @@
                         <option value="Completed">Completed</option>
                         <option value="Cancelled">Cancelled</option>
                     </select>
+                    <button onclick="exportAllOrdersToExcel()" class="btn btn-sm btn-success d-flex align-items-center gap-1">
+                        <i class="bi bi-file-earmark-excel"></i> Excel
+                    </button>
                 </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="ordersTable">
-                    <thead class="table-dark">
+                    <thead class="table-light">
                         <tr>
                             <th class="cursor-pointer" onclick="sortTable(0)">Order # <i class="bi bi-arrow-down-up ms-1 small"></i></th>
                             <th onclick="sortTable(1)">Table <i class="bi bi-arrow-down-up ms-1 small"></i></th>
@@ -130,7 +143,7 @@
                             };
                             <tr class="@(isCancelled ? "row-cancelled" : "")" data-status="@order.Status">
                                 <td class="fw-bold">#@order.Id</td>
-                                <td><span class="badge bg-dark rounded-pill">T@order.TableNumber</span></td>
+                                <td><span class="badge bg-secondary rounded-pill">T@order.TableNumber</span></td>
                                 <td>
                                     <div class="fw-semibold">@(order.CustomerName ?? "Guest")</div>
                                     <div class="small text-muted">@(order.PhoneNumber ?? "")</div>
@@ -160,6 +173,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         let sortDir = {};
 
@@ -191,6 +205,34 @@
                 return sortDir[colIdx] ? aText.localeCompare(bText) : bText.localeCompare(aText);
             });
             rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function exportAllOrdersToExcel() {
+            var table = document.getElementById("ordersTable");
+            if (!table) return;
+            
+            // Clone table to manipulate for export
+            var cloneTable = table.cloneNode(true);
+            var tbody = cloneTable.querySelector('tbody');
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Rebuild tbody only with visible rows
+            tbody.innerHTML = '';
+            rows.forEach(function(row) {
+                // Check if row was visible in the original table
+                var originalRow = table.rows[row.rowIndex];
+                if (originalRow && originalRow.style.display !== 'none') {
+                    // Clean up text content formatting
+                    for(let c=0; c<row.cells.length; c++) {
+                        row.cells[c].innerText = row.cells[c].innerText.trim().replace(/\s+/g, ' ');
+                    }
+                    tbody.appendChild(row);
+                }
+            });
+
+            var wb = XLSX.utils.table_to_book(cloneTable, { sheet: "Orders" });
+            var today = '@selectedDate.ToString("yyyy-MM-dd")';
+            XLSX.writeFile(wb, "AllOrders_" + today + ".xlsx");
         }
     </script>
 }

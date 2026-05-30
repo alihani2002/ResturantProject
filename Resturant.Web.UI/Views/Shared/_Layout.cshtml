@@ -21,8 +21,8 @@
                 <!-- Brand Centered -->
                 <div class="navbar-brand-centered">
                     <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-egg-fried text-warning fs-2"></i> <!-- Slightly larger icon -->
-                        <span class="text-black-pure fw-bold fs-2" style="letter-spacing: 1px;">TEST RESTAURANT</span> <!-- Uppercase for brand -->
+                        <img src="~/assets/images/Qore.png" alt="QoreSystem" class="me-2" style="height: 32px; width: auto;" onerror="this.src='~/assets/images/logo-abbr.png'" />
+                        <span class="text-black-pure fw-bold fs-2" style="letter-spacing: 1px;">QoreSystem</span> <!-- Brand -->
                     </a>
                 </div>
 
@@ -33,20 +33,10 @@
 
                 <!-- Links Centered Below Brand -->
                 <div class="navbar-collapse collapse w-100 justify-content-center">
-                     <ul class="navbar-nav mb-2 mb-lg-0 gap-4"> <!-- Added gap for spacing -->
+<ul class="navbar-nav mb-2 mb-lg-0 gap-4"> <!-- Added gap for spacing -->
                         <li class="nav-item">
                             <a class="nav-link text-black-pure fw-bold text-uppercase" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#menu">Menu</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#about">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-black-pure fw-bold text-uppercase" href="#contact">Contact</a>
-                        </li>
-                        <!-- Privacy removed from main nav for cleaner look, can stay in footer -->
                     </ul>
                     <!-- Login Partial (Absolute right on desktop, or stacked on mobile) -->
                     <div class="d-lg-flex position-lg-absolute end-0 top-50 translate-middle-y-lg mt-3 mt-lg-0"> 

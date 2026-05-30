@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -88,8 +88,26 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains(AppRoles.Admin) || 
+                        roles.Contains(AppRoles.Chief) || 
+                        roles.Contains(AppRoles.Waiter) || 
+                        roles.Contains(AppRoles.Manager) || 
+                        roles.Contains(AppRoles.Accountant))
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
+                }
+                return Redirect("~/");
+            }
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -103,6 +121,7 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
