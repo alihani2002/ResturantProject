@@ -43,10 +43,9 @@ a {
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
-    color: #000000;
+    color: white;
     margin-top: -76px;
     /* Offset navbar height if sticky/transparent */
-    background-color: #ffffff;
 }
 
 .hero-overlay {
@@ -55,8 +54,8 @@ a {
     left: 0;
     width: 100%;
     height: 100%;
-    background: transparent;
-    /* Transparent overlay */
+    background: rgba(0, 0, 0, 0.5);
+    /* Dark overlay */
     z-index: 1;
 }
 
@@ -74,14 +73,13 @@ a {
     font-weight: 800;
     margin-bottom: 20px;
     text-transform: uppercase;
-    color: #000000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
     margin-bottom: 30px;
     font-weight: 300;
-    color: #333;
 }
 
 /* Buttons */
@@ -105,7 +103,7 @@ a {
 /* Features Section */
 .features-section {
     padding: 80px 0;
-    background-color: #ffffff;
+    background-color: #f8f9fa;
 }
 
 .feature-card {
@@ -157,9 +155,9 @@ a {
 
 /* Dark Primary Button */
 .btn-dark-primary {
-    background-color: #f8f9fa;
-    color: #212529;
-    border: 1px solid #dee2e6;
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid #000000;
     padding: 10px 25px;
     font-weight: 600;
     text-transform: uppercase;
@@ -170,11 +168,11 @@ a {
 }
 
 .btn-dark-primary:hover {
-    background-color: #e9ecef;
-    border-color: #dde0e3;
-    color: #212529;
+    background-color: #333333;
+    border-color: #333333;
+    color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Force pure black text */
@@ -223,18 +221,4 @@ a {
     display: flex;
     justify-content: center;
     width: 100%;
-}
-
-/* Ensure main content area has white background */
-main {
-    background-color: #ffffff !important;
-}
-
-/* Ensure forms and containers have white backgrounds */
-form {
-    background-color: #ffffff !important;
-}
-
-.container {
-    background-color: #ffffff !important;
 }

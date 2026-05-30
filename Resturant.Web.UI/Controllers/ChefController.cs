@@ -61,7 +61,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = o.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "",
+                        menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
                         isCancelled = oi.IsCancelled,
@@ -110,10 +110,6 @@ namespace Resturant.Web.UI.Controllers
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             if (order == null) return NotFound();
-            if (order.Status == OrderStatus.Ready || order.Status == OrderStatus.Served || order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
-            {
-                return BadRequest("Order is already ready or completed.");
-            }
 
             order.Status = OrderStatus.Ready;
             await _context.SaveChangesAsync();
@@ -144,7 +140,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.Name ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled

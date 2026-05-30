@@ -9,7 +9,7 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-white text-dark text-center py-4">
+                <div class="card-header bg-dark text-gold text-center py-4">
                     <h3 class="font-weight-light mb-0">Table @ViewBag.TableNumber</h3>
                     <p class="mb-0">Please enter your details to start ordering</p>
                 </div>
@@ -29,7 +29,7 @@
                         </div>
                         
                         <div class="form-group mt-5">
-                            <button class="btn btn-warning btn-block btn-lg rounded-pill shadow-sm" type="submit">
+                            <button class="btn btn-dark btn-block btn-lg rounded-pill shadow-sm" type="submit">
                                 Start Ordering <i class="fas fa-arrow-right ml-2"></i>
                             </button>
                         </div>
@@ -45,5 +45,8 @@
 
 <style>
     .text-gold { color: #d4af37; }
+    .bg-dark { background-color: #1a1a1a !important; }
+    .btn-dark { background-color: #1a1a1a; border-color: #1a1a1a; }
+    .btn-dark:hover { background-color: #d4af37; border-color: #d4af37; color: #1a1a1a; }
     .card { border: none; }
 </style>

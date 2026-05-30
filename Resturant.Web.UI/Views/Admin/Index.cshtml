@@ -1131,34 +1131,8 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Description</label>
-                                <textarea id="menu-desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="Enter item details..."></textarea>
+                                <textarea id="menu-desc" rows="3" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="Enter item details..."></textarea>
                             </div>
-
-                            <!-- SIZE VARIANTS SECTION (Add Form) -->
-                            <div class="border border-amber-200 dark:border-amber-900/40 rounded-xl overflow-hidden">
-                                <div class="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 px-3 py-2">
-                                    <span class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                                        <i class="bi bi-stack"></i> Size Variants &amp; Pricing
-                                    </span>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" id="menu-has-sizes" class="w-3.5 h-3.5 text-amber-500 rounded" onchange="toggleSizesSection('menu-sizes-body', 'menu-sizes-list', this.checked)">
-                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Enable Sizes</span>
-                                    </label>
-                                </div>
-                                <div id="menu-sizes-body" class="hidden p-3 space-y-2 bg-white dark:bg-darkCard">
-                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own price. The Base Price field below stays as default fallback.</p>
-                                    <div class="grid grid-cols-12 gap-1 text-[9px] font-bold text-slate-400 uppercase px-1">
-                                        <div class="col-span-6">Size Name</div>
-                                        <div class="col-span-5">Price (L.E.)</div>
-                                        <div class="col-span-1"></div>
-                                    </div>
-                                    <div id="menu-sizes-list" class="space-y-1.5"></div>
-                                    <button type="button" onclick="addAdminSizeRow('menu-sizes-list')" class="text-[10px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 mt-1">
-                                        <i class="bi bi-plus-circle"></i> Add Size
-                                    </button>
-                                </div>
-                            </div>
-
                             <div class="grid grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Price (L.E.)</label>
@@ -1387,103 +1361,6 @@
                             </h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Historical list of closed cashier shifts with cash reconciliations, shortages and surpluses.</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="resetShiftFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
-                                <i class="bi bi-arrow-counterclockwise"></i> Reset
-                            </button>
-                            <button onclick="exportAdminShiftsToExcel()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
-                                <i class="bi bi-file-earmark-excel"></i> Export Excel
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Filters Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40">
-                        <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Search Cashier / ID</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
-                                    <i class="bi bi-search text-xs"></i>
-                                </span>
-                                <input type="text" id="adminShiftSearch" onkeyup="renderShiftsTable(1)" placeholder="e.g. Sarah, 1001..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Status</label>
-                            <select id="adminShiftStatus" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">All Statuses</option>
-                                <option value="Active">Active</option>
-                                <option value="Closed">Closed</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date From</label>
-                            <input type="date" id="adminShiftDateFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date To</label>
-                            <input type="date" id="adminShiftDateTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour From</label>
-                            <select id="adminShiftHourFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">Any Hour</option>
-                                <option value="0">12:00 AM (00:00)</option>
-                                <option value="1">01:00 AM (01:00)</option>
-                                <option value="2">02:00 AM (02:00)</option>
-                                <option value="3">03:00 AM (03:00)</option>
-                                <option value="4">04:00 AM (04:00)</option>
-                                <option value="5">05:00 AM (05:00)</option>
-                                <option value="6">06:00 AM (06:00)</option>
-                                <option value="7">07:00 AM (07:00)</option>
-                                <option value="8">08:00 AM (08:00)</option>
-                                <option value="9">09:00 AM (09:00)</option>
-                                <option value="10">10:00 AM (10:00)</option>
-                                <option value="11">11:00 AM (11:00)</option>
-                                <option value="12">12:00 PM (12:00)</option>
-                                <option value="13">01:00 PM (13:00)</option>
-                                <option value="14">02:00 PM (14:00)</option>
-                                <option value="15">03:00 PM (15:00)</option>
-                                <option value="16">04:00 PM (16:00)</option>
-                                <option value="17">05:00 PM (17:00)</option>
-                                <option value="18">06:00 PM (18:00)</option>
-                                <option value="19">07:00 PM (19:00)</option>
-                                <option value="20">08:00 PM (20:00)</option>
-                                <option value="21">09:00 PM (21:00)</option>
-                                <option value="22">10:00 PM (22:00)</option>
-                                <option value="23">11:00 PM (23:00)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour To</label>
-                            <select id="adminShiftHourTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">Any Hour</option>
-                                <option value="0">12:00 AM (00:00)</option>
-                                <option value="1">01:00 AM (01:00)</option>
-                                <option value="2">02:00 AM (02:00)</option>
-                                <option value="3">03:00 AM (03:00)</option>
-                                <option value="4">04:00 AM (04:00)</option>
-                                <option value="5">05:00 AM (05:00)</option>
-                                <option value="6">06:00 AM (06:00)</option>
-                                <option value="7">07:00 AM (07:00)</option>
-                                <option value="8">08:00 AM (08:00)</option>
-                                <option value="9">09:00 AM (09:00)</option>
-                                <option value="10">10:00 AM (10:00)</option>
-                                <option value="11">11:00 AM (11:00)</option>
-                                <option value="12">12:00 PM (12:00)</option>
-                                <option value="13">01:00 PM (13:00)</option>
-                                <option value="14">02:00 PM (14:00)</option>
-                                <option value="15">03:00 PM (15:00)</option>
-                                <option value="16">04:00 PM (16:00)</option>
-                                <option value="17">05:00 PM (17:00)</option>
-                                <option value="18">06:00 PM (18:00)</option>
-                                <option value="19">07:00 PM (19:00)</option>
-                                <option value="20">08:00 PM (20:00)</option>
-                                <option value="21">09:00 PM (21:00)</option>
-                                <option value="22">10:00 PM (22:00)</option>
-                                <option value="23">11:00 PM (23:00)</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div class="overflow-x-auto mt-4">
@@ -1506,15 +1383,11 @@
                             </tbody>
                         </table>
                     </div>
-                    
-                    <!-- Pagination Controls -->
-                    <div id="shiftsPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
-                    </div>
                 </div>
             </div>
 
             <!-- TAB 9: USER MANAGEMENT -->
-            <div id="tab-user-mgmt" class="tab-content hidden h-full flex flex-col">
+            <div id="tab-user-mgmt" class="hidden h-full flex flex-col">
                 <div class="mb-6 flex justify-between items-end shrink-0">
                     <div>
                         <h2 class="outfit-font text-2xl font-black text-slate-800 dark:text-white">System Access Control</h2>
@@ -3791,97 +3664,10 @@
             }
         }
 
-        // ─── Admin Sizes Helpers ───────────────────────────────────────────
-        function toggleSizesSection(bodyId, listId, enabled) {
-            const body = document.getElementById(bodyId);
-            if (!body) return;
-            if (enabled) {
-                body.classList.remove('hidden');
-                if (document.getElementById(listId).children.length === 0) {
-                    addAdminSizeRow(listId);
-                }
-            } else {
-                body.classList.add('hidden');
-            }
-        }
-
-        function addAdminSizeRow(listId, name = '', price = '') {
-            const list = document.getElementById(listId);
-            if (!list) return;
-            const isFirstRow = list.children.length === 0;
-            const rowId = 'sz-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
-            list.insertAdjacentHTML('beforeend', `
-                <div id="${rowId}" class="grid grid-cols-12 gap-1 items-center">
-                    <input type="text" class="col-span-6 admin-size-name bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                           placeholder="e.g. Small / S" value="${name.replace(/"/g,'&quot;')}">
-                    <div class="col-span-5 flex items-center">
-                        <input type="number" step="0.01" min="0.01" class="w-full admin-size-price bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                               placeholder="0.00" value="${price}" oninput="syncFirstSizeToBasePrice('${listId}')">
-                    </div>
-                    <button type="button" onclick="document.getElementById('${rowId}').remove(); syncFirstSizeToBasePrice('${listId}')" class="col-span-1 flex justify-center text-red-400 hover:text-red-600">
-                        <i class="bi bi-x-circle text-sm"></i>
-                    </button>
-                </div>
-            `);
-            // If this is the first row being added, seed its price from the base price field
-            if (isFirstRow && !price) {
-                const basePriceId = listId === 'menu-sizes-list' ? 'menu-price' : 'edit-menu-price';
-                const basePrice = document.getElementById(basePriceId);
-                if (basePrice && basePrice.value) {
-                    list.querySelector('.admin-size-price').value = parseFloat(basePrice.value).toFixed(2);
-                }
-            }
-        }
-
-        function syncFirstSizeToBasePrice(listId) {
-            const list = document.getElementById(listId);
-            if (!list) return;
-            const firstPriceInput = list.querySelector('.admin-size-price');
-            if (!firstPriceInput) return;
-            const firstPrice = parseFloat(firstPriceInput.value) || 0;
-            if (firstPrice <= 0) return;
-            const basePriceId = listId === 'menu-sizes-list' ? 'menu-price' : 'edit-menu-price';
-            const basePriceInput = document.getElementById(basePriceId);
-            if (basePriceInput) basePriceInput.value = firstPrice.toFixed(2);
-        }
-
-        function serializeSizes(listId, hasSizesCheckId, rawDesc) {
-            const toggle = document.getElementById(hasSizesCheckId);
-            if (!toggle || !toggle.checked) return rawDesc;
-            const list = document.getElementById(listId);
-            if (!list) return rawDesc;
-            const rows = list.querySelectorAll('[id^="sz-"]');
-            const parts = [];
-            rows.forEach(row => {
-                const nameEl = row.querySelector('.admin-size-name');
-                const priceEl = row.querySelector('.admin-size-price');
-                const n = nameEl ? nameEl.value.trim() : '';
-                const p = parseFloat(priceEl ? priceEl.value : 0) || 0;
-                if (n && p > 0) parts.push(`${n} - ${p.toFixed(2)}`);
-            });
-            if (parts.length === 0) return rawDesc;
-            const sizesString = 'Sizes: ' + parts.join(', ');
-            return rawDesc ? rawDesc + '\n' + sizesString : sizesString;
-        }
-
-        function parseSizesFromDesc(fullDesc) {
-            const result = { cleanDesc: fullDesc, sizes: [] };
-            if (!fullDesc) return result;
-            const m = fullDesc.match(/(?:^|\n|\r)\s*(?:sizes?)\s*:\s*([\s\S]+)$/i);
-            if (!m) return result;
-            result.cleanDesc = fullDesc.replace(/(?:\n|\r)*\s*(?:sizes?)\s*:[\s\S]+$/i, '').trim();
-            m[1].split(/[,;]+/).forEach(part => {
-                const pm = part.trim().match(/^([\w\u0600-\u06FF\s]+?)\s*[-:=]+\s*([0-9]+(?:\.[0-9]+)?)/);
-                if (pm) result.sizes.push({ name: pm[1].trim(), price: parseFloat(pm[2]) });
-            });
-            return result;
-        }
-        // ─────────────────────────────────────────────────────────────────────
-
         async function submitMenuItem(e) {
             e.preventDefault();
             const name = document.getElementById('menu-name').value.trim();
-            const rawDesc = document.getElementById('menu-desc').value.trim();
+            const desc = document.getElementById('menu-desc').value.trim();
             const price = document.getElementById('menu-price').value;
             const catId = document.getElementById('menu-cat-id').value;
             
@@ -3896,9 +3682,6 @@
                 showToastAlert("Please fill in all required fields.", "warning");
                 return;
             }
-
-            // Serialize sizes into description
-            const desc = serializeSizes('menu-sizes-list', 'menu-has-sizes', rawDesc);
 
             const formData = new FormData();
             formData.append('name', name);
@@ -3951,9 +3734,6 @@
                     showToastAlert("New Menu Item added successfully!", "success");
                     document.getElementById('form-add-menuitem').reset();
                     document.getElementById('menu-addons-container').innerHTML = '';
-                    document.getElementById('menu-sizes-list').innerHTML = '';
-                    document.getElementById('menu-sizes-body').classList.add('hidden');
-                    document.getElementById('menu-has-sizes').checked = false;
                     renderRecommendationsList('menu-recommendations-list');
                     loadMenuItemsList();
                 } else {
@@ -4212,6 +3992,7 @@
             
             document.getElementById('edit-menu-id').value = id;
             document.getElementById('edit-menu-name').value = name;
+            document.getElementById('edit-menu-desc').value = description;
             document.getElementById('edit-menu-price').value = price;
 
             const orderNumInput = document.getElementById('edit-menu-order-number');
@@ -4221,24 +4002,6 @@
             if (document.getElementById('edit-menu-popular')) document.getElementById('edit-menu-popular').checked = isPop;
             if (document.getElementById('edit-menu-trending')) document.getElementById('edit-menu-trending').checked = isTrend;
             if (document.getElementById('edit-menu-recommended')) document.getElementById('edit-menu-recommended').checked = isRec;
-
-            // Parse sizes from description
-            const parsed = parseSizesFromDesc(description || '');
-            document.getElementById('edit-menu-desc').value = parsed.cleanDesc;
-
-            // Reset sizes UI
-            const editSizesList = document.getElementById('edit-menu-sizes-list');
-            const editSizesBody = document.getElementById('edit-menu-sizes-body');
-            const editSizesToggle = document.getElementById('edit-menu-has-sizes');
-            editSizesList.innerHTML = '';
-            if (parsed.sizes.length > 0) {
-                editSizesToggle.checked = true;
-                editSizesBody.classList.remove('hidden');
-                parsed.sizes.forEach(s => addAdminSizeRow('edit-menu-sizes-list', s.name, s.price.toFixed(2)));
-            } else {
-                editSizesToggle.checked = false;
-                editSizesBody.classList.add('hidden');
-            }
 
             // Populate category list before selecting
             const origDropdown = document.getElementById('menu-cat-id');
@@ -4294,7 +4057,7 @@
             e.preventDefault();
             const id = document.getElementById('edit-menu-id').value;
             const name = document.getElementById('edit-menu-name').value.trim();
-            const rawDesc = document.getElementById('edit-menu-desc').value.trim();
+            const desc = document.getElementById('edit-menu-desc').value.trim();
             const price = document.getElementById('edit-menu-price').value;
             const catId = document.getElementById('edit-menu-cat-id').value;
             
@@ -4309,9 +4072,6 @@
                 showToastAlert("Please fill in all required fields.", "warning");
                 return;
             }
-
-            // Serialize sizes into description
-            const desc = serializeSizes('edit-menu-sizes-list', 'edit-menu-has-sizes', rawDesc);
 
             const formData = new FormData();
             formData.append('name', name);
@@ -4472,35 +4232,8 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Description</label>
-                    <textarea id="edit-menu-desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all"></textarea>
+                    <textarea id="edit-menu-desc" rows="3" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all"></textarea>
                 </div>
-
-                <!-- SIZE VARIANTS SECTION (Edit Modal) -->
-                <div class="border border-amber-200 dark:border-amber-900/40 rounded-xl overflow-hidden">
-                    <div class="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 px-3 py-2">
-                        <span class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                            <i class="bi bi-stack"></i> Size Variants &amp; Pricing
-                        </span>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="edit-menu-has-sizes" class="w-3.5 h-3.5 text-amber-500 rounded"
-                                   onchange="toggleSizesSection('edit-menu-sizes-body', 'edit-menu-sizes-list', this.checked)">
-                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Enable Sizes</span>
-                        </label>
-                    </div>
-                    <div id="edit-menu-sizes-body" class="hidden p-3 space-y-2 bg-white dark:bg-darkCard">
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own price. Base Price stays as default fallback.</p>
-                        <div class="grid grid-cols-12 gap-1 text-[9px] font-bold text-slate-400 uppercase px-1">
-                            <div class="col-span-6">Size Name</div>
-                            <div class="col-span-5">Price (L.E.)</div>
-                            <div class="col-span-1"></div>
-                        </div>
-                        <div id="edit-menu-sizes-list" class="space-y-1.5"></div>
-                        <button type="button" onclick="addAdminSizeRow('edit-menu-sizes-list')" class="text-[10px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 mt-1">
-                            <i class="bi bi-plus-circle"></i> Add Size
-                        </button>
-                    </div>
-                </div>
-
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Price (L.E.)</label>
@@ -4649,322 +4382,66 @@
         }
 
         // --- CASHIER SHIFT REPORTS LOGIC ---
-        let allAdminShifts = [];
-        let currentAdminShiftPage = 1;
-        const shiftsPerPage = 10;
-
         async function loadShiftReportsList() {
             showLoader();
             try {
                 const response = await fetch('/api/analytics/shifts');
-                
-                // Check if session is expired or redirected to login
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("text/html") !== -1) {
-                    showToastAlert("Session expired or Unauthorized. Redirecting to login page...", "warning");
-                    setTimeout(() => {
-                        window.location.href = "/Identity/Account/Login?ReturnUrl=" + encodeURIComponent(window.location.pathname);
-                    }, 2200);
-                    return;
-                }
-
                 if (response.ok) {
-                    allAdminShifts = await response.json();
+                    const shifts = await response.json();
+                    const tbody = document.querySelector('#table-shifts-list tbody');
+                    tbody.innerHTML = '';
                     
-                    // Client-side fallback to high-fidelity mock data if no data was returned
-                    if (!allAdminShifts || allAdminShifts.length === 0) {
-                        console.log("No shift records returned from server database. Seeding high-fidelity sandbox shifts...");
-                        seedMockShifts();
+                    if (shifts.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="text-center py-8 text-slate-400 dark:text-slate-500">
+                                    <i class="bi bi-clock-history text-3xl text-warning mb-2 d-block"></i>
+                                    No cashier shifts logged in the system.
+                                </td>
+                            </tr>`;
+                        return;
                     }
-                    renderShiftsTable(1);
-                } else {
-                    showToastAlert("Server returned an error. Loading high-fidelity sandbox shifts...", "warning");
-                    seedMockShifts();
-                    renderShiftsTable(1);
+
+                    shifts.forEach(shift => {
+                        let diffBadge = '-';
+                        if (shift.difference !== null) {
+                            const diffVal = parseFloat(shift.difference);
+                            if (diffVal === 0) {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Balanced</span>`;
+                            } else if (diffVal > 0) {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">+${diffVal.toFixed(2)} EGP</span>`;
+                            } else {
+                                diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">${diffVal.toFixed(2)} EGP (Short)</span>`;
+                            }
+                        }
+
+                        const statusBadge = shift.isActive
+                            ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse">Active</span>`
+                            : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-550/15 text-slate-400">Closed</span>`;
+
+                        const actualStr = shift.actualAmount !== null ? `${parseFloat(shift.actualAmount).toFixed(2)} EGP` : '-';
+                        const actionBtn = !shift.isActive
+                            ? `<button onclick="viewShiftDetails(${shift.id})" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-500/20 text-brand-500 hover:bg-brand-500/10 transition-all">View Details</button>`
+                            : `<span class="text-xs text-slate-400">Active Shift</span>`;
+
+                        tbody.innerHTML += `
+                            <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                                <td class="py-3.5 px-2 font-bold text-brand-500">#${shift.id}</td>
+                                <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${shift.cashierName}</td>
+                                <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.startTime}</td>
+                                <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.endTime}</td>
+                                <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} EGP</td>
+                                <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${actualStr}</td>
+                                <td class="py-3.5 px-2 text-center">${diffBadge}</td>
+                                <td class="py-3.5 px-2 text-center">${statusBadge}</td>
+                                <td class="py-3.5 px-2 text-right">${actionBtn}</td>
+                            </tr>`;
+                    });
                 }
             } catch (err) {
                 console.error("Failed to load shifts:", err);
-                showToastAlert("Could not connect to server. Loading sandbox shifts...", "warning");
-                seedMockShifts();
-                renderShiftsTable(1);
             } finally {
                 hideLoader();
-            }
-        }
-
-        function seedMockShifts() {
-            allAdminShifts = [
-                {
-                    id: 1001,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 08:15 AM",
-                    endTime: "2026-05-28 04:00 PM",
-                    expectedAmount: 4500.00,
-                    actualAmount: 4500.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1002,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 04:30 PM",
-                    endTime: "2026-05-28 11:45 PM",
-                    expectedAmount: 7200.00,
-                    actualAmount: 7150.00,
-                    difference: -50.00,
-                    isActive: false
-                },
-                {
-                    id: 1003,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 09:00 AM",
-                    endTime: "2026-05-29 05:00 PM",
-                    expectedAmount: 3800.00,
-                    actualAmount: 3800.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1004,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 06:15 PM",
-                    endTime: "2026-05-30 02:00 AM",
-                    expectedAmount: 8900.00,
-                    actualAmount: 8950.00,
-                    difference: 50.00,
-                    isActive: false
-                },
-                {
-                    id: 1005,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 08:00 AM",
-                    endTime: "2026-05-30 04:30 PM",
-                    expectedAmount: 5120.00,
-                    actualAmount: 5120.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1006,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 05:00 PM",
-                    endTime: null,
-                    expectedAmount: 3200.00,
-                    actualAmount: null,
-                    difference: null,
-                    isActive: true
-                }
-            ];
-        }
-
-        function parseShiftDateTime(dateTimeStr) {
-            if (!dateTimeStr || dateTimeStr === '-') return null;
-            const parts = dateTimeStr.split(' ');
-            if (parts.length < 3) return null;
-            const datePart = parts[0]; 
-            const timePart = parts[1]; 
-            const ampmPart = parts[2]; 
-            
-            const timeSplit = timePart.split(':');
-            let hour = parseInt(timeSplit[0]);
-            const minute = parseInt(timeSplit[1]);
-            
-            if (ampmPart === 'PM' && hour < 12) hour += 12;
-            if (ampmPart === 'AM' && hour === 12) hour = 0;
-            
-            return {
-                dateStr: datePart, 
-                hour: hour, 
-                minute: minute 
-            };
-        }
-
-        function getFilteredAdminShifts() {
-            const searchTerm = document.getElementById('adminShiftSearch')?.value.toLowerCase() || '';
-            const statusFilter = document.getElementById('adminShiftStatus')?.value || '';
-            const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
-            const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
-            const hourFromVal = document.getElementById('adminShiftHourFrom')?.value;
-            const hourToVal = document.getElementById('adminShiftHourTo')?.value;
-            const hourFrom = hourFromVal !== "" && hourFromVal !== undefined ? parseInt(hourFromVal) : null;
-            const hourTo = hourToVal !== "" && hourToVal !== undefined ? parseInt(hourToVal) : null;
-
-            return allAdminShifts.filter(shift => {
-                // Search match
-                const searchMatch = !searchTerm || 
-                    (shift.cashierName && shift.cashierName.toLowerCase().includes(searchTerm)) || 
-                    shift.id.toString().includes(searchTerm);
-
-                // Status match
-                const shiftStatus = shift.isActive ? "Active" : "Closed";
-                const statusMatch = !statusFilter || shiftStatus === statusFilter;
-
-                // Date & hour parsing
-                const parsedStart = parseShiftDateTime(shift.startTime);
-
-                // Date range match
-                let dateMatch = true;
-                if (parsedStart) {
-                    if (dateFrom && parsedStart.dateStr < dateFrom) dateMatch = false;
-                    if (dateTo && parsedStart.dateStr > dateTo) dateMatch = false;
-                }
-
-                // Hour range match
-                let hourMatch = true;
-                if (parsedStart) {
-                    if (hourFrom !== null && !isNaN(hourFrom) && parsedStart.hour < hourFrom) hourMatch = false;
-                    if (hourTo !== null && !isNaN(hourTo) && parsedStart.hour > hourTo) hourMatch = false;
-                }
-
-                return searchMatch && statusMatch && dateMatch && hourMatch;
-            });
-        }
-
-        function resetShiftFilters() {
-            const searchInput = document.getElementById('adminShiftSearch');
-            if (searchInput) searchInput.value = '';
-
-            const statusInput = document.getElementById('adminShiftStatus');
-            if (statusInput) statusInput.value = '';
-
-            const dateFromInput = document.getElementById('adminShiftDateFrom');
-            if (dateFromInput) dateFromInput.value = '';
-
-            const dateToInput = document.getElementById('adminShiftDateTo');
-            if (dateToInput) dateToInput.value = '';
-
-            const hourFromInput = document.getElementById('adminShiftHourFrom');
-            if (hourFromInput) hourFromInput.value = '';
-
-            const hourToInput = document.getElementById('adminShiftHourTo');
-            if (hourToInput) hourToInput.value = '';
-
-            renderShiftsTable(1);
-            showToastAlert("Filters reset successfully.", "info");
-        }
-
-        function renderShiftsTable(page = 1) {
-            currentAdminShiftPage = page;
-            const tbody = document.querySelector('#table-shifts-list tbody');
-            const paginationContainer = document.getElementById('shiftsPagination');
-            tbody.innerHTML = '';
-            
-            if (paginationContainer) {
-                paginationContainer.innerHTML = '';
-            }
-
-            // Get shared filtered data
-            let filteredShifts = getFilteredAdminShifts();
-
-            if (filteredShifts.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="text-center py-8 text-slate-400 dark:text-slate-500">
-                            <i class="bi bi-clock-history text-3xl text-warning mb-2 d-block"></i>
-                            No cashier shifts matched the criteria.
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            // Pagination
-            const totalPages = Math.ceil(filteredShifts.length / shiftsPerPage);
-            const startIndex = (page - 1) * shiftsPerPage;
-            const paginatedShifts = filteredShifts.slice(startIndex, startIndex + shiftsPerPage);
-
-            paginatedShifts.forEach(shift => {
-                let diffBadge = '-';
-                if (shift.difference !== null) {
-                    const diffVal = parseFloat(shift.difference);
-                    if (diffVal === 0) {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Balanced</span>`;
-                    } else if (diffVal > 0) {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">+${diffVal.toFixed(2)} EGP</span>`;
-                    } else {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">${diffVal.toFixed(2)} EGP (Short)</span>`;
-                    }
-                }
-
-                const statusBadge = shift.isActive
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse">Active</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-550/15 text-slate-400">Closed</span>`;
-
-                const actualStr = shift.actualAmount !== null ? `${parseFloat(shift.actualAmount).toFixed(2)} EGP` : '-';
-                const actionBtn = !shift.isActive
-                    ? `<button onclick="viewShiftDetails(${shift.id})" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-500/20 text-brand-500 hover:bg-brand-500/10 transition-all">View Details</button>`
-                    : `<span class="text-xs text-slate-400">Active Shift</span>`;
-
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-                        <td class="py-3.5 px-2 font-bold text-brand-500">#${shift.id}</td>
-                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${shift.cashierName}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.startTime}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.endTime || '-'}</td>
-                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} EGP</td>
-                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${actualStr}</td>
-                        <td class="py-3.5 px-2 text-center">${diffBadge}</td>
-                        <td class="py-3.5 px-2 text-center">${statusBadge}</td>
-                        <td class="py-3.5 px-2 text-right">${actionBtn}</td>
-                    </tr>`;
-            });
-
-            // Render Pagination Buttons
-            if (totalPages > 1 && paginationContainer) {
-                let paginationHtml = '';
-                
-                // Prev button
-                paginationHtml += `<button onclick="renderShiftsTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
-                
-                // Page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    const activeClass = i === page 
-                        ? 'bg-brand-500 text-white border-brand-500' 
-                        : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
-                    paginationHtml += `<button onclick="renderShiftsTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
-                }
-                
-                // Next button
-                paginationHtml += `<button onclick="renderShiftsTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
-
-                paginationContainer.innerHTML = paginationHtml;
-            }
-        }
-
-        function exportAdminShiftsToExcel() {
-            if (!allAdminShifts || allAdminShifts.length === 0) return;
-
-            // Get currently filtered list
-            let filteredShifts = getFilteredAdminShifts();
-
-            if (filteredShifts.length === 0) {
-                showToastAlert("No data matching current filters to export.", "warning");
-                return;
-            }
-
-            // Generate clean array of objects for Excel
-            const exportData = filteredShifts.map(shift => {
-                const diffVal = shift.difference !== null ? parseFloat(shift.difference).toFixed(2) : '0.00';
-                return {
-                    "Shift ID": shift.id,
-                    "Cashier": shift.cashierName,
-                    "Start Time": shift.startTime,
-                    "End Time": shift.endTime || '-',
-                    "System Expected (EGP)": parseFloat(shift.expectedAmount).toFixed(2),
-                    "Actual Entered (EGP)": shift.actualAmount !== null ? parseFloat(shift.actualAmount).toFixed(2) : '0.00',
-                    "Difference (EGP)": diffVal,
-                    "Status": shift.isActive ? "Active" : "Closed"
-                };
-            });
-
-            // Use SheetJS if available
-            if (typeof XLSX !== 'undefined') {
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Cashier Shifts");
-                XLSX.writeFile(wb, `Cashier_Shifts_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-                showToastAlert("Filtered Cashier shifts exported as Excel.", "success");
-            } else {
-                showToastAlert("Excel export library is currently not available.", "error");
             }
         }
 
@@ -5180,6 +4657,5 @@
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>

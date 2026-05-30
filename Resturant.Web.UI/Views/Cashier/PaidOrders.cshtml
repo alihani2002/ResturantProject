@@ -31,8 +31,7 @@
                                 <th>Order #</th>
                                 <th>Table</th>
                                 <th>Items</th>
-                                <th >Subtotal</th>
-                                <th >Grand Total</th>
+                                <th class="text-end">Total</th>
                                 <th>Order Date</th>
                                 <th>Paid Date</th>
                                 <th class="text-center">Actions</th>
@@ -54,8 +53,7 @@
                                             </span>
                                         }
                                     </td>
-                                    <td >$@order.TotalAmount.ToString("0.00")</td>
-                                    <td >$(@order.TotalAmount + @order.TaxAmount + @order.ServiceAmount ).ToString("0.00")</td>
+                                    <td class="text-end fw-bold">$@order.TotalAmount.ToString("0.00")</td>
                                     <td>@order.OrderDate.ToString("MMM dd, HH:mm")</td>
                                     <td>@order.CompletedDate?.ToString("MMM dd, HH:mm")</td>
                                     <td class="text-center">

@@ -22,6 +22,29 @@ namespace Resturant.Web.UI.Controllers
     public class WaiterController : Controller
     {
         private readonly AppDbContext _context;
+/* 
+ * NOTE: didn't create migration or database
+ */
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Resturant.Core.Common;
+using Resturant.Core.Entities;
+using Resturant.Infrastructure.Data;
+using Resturant.Web.UI.Hubs;
+using Resturant.Web.UI.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Resturant.Web.UI.Controllers
+{
+    [Authorize(Roles = AppRoles.Waiter + "," + AppRoles.Admin + "," + AppRoles.Manager)]
+    public class WaiterController : Controller
+    {
+        private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
         private readonly Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager;
 
@@ -169,46 +192,13 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> StartSession(int tableNumber, string customerName, string phoneNumber)
-        {
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
-            if (table == null) return NotFound("Table not found");
-
-            var activeSession = await _context.Set<TableSession>().FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
-            if (activeSession != null)
-            {
-                return Ok(new { sessionId = activeSession.Id });
-            }
-
-            var newSession = new TableSession
-            {
-                TableId = table.Id,
-                CustomerName = string.IsNullOrEmpty(customerName) ? $"Table {tableNumber} Guest" : customerName,
-                PhoneNumber = string.IsNullOrEmpty(phoneNumber) ? "0000000000" : phoneNumber,
-                StartTime = DateTime.Now,
-                IsActive = true
-            };
-
-            _context.Set<TableSession>().Add(newSession);
-            await _context.SaveChangesAsync();
-
-            // Notify dashboards to refresh
-            var notifyPayload = new { tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
-            await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
-
-            return Ok(new { sessionId = newSession.Id });
-        }
-
-        [HttpPost]
         public async Task<IActionResult> CloseSession(int sessionId)
         {
             var session = await _context.Set<TableSession>()
                 .Include(s => s.Table)
                 .FirstOrDefaultAsync(s => s.Id == sessionId);
                 
-            if (session != null && session.IsActive)
+            if (session != null)
             {
                 session.IsActive = false;
                 session.EndTime = DateTime.Now;
@@ -262,7 +252,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = order.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price),
+                        menuItemName = oi.MenuItem?.Name,
                         quantity = oi.Quantity,
                         price = oi.Price
                     })
@@ -286,7 +276,7 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> CancelOrder(int orderId)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order != null && order.Status != OrderStatus.Completed && order.Status != OrderStatus.Cancelled)
+            if (order != null && order.Status != OrderStatus.Completed)
             {
                 order.Status = OrderStatus.Cancelled;
                 order.CancelledDate = DateTime.Now;
@@ -316,7 +306,7 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> CompleteOrder(int orderId)
         {
             var order = await _context.Orders.FindAsync(orderId);
-            if (order != null && order.Status != OrderStatus.Completed)
+            if (order != null)
             {
                 order.Status = OrderStatus.Completed;
                 order.CompletedDate = DateTime.Now;
@@ -352,7 +342,6 @@ namespace Resturant.Web.UI.Controllers
                 .FirstOrDefaultAsync(oi => oi.Id == orderItemId);
 
             if (orderItem == null) return NotFound();
-            if (orderItem.IsCancelled) return Ok(new { message = "Item is already cancelled." });
 
             // Mark item as cancelled (soft delete)
             orderItem.IsCancelled = true;
@@ -388,7 +377,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.Name ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled
@@ -437,49 +426,6 @@ namespace Resturant.Web.UI.Controllers
                 await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Served");
             }
             return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMenuData()
-        {
-            var categories = await _context.MenuCategories
-                .Include(c => c.MenuItems)
-                .ThenInclude(m => m.AddOns)
-                .Where(c => c.IsActive && c.MenuItems.Any(mi => mi.IsAvailable))
-                .OrderBy(c => c.OrderNumber)
-                .ToListAsync();
-
-            var menu = categories.Select(c => new
-            {
-                categoryId = c.Id,
-                categoryName = c.Name,
-                items = c.MenuItems.Where(mi => mi.IsAvailable).Select(mi => new
-                {
-                    id = mi.Id,
-                    name = mi.Name,
-                    price = mi.Price,
-                    description = mi.Description,
-                    sizes = mi.GetParsedSizes().Select(s => new { name = s.Name, price = s.Price }).ToList(),
-                    addOns = mi.AddOns.Where(a => a.IsAvailable).Select(a => new
-                    {
-                        id = a.Id,
-                        name = a.Name,
-                        price = a.ExtraPrice
-                    }).ToList()
-                }).OrderBy(mi => mi.name).ToList()
-            }).ToList();
-
-            return Json(menu);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> DumpMenu()
-        {
-            var items = await _context.MenuItems
-                .Select(mi => new { mi.Id, mi.Name, mi.Description, mi.Price })
-                .ToListAsync();
-            return Json(items);
         }
     }
 }

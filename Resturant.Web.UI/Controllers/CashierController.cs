@@ -95,7 +95,7 @@ namespace Resturant.Web.UI.Controllers
                 .Where(o => o.ShiftId == activeShift.Id && o.Status == OrderStatus.Completed)
                 .ToListAsync();
 
-            decimal expectedAmount = shiftOrders.Sum(o => o.TotalAmount + (o.Tips ?? 0));
+            decimal expectedAmount = shiftOrders.Sum(o => (o.PaidAmount ?? o.TotalAmount) - (o.ChangeReturned ?? 0));
 
             activeShift.ExpectedAmount = expectedAmount;
             activeShift.ActualAmountEntered = actualAmount;
@@ -125,7 +125,6 @@ namespace Resturant.Web.UI.Controllers
             ViewBag.ShiftOrdersCount = shiftOrders.Count;
             ViewBag.ShiftTotalSales = shiftOrders.Sum(o => o.TotalAmount);
             ViewBag.ShiftTotalTips = shiftOrders.Sum(o => o.Tips ?? 0);
-            ViewBag.ShiftOrders = shiftOrders;
 
             return View(shift);
         }
@@ -165,7 +164,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = g.SelectMany(o => o.OrderItems).Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "",
+                        menuItemName = oi.MenuItem != null ? oi.MenuItem.Name : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
                         isCancelled = oi.IsCancelled
@@ -192,11 +191,6 @@ namespace Resturant.Web.UI.Controllers
 
             var ids = orderIds.Split(',').Select(int.Parse).ToList();
             var orders = await _context.Orders.Where(o => ids.Contains(o.Id)).ToListAsync();
-
-            if (orders.All(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Cancelled))
-            {
-                return Ok(); // Idempotent success (already processed)
-            }
 
             if (orders.Any())
             {
@@ -261,32 +255,17 @@ namespace Resturant.Web.UI.Controllers
             return View(orders);
         }
 
-        public async Task<IActionResult> AllOrders(DateTime? date, int? hour)
+        public async Task<IActionResult> AllOrders(DateTime? date)
         {
             var targetDate = date?.Date ?? DateTime.Today;
-            DateTime start, end;
-            if (hour.HasValue)
-            {
-                start = targetDate.AddHours(hour.Value);
-                end = start.AddHours(1);
-            }
-            else
-            {
-                start = targetDate;
-                end = targetDate.AddDays(1);
-            }
-
-            var ordersQuery = _context.Orders
+            var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
-                .Where(o => o.OrderDate >= start && o.OrderDate < end);
-
-            var orders = await ordersQuery
+                .Where(o => o.OrderDate.Date == targetDate)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             ViewBag.SelectedDate = targetDate;
-            ViewBag.SelectedHour = hour;
             return View(orders);
         }
 
@@ -316,32 +295,29 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuData()
         {
-            var categories = await _context.MenuCategories
+            var menu = await _context.MenuCategories
                 .Include(c => c.MenuItems)
                 .ThenInclude(m => m.AddOns)
                 .Where(c => c.IsActive && c.MenuItems.Any(mi => mi.IsAvailable))
                 .OrderBy(c => c.OrderNumber)
-                .ToListAsync();
-
-            var menu = categories.Select(c => new
-            {
-                categoryId = c.Id,
-                categoryName = c.Name,
-                items = c.MenuItems.Where(mi => mi.IsAvailable).Select(mi => new
+                .Select(c => new
                 {
-                    id = mi.Id,
-                    name = mi.Name,
-                    price = mi.Price,
-                    description = mi.Description,
-                    sizes = mi.GetParsedSizes().Select(s => new { name = s.Name, price = s.Price }).ToList(),
-                    addOns = mi.AddOns.Where(a => a.IsAvailable).Select(a => new
+                    categoryId = c.Id,
+                    categoryName = c.Name,
+                    items = c.MenuItems.Where(mi => mi.IsAvailable).Select(mi => new
                     {
-                        id = a.Id,
-                        name = a.Name,
-                        price = a.ExtraPrice
-                    }).ToList()
-                }).OrderBy(mi => mi.name).ToList()
-            }).ToList();
+                        id = mi.Id,
+                        name = mi.Name,
+                        price = mi.Price,
+                        addOns = mi.AddOns.Where(a => a.IsAvailable).Select(a => new
+                        {
+                            id = a.Id,
+                            name = a.Name,
+                            price = a.ExtraPrice
+                        }).ToList()
+                    }).OrderBy(mi => mi.name).ToList()
+                })
+                .ToListAsync();
 
             return Json(menu);
         }
@@ -361,22 +337,6 @@ namespace Resturant.Web.UI.Controllers
             if (activeShift == null)
             {
                 return BadRequest("You do not have an active shift. Please start your shift first.");
-            }
-
-            // Prevent duplicate takeaway orders in rapid succession (within 5 seconds)
-            var recentOrder = await _context.Orders
-                .Where(o => o.TableNumber == 0 && o.CashierId == userId && o.OrderDate >= DateTime.Now.AddSeconds(-5))
-                .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefaultAsync();
-
-            if (recentOrder != null)
-            {
-                if (recentOrder.PaidAmount == request.PaidAmount && 
-                    recentOrder.ChangeReturned == request.ChangeReturned && 
-                    recentOrder.Tips == request.Tips)
-                {
-                    return Ok(new { orderId = recentOrder.Id });
-                }
             }
 
             // Create Order
@@ -411,7 +371,7 @@ namespace Resturant.Web.UI.Controllers
                     OrderId = order.Id,
                     MenuItemId = itemReq.MenuItemId,
                     Quantity = itemReq.Quantity,
-                    Price = itemReq.Price ?? menuItem.Price,
+                    Price = menuItem.Price,
                     IsCancelled = false
                 };
 
@@ -437,15 +397,21 @@ namespace Resturant.Web.UI.Controllers
                     }
                 }
 
-                totalAmount += (orderItem.Price + addOnsTotal) * itemReq.Quantity;
+                totalAmount += (menuItem.Price + addOnsTotal) * itemReq.Quantity;
             }
 
-            // For Takeaway orders, do not add Taxes & Service
-            order.TaxPercentage = 0;
-            order.ServicePercentage = 0;
-            order.ServiceAmount = 0;
-            order.TaxAmount = 0;
-            order.TotalAmount = totalAmount;
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync() 
+                           ?? new RestaurantSetting { TaxPercentage = 14, ServicePercentage = 12 };
+
+            decimal serviceAmount = totalAmount * (settings.ServicePercentage / 100);
+            decimal taxAmount = (totalAmount + serviceAmount) * (settings.TaxPercentage / 100);
+            decimal grandTotal = totalAmount + serviceAmount + taxAmount;
+
+            order.TaxPercentage = settings.TaxPercentage;
+            order.ServicePercentage = settings.ServicePercentage;
+            order.ServiceAmount = serviceAmount;
+            order.TaxAmount = taxAmount;
+            order.TotalAmount = grandTotal;
 
             await _context.SaveChangesAsync();
 
@@ -478,7 +444,5 @@ namespace Resturant.Web.UI.Controllers
         public int MenuItemId { get; set; }
         public int Quantity { get; set; }
         public List<int> AddOnIds { get; set; } = new List<int>();
-        public decimal? Price { get; set; }
-        public string? Size { get; set; }
     }
 }
