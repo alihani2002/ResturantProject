@@ -319,7 +319,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = order.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price),
+                        menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price),
                         quantity = oi.Quantity,
                         price = oi.Price
                     })
@@ -445,7 +445,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled
@@ -502,6 +502,8 @@ namespace Resturant.Web.UI.Controllers
             int branchId = await GetSelectedBranchIdAsync();
 
             var categories = await _context.MenuCategories
+                .Include(c => c.MenuItems)
+                .ThenInclude(m => m.Sizes)
                 .Include(c => c.MenuItems)
                 .ThenInclude(m => m.AddOns)
                 .Where(c => c.IsActive && c.BranchId == branchId && c.MenuItems.Any(mi => mi.IsAvailable))

@@ -700,7 +700,8 @@
                 menuItemId: i.id,
                 quantity: i.quantity,
                 addOnIds: i.addOns ? i.addOns.map(a => a.id) : [],
-                price: i.price
+                price: i.price,
+                size: i.size || ''
             }));
  
             const payload = {

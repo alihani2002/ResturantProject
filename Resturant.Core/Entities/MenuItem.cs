@@ -1,4 +1,4 @@
-/* 
+/*
  * NOTE: didn't create migration or database
  */
 using Resturant.Core.Common;
@@ -21,6 +21,10 @@ namespace Resturant.Core.Entities
         [Display(Name = "Price")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
+
+        [Display(Name = "Cost")]
+        [Range(0, double.MaxValue, ErrorMessage = "Cost cannot be negative")]
+        public decimal Cost { get; set; }
 
         [Display(Name = "Image URL")]
         public string? ImageUrl { get; set; }
@@ -52,15 +56,27 @@ namespace Resturant.Core.Entities
 
         public ICollection<MenuItemAddOn> AddOns { get; set; } = new List<MenuItemAddOn>();
         public ICollection<MenuItemRecommendation> Recommendations { get; set; } = new List<MenuItemRecommendation>();
+        public ICollection<MenuItemSize> Sizes { get; set; } = new List<MenuItemSize>();
 
         public class SizeOption
         {
+            public int? Id { get; set; }
             public string Name { get; set; } = string.Empty;
             public decimal Price { get; set; }
+            public decimal Cost { get; set; }
         }
 
         public List<SizeOption> GetParsedSizes()
         {
+            if (Sizes != null && Sizes.Count > 0)
+            {
+                return Sizes
+                    .Where(s => !s.IsDeleted)
+                    .OrderBy(s => s.Id)
+                    .Select(s => new SizeOption { Id = s.Id, Name = s.Name, Price = s.Price, Cost = s.Cost })
+                    .ToList();
+            }
+
             var list = new List<SizeOption>();
             if (string.IsNullOrEmpty(Description)) return list;
 
@@ -85,7 +101,7 @@ namespace Resturant.Core.Entities
                     var name = match.Groups[1].Value.Trim();
                     if (decimal.TryParse(match.Groups[2].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal price))
                     {
-                        list.Add(new SizeOption { Name = name, Price = price });
+                        list.Add(new SizeOption { Name = name, Price = price, Cost = Cost });
                     }
                 }
             }
@@ -94,6 +110,16 @@ namespace Resturant.Core.Entities
 
         public string GetFormattedNameWithPrice(decimal orderItemPrice)
         {
+            return GetFormattedNameWithSize(null, orderItemPrice);
+        }
+
+        public string GetFormattedNameWithSize(string? sizeName, decimal orderItemPrice)
+        {
+            if (!string.IsNullOrWhiteSpace(sizeName))
+            {
+                return $"{Name} ({sizeName})";
+            }
+
             if (orderItemPrice == Price) return Name;
 
             var sizes = GetParsedSizes();
@@ -105,4 +131,4 @@ namespace Resturant.Core.Entities
             return Name;
         }
     }
-}
+}

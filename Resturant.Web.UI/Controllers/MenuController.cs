@@ -1,4 +1,4 @@
-/* 
+/*
  * NOTE: didn't create migration or database
  */
 using Microsoft.AspNetCore.Mvc;
@@ -57,9 +57,9 @@ namespace Resturant.Web.UI.Controllers
                 string guestName = Request.Cookies["GuestName"];
                 string guestPhone = Request.Cookies["GuestPhone"];
 
-                if (string.IsNullOrEmpty(guestName) || 
-                    string.IsNullOrEmpty(guestPhone) || 
-                    !activeSession.CustomerName.Equals(guestName, StringComparison.OrdinalIgnoreCase) || 
+                if (string.IsNullOrEmpty(guestName) ||
+                    string.IsNullOrEmpty(guestPhone) ||
+                    !activeSession.CustomerName.Equals(guestName, StringComparison.OrdinalIgnoreCase) ||
                     activeSession.PhoneNumber != guestPhone)
                 {
                     return RedirectToAction("Register", "CustomerSession");
@@ -69,6 +69,7 @@ namespace Resturant.Web.UI.Controllers
             // Filter categories and menu items by the table's BranchId
             var menu = await _context.MenuCategories
                 .Include(c => c.MenuItems.Where(i => i.IsAvailable && i.BranchId == branchId).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
+                    .ThenInclude(i => i.Sizes)
                 .Where(c => c.IsActive && c.BranchId == branchId)
                 .OrderBy(c => c.OrderNumber)
                 .ThenBy(c => c.Name)
@@ -89,7 +90,7 @@ namespace Resturant.Web.UI.Controllers
                 .Where(i => i.MenuCategoryId == categoryId && i.IsAvailable)
                 .OrderBy(i => i.OrderNumber)
                 .ThenBy(i => i.Name)
-                .Select(i => new 
+                .Select(i => new
                 {
                     id = i.Id,
                     name = i.Name,
@@ -113,6 +114,7 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> GetMenuItemCustomizationDetails(int id)
         {
             var menuItem = await _context.MenuItems
+                .Include(m => m.Sizes)
                 .Include(m => m.AddOns)
                 .Include(m => m.Recommendations)
                     .ThenInclude(r => r.RecommendedMenuItem)
@@ -187,4 +189,4 @@ namespace Resturant.Web.UI.Controllers
             return Json(menuItem);
         }
     }
-}
+}
