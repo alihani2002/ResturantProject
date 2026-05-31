@@ -974,6 +974,123 @@ namespace Resturant.Web.UI.Controllers
             }
         }
 
+        [HttpGet("branches")]
+        public async Task<IActionResult> GetBranches()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching branches list for report filters.");
+                var branches = await _context.Set<Branch>()
+                    .OrderBy(b => b.Name)
+                    .Select(b => new { id = b.Id, name = b.Name })
+                    .ToListAsync();
+                return Ok(branches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching branches.");
+                return StatusCode(500, new { Message = "An error occurred while fetching branches.", Details = ex.Message });
+            }
+        }
+
+        [HttpGet("products/sales-report")]
+        public async Task<IActionResult> GetProductSalesReport(
+            [FromQuery] string? productName,
+            [FromQuery] int? categoryId,
+            [FromQuery] int? branchId,
+            [FromQuery] DateTime? dateFrom,
+            [FromQuery] DateTime? dateTo,
+            [FromQuery] int? hourFrom,
+            [FromQuery] int? hourTo
+        )
+        {
+            try
+            {
+                _logger.LogInformation("Generating Product Sales Report with filters.");
+
+                var query = _context.Set<OrderItem>()
+                    .Include(oi => oi.MenuItem)
+                        .ThenInclude(m => m.MenuCategory)
+                    .Include(oi => oi.Order)
+                        .ThenInclude(o => o.Branch)
+                    .Where(oi => oi.Order.Status == OrderStatus.Paid || oi.Order.Status == OrderStatus.Completed)
+                    .Where(oi => !oi.IsCancelled)
+                    .AsQueryable();
+
+                // Apply Branch filter
+                if (branchId.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.BranchId == branchId.Value);
+                }
+                else
+                {
+                    var activeBranchId = GetActiveBranchId();
+                    if (activeBranchId.HasValue)
+                    {
+                        query = query.Where(oi => oi.Order.BranchId == activeBranchId.Value);
+                    }
+                }
+
+                // Apply Category filter
+                if (categoryId.HasValue)
+                {
+                    query = query.Where(oi => oi.MenuItem.MenuCategoryId == categoryId.Value);
+                }
+
+                // Apply Date filters
+                if (dateFrom.HasValue)
+                {
+                    var startOfFrom = dateFrom.Value.Date;
+                    query = query.Where(oi => oi.Order.OrderDate >= startOfFrom);
+                }
+                if (dateTo.HasValue)
+                {
+                    var endOfTo = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(oi => oi.Order.OrderDate <= endOfTo);
+                }
+
+                // Apply Hour filters
+                if (hourFrom.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.OrderDate.Hour >= hourFrom.Value);
+                }
+                if (hourTo.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.OrderDate.Hour <= hourTo.Value);
+                }
+
+                var items = await query.ToListAsync();
+
+                // Group in-memory
+                var grouped = items
+                    .GroupBy(oi => new {
+                        ProductVariantName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "Unknown",
+                        UnitPrice = oi.Price,
+                        BranchName = oi.Order?.Branch?.Name ?? "Main Branch",
+                        CategoryName = oi.MenuItem?.MenuCategory?.Name ?? "Uncategorized"
+                    })
+                    .Select(g => new {
+                        productName = g.Key.ProductVariantName,
+                        category = g.Key.CategoryName,
+                        quantitySold = g.Sum(oi => oi.Quantity),
+                        unitPrice = g.Key.UnitPrice,
+                        totalSales = g.Sum(oi => oi.Quantity) * g.Key.UnitPrice,
+                        branch = g.Key.BranchName,
+                        lastSoldDate = g.Max(oi => oi.Order.OrderDate).ToString("yyyy-MM-dd hh:mm tt")
+                    })
+                    .OrderBy(g => g.productName)
+                    .ThenBy(g => g.unitPrice)
+                    .ToList();
+
+                return Ok(grouped);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating product sales report.");
+                return StatusCode(500, new { Message = "An error occurred while generating product sales report.", Details = ex.Message });
+            }
+        }
+
         [HttpGet("users")]
         public async Task<IActionResult> GetUsersList()
         {
