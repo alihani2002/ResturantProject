@@ -113,6 +113,11 @@
                 <span>Shift Reports</span>
             </button>
 
+            <button onclick="switchTab('product-sales-report')" id="btn-tab-product-sales-report" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <i class="bi bi-bar-chart-line text-base text-success"></i>
+                <span>Product Sales Report</span>
+            </button>
+
             <div class="pt-4 pb-2 px-4">
                 <p class="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">ERP Setup & Config</p>
             </div>
@@ -1687,6 +1692,146 @@
                 </div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- 14b. PRODUCT SALES REPORTS TAB -->
+            <!-- ========================================== -->
+            <div id="tab-product-sales-report" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
+                        <div>
+                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="bi bi-bar-chart-line text-success"></i> Product Sales Report
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Historical report of sold products grouped by variant sizes and actual selling price from paid/completed orders.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetProductSalesFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <button onclick="exportProductSalesToExcel()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Product Name (Search)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
+                                    <i class="bi bi-search text-xs"></i>
+                                </span>
+                                <input type="text" id="prodSalesSearch" onkeyup="renderProductSalesTable(1)" placeholder="e.g. Burger, Pizza..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Category</label>
+                            <select id="prodSalesCategory" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Branch</label>
+                            <select id="prodSalesBranch" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">All Branches</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date From</label>
+                            <input type="date" id="prodSalesDateFrom" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date To</label>
+                            <input type="date" id="prodSalesDateTo" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour From</label>
+                            <select id="prodSalesHourFrom" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">Any Hour</option>
+                                <option value="0">12:00 AM (00:00)</option>
+                                <option value="1">01:00 AM (01:00)</option>
+                                <option value="2">02:00 AM (02:00)</option>
+                                <option value="3">03:00 AM (03:00)</option>
+                                <option value="4">04:00 AM (04:00)</option>
+                                <option value="5">05:00 AM (05:00)</option>
+                                <option value="6">06:00 AM (06:00)</option>
+                                <option value="7">07:00 AM (07:00)</option>
+                                <option value="8">08:00 AM (08:00)</option>
+                                <option value="9">09:00 AM (09:00)</option>
+                                <option value="10">10:00 AM (10:00)</option>
+                                <option value="11">11:00 AM (11:00)</option>
+                                <option value="12">12:00 PM (12:00)</option>
+                                <option value="13">01:00 PM (13:00)</option>
+                                <option value="14">02:00 PM (14:00)</option>
+                                <option value="15">03:00 PM (15:00)</option>
+                                <option value="16">04:00 PM (16:00)</option>
+                                <option value="17">05:00 PM (17:00)</option>
+                                <option value="18">06:00 PM (18:00)</option>
+                                <option value="19">07:00 PM (19:00)</option>
+                                <option value="20">08:00 PM (20:00)</option>
+                                <option value="21">09:00 PM (21:00)</option>
+                                <option value="22">10:00 PM (22:00)</option>
+                                <option value="23">11:00 PM (23:00)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour To</label>
+                            <select id="prodSalesHourTo" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">Any Hour</option>
+                                <option value="0">12:00 AM (00:00)</option>
+                                <option value="1">01:00 AM (01:00)</option>
+                                <option value="2">02:00 AM (02:00)</option>
+                                <option value="3">03:00 AM (03:00)</option>
+                                <option value="4">04:00 AM (04:00)</option>
+                                <option value="5">05:00 AM (05:00)</option>
+                                <option value="6">06:00 AM (06:00)</option>
+                                <option value="7">07:00 AM (07:00)</option>
+                                <option value="8">08:00 AM (08:00)</option>
+                                <option value="9">09:00 AM (09:00)</option>
+                                <option value="10">10:00 AM (10:00)</option>
+                                <option value="11">11:00 AM (11:00)</option>
+                                <option value="12">12:00 PM (12:00)</option>
+                                <option value="13">01:00 PM (13:00)</option>
+                                <option value="14">02:00 PM (14:00)</option>
+                                <option value="15">03:00 PM (15:00)</option>
+                                <option value="16">04:00 PM (16:00)</option>
+                                <option value="17">05:00 PM (17:00)</option>
+                                <option value="18">06:00 PM (18:00)</option>
+                                <option value="19">07:00 PM (19:00)</option>
+                                <option value="20">08:00 PM (20:00)</option>
+                                <option value="21">09:00 PM (21:00)</option>
+                                <option value="22">10:00 PM (22:00)</option>
+                                <option value="23">11:00 PM (23:00)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto mt-4">
+                        <table id="table-productsales-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                    <th class="py-3 px-2">Product Name</th>
+                                    <th class="py-3 px-2">Category</th>
+                                    <th class="py-3 px-2 text-right">Quantity Sold</th>
+                                    <th class="py-3 px-2 text-right">Unit Price</th>
+                                    <th class="py-3 px-2 text-right">Total Sales</th>
+                                    <th class="py-3 px-2">Branch</th>
+                                    <th class="py-3 px-2">Last Sold Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination Controls -->
+                    <div id="productSalesPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 9: USER MANAGEMENT -->
             <div id="tab-user-mgmt" class="tab-content hidden h-full flex flex-col">
                 <div class="mb-6 flex justify-between items-end shrink-0">
@@ -1842,6 +1987,7 @@
                 'table-mgmt': 'Add / Manage Restaurant Tables',
                 'waiter-assignment': 'Assign Waiters to Tables',
                 'shift-reports': 'Cashier Shift History & Reports',
+                'product-sales-report': 'Product Sales Report',
                 'settings-mgmt': 'System Taxes & Service Settings',
                 'user-mgmt': 'System Access Control',
                 'branch-mgmt': 'Manage Restaurant Branches'
@@ -1862,6 +2008,8 @@
                 loadWaiterAssignmentsList();
             } else if (tabId === 'shift-reports') {
                 loadShiftReportsList();
+            } else if (tabId === 'product-sales-report') {
+                loadProductSalesReportList();
             } else if (tabId === 'settings-mgmt') {
                 loadSystemSettings();
             } else if (tabId === 'dashboard' || tabId === 'user-mgmt' || tabId === 'branch-mgmt') {
@@ -5238,6 +5386,226 @@
             } catch (err) {
                 console.error(err);
                 location.reload();
+            }
+        }
+
+        // --- PRODUCT SALES REPORT LOGIC ---
+        let allProductSales = [];
+        let productSalesCategoriesLoaded = false;
+        let productSalesBranchesLoaded = false;
+        let currentProductSalesPage = 1;
+        const productSalesPerPage = 10;
+
+        async function loadProductSalesReportList() {
+            showLoader();
+
+            // Dynamic populate dropdowns on first load
+            if (!productSalesCategoriesLoaded || !productSalesBranchesLoaded) {
+                try {
+                    if (!productSalesCategoriesLoaded) {
+                        const catRes = await fetch('/api/analytics/categories');
+                        if (catRes.ok) {
+                            const categories = await catRes.json();
+                            const catSelect = document.getElementById('prodSalesCategory');
+                            if (catSelect) {
+                                catSelect.innerHTML = '<option value="">All Categories</option>';
+                                categories.forEach(c => {
+                                    catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                                });
+                            }
+                            productSalesCategoriesLoaded = true;
+                        }
+                    }
+                    if (!productSalesBranchesLoaded) {
+                        const branchRes = await fetch('/api/analytics/branches');
+                        if (branchRes.ok) {
+                            const branches = await branchRes.json();
+                            const branchSelect = document.getElementById('prodSalesBranch');
+                            if (branchSelect) {
+                                branchSelect.innerHTML = '<option value="">All Branches</option>';
+                                branches.forEach(b => {
+                                    branchSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+                                });
+                            }
+                            productSalesBranchesLoaded = true;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error loading filter categories/branches:", err);
+                }
+            }
+
+            // Fetch report data from server
+            const categoryId = document.getElementById('prodSalesCategory')?.value || '';
+            const branchId = document.getElementById('prodSalesBranch')?.value || '';
+            const dateFrom = document.getElementById('prodSalesDateFrom')?.value || '';
+            const dateTo = document.getElementById('prodSalesDateTo')?.value || '';
+            const hourFrom = document.getElementById('prodSalesHourFrom')?.value || '';
+            const hourTo = document.getElementById('prodSalesHourTo')?.value || '';
+
+            const params = new URLSearchParams();
+            if (categoryId) params.append('categoryId', categoryId);
+            if (branchId) params.append('branchId', branchId);
+            if (dateFrom) params.append('dateFrom', dateFrom);
+            if (dateTo) params.append('dateTo', dateTo);
+            if (hourFrom !== '') params.append('hourFrom', hourFrom);
+            if (hourTo !== '') params.append('hourTo', hourTo);
+
+            try {
+                const response = await fetch(`/api/analytics/products/sales-report?${params.toString()}`);
+                
+                // Session timeout handling
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("text/html") !== -1) {
+                    showToastAlert("Session expired or Unauthorized. Redirecting to login...", "warning");
+                    setTimeout(() => {
+                        window.location.href = "/Identity/Account/Login?ReturnUrl=" + encodeURIComponent(window.location.pathname);
+                    }, 2200);
+                    return;
+                }
+
+                if (response.ok) {
+                    allProductSales = await response.json();
+                    renderProductSalesTable(1);
+                } else {
+                    showToastAlert("Server returned an error generating product report.", "error");
+                }
+            } catch (err) {
+                console.error("Failed to load product sales report:", err);
+                showToastAlert("Could not connect to server.", "error");
+            } finally {
+                hideLoader();
+            }
+        }
+
+        function getFilteredProductSales() {
+            const searchTerm = document.getElementById('prodSalesSearch')?.value.toLowerCase() || '';
+
+            return allProductSales.filter(item => {
+                const matchSearch = !searchTerm || 
+                    (item.productName && item.productName.toLowerCase().includes(searchTerm));
+                return matchSearch;
+            });
+        }
+
+        function resetProductSalesFilters() {
+            const searchInput = document.getElementById('prodSalesSearch');
+            if (searchInput) searchInput.value = '';
+
+            const categoryInput = document.getElementById('prodSalesCategory');
+            if (categoryInput) categoryInput.value = '';
+
+            const branchInput = document.getElementById('prodSalesBranch');
+            if (branchInput) branchInput.value = '';
+
+            const dateFromInput = document.getElementById('prodSalesDateFrom');
+            if (dateFromInput) dateFromInput.value = '';
+
+            const dateToInput = document.getElementById('prodSalesDateTo');
+            if (dateToInput) dateToInput.value = '';
+
+            const hourFromInput = document.getElementById('prodSalesHourFrom');
+            if (hourFromInput) hourFromInput.value = '';
+
+            const hourToInput = document.getElementById('prodSalesHourTo');
+            if (hourToInput) hourToInput.value = '';
+
+            loadProductSalesReportList();
+            showToastAlert("Filters reset successfully.", "info");
+        }
+
+        function renderProductSalesTable(page = 1) {
+            currentProductSalesPage = page;
+            const tbody = document.querySelector('#table-productsales-list tbody');
+            const paginationContainer = document.getElementById('productSalesPagination');
+            tbody.innerHTML = '';
+            
+            if (paginationContainer) {
+                paginationContainer.innerHTML = '';
+            }
+
+            let filtered = getFilteredProductSales();
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">
+                            <i class="bi bi-bar-chart-line text-3xl text-success mb-2 d-block"></i>
+                            No products sales matched the criteria.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            // Pagination
+            const totalPages = Math.ceil(filtered.length / productSalesPerPage);
+            const startIndex = (page - 1) * productSalesPerPage;
+            const paginated = filtered.slice(startIndex, startIndex + productSalesPerPage);
+
+            paginated.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${item.productName}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${item.category}</td>
+                        <td class="py-3.5 px-2 text-right font-semibold text-slate-650 dark:text-slate-400">${item.quantitySold}</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.unitPrice).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.totalSales).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-slate-650 dark:text-slate-400">${item.branch}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${item.lastSoldDate}</td>
+                    </tr>`;
+            });
+
+            // Pagination UI Buttons
+            if (totalPages > 1 && paginationContainer) {
+                let paginationHtml = '';
+                
+                // Prev button
+                paginationHtml += `<button onclick="renderProductSalesTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
+                
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const activeClass = i === page 
+                        ? 'bg-brand-500 text-white border-brand-500' 
+                        : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
+                    paginationHtml += `<button onclick="renderProductSalesTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
+                }
+                
+                // Next button
+                paginationHtml += `<button onclick="renderProductSalesTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
+
+                paginationContainer.innerHTML = paginationHtml;
+            }
+        }
+
+        function exportProductSalesToExcel() {
+            let filtered = getFilteredProductSales();
+
+            if (filtered.length === 0) {
+                showToastAlert("No data matching current filters to export.", "warning");
+                return;
+            }
+
+            const exportData = filtered.map(item => {
+                return {
+                    "Product Name": item.productName,
+                    "Category": item.category,
+                    "Quantity Sold": item.quantitySold,
+                    "Unit Price (EGP)": parseFloat(item.unitPrice).toFixed(2),
+                    "Total Sales (EGP)": parseFloat(item.totalSales).toFixed(2),
+                    "Branch": item.branch,
+                    "Last Sold Date": item.lastSoldDate
+                };
+            });
+
+            // Use SheetJS (XLSX) which is imported at the bottom of the page
+            if (typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Product Sales");
+                XLSX.writeFile(wb, `Product_Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+                showToastAlert("Filtered product sales report exported as Excel.", "success");
+            } else {
+                showToastAlert("Excel export library is currently not available.", "error");
             }
         }
 
