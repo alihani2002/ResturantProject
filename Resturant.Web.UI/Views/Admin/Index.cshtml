@@ -45,16 +45,16 @@
             }
         }
     </script>
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
     <!-- ApexCharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    
+
     <!-- SheetJS (xlsx) for Excel Exports -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
+
     <!-- jsPDF & autoTable for PDF Exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
@@ -172,7 +172,7 @@
                 <i class="bi bi-people-fill"></i>
                 <span>Manage Users & Roles</span>
             </button>
-           
+
             <form action="/Identity/Account/Logout?returnUrl=%2F" method="post" id="logoutForm" class="w-full m-0">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 transition-all justify-center">
@@ -185,7 +185,7 @@
 
     <!-- MAIN APP WRAPPER -->
     <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-        
+
         <!-- HEADER -->
         <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-8 z-10 shrink-0">
             <!-- Breadcrumbs / Active Tab Title -->
@@ -235,7 +235,7 @@
             <!-- TAB 0: ALL FEATURES HUB (DIRECTORY MAP)        -->
             <!-- ============================================== -->
             <div id="tab-dashboard" class="tab-content space-y-6">
-                
+
                 <!-- Dynamic Branch Terminals Gateway (White Background Premium Panel) -->
                 @{
                     var activeBranchId = ViewBag.ActiveBranchId as string;
@@ -258,7 +258,7 @@
                             </h2>
                             <p class="text-xs text-slate-500 mt-1 font-medium">Quick operational terminals launchpad. Select a branch from the top header to control distinct terminals.</p>
                         </div>
-                        
+
                         @if (activeBranch == null)
                         {
                             <span class="text-xs text-amber-600 font-bold bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100 flex items-center gap-1.5">
@@ -361,7 +361,7 @@
                         </div>
                     }
                 </div>
-               
+
                 <!-- Features Directory Map Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Card 1: Add / Manage Menu -->
@@ -1325,10 +1325,11 @@
                                     </label>
                                 </div>
                                 <div id="menu-sizes-body" class="hidden p-3 space-y-2 bg-white dark:bg-darkCard">
-                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own price. The Base Price field below stays as default fallback.</p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own selling price and cost. Base Price and Cost stay as default fallback.</p>
                                     <div class="grid grid-cols-12 gap-1 text-[9px] font-bold text-slate-400 uppercase px-1">
-                                        <div class="col-span-6">Size Name</div>
-                                        <div class="col-span-5">Price (L.E.)</div>
+                                        <div class="col-span-4">Size Name</div>
+                                        <div class="col-span-3">Price</div>
+                                        <div class="col-span-4">Cost</div>
                                         <div class="col-span-1"></div>
                                     </div>
                                     <div id="menu-sizes-list" class="space-y-1.5"></div>
@@ -1338,10 +1339,14 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-4">
+                            <div class="grid grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Price (L.E.)</label>
                                     <input type="number" id="menu-price" step="0.01" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="19.99">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Cost (L.E.)</label>
+                                    <input type="number" id="menu-cost" step="0.01" min="0" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Category</label>
@@ -1407,6 +1412,7 @@
                                         <th class="py-3">Product Name</th>
                                         <th class="py-3">Category</th>
                                         <th class="py-3">Price</th>
+                                        <th class="py-3">Cost</th>
                                         <th class="py-3">Order #</th>
                                         <th class="py-3">Image</th>
                                         <th class="py-3 text-right">Actions</th>
@@ -1685,7 +1691,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination Controls -->
                     <div id="shiftsPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
                     </div>
@@ -1807,15 +1813,30 @@
                         </div>
                     </div>
 
+                    <div id="productSalesSummaryCards" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <!-- Dynamic summary cards -->
+                    </div>
+
                     <div class="overflow-x-auto mt-4">
                         <table id="table-productsales-list" class="w-full text-left border-collapse text-xs">
                             <thead>
                                 <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
                                     <th class="py-3 px-2">Product Name</th>
+                                    <th class="py-3 px-2">Size</th>
                                     <th class="py-3 px-2">Category</th>
                                     <th class="py-3 px-2 text-right">Quantity Sold</th>
-                                    <th class="py-3 px-2 text-right">Unit Price</th>
-                                    <th class="py-3 px-2 text-right">Total Sales</th>
+                                    <th class="py-3 px-2 text-right">Cost</th>
+                                    <th class="py-3 px-2 text-right">Avg Price</th>
+                                    <th class="py-3 px-2 text-right">Low Price</th>
+                                    <th class="py-3 px-2 text-right">High Price</th>
+                                    <th class="py-3 px-2 text-right">Sales Before Tax</th>
+                                    <th class="py-3 px-2 text-right">Tax</th>
+                                    <th class="py-3 px-2 text-right">Service</th>
+                                    <th class="py-3 px-2 text-right">Customer Paid</th>
+                                    <th class="py-3 px-2 text-right">Total Cost</th>
+                                    <th class="py-3 px-2 text-right">Gross Profit</th>
+                                    <th class="py-3 px-2 text-right">Net Customer Profit</th>
+                                    <th class="py-3 px-2 text-right">Margin</th>
                                     <th class="py-3 px-2">Branch</th>
                                     <th class="py-3 px-2">Last Sold Date</th>
                                 </tr>
@@ -1825,7 +1846,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination Controls -->
                     <div id="productSalesPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
                     </div>
@@ -1840,7 +1861,7 @@
                         <p class="text-sm text-slate-500 dark:text-slate-400">Manage all staff, cashiers, and managers directly inside the dashboard</p>
                     </div>
                 </div>
-                
+
                 <div class="flex-1 bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-200 dark:border-darkBorder overflow-hidden">
                     <iframe src="/Users?iframe=true" class="w-full h-full border-0"></iframe>
                 </div>
@@ -1854,7 +1875,7 @@
                         <p class="text-sm text-slate-500 dark:text-slate-400">Create, configure, toggle active states, and manage physical restaurant locations</p>
                     </div>
                 </div>
-                
+
                 <div class="flex-1 bg-white dark:bg-darkCard rounded-2xl shadow-sm border border-slate-200 dark:border-darkBorder overflow-hidden" style="min-height: 600px;">
                     <iframe src="/Branches?iframe=true" class="w-full h-full border-0" style="min-height: 600px;"></iframe>
                 </div>
@@ -1962,7 +1983,7 @@
         function switchTab(tabId) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
+
             // Remove active classes from all sidebar buttons
             document.querySelectorAll('aside nav button').forEach(btn => {
                 btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all";
@@ -1993,7 +2014,7 @@
                 'branch-mgmt': 'Manage Restaurant Branches'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
-            
+
             currentTab = tabId;
 
             // Fetch tab data if not already fetched
@@ -2026,7 +2047,7 @@
             if (activeFilters.endDate) params.push(`endDate=${activeFilters.endDate}`);
             if (activeFilters.tableNumber) params.push(`tableNumber=${activeFilters.tableNumber}`);
             if (activeFilters.waiterId) params.push(`waiterId=${activeFilters.waiterId}`);
-            
+
             if (params.length > 0) {
                 url += `?${params.join('&')}`;
             }
@@ -2044,7 +2065,7 @@
             showLoader();
             try {
                 const response = await fetch(buildUrl(tabId === 'dashboard' ? 'summary' : tabId));
-                
+
                 // Check if response is redirected to HTML login page (ASP.NET Core Cookie authentication default behavior)
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("text/html") !== -1) {
@@ -2058,7 +2079,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     reportsData[tabId] = data;
-                    
+
                     // Reset status badge to secure Sync mode if connection succeeds
                     const badge = document.getElementById('connection-status');
                     if (badge) {
@@ -2088,7 +2109,7 @@
         function activateDemoSandbox(tabId) {
             const mockData = generateFallbackData(tabId);
             reportsData[tabId] = mockData;
-            
+
             // Set dynamic header badge to sandbox mode
             const badge = document.getElementById('connection-status');
             if (badge) {
@@ -2359,7 +2380,7 @@
             const startIdx = (liveLedgerPage - 1) * liveLedgerPageSize;
             const endIdx = Math.min(startIdx + liveLedgerPageSize, totalCount);
 
-            document.getElementById('live-ledger-pagination-info').textContent = 
+            document.getElementById('live-ledger-pagination-info').textContent =
                 `Showing ${totalCount > 0 ? startIdx + 1 : 0} to ${endIdx} of ${totalCount} events`;
 
             document.querySelector("button[onclick=\"paginateLiveLedger('prev')\"]").disabled = (liveLedgerPage === 1);
@@ -2388,7 +2409,7 @@
             pageSlice.forEach(n => {
                 const date = new Date(n.timestamp);
                 const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
+
                 const tr = `
                     <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
                         <td class="py-3 font-semibold text-slate-400">${timeStr}</td>
@@ -2420,9 +2441,9 @@
             animateValue('stat-active-tables', data.activeTablesCount);
             animateValue('stat-active-sessions', data.activeSessionsTodayCount);
             animateValue('stat-pending-orders', data.pendingOrdersCount);
-            
+
             document.getElementById('stat-completed-orders').textContent = `${data.completedOrdersToday} completed today`;
-            
+
             const growthBadge = document.getElementById('stat-revenue-growth');
             if (data.revenueGrowthRate >= 0) {
                 growthBadge.className = "text-xs font-semibold text-emerald-500 flex items-center gap-1";
@@ -2450,7 +2471,7 @@
             const list = document.getElementById('live-notifications-list');
             list.innerHTML = '';
             document.getElementById('notification-count').textContent = `${data.recentNotifications.length} logs`;
-            
+
             data.recentNotifications.forEach(n => {
                 const borderColors = {
                     info: 'border-l-blue-500',
@@ -2586,7 +2607,7 @@
             const startIdx = (salesPage - 1) * salesPageSize;
             const endIdx = Math.min(startIdx + salesPageSize, totalCount);
 
-            document.getElementById('sales-pagination-info').textContent = 
+            document.getElementById('sales-pagination-info').textContent =
                 `Showing ${totalCount > 0 ? startIdx + 1 : 0} to ${endIdx} of ${totalCount} days`;
 
             document.querySelector("button[onclick=\"paginateSales('prev')\"]").disabled = (salesPage === 1);
@@ -2599,8 +2620,8 @@
             }
 
             pageSlice.forEach(s => {
-                const badgeClass = s.status === 'Settled' 
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400' 
+                const badgeClass = s.status === 'Settled'
+                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
                     : 'bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400';
 
                 const tr = `
@@ -2776,7 +2797,7 @@
             const tbodyPayment = document.querySelector('#table-sales-by-payment tbody');
             if (tbodyPayment) {
                 tbodyPayment.innerHTML = '';
-                
+
                 // Add Payment Methods
                 (data.salesByPaymentMethod || []).forEach(p => {
                     const tr = `
@@ -2920,7 +2941,7 @@
             const startIdx = (prodPage - 1) * prodPageSize;
             const endIdx = Math.min(startIdx + prodPageSize, totalCount);
 
-            document.getElementById('prod-pagination-info').textContent = 
+            document.getElementById('prod-pagination-info').textContent =
                 `Showing ${totalCount > 0 ? startIdx + 1 : 0} to ${endIdx} of ${totalCount} products`;
 
             document.querySelector("button[onclick=\"paginateProducts('prev')\"]").disabled = (prodPage === 1);
@@ -3048,7 +3069,7 @@
 
             // Bind Product Database
             globalAllProducts = data.bestSellers || [];
-            
+
             // Populate category filter dropdown
             const catSelect = document.getElementById('prod-filter-category');
             catSelect.innerHTML = '<option value="">All Categories</option>';
@@ -3115,8 +3136,8 @@
 
         function getFilteredCRMCount() {
             return globalCrmGuests.filter(g => {
-                const matchSearch = (g.customerName || '').toLowerCase().includes(crmSearchTerm) || 
-                                    (g.phoneNumber || '').toLowerCase().includes(crmSearchTerm) || 
+                const matchSearch = (g.customerName || '').toLowerCase().includes(crmSearchTerm) ||
+                                    (g.phoneNumber || '').toLowerCase().includes(crmSearchTerm) ||
                                     (g.email || '').toLowerCase().includes(crmSearchTerm);
                 const matchLoyalty = !crmLoyaltyFilter || g.loyaltySegment === crmLoyaltyFilter;
                 const matchStatus = !crmStatusFilter || g.sessionStatus === crmStatusFilter;
@@ -3130,8 +3151,8 @@
             tbody.innerHTML = '';
 
             let filtered = globalCrmGuests.filter(g => {
-                const matchSearch = (g.customerName || '').toLowerCase().includes(crmSearchTerm) || 
-                                    (g.phoneNumber || '').toLowerCase().includes(crmSearchTerm) || 
+                const matchSearch = (g.customerName || '').toLowerCase().includes(crmSearchTerm) ||
+                                    (g.phoneNumber || '').toLowerCase().includes(crmSearchTerm) ||
                                     (g.email || '').toLowerCase().includes(crmSearchTerm);
                 const matchLoyalty = !crmLoyaltyFilter || g.loyaltySegment === crmLoyaltyFilter;
                 const matchStatus = !crmStatusFilter || g.sessionStatus === crmStatusFilter;
@@ -3157,7 +3178,7 @@
             const startIdx = (crmPage - 1) * crmPageSize;
             const endIdx = Math.min(startIdx + crmPageSize, totalCount);
 
-            document.getElementById('crm-pagination-info').textContent = 
+            document.getElementById('crm-pagination-info').textContent =
                 `Showing ${totalCount > 0 ? startIdx + 1 : 0} to ${endIdx} of ${totalCount} guests`;
 
             document.querySelector("button[onclick=\"paginateCRM('prev')\"]").disabled = (crmPage === 1);
@@ -3216,8 +3237,8 @@
             document.getElementById('crm-modal-phone').textContent = guest.phoneNumber || 'Not Provided';
             document.getElementById('crm-modal-email').textContent = guest.email || 'Not Provided';
             document.getElementById('crm-modal-segment').className = `px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                guest.loyaltySegment === 'Elite VIP' ? 'bg-brand-500/20 text-brand-550 border border-brand-500/30' : 
-                guest.loyaltySegment === 'Frequent Buyer' ? 'bg-emerald-100 text-emerald-800 border border-emerald-550/30' : 
+                guest.loyaltySegment === 'Elite VIP' ? 'bg-brand-500/20 text-brand-550 border border-brand-500/30' :
+                guest.loyaltySegment === 'Frequent Buyer' ? 'bg-emerald-100 text-emerald-800 border border-emerald-550/30' :
                 'bg-slate-100 text-slate-700'
             }`;
             document.getElementById('crm-modal-segment').textContent = guest.loyaltySegment;
@@ -3329,7 +3350,7 @@
         function renderStaffReport(data) {
             const tbody = document.querySelector('#table-staff-rankings tbody');
             tbody.innerHTML = '';
-            
+
             if (data.waiterRankings) {
                 data.waiterRankings.forEach((w, idx) => {
                     const badgesColors = {
@@ -3361,7 +3382,7 @@
             // Populate Shifts
             const shiftsList = document.getElementById('shift-reports-list');
             shiftsList.innerHTML = '';
-            
+
             if (data.shifts) {
                 data.shifts.forEach(s => {
                     const card = `
@@ -3452,7 +3473,7 @@
         function renderFinancialsReport(data) {
             animateValue('fin-net-profit', `${data.netProfit.toFixed(2)} L.E.`);
             document.getElementById('fin-net-margin').textContent = `Profit Margin: ${data.profitMarginPercentage}%`;
-            
+
             document.getElementById('fin-revenue').textContent = `${data.totalRevenue.toFixed(2)} L.E.`;
             document.getElementById('fin-expenses').textContent = `${data.totalExpenses.toFixed(2)} L.E.`;
             document.getElementById('fin-taxes').textContent = `${data.totalTaxAmount.toFixed(2)} L.E.`;
@@ -3645,7 +3666,7 @@
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 const easedProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-                
+
                 const currentValue = start + (numericTarget - start) * easedProgress;
 
                 if (isCurrency) {
@@ -3677,7 +3698,7 @@
                     const data = await response.json();
                     const dropdown = document.getElementById('filter-waiter');
                     dropdown.innerHTML = '<option value="">All Waiters</option>';
-                    
+
                     data.WaiterRankings.forEach(w => {
                         dropdown.insertAdjacentHTML('beforeend', `<option value="${w.WaiterId}">${w.WaiterName}</option>`);
                     });
@@ -3708,7 +3729,7 @@
             }
 
             const id = 'toast-' + Date.now();
-            
+
             const colors = {
                 success: 'bg-emerald-500 text-white',
                 error: 'bg-red-500 text-white',
@@ -3730,7 +3751,7 @@
                     <button onclick="document.getElementById('${id}').remove()" class="ml-auto text-white/70 hover:text-white"><i class="bi bi-x-lg text-xs"></i></button>
                 </div>
             `;
-            
+
             container.insertAdjacentHTML('beforeend', html);
             const el = document.getElementById(id);
             setTimeout(() => {
@@ -3826,7 +3847,7 @@
         function exportToExcel(data, filename) {
             try {
                 const wb = XLSX.utils.book_new();
-                
+
                 // Helper to push worksheet
                 function addSheet(sheetName, tableData) {
                     if (!tableData) return;
@@ -3969,7 +3990,7 @@
                 const response = await fetch('/api/analytics/categories');
                 if (response.ok) {
                     const categories = await response.json();
-                    
+
                     // Populate select dropdown in Menu Item creation form
                     const dropdown = document.getElementById('menu-cat-id');
                     if (dropdown) {
@@ -4070,13 +4091,13 @@
         function renderRecommendationsList(containerId, checkedIds = [], excludeId = null) {
             const container = document.getElementById(containerId);
             if (!container) return;
-            
+
             const filteredItems = allMenuItems.filter(item => item.id !== excludeId);
             if (filteredItems.length === 0) {
                 container.innerHTML = `<span class="text-[10px] text-slate-400 italic">No other products to recommend.</span>`;
                 return;
             }
-            
+
             container.innerHTML = filteredItems.map(item => {
                 const isChecked = checkedIds.includes(item.id) ? 'checked' : '';
                 return `
@@ -4091,7 +4112,7 @@
         function addNewAddonRow(containerId, name = '', price = '') {
             const container = document.getElementById(containerId);
             if (!container) return;
-            
+
             const id = 'addon-' + Date.now() + Math.random().toString(36).substr(2, 5);
             const html = `
                 <div id="${id}" class="flex items-center gap-2">
@@ -4116,7 +4137,7 @@
                     const tbody = document.querySelector('#table-menu-list tbody');
                     if (tbody) {
                         if (items.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">No menu items added yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">No menu items added yet.</td></tr>`;
                         } else {
                             tbody.innerHTML = items.map(i => `
                                 <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
@@ -4126,12 +4147,13 @@
                                     </td>
                                     <td class="py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200/40 dark:border-darkBorder">${i.categoryName || 'Uncategorized'}</span></td>
                                     <td class="py-3 font-semibold text-rose-500 text-xs">${i.price.toFixed(2)} L.E.</td>
+                                    <td class="py-3 font-semibold text-slate-500 dark:text-slate-400 text-xs">${(i.cost || 0).toFixed(2)} L.E.</td>
                                     <td class="py-3 font-bold text-slate-500 dark:text-slate-400 text-xs">${i.orderNumber || 0}</td>
                                     <td class="py-3">
                                         ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-darkBorder">` : `<span class="text-slate-400 italic text-[10px]">No image</span>`}
                                     </td>
                                     <td class="py-3 text-right space-x-2 whitespace-nowrap">
-                                        <button onclick="openEditMenuItemModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.description ? i.description.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "") : ''}', ${i.price}, ${i.menuCategoryId}, ${i.isAvailable}, ${i.isPopular}, ${i.isTrending}, ${i.isRecommended}, '${i.imageUrl || ''}', ${i.orderNumber || 0})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> Edit</button>
+                                        <button onclick="openEditMenuItemModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.description ? i.description.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "") : ''}', ${i.price}, ${i.cost || 0}, ${i.menuCategoryId}, ${i.isAvailable}, ${i.isPopular}, ${i.isTrending}, ${i.isRecommended}, '${i.imageUrl || ''}', ${i.orderNumber || 0})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> Edit</button>
                                         <button onclick="deleteMenuItem(${i.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-trash"></i> Delete</button>
                                     </td>
                                 </tr>
@@ -4158,18 +4180,22 @@
             }
         }
 
-        function addAdminSizeRow(listId, name = '', price = '') {
+        function addAdminSizeRow(listId, name = '', price = '', cost = '') {
             const list = document.getElementById(listId);
             if (!list) return;
             const isFirstRow = list.children.length === 0;
             const rowId = 'sz-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
             list.insertAdjacentHTML('beforeend', `
                 <div id="${rowId}" class="grid grid-cols-12 gap-1 items-center">
-                    <input type="text" class="col-span-6 admin-size-name bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    <input type="text" class="col-span-4 admin-size-name bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                            placeholder="e.g. Small / S" value="${name.replace(/"/g,'&quot;')}">
-                    <div class="col-span-5 flex items-center">
+                    <div class="col-span-3 flex items-center">
                         <input type="number" step="0.01" min="0.01" class="w-full admin-size-price bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                                placeholder="0.00" value="${price}" oninput="syncFirstSizeToBasePrice('${listId}')">
+                    </div>
+                    <div class="col-span-4 flex items-center">
+                        <input type="number" step="0.01" min="0" class="w-full admin-size-cost bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                               placeholder="0.00" value="${cost}" oninput="syncFirstSizeToBasePrice('${listId}')">
                     </div>
                     <button type="button" onclick="document.getElementById('${rowId}').remove(); syncFirstSizeToBasePrice('${listId}')" class="col-span-1 flex justify-center text-red-400 hover:text-red-600">
                         <i class="bi bi-x-circle text-sm"></i>
@@ -4182,6 +4208,11 @@
                 const basePrice = document.getElementById(basePriceId);
                 if (basePrice && basePrice.value) {
                     list.querySelector('.admin-size-price').value = parseFloat(basePrice.value).toFixed(2);
+                }
+                const baseCostId = listId === 'menu-sizes-list' ? 'menu-cost' : 'edit-menu-cost';
+                const baseCost = document.getElementById(baseCostId);
+                if (baseCost && baseCost.value) {
+                    list.querySelector('.admin-size-cost').value = parseFloat(baseCost.value).toFixed(2);
                 }
             }
         }
@@ -4196,25 +4227,32 @@
             const basePriceId = listId === 'menu-sizes-list' ? 'menu-price' : 'edit-menu-price';
             const basePriceInput = document.getElementById(basePriceId);
             if (basePriceInput) basePriceInput.value = firstPrice.toFixed(2);
+            const firstCostInput = list.querySelector('.admin-size-cost');
+            const firstCost = parseFloat(firstCostInput ? firstCostInput.value : 0);
+            if (firstCost >= 0) {
+                const baseCostId = listId === 'menu-sizes-list' ? 'menu-cost' : 'edit-menu-cost';
+                const baseCostInput = document.getElementById(baseCostId);
+                if (baseCostInput) baseCostInput.value = firstCost.toFixed(2);
+            }
         }
 
-        function serializeSizes(listId, hasSizesCheckId, rawDesc) {
+        function collectSizes(listId, hasSizesCheckId) {
             const toggle = document.getElementById(hasSizesCheckId);
-            if (!toggle || !toggle.checked) return rawDesc;
+            if (!toggle || !toggle.checked) return [];
             const list = document.getElementById(listId);
-            if (!list) return rawDesc;
+            if (!list) return [];
             const rows = list.querySelectorAll('[id^="sz-"]');
-            const parts = [];
+            const sizes = [];
             rows.forEach(row => {
                 const nameEl = row.querySelector('.admin-size-name');
                 const priceEl = row.querySelector('.admin-size-price');
+                const costEl = row.querySelector('.admin-size-cost');
                 const n = nameEl ? nameEl.value.trim() : '';
                 const p = parseFloat(priceEl ? priceEl.value : 0) || 0;
-                if (n && p > 0) parts.push(`${n} - ${p.toFixed(2)}`);
+                const c = parseFloat(costEl ? costEl.value : 0) || 0;
+                if (n && p > 0) sizes.push({ name: n, price: p, cost: c });
             });
-            if (parts.length === 0) return rawDesc;
-            const sizesString = 'Sizes: ' + parts.join(', ');
-            return rawDesc ? rawDesc + '\n' + sizesString : sizesString;
+            return sizes;
         }
 
         function parseSizesFromDesc(fullDesc) {
@@ -4225,7 +4263,7 @@
             result.cleanDesc = fullDesc.replace(/(?:\n|\r)*\s*(?:sizes?)\s*:[\s\S]+$/i, '').trim();
             m[1].split(/[,;]+/).forEach(part => {
                 const pm = part.trim().match(/^([\w\u0600-\u06FF\s]+?)\s*[-:=]+\s*([0-9]+(?:\.[0-9]+)?)/);
-                if (pm) result.sizes.push({ name: pm[1].trim(), price: parseFloat(pm[2]) });
+                if (pm) result.sizes.push({ name: pm[1].trim(), price: parseFloat(pm[2]), cost: 0 });
             });
             return result;
         }
@@ -4236,8 +4274,9 @@
             const name = document.getElementById('menu-name').value.trim();
             const rawDesc = document.getElementById('menu-desc').value.trim();
             const price = document.getElementById('menu-price').value;
+            const cost = document.getElementById('menu-cost').value;
             const catId = document.getElementById('menu-cat-id').value;
-            
+
             const isAvail = document.getElementById('menu-available') ? document.getElementById('menu-available').checked : true;
             const isPop = document.getElementById('menu-popular') ? document.getElementById('menu-popular').checked : false;
             const isTrend = document.getElementById('menu-trending') ? document.getElementById('menu-trending').checked : false;
@@ -4245,18 +4284,18 @@
 
             const fileInput = document.getElementById('menu-image');
 
-            if (!name || !price || !catId) {
+            if (!name || !price || cost === '' || !catId) {
                 showToastAlert("Please fill in all required fields.", "warning");
                 return;
             }
 
-            // Serialize sizes into description
-            const desc = serializeSizes('menu-sizes-list', 'menu-has-sizes', rawDesc);
+            const sizes = collectSizes('menu-sizes-list', 'menu-has-sizes');
 
             const formData = new FormData();
             formData.append('name', name);
-            formData.append('description', desc);
+            formData.append('description', rawDesc);
             formData.append('price', price);
+            formData.append('cost', cost);
             formData.append('menuCategoryId', catId);
             formData.append('isAvailable', isAvail);
             formData.append('isPopular', isPop);
@@ -4264,6 +4303,7 @@
             formData.append('isRecommended', isRec);
             const orderNumInput = document.getElementById('menu-order-number');
             formData.append('orderNumber', orderNumInput ? orderNumInput.value : 0);
+            formData.append('sizesJson', JSON.stringify(sizes));
 
             if (fileInput.files.length > 0) {
                 formData.append('imageFile', fileInput.files[0]);
@@ -4449,7 +4489,7 @@
             modalTitle.textContent = `Table ${tableNumber} QR Code`;
             modalImg.classList.add('hidden');
             modalLoader.classList.remove('hidden');
-            
+
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -4473,19 +4513,19 @@
         function openEditCategoryModal(id, name, desc, isActive, imageUrl, orderNumber) {
             const modal = document.getElementById('edit-cat-modal');
             const modalContent = document.getElementById('edit-cat-modal-content');
-            
+
             document.getElementById('edit-cat-id').value = id;
             document.getElementById('edit-cat-name').value = name;
-            
+
             const descInput = document.getElementById('edit-cat-desc');
             if (descInput) descInput.value = desc;
-            
+
             const activeCheck = document.getElementById('edit-cat-active');
             if (activeCheck) activeCheck.checked = isActive;
 
             const orderNumInput = document.getElementById('edit-cat-order-number');
             if (orderNumInput) orderNumInput.value = orderNumber || 0;
-            
+
             const previewDiv = document.getElementById('edit-cat-img-preview');
             if (imageUrl) {
                 previewDiv.querySelector('img').src = imageUrl;
@@ -4504,7 +4544,7 @@
         function closeEditCategoryModal() {
             const modal = document.getElementById('edit-cat-modal');
             const modalContent = document.getElementById('edit-cat-modal-content');
-            
+
             modal.classList.add('opacity-0');
             modalContent.classList.add('scale-95');
             setTimeout(() => {
@@ -4559,17 +4599,18 @@
         }
 
         // --- EDIT MENU ITEM MODAL LOGIC ---
-        function openEditMenuItemModal(id, name, description, price, categoryId, isAvail, isPop, isTrend, isRec, imageUrl, orderNumber) {
+        function openEditMenuItemModal(id, name, description, price, cost, categoryId, isAvail, isPop, isTrend, isRec, imageUrl, orderNumber) {
             const modal = document.getElementById('edit-menu-modal');
             const modalContent = document.getElementById('edit-menu-modal-content');
-            
+
             document.getElementById('edit-menu-id').value = id;
             document.getElementById('edit-menu-name').value = name;
             document.getElementById('edit-menu-price').value = price;
+            document.getElementById('edit-menu-cost').value = cost || 0;
 
             const orderNumInput = document.getElementById('edit-menu-order-number');
             if (orderNumInput) orderNumInput.value = orderNumber || 0;
-            
+
             if (document.getElementById('edit-menu-available')) document.getElementById('edit-menu-available').checked = isAvail;
             if (document.getElementById('edit-menu-popular')) document.getElementById('edit-menu-popular').checked = isPop;
             if (document.getElementById('edit-menu-trending')) document.getElementById('edit-menu-trending').checked = isTrend;
@@ -4584,10 +4625,12 @@
             const editSizesBody = document.getElementById('edit-menu-sizes-body');
             const editSizesToggle = document.getElementById('edit-menu-has-sizes');
             editSizesList.innerHTML = '';
-            if (parsed.sizes.length > 0) {
+            const item = allMenuItems.find(i => i.id === id);
+            const sizeRows = item && item.sizes && item.sizes.length > 0 ? item.sizes : parsed.sizes;
+            if (sizeRows.length > 0) {
                 editSizesToggle.checked = true;
                 editSizesBody.classList.remove('hidden');
-                parsed.sizes.forEach(s => addAdminSizeRow('edit-menu-sizes-list', s.name, s.price.toFixed(2)));
+                sizeRows.forEach(s => addAdminSizeRow('edit-menu-sizes-list', s.name, s.price.toFixed(2), (s.cost || 0).toFixed(2)));
             } else {
                 editSizesToggle.checked = false;
                 editSizesBody.classList.add('hidden');
@@ -4602,8 +4645,6 @@
             }
 
             // Find current item in global list for recommendations & add-ons
-            const item = allMenuItems.find(i => i.id === id);
-            
             // Populate recommendations checkboxes
             const checkedRecIds = item && item.recommendations ? item.recommendations : [];
             renderRecommendationsList('edit-menu-recommendations-list', checkedRecIds, id);
@@ -4635,7 +4676,7 @@
         function closeEditMenuItemModal() {
             const modal = document.getElementById('edit-menu-modal');
             const modalContent = document.getElementById('edit-menu-modal-content');
-            
+
             modal.classList.add('opacity-0');
             modalContent.classList.add('scale-95');
             setTimeout(() => {
@@ -4649,8 +4690,9 @@
             const name = document.getElementById('edit-menu-name').value.trim();
             const rawDesc = document.getElementById('edit-menu-desc').value.trim();
             const price = document.getElementById('edit-menu-price').value;
+            const cost = document.getElementById('edit-menu-cost').value;
             const catId = document.getElementById('edit-menu-cat-id').value;
-            
+
             const isAvail = document.getElementById('edit-menu-available') ? document.getElementById('edit-menu-available').checked : true;
             const isPop = document.getElementById('edit-menu-popular') ? document.getElementById('edit-menu-popular').checked : false;
             const isTrend = document.getElementById('edit-menu-trending') ? document.getElementById('edit-menu-trending').checked : false;
@@ -4658,18 +4700,18 @@
 
             const fileInput = document.getElementById('edit-menu-image');
 
-            if (!name || !price || !catId) {
+            if (!name || !price || cost === '' || !catId) {
                 showToastAlert("Please fill in all required fields.", "warning");
                 return;
             }
 
-            // Serialize sizes into description
-            const desc = serializeSizes('edit-menu-sizes-list', 'edit-menu-has-sizes', rawDesc);
+            const sizes = collectSizes('edit-menu-sizes-list', 'edit-menu-has-sizes');
 
             const formData = new FormData();
             formData.append('name', name);
-            formData.append('description', desc);
+            formData.append('description', rawDesc);
             formData.append('price', price);
+            formData.append('cost', cost);
             formData.append('menuCategoryId', catId);
             formData.append('isAvailable', isAvail);
             formData.append('isPopular', isPop);
@@ -4677,6 +4719,7 @@
             formData.append('isRecommended', isRec);
             const orderNumInput = document.getElementById('edit-menu-order-number');
             formData.append('orderNumber', orderNumInput ? orderNumInput.value : 0);
+            formData.append('sizesJson', JSON.stringify(sizes));
             if (fileInput.files.length > 0) {
                 formData.append('imageFile', fileInput.files[0]);
             }
@@ -4841,10 +4884,11 @@
                         </label>
                     </div>
                     <div id="edit-menu-sizes-body" class="hidden p-3 space-y-2 bg-white dark:bg-darkCard">
-                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own price. Base Price stays as default fallback.</p>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own selling price and cost. Base Price and Cost stay as default fallback.</p>
                         <div class="grid grid-cols-12 gap-1 text-[9px] font-bold text-slate-400 uppercase px-1">
-                            <div class="col-span-6">Size Name</div>
-                            <div class="col-span-5">Price (L.E.)</div>
+                            <div class="col-span-4">Size Name</div>
+                            <div class="col-span-3">Price</div>
+                            <div class="col-span-4">Cost</div>
                             <div class="col-span-1"></div>
                         </div>
                         <div id="edit-menu-sizes-list" class="space-y-1.5"></div>
@@ -4854,10 +4898,14 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Price (L.E.)</label>
                         <input type="number" id="edit-menu-price" step="0.01" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Cost (L.E.)</label>
+                        <input type="number" id="edit-menu-cost" step="0.01" min="0" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Category</label>
@@ -4947,10 +4995,10 @@
                 const response = await fetch('/Admin/GetWaiterAssignments');
                 if (!response.ok) throw new Error('Failed to load table assignments');
                 const data = await response.json();
-                
+
                 const tbody = document.querySelector('#table-waiter-assignment-list tbody');
                 tbody.innerHTML = '';
-                
+
                 if (data.tables.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">No tables configured yet.</td></tr>`;
                     return;
@@ -5010,7 +5058,7 @@
             showLoader();
             try {
                 const response = await fetch('/api/analytics/shifts');
-                
+
                 // Check if session is expired or redirected to login
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("text/html") !== -1) {
@@ -5023,7 +5071,7 @@
 
                 if (response.ok) {
                     allAdminShifts = await response.json();
-                    
+
                     // Client-side fallback to high-fidelity mock data if no data was returned
                     if (!allAdminShifts || allAdminShifts.length === 0) {
                         console.log("No shift records returned from server database. Seeding high-fidelity sandbox shifts...");
@@ -5114,21 +5162,21 @@
             if (!dateTimeStr || dateTimeStr === '-') return null;
             const parts = dateTimeStr.split(' ');
             if (parts.length < 3) return null;
-            const datePart = parts[0]; 
-            const timePart = parts[1]; 
-            const ampmPart = parts[2]; 
-            
+            const datePart = parts[0];
+            const timePart = parts[1];
+            const ampmPart = parts[2];
+
             const timeSplit = timePart.split(':');
             let hour = parseInt(timeSplit[0]);
             const minute = parseInt(timeSplit[1]);
-            
+
             if (ampmPart === 'PM' && hour < 12) hour += 12;
             if (ampmPart === 'AM' && hour === 12) hour = 0;
-            
+
             return {
-                dateStr: datePart, 
-                hour: hour, 
-                minute: minute 
+                dateStr: datePart,
+                hour: hour,
+                minute: minute
             };
         }
 
@@ -5144,8 +5192,8 @@
 
             return allAdminShifts.filter(shift => {
                 // Search match
-                const searchMatch = !searchTerm || 
-                    (shift.cashierName && shift.cashierName.toLowerCase().includes(searchTerm)) || 
+                const searchMatch = !searchTerm ||
+                    (shift.cashierName && shift.cashierName.toLowerCase().includes(searchTerm)) ||
                     shift.id.toString().includes(searchTerm);
 
                 // Status match
@@ -5201,7 +5249,7 @@
             const tbody = document.querySelector('#table-shifts-list tbody');
             const paginationContainer = document.getElementById('shiftsPagination');
             tbody.innerHTML = '';
-            
+
             if (paginationContainer) {
                 paginationContainer.innerHTML = '';
             }
@@ -5264,18 +5312,18 @@
             // Render Pagination Buttons
             if (totalPages > 1 && paginationContainer) {
                 let paginationHtml = '';
-                
+
                 // Prev button
                 paginationHtml += `<button onclick="renderShiftsTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
-                
+
                 // Page numbers
                 for (let i = 1; i <= totalPages; i++) {
-                    const activeClass = i === page 
-                        ? 'bg-brand-500 text-white border-brand-500' 
+                    const activeClass = i === page
+                        ? 'bg-brand-500 text-white border-brand-500'
                         : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
                     paginationHtml += `<button onclick="renderShiftsTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
                 }
-                
+
                 // Next button
                 paginationHtml += `<button onclick="renderShiftsTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
 
@@ -5453,7 +5501,7 @@
 
             try {
                 const response = await fetch(`/api/analytics/products/sales-report?${params.toString()}`);
-                
+
                 // Session timeout handling
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("text/html") !== -1) {
@@ -5482,10 +5530,37 @@
             const searchTerm = document.getElementById('prodSalesSearch')?.value.toLowerCase() || '';
 
             return allProductSales.filter(item => {
-                const matchSearch = !searchTerm || 
-                    (item.productName && item.productName.toLowerCase().includes(searchTerm));
+                const matchSearch = !searchTerm ||
+                    (item.productName && item.productName.toLowerCase().includes(searchTerm)) ||
+                    (item.size && item.size.toLowerCase().includes(searchTerm));
                 return matchSearch;
             });
+        }
+
+        function renderProductSalesSummary(filtered) {
+            const container = document.getElementById('productSalesSummaryCards');
+            if (!container) return;
+            const sum = (field) => filtered.reduce((acc, item) => acc + (parseFloat(item[field]) || 0), 0);
+            const totalSales = sum('totalSalesBeforeTax');
+            const totalGrossProfit = sum('grossProfit');
+            const totalNetCustomerProfit = sum('netCustomerProfit');
+            const cards = [
+                ['Total Quantity Sold', sum('quantitySold').toFixed(0)],
+                ['Sales Before Tax', `${totalSales.toFixed(2)} EGP`],
+                ['Tax Collected', `${sum('totalTax').toFixed(2)} EGP`],
+                ['Service Collected', `${sum('totalServiceCharge').toFixed(2)} EGP`],
+                ['Customer Payments', `${sum('totalCustomerPaid').toFixed(2)} EGP`],
+                ['Total Cost', `${sum('totalCost').toFixed(2)} EGP`],
+                ['Total Gross Profit', `${totalGrossProfit.toFixed(2)} EGP`],
+                ['Total Net Customer Profit', `${totalNetCustomerProfit.toFixed(2)} EGP`],
+                ['Overall Margin', `${(totalSales > 0 ? (totalGrossProfit / totalSales) * 100 : 0).toFixed(2)}%`]
+            ];
+            container.innerHTML = cards.map(([label, value]) => `
+                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl p-3">
+                    <div class="text-[9px] font-bold uppercase text-slate-400">${label}</div>
+                    <div class="text-sm font-black text-slate-800 dark:text-white mt-1">${value}</div>
+                </div>
+            `).join('');
         }
 
         function resetProductSalesFilters() {
@@ -5519,17 +5594,18 @@
             const tbody = document.querySelector('#table-productsales-list tbody');
             const paginationContainer = document.getElementById('productSalesPagination');
             tbody.innerHTML = '';
-            
+
             if (paginationContainer) {
                 paginationContainer.innerHTML = '';
             }
 
             let filtered = getFilteredProductSales();
+            renderProductSalesSummary(filtered);
 
             if (filtered.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">
+                        <td colspan="18" class="text-center py-8 text-slate-400 dark:text-slate-500">
                             <i class="bi bi-bar-chart-line text-3xl text-success mb-2 d-block"></i>
                             No products sales matched the criteria.
                         </td>
@@ -5546,10 +5622,21 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                         <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${item.productName}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${item.size || 'Default'}</td>
                         <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${item.category}</td>
                         <td class="py-3.5 px-2 text-right font-semibold text-slate-650 dark:text-slate-400">${item.quantitySold}</td>
-                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.unitPrice).toFixed(2)} EGP</td>
-                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.totalSales).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-semibold text-slate-650 dark:text-slate-400">${parseFloat(item.cost || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.averageSellingPrice || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right text-slate-650 dark:text-slate-400">${parseFloat(item.lowestSellingPrice || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right text-slate-650 dark:text-slate-400">${parseFloat(item.highestSellingPrice || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.totalSalesBeforeTax || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right text-slate-650 dark:text-slate-400">${parseFloat(item.totalTax || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right text-slate-650 dark:text-slate-400">${parseFloat(item.totalServiceCharge || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(item.totalCustomerPaid || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right text-slate-650 dark:text-slate-400">${parseFloat(item.totalCost || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold ${(item.grossProfit || item.totalProfit || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}">${parseFloat(item.grossProfit || item.totalProfit || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold ${(item.netCustomerProfit || 0) >= 0 ? 'text-emerald-600' : 'text-red-600'}">${parseFloat(item.netCustomerProfit || 0).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 text-right font-bold">${parseFloat(item.profitMarginPercentage || 0).toFixed(2)}%</td>
                         <td class="py-3.5 px-2 text-slate-650 dark:text-slate-400">${item.branch}</td>
                         <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${item.lastSoldDate}</td>
                     </tr>`;
@@ -5558,18 +5645,18 @@
             // Pagination UI Buttons
             if (totalPages > 1 && paginationContainer) {
                 let paginationHtml = '';
-                
+
                 // Prev button
                 paginationHtml += `<button onclick="renderProductSalesTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
-                
+
                 // Page numbers
                 for (let i = 1; i <= totalPages; i++) {
-                    const activeClass = i === page 
-                        ? 'bg-brand-500 text-white border-brand-500' 
+                    const activeClass = i === page
+                        ? 'bg-brand-500 text-white border-brand-500'
                         : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
                     paginationHtml += `<button onclick="renderProductSalesTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
                 }
-                
+
                 // Next button
                 paginationHtml += `<button onclick="renderProductSalesTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
 
@@ -5588,10 +5675,21 @@
             const exportData = filtered.map(item => {
                 return {
                     "Product Name": item.productName,
+                    "Size": item.size || "Default",
                     "Category": item.category,
                     "Quantity Sold": item.quantitySold,
-                    "Unit Price (EGP)": parseFloat(item.unitPrice).toFixed(2),
-                    "Total Sales (EGP)": parseFloat(item.totalSales).toFixed(2),
+                    "Cost (EGP)": parseFloat(item.cost || 0).toFixed(2),
+                    "Average Selling Price (EGP)": parseFloat(item.averageSellingPrice || 0).toFixed(2),
+                    "Lowest Selling Price (EGP)": parseFloat(item.lowestSellingPrice || 0).toFixed(2),
+                    "Highest Selling Price (EGP)": parseFloat(item.highestSellingPrice || 0).toFixed(2),
+                    "Total Sales Before Tax & Service (EGP)": parseFloat(item.totalSalesBeforeTax || 0).toFixed(2),
+                    "Total Tax (EGP)": parseFloat(item.totalTax || 0).toFixed(2),
+                    "Total Service Charge (EGP)": parseFloat(item.totalServiceCharge || 0).toFixed(2),
+                    "Total Customer Paid (EGP)": parseFloat(item.totalCustomerPaid || 0).toFixed(2),
+                    "Total Cost (EGP)": parseFloat(item.totalCost || 0).toFixed(2),
+                    "Gross Profit (EGP)": parseFloat(item.grossProfit || item.totalProfit || 0).toFixed(2),
+                    "Net Customer Profit (EGP)": parseFloat(item.netCustomerProfit || 0).toFixed(2),
+                    "Profit Margin %": parseFloat(item.profitMarginPercentage || 0).toFixed(2),
                     "Branch": item.branch,
                     "Last Sold Date": item.lastSoldDate
                 };

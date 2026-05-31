@@ -229,7 +229,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = g.SelectMany(o => o.OrderItems).Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "",
+                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithSize(oi.SizeName, oi.Price) : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
                         isCancelled = oi.IsCancelled
@@ -396,6 +396,8 @@ namespace Resturant.Web.UI.Controllers
 
             var categories = await _context.MenuCategories
                 .Include(c => c.MenuItems)
+                .ThenInclude(m => m.Sizes)
+                .Include(c => c.MenuItems)
                 .ThenInclude(m => m.AddOns)
                 .Where(c => c.IsActive && c.BranchId == branchId && c.MenuItems.Any(mi => mi.IsAvailable))
                 .OrderBy(c => c.OrderNumber)
@@ -485,15 +487,25 @@ namespace Resturant.Web.UI.Controllers
 
             foreach (var itemReq in request.Items)
             {
-                var menuItem = await _context.MenuItems.FindAsync(itemReq.MenuItemId);
+                var menuItem = await _context.MenuItems
+                    .Include(m => m.Sizes)
+                    .FirstOrDefaultAsync(m => m.Id == itemReq.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable) continue;
+
+                var itemPrice = itemReq.Price ?? menuItem.Price;
+                var selectedSize = menuItem.GetParsedSizes().FirstOrDefault(s =>
+                    (!string.IsNullOrWhiteSpace(itemReq.Size) && s.Name == itemReq.Size) ||
+                    (string.IsNullOrWhiteSpace(itemReq.Size) && s.Price == itemPrice));
 
                 var orderItem = new OrderItem
                 {
                     OrderId = order.Id,
                     MenuItemId = itemReq.MenuItemId,
                     Quantity = itemReq.Quantity,
-                    Price = itemReq.Price ?? menuItem.Price,
+                    Price = itemPrice,
+                    MenuItemSizeId = selectedSize?.Id,
+                    SizeName = selectedSize?.Name ?? itemReq.Size,
+                    UnitCost = selectedSize?.Cost ?? menuItem.Cost,
                     IsCancelled = false
                 };
 

@@ -970,7 +970,8 @@
                 menuItemId: item.id,
                 quantity: item.quantity,
                 addOnIds: item.addOns ? item.addOns.map(a => a.id) : [],
-                price: item.price
+                price: item.price,
+                size: item.size || ''
             }));
 
             fetch('/Order/Create', {

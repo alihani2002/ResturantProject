@@ -127,18 +127,28 @@ namespace Resturant.Web.UI.Controllers
 
             foreach (var itemRequest in request.OrderItems)
             {
-                var menuItem = await _context.MenuItems.FindAsync(itemRequest.MenuItemId);
+                var menuItem = await _context.MenuItems
+                    .Include(m => m.Sizes)
+                    .FirstOrDefaultAsync(m => m.Id == itemRequest.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable)
                 {
                     continue; // Or handle error
                 }
+
+                var itemPrice = itemRequest.Price ?? menuItem.Price;
+                var selectedSize = menuItem.GetParsedSizes().FirstOrDefault(s =>
+                    (!string.IsNullOrWhiteSpace(itemRequest.Size) && s.Name == itemRequest.Size) ||
+                    (string.IsNullOrWhiteSpace(itemRequest.Size) && s.Price == itemPrice));
                 
                 var orderItem = new OrderItem
                 {
                     OrderId = order.Id,
                     MenuItemId = itemRequest.MenuItemId,
                     Quantity = itemRequest.Quantity,
-                    Price = itemRequest.Price ?? menuItem.Price
+                    Price = itemPrice,
+                    MenuItemSizeId = selectedSize?.Id,
+                    SizeName = selectedSize?.Name ?? itemRequest.Size,
+                    UnitCost = selectedSize?.Cost ?? menuItem.Cost
                 };
 
                 _context.OrderItems.Add(orderItem);
@@ -197,7 +207,7 @@ namespace Resturant.Web.UI.Controllers
                 note = order.Note,
                 items = orderItemsEntities.Select(oi => new
                 {
-                    menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.GetFormattedNameWithPrice(oi.Price) ?? "Unknown",
+                    menuItemName = _context.MenuItems.Find(oi.MenuItemId)?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "Unknown",
                     quantity = oi.Quantity,
                     price = oi.Price + oi.AddOns.Sum(a => a.Price),
                     total = oi.Total,
@@ -290,7 +300,7 @@ namespace Resturant.Web.UI.Controllers
                 note = order.Note,
                 items = order.OrderItems.Select(oi => new
                 {
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "Unknown",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "Unknown",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     total = oi.Total
@@ -434,5 +444,6 @@ namespace Resturant.Web.UI.Controllers
         public int Quantity { get; set; }
         public List<int>? AddOnIds { get; set; }
         public decimal? Price { get; set; }
+        public string? Size { get; set; }
     }
 }

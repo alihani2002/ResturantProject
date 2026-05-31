@@ -16,6 +16,7 @@ namespace Resturant.Infrastructure.Data
         public DbSet<QrCode> QrCodes { get; set; }
         public DbSet<MenuCategory> MenuCategories { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<MenuItemSize> MenuItemSizes { get; set; }
         public DbSet<MenuItemAddOn> MenuItemAddOns { get; set; }
         public DbSet<MenuItemRecommendation> MenuItemRecommendations { get; set; }
         public DbSet<TableSession> TableSessions { get; set; }
@@ -129,6 +130,14 @@ namespace Resturant.Infrastructure.Data
                     .WithMany()
                     .HasForeignKey(m => m.BranchId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuItemSize>(entity =>
+            {
+                entity.HasOne(s => s.MenuItem)
+                    .WithMany(m => m.Sizes)
+                    .HasForeignKey(s => s.MenuItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CashierShift>(entity =>
@@ -246,6 +255,11 @@ namespace Resturant.Infrastructure.Data
                     .WithMany()
                     .HasForeignKey(i => i.MenuItemId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<MenuItemSize>()
+                    .WithMany()
+                    .HasForeignKey(i => i.MenuItemSizeId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Set global precision for decimal properties to avoid warnings and truncation

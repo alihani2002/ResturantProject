@@ -120,7 +120,7 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = o.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "",
+                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithSize(oi.SizeName, oi.Price) : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
                         isCancelled = oi.IsCancelled,
@@ -204,7 +204,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled
