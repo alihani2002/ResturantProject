@@ -771,23 +771,36 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost("menu/delete/{id}")]
         public async Task<IActionResult> DeleteMenuItem(int id)
         {
-            var item = await _context.MenuItems.FindAsync(id);
+            var item = await _context.MenuItems
+                .Include(m => m.AddOns)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (item == null)
-            {
                 return NotFound(new { Message = "Menu item not found." });
+
+            // Check if any add‑ons are referenced by orders
+            var addOnIds = item.AddOns.Select(a => a.Id).ToList();
+            bool hasOrders = await _context.OrderItemAddOns
+                .AnyAsync(o => addOnIds.Contains(o.MenuItemAddOnId));
+
+            if (hasOrders)
+            {
+                // Soft‑delete item and its add‑ons, but keep them for history
+                item.IsDeleted = true;
+                foreach (var addOn in item.AddOns)
+                    addOn.IsDeleted = true;
+
+                _context.Update(item);
+                await _context.SaveChangesAsync();
+                return Ok(new { Message = "Menu item soft‑deleted; it is referenced by existing orders." });
             }
 
-            // Clear relationships to avoid foreign key constraints issues
-            var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
-            _context.MenuItemAddOns.RemoveRange(existingAddOns);
+            // No orders reference – soft‑delete safely
+            item.IsDeleted = true;
+            foreach (var addOn in item.AddOns)
+                addOn.IsDeleted = true;
 
-            var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id || r.RecommendedMenuItemId == id).ToListAsync();
-            _context.MenuItemRecommendations.RemoveRange(existingRecs);
-
-            var existingSizes = await _context.MenuItemSizes.Where(s => s.MenuItemId == id).ToListAsync();
-            _context.MenuItemSizes.RemoveRange(existingSizes);
-
-            _context.MenuItems.Remove(item);
+            _context.Update(item);
             await _context.SaveChangesAsync();
             return Ok(new { Success = true });
         }
@@ -830,28 +843,6 @@ namespace Resturant.Web.UI.Controllers
                     {
                         item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
                     }
-
-                    // Clear existing child entities from the database context first
-                    var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
-                    _context.MenuItemAddOns.RemoveRange(existingAddOns);
-
-                    var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id).ToListAsync();
-                    _context.MenuItemRecommendations.RemoveRange(existingRecs);
-
-                    var existingSizes = await _context.MenuItemSizes.Where(s => s.MenuItemId == id).ToListAsync();
-                    _context.MenuItemSizes.RemoveRange(existingSizes);
-
-                    // Clear the local navigation collections so EF doesn't get confused or try to track deleted entities
-                    item.Sizes.Clear();
-                    item.AddOns.Clear();
-                    item.Recommendations.Clear();
-
-                    await _context.SaveChangesAsync(); // Flush deletions to the database first!
-
-                    UpsertMenuItemSizes(id, sizesJson, cost);
-
-                    // Add new add-ons directly to DbContext
-                    if (!string.IsNullOrEmpty(addonsJson))
                     {
                         var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                         var addons = System.Text.Json.JsonSerializer.Deserialize<List<MenuItemAddOnDto>>(addonsJson, options);

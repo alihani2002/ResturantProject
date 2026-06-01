@@ -4,6 +4,7 @@ using Resturant.Infrastructure.Data;
 using Resturant.Core.Entities;
 using Resturant.Core.Interfaces;
 using Resturant.Web.UI.Hubs;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,12 +17,14 @@ namespace Resturant.Web.UI.Controllers
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
         private readonly IInventoryService _inventoryService;
+        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(AppDbContext context, IHubContext<OrderHub> hubContext, IInventoryService inventoryService)
+        public OrderController(AppDbContext context, IHubContext<OrderHub> hubContext, IInventoryService inventoryService, ILogger<OrderController> logger)
         {
             _context = context;
             _hubContext = hubContext;
             _inventoryService = inventoryService;
+            _logger = logger;
         }
 
         // POST: Order/Create
@@ -33,32 +36,73 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("Invalid order data");
             }
 
-            // Determine active branch context (Staff user's assigned branch OR guest's cookie branch)
-            int branchId = 1;
-            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            // Determine active branch context (explicit request branch OR Staff user's active branch OR guest's cookie branch)
+            int branchId = 0;
+            string resolveSource = "None";
+
+            // 1. Check if branchId is explicitly passed in the request body
+            if (request.BranchId.HasValue && request.BranchId.Value > 0)
             {
-                var userName = User.Identity.Name;
-                var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
-                if (dbUser != null && dbUser.BranchId.HasValue)
+                branchId = request.BranchId.Value;
+                resolveSource = "RequestBody";
+            }
+
+            // 2. If staff user is authenticated, check their branch context
+            if (branchId == 0 && User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // Check if they have a WaiterActiveBranchId cookie (for admins/managers switching branches)
+                string waiterActiveBranchIdStr = Request.Cookies["WaiterActiveBranchId"];
+                if (!string.IsNullOrEmpty(waiterActiveBranchIdStr) && int.TryParse(waiterActiveBranchIdStr, out int waiterActiveBranchId))
                 {
-                    branchId = dbUser.BranchId.Value;
+                    branchId = waiterActiveBranchId;
+                    resolveSource = "WaiterActiveBranchIdCookie";
+                }
+
+                if (branchId == 0)
+                {
+                    var userName = User.Identity.Name;
+                    var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+                    if (dbUser != null && dbUser.BranchId.HasValue)
+                    {
+                        branchId = dbUser.BranchId.Value;
+                        resolveSource = "UserBranchId";
+                    }
                 }
             }
-            else
+
+            // 3. Check guest cookie
+            if (branchId == 0)
             {
                 string branchIdStr = Request.Cookies["BranchId"];
                 if (!string.IsNullOrEmpty(branchIdStr) && int.TryParse(branchIdStr, out int cachedBranchId))
                 {
                     branchId = cachedBranchId;
+                    resolveSource = "GuestBranchIdCookie";
                 }
+            }
+
+            // Logging incoming branch resolution info
+            _logger.LogInformation(
+                "Incoming Order Creation => TableNumber:{TableNumber}, IncomingBranchId:{IncomingBranchId}, ResolvedBranchId:{ResolvedBranchId}, ResolveSource:{ResolveSource}",
+                request.TableNumber,
+                request.BranchId,
+                branchId,
+                resolveSource);
+
+            if (branchId <= 0)
+            {
+                return BadRequest("Branch context could not be resolved. Please make sure to scan the QR code or select a branch.");
             }
 
             // Check if table exists in this branch
             var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == request.TableNumber && t.BranchId == branchId);
             if (table == null)
             {
+                _logger.LogWarning("Table {TableNumber} does not exist in branch {BranchId}", request.TableNumber, branchId);
                 return BadRequest($"Table {request.TableNumber} does not exist in this branch");
             }
+
+            _logger.LogInformation("Found table ID {TableId} with Table.BranchId {TableBranchId}", table.Id, table.BranchId);
 
             // Get Active Session
             var activeSession = await _context.Set<TableSession>()
@@ -66,6 +110,7 @@ namespace Resturant.Web.UI.Controllers
             
             if (activeSession == null)
             {
+                _logger.LogWarning("No active session found for TableId {TableId}", table.Id);
                 return BadRequest("No active session found for this table. Please scan the QR code again.");
             }
 
@@ -99,6 +144,7 @@ namespace Resturant.Web.UI.Controllers
 
                     if (isIdentical)
                     {
+                        _logger.LogInformation("Identical order detected within 5 seconds for order ID {OrderId}. Rejecting duplicate.", recentOrder.Id);
                         return Ok(new { OrderId = recentOrder.Id, TotalAmount = recentOrder.TotalAmount });
                     }
                 }
@@ -119,8 +165,22 @@ namespace Resturant.Web.UI.Controllers
                 Note = request.Note,
                 CustomerName = activeSession.CustomerName,
                 PhoneNumber = activeSession.PhoneNumber,
-                BranchId = branchId
+                BranchId = table.BranchId // Treat the table as the source of truth!
             };
+
+            var userId = User?.Identity?.IsAuthenticated == true ? _context.Users.FirstOrDefault(u => u.UserName == User.Identity.Name)?.Id : "Guest";
+
+            _logger.LogInformation(
+                "Creating Order => OrderId:{OrderId}, TableId:{TableId}, BranchId:{BranchId}, UserId:{UserId}",
+                order.Id,
+                table.Id,
+                order.BranchId,
+                userId);
+
+            _logger.LogInformation(
+                "Final Order.BranchId before SaveChanges() => OrderId:{OrderId}, BranchId:{BranchId}",
+                order.Id,
+                order.BranchId);
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -183,7 +243,7 @@ namespace Resturant.Web.UI.Controllers
             }
 
             // Load branch-specific restaurant settings
-            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == branchId) 
+            var settings = await _context.RestaurantSettings.FirstOrDefaultAsync(s => s.BranchId == order.BranchId) 
                            ?? new RestaurantSetting { TaxPercentage = 14, ServicePercentage = 12 };
 
             decimal serviceAmount = totalAmount * (settings.ServicePercentage / 100);
@@ -220,14 +280,20 @@ namespace Resturant.Web.UI.Controllers
                 }).ToList()
             };
 
-            await _hubContext.Clients.Group("waiter").SendAsync("NewOrderReceived", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("NewOrderReceived", orderData);
+            _logger.LogInformation(
+                "Routing SignalR updates for OrderId {OrderId} to BranchId {BranchId} groups",
+                order.Id,
+                order.BranchId);
+
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("NewOrderReceived", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("NewOrderReceived", orderData);
 
             if (order.Status == OrderStatus.Confirmed)
             {
-                await _hubContext.Clients.Group("chef").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "New Order to Prepare");
+                _logger.LogInformation("Kitchen routing for OrderId {OrderId} via SignalR to chef_{BranchId}", order.Id, order.BranchId);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("ReceiveChefUpdate", "New Order to Prepare");
             }
 
             return Ok(new { OrderId = order.Id, TotalAmount = totalAmount });
@@ -235,17 +301,29 @@ namespace Resturant.Web.UI.Controllers
 
         // GET: Order/CheckTable - Check if table exists and is available
         [HttpGet]
-        public async Task<IActionResult> CheckTable(int tableNumber)
+        public async Task<IActionResult> CheckTable(int tableNumber, int? branchId)
         {
-            // Resolve branch from cookies if possible
-            int branchId = 1;
-            string branchIdStr = Request.Cookies["BranchId"];
-            if (!string.IsNullOrEmpty(branchIdStr))
+            // Resolve branch from parameter, then cookies
+            int resolvedBranchId = 0;
+            if (branchId.HasValue && branchId.Value > 0)
             {
-                int.TryParse(branchIdStr, out branchId);
+                resolvedBranchId = branchId.Value;
+            }
+            else
+            {
+                string branchIdStr = Request.Cookies["BranchId"];
+                if (!string.IsNullOrEmpty(branchIdStr) && int.TryParse(branchIdStr, out int cachedBranchId))
+                {
+                    resolvedBranchId = cachedBranchId;
+                }
             }
 
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
+            if (resolvedBranchId == 0)
+            {
+                return Json(new { available = false, message = "Branch context is missing. Please scan the QR code." });
+            }
+
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == resolvedBranchId);
             if (table == null)
             {
                 return Json(new { available = false, message = $"Table {tableNumber} does not exist in this branch." });
@@ -315,22 +393,22 @@ namespace Resturant.Web.UI.Controllers
                 case OrderStatus.Confirmed:
                     order.ConfirmedDate = DateTime.Now;
                     // Waiter confirmed -> notify Chef and Cashier
-                    await _hubContext.Clients.Group("chef").SendAsync("NewOrderReceived", orderData);
-                    await _hubContext.Clients.Group("cashier").SendAsync("NewOrderReceived", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "Order ready for preparation");
+                    await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("NewOrderReceived", orderData);
+                    await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("NewOrderReceived", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("ReceiveChefUpdate", "Order ready for preparation");
                     break;
                 case OrderStatus.InPreparation:
-                    await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "Order in preparation");
+                    await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("ReceiveChefUpdate", "Order in preparation");
                     break;
                 case OrderStatus.Ready:
                     // Chef finished -> notify Waiter
-                    await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order ready to serve");
+                    await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order ready to serve");
                     break;
                 case OrderStatus.Completed:
                     order.CompletedDate = DateTime.Now;
@@ -338,26 +416,28 @@ namespace Resturant.Web.UI.Controllers
                     await _inventoryService.DeductStockForOrderAsync(order.Id);
                     
                     // Cashier processed payment -> order is complete
-                    await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "Order payment completed");
+                    await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"accountant_{order.BranchId}").SendAsync("ReceiveAccountantUpdate", "Order payment completed");
                     break;
                 case OrderStatus.Served:
                     // Waiter served the order -> notify Cashier for payment
-                    await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
                     break;
                 case OrderStatus.Cancelled:
                     order.CancelledDate = DateTime.Now;
-                    await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("chef").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-                    await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                    await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
                     break;
             }
 
-            // Real-time broadcast to all clients (including guest tracking view)
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            // Real-time broadcast to all clients in this branch (including guest tracking view)
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
             await _context.SaveChangesAsync();
 
@@ -383,17 +463,29 @@ namespace Resturant.Web.UI.Controllers
 
         // GET: Order/GetActiveSessionOrders
         [HttpGet]
-        public async Task<IActionResult> GetActiveSessionOrders(int tableNumber)
+        public async Task<IActionResult> GetActiveSessionOrders(int tableNumber, int? branchId)
         {
-            // Resolve branch from cookies if possible
-            int branchId = 1;
-            string branchIdStr = Request.Cookies["BranchId"];
-            if (!string.IsNullOrEmpty(branchIdStr))
+            // Resolve branch from parameter, then cookies
+            int resolvedBranchId = 0;
+            if (branchId.HasValue && branchId.Value > 0)
             {
-                int.TryParse(branchIdStr, out branchId);
+                resolvedBranchId = branchId.Value;
+            }
+            else
+            {
+                string branchIdStr = Request.Cookies["BranchId"];
+                if (!string.IsNullOrEmpty(branchIdStr) && int.TryParse(branchIdStr, out int cachedBranchId))
+                {
+                    resolvedBranchId = cachedBranchId;
+                }
             }
 
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
+            if (resolvedBranchId == 0)
+            {
+                return BadRequest("Branch ID is required");
+            }
+
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == resolvedBranchId);
             if (table == null)
             {
                 return BadRequest("Table not found");
@@ -442,6 +534,7 @@ namespace Resturant.Web.UI.Controllers
         public int TableNumber { get; set; }
         public string? Note { get; set; }
         public List<OrderItemRequest> OrderItems { get; set; }
+        public int? BranchId { get; set; }
     }
 
     public class OrderItemRequest

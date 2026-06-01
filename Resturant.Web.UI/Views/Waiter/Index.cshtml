@@ -292,6 +292,7 @@
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
+        const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
         // SignalR Connection with auto-reconnect and fallback
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub", {
@@ -629,7 +630,7 @@
             try {
                 await connection.start();
                 console.log("SignalR Connected");
-                await connection.invoke("JoinDashboard", "waiter");
+                await connection.invoke("JoinDashboard", "waiter", activeBranchId);
                 updateConnectionStatus(true);
             } catch (err) {
                 console.error("SignalR Connection Error:", err);
@@ -644,7 +645,7 @@
         connection.onreconnected(async () => {
             console.log("SignalR Reconnected");
             try {
-                await connection.invoke("JoinDashboard", "waiter");
+                await connection.invoke("JoinDashboard", "waiter", activeBranchId);
                 updateConnectionStatus(true);
                 fetchAndRefreshTables();
             } catch (e) { console.error(e); }
@@ -983,7 +984,8 @@
             const payload = {
                 tableNumber: currentWaiterTable,
                 note: document.getElementById('orderNotesInput').value.trim(),
-                orderItems: items
+                orderItems: items,
+                branchId: activeBranchId
             };
 
             const btn = document.getElementById('btnCartCheckout');

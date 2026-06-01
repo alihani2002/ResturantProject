@@ -53,6 +53,7 @@ namespace Resturant.Core.Entities
         [Display(Name = "Branch")]
         public int BranchId { get; set; }
         public Branch? Branch { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public ICollection<MenuItemAddOn> AddOns { get; set; } = new List<MenuItemAddOn>();
         public ICollection<MenuItemRecommendation> Recommendations { get; set; } = new List<MenuItemRecommendation>();

@@ -569,6 +569,7 @@
     <script>
         // Table parameters
         let tableNumber = @(ViewData["TableNumber"] ?? "null");
+        let branchId = @(ViewData["BranchId"] ?? "null");
         let selectedCategoryId = @(ViewData["SelectedCategoryId"] ?? "null");
         
         // Static category mapping from Razor models
@@ -982,7 +983,8 @@
                 body: JSON.stringify({
                     tableNumber: tableNumber,
                     note: note,
-                    orderItems: orderItems
+                    orderItems: orderItems,
+                    branchId: branchId
                 })
             })
             .then(async response => {
@@ -1138,7 +1140,7 @@
         function fetchAndRefreshMyOrders() {
             if (!tableNumber) return;
             
-            fetch(`/Order/GetActiveSessionOrders?tableNumber=${tableNumber}`)
+            fetch(`/Order/GetActiveSessionOrders?tableNumber=${tableNumber}&branchId=${branchId}`)
                 .then(response => response.json())
                 .then(orders => {
                     const myOrdersCard = document.getElementById('my-orders-card');
@@ -1181,7 +1183,13 @@
             });
 
             connection.start()
-                .then(() => console.log("SignalR connected for Guest Tracking"))
+                .then(() => {
+                    console.log("SignalR connected for Guest Tracking");
+                    if (branchId) {
+                        connection.invoke("JoinDashboard", "guest", branchId)
+                            .then(() => console.log("Joined guest group for branch: " + branchId));
+                    }
+                })
                 .catch(err => console.error("SignalR connection error:", err));
         }
 

@@ -88,6 +88,7 @@ namespace Resturant.Web.UI.Controllers
             }
 
             int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
 
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
@@ -251,9 +252,9 @@ namespace Resturant.Web.UI.Controllers
 
             // Notify dashboards to refresh
             var notifyPayload = new { branchId = branchId, tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
-            await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
+            await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", notifyPayload);
 
             return Ok(new { sessionId = newSession.Id });
         }
@@ -286,9 +287,10 @@ namespace Resturant.Web.UI.Controllers
                 var notifyData = new { tableNumber = session.Table?.TableNumber ?? 0 };
                 
                 // Notify dashboards to refresh
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.Group($"waiter_{session.BranchId}").SendAsync("TableCleared", notifyData);
+                await _hubContext.Clients.Group($"cashier_{session.BranchId}").SendAsync("OrderCompleted", notifyData);
+                await _hubContext.Clients.Group($"admin_{session.BranchId}").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.Group($"guest_{session.BranchId}").SendAsync("TableCleared", notifyData);
                 
                 return Ok();
             }
@@ -326,15 +328,15 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and guest tracking
-                await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("chef").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events for backward compatibility
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Accepted");
-                await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "New Order to Prepare");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Accepted");
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("ReceiveChefUpdate", "New Order to Prepare");
             }
             return Ok();
         }
@@ -358,13 +360,13 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and guest tracking - table is now empty
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
-                await _hubContext.Clients.Group("chef").SendAsync("OrderCancelled", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("TableCleared", orderData);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderCancelled", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderCompleted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("TableCleared", orderData);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Cancelled");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Cancelled");
             }
             return Ok();
         }
@@ -388,13 +390,13 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and guest tracking
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("TableCleared", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderCompleted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Table Cleared");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Table Cleared");
             }
             return Ok();
         }
@@ -453,12 +455,12 @@ namespace Resturant.Web.UI.Controllers
             };
 
             // Notify chef: remove this item from view
-            await _hubContext.Clients.Group("chef").SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
             // Notify cashier: show item in red (don't remove)
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
             // Notify all
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", new { tableNumber = order.TableNumber });
-            await _hubContext.Clients.All.SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", new { tableNumber = order.TableNumber });
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
 
             return Ok(new { message = $"Item cancelled: {orderItem.MenuItem?.Name}" });
         }
@@ -487,11 +489,11 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and clients via SignalR
-                await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData); // Broadcast directly to guest tracker in real-time
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Served");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData); // Broadcast directly to guest tracker in real-time
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Served");
             }
             return Ok();
         }

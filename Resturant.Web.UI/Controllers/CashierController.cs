@@ -81,6 +81,7 @@ namespace Resturant.Web.UI.Controllers
             }
 
             int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             var activeShift = await _context.Set<CashierShift>()
@@ -305,10 +306,10 @@ namespace Resturant.Web.UI.Controllers
 
                 var notifyData = new { tableNumber = tableNumber };
 
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", new { tableNumber = tableNumber });
+                await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("TableCleared", notifyData);
+                await _hubContext.Clients.Group($"cashier_{branchId}").SendAsync("OrderCompleted", notifyData);
+                await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", new { tableNumber = tableNumber });
 
                 return Ok();
             }
@@ -553,8 +554,8 @@ namespace Resturant.Web.UI.Controllers
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate
             };
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderCompleted", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
             return Ok(new { orderId = order.Id });
         }
