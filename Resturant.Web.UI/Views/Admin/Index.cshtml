@@ -103,81 +103,100 @@
 
         <!-- Sidebar Navigation Tabs -->
         <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-            <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10">
+            <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10 text-right justify-start" dir="rtl">
                 <i class="bi bi-grid-fill text-base"></i>
-                <span>All Features Map</span>
+                <span>خريطة النظام الرئيسية</span>
             </button>
 
-            <button onclick="switchTab('shift-reports')" id="btn-tab-shift-reports" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('shift-reports')" id="btn-tab-shift-reports" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-clock-history text-base text-warning"></i>
-                <span>Shift Reports</span>
+                <span>تقارير الورديات (الشيفتات)</span>
             </button>
 
-            <button onclick="switchTab('product-sales-report')" id="btn-tab-product-sales-report" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('product-sales-report')" id="btn-tab-product-sales-report" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-bar-chart-line text-base text-success"></i>
-                <span>Product Sales Report</span>
+                <span>تقارير مبيعات المنتجات</span>
             </button>
 
-            <div class="pt-4 pb-2 px-4">
-                <p class="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">ERP Setup & Config</p>
+            <div class="pt-4 pb-2 px-4 text-right" dir="rtl">
+                <p class="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">تهيئة وإعدادات النظام</p>
             </div>
 
-            <button onclick="switchTab('menu-mgmt')" id="btn-tab-menu-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('menu-mgmt')" id="btn-tab-menu-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-journal-plus text-base text-rose-500"></i>
-                <span>Add / Manage Menu</span>
+                <span>إضافة وإدارة المنيو</span>
             </button>
 
-            <button onclick="switchTab('category-mgmt')" id="btn-tab-category-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('category-mgmt')" id="btn-tab-category-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-tags text-base text-cyan-500"></i>
-                <span>Add / Manage Categories</span>
+                <span>إضافة وإدارة الأقسام</span>
             </button>
 
-            <button onclick="switchTab('table-mgmt')" id="btn-tab-table-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('table-mgmt')" id="btn-tab-table-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-grid text-base text-orange-500"></i>
-                <span>Add / Manage Tables</span>
+                <span>إضافة وإدارة الطاولات</span>
             </button>
 
-            <button onclick="switchTab('waiter-assignment')" id="btn-tab-waiter-assignment" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('waiter-assignment')" id="btn-tab-waiter-assignment" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-person-lines-fill text-base text-indigo-500"></i>
-                <span>Assign Waiter Tables</span>
+                <span>إسناد الطاولات للويتر</span>
             </button>
 
-            <button onclick="switchTab('settings-mgmt')" id="btn-tab-settings-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('settings-mgmt')" id="btn-tab-settings-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-sliders text-base text-emerald-500"></i>
-                <span>Taxes & Service Settings</span>
+                <span>إعدادات الضرائب والخدمة</span>
             </button>
 
-            <button onclick="switchTab('branch-mgmt')" id="btn-tab-branch-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button onclick="switchTab('branch-mgmt')" id="btn-tab-branch-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
                 <i class="bi bi-geo-alt text-base text-brand-500"></i>
-                <span>Manage Branches</span>
+                <span>إدارة الفروع</span>
+            </button>
+
+            <div class="pt-4 pb-2 px-4 text-right" dir="rtl">
+                <p class="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">المخازن وسلاسل الإمداد</p>
+            </div>
+
+            <button onclick="switchTab('inventory-mgmt')" id="btn-tab-inventory-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-box-seam text-base text-amber-500"></i>
+                <span>مخزون المواد الخام</span>
+            </button>
+
+            <button onclick="switchTab('stock-transfers')" id="btn-tab-stock-transfers" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-arrow-left-right text-base text-indigo-500"></i>
+                <span>تحويلات المخزون</span>
+            </button>
+
+            <button onclick="switchTab('recipe-mgmt')" id="btn-tab-recipe-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-receipt text-base text-rose-500"></i>
+                <span>مكونات الوصفات (الريسبات)</span>
             </button>
         </nav>
 
         <!-- Footer Operations Link -->
         <div class="p-4 border-t border-slate-100 dark:border-darkBorder bg-slate-50/50 dark:bg-darkCard space-y-2">
-            <a href="/Waiter" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-semibold rounded-lg border border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all justify-center">
+            <a href="/Waiter" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all justify-center">
                 <i class="bi bi-person-badge"></i>
-                <span>Waiter Terminal</span>
+                <span>شاشة الويتر (النادل)</span>
             </a>
-            <a href="/Cashier" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-semibold rounded-lg border border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all justify-center">
+            <a href="/Cashier" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all justify-center">
                 <i class="bi bi-pc-display-horizontal"></i>
-                <span>Cashier POS</span>
+                <span>كاشير نقاط البيع POS</span>
             </a>
-            <a href="/Chef" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-semibold rounded-lg border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all justify-center">
+            <a href="/Chef" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all justify-center">
                 <i class="bi bi-fire"></i>
-                <span>Kitchen Display</span>
+                <span>شاشة المطبخ (الشيف)</span>
             </a>
             <hr class="border-slate-200 dark:border-slate-700 my-2">
-            <button onclick="switchTab('user-mgmt')" id="btn-tab-user-mgmt" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold rounded-lg border border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all justify-center">
+            <button onclick="switchTab('user-mgmt')" id="btn-tab-user-mgmt" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all justify-center">
                 <i class="bi bi-people-fill"></i>
-                <span>Manage Users & Roles</span>
+                <span>إدارة المستخدمين والصلاحيات</span>
             </button>
            
             <form action="/Identity/Account/Logout?returnUrl=%2F" method="post" id="logoutForm" class="w-full m-0">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-bold rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 transition-all justify-center">
+                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 transition-all justify-center">
                     <i class="bi bi-box-arrow-right"></i>
-                    <span>Log Out</span>
+                    <span>تسجيل الخروج</span>
                 </button>
             </form>
         </div>
@@ -1905,7 +1924,426 @@
                 </div>
             </div>
 
+            <!-- ============================================== -->
+            <!-- TAB: INVENTORY STOCK MANAGEMENT                -->
+            <!-- ============================================== -->
+            <div id="tab-inventory-mgmt" class="tab-content hidden space-y-6">
+                <!-- KPI metrics cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
+                            <i class="bi bi-wallet2 text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Stock Valuation</span>
+                            <h3 id="inv-kpi-valuation" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl">
+                            <i class="bi bi-cart-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Purchases</span>
+                            <h3 id="inv-kpi-purchases" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-red-500/10 text-red-500 rounded-xl">
+                            <i class="bi bi-trash3 text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Wasted Value</span>
+                            <h3 id="inv-kpi-waste" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                            <i class="bi bi-percent text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Avg Target Food Cost</span>
+                            <h3 id="inv-kpi-foodcost" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">31.8%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Left: Stock Alerts -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm space-y-4 h-fit">
+                        <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="bi bi-exclamation-triangle text-amber-500"></i> Critical Stock Alerts
+                        </h4>
+                        <div id="inventory-low-stock-list" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Dynamic Stock Alerts -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Main Table -->
+                    <div class="lg:col-span-3 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Active Branch Inventory Stock</h3>
+                                <p class="text-xs text-slate-400 mt-1">Real-time counts, costs, and levels scoped by your chosen active branch context</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="text" id="search-inventory" oninput="filterInventoryTable()" placeholder="Search ingredients..." class="px-4 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white">
+                                <button onclick="openCreateIngredientModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 flex items-center gap-1.5 transition-all"><i class="bi bi-plus-lg"></i> Add New Material</button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table id="table-inventory-stock" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[10px]">
+                                        <th class="py-3.5 px-6">Ingredient</th>
+                                        <th class="py-3.5">Supplier</th>
+                                        <th class="py-3.5 text-center">Current Stock</th>
+                                        <th class="py-3.5 text-center">Min Level</th>
+                                        <th class="py-3.5 text-right">Cost Per Unit</th>
+                                        <th class="py-3.5 text-right">Valuation</th>
+                                        <th class="py-3.5 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- TAB: STOCK TRANSFERS WORKFLOW                  -->
+            <!-- ============================================== -->
+            <div id="tab-stock-transfers" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="outfit-font text-xl font-extrabold text-slate-900 dark:text-white">Inter-Branch Supply Transfers</h2>
+                        <p class="text-xs text-slate-500 mt-1">Create transfer requests from Central Warehouse to Branches, track transit statuses, and confirm intakes</p>
+                    </div>
+                    <button onclick="openRequestTransferModal()" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 flex items-center gap-1.5 transition-all">
+                        <i class="bi bi-plus-lg"></i> Request Stock Transfer
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="overflow-x-auto">
+                        <table id="table-stock-transfers-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[10px]">
+                                    <th class="py-3.5 px-6">ID</th>
+                                    <th class="py-3.5">Source</th>
+                                    <th class="py-3.5">Destination</th>
+                                    <th class="py-3.5">Transferred Items</th>
+                                    <th class="py-3.5 text-center">Status</th>
+                                    <th class="py-3.5">Created By</th>
+                                    <th class="py-3.5">Date Created</th>
+                                    <th class="py-3.5 text-center">Action Controls</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                <!-- Dynamic Transfer list -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- TAB: MENU ITEM RECIPE MANAGEMENT               -->
+            <!-- ============================================== -->
+            <div id="tab-recipe-mgmt" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Menu Item Selector list -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
+                        <div class="pb-4 border-b dark:border-darkBorder">
+                            <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Select Menu Product</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">Configure recipes for standard items in the active branch context</p>
+                            <input type="text" id="search-recipe-menu" oninput="filterRecipeMenuItems()" placeholder="Search products..." class="w-full mt-3 px-3 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white">
+                        </div>
+                        <div id="recipe-menu-list" class="flex-1 overflow-y-auto mt-4 space-y-1 pr-2">
+                            <!-- Dynamic menu items -->
+                        </div>
+                    </div>
+
+                    <!-- Right Recipe editor -->
+                    <div class="lg:col-span-2 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
+                        <div id="recipe-editor-empty" class="flex-1 flex flex-col items-center justify-center text-center text-slate-450 dark:text-slate-500">
+                            <div class="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-850/50 flex items-center justify-center text-rose-500 mb-4 border dark:border-darkBorder/40">
+                                <i class="bi bi-receipt text-3xl"></i>
+                            </div>
+                            <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base">Select a product to view recipe</h4>
+                            <p class="text-xs text-slate-500 mt-1 max-w-xs">Setup ingredients consumption lists in grams, liters, or portions for automated stock count deduction upon cashier ticketing.</p>
+                        </div>
+
+                        <div id="recipe-editor-container" class="hidden flex-1 flex flex-col h-full min-h-0">
+                            <div class="pb-4 border-b dark:border-darkBorder flex justify-between items-start">
+                                <div>
+                                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest">Recipe Ingredients Map</span>
+                                    <h3 id="recipe-editor-name" class="outfit-font text-base font-black text-slate-800 dark:text-white mt-1">Product Name</h3>
+                                    <p id="recipe-editor-price" class="text-xs text-brand-500 font-bold mt-0.5">Price: 0.00 EGP</p>
+                                </div>
+                                <button onclick="addRecipeIngredientRow()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+                                    <i class="bi bi-plus-lg"></i> Add Ingredient
+                                </button>
+                            </div>
+
+                            <form id="form-recipe-editor" onsubmit="saveRecipeChanges(event)" class="flex-1 flex flex-col min-h-0 justify-between mt-4">
+                                <div class="flex-1 overflow-y-auto space-y-3 pr-2">
+                                    <table class="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr class="text-slate-450 dark:text-slate-400 font-bold uppercase text-[9px] border-b dark:border-darkBorder">
+                                                <th class="py-2 px-3">Ingredient Raw Material Name</th>
+                                                <th class="py-2 text-center" style="width: 150px;">Quantity Required</th>
+                                                <th class="py-2" style="width: 100px;">Unit</th>
+                                                <th class="py-2 text-center" style="width: 60px;">Control</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recipe-ingredients-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                            <!-- Dynamic Recipe Rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="border-t pt-4 dark:border-darkBorder flex justify-end gap-3 shrink-0">
+                                    <button type="button" onclick="cancelRecipeEdit()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">Cancel</button>
+                                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Recipe Map</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
+
+    <!-- ADD INVENTORY STOCK INTAKE MODAL -->
+    <div id="add-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="add-stock-modal-content">
+            <button onclick="closeAddStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-500 dark:text-amber-400 uppercase tracking-widest">Inventory intake</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Purchase / Add Stock Intake</h3>
+                </div>
+
+                <form id="form-add-stock" onsubmit="submitAddStock(event)" class="space-y-4">
+                    <input type="hidden" id="add-stock-ingredient-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
+                        <input type="text" id="add-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Quantity Added</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <input type="number" step="0.001" min="0.001" id="add-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="add-stock-unit-lbl">Kg</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
+                            <input type="number" step="0.01" min="0" id="add-stock-cost" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Intake / Purchase Notes</label>
+                        <textarea id="add-stock-notes" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Supplier invoice ref, delivery confirmation, batch details..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/10">Confirm Stock Intake</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE / UPDATE INGREDIENT CRUD MODAL -->
+    <div id="ingredient-crud-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="ingredient-crud-modal-content">
+            <button onclick="closeIngredientCrudModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest" id="ingredient-modal-badge">Inventory Material</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1" id="ingredient-modal-title">Add New Material</h3>
+                </div>
+
+                <form id="form-ingredient-crud" onsubmit="submitIngredientCrud(event)" class="space-y-4">
+                    <input type="hidden" id="ingredient-crud-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Material / Ingredient Name</label>
+                        <input type="text" id="ingredient-crud-name" required placeholder="e.g. Ground Beef, Milk, Espresso Beans" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div id="initial-stock-container">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Initial Stock</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-initial-stock" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Reorder Level (Min)</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-reorder-level" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="5">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Measurement Unit</label>
+                            <select id="ingredient-crud-unit" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                <option value="Kg">Kg (Kilograms)</option>
+                                <option value="Grams">Grams</option>
+                                <option value="Ltr">Ltr (Liters)</option>
+                                <option value="Pcs">Pcs (Pieces)</option>
+                                <option value="Box">Box</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
+                            <input type="number" step="0.01" min="0.01" id="ingredient-crud-cost" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="e.g. 150.00">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Default Supplier</label>
+                        <select id="ingredient-crud-supplier" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                            <option value="">No Assigned Supplier</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeIngredientCrudModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Material</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL STOCK ADJUSTMENT AUDIT MODAL -->
+    <div id="adjust-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="adjust-stock-modal-content">
+            <button onclick="closeAdjustStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest">Inventory audit</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Manual Stock Audit / Adjust</h3>
+                </div>
+
+                <form id="form-adjust-stock" onsubmit="submitAdjustStock(event)" class="space-y-4">
+                    <input type="hidden" id="adjust-stock-ingredient-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
+                        <input type="text" id="adjust-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Qty (Diff)</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <input type="number" step="0.001" id="adjust-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="e.g. -2.50 or 5.00">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="adjust-stock-unit-lbl">Kg</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Type</label>
+                            <select id="adjust-stock-type" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                                <option value="StockCount">Stock Count Audit (Correction)</option>
+                                <option value="Waste">Kitchen Waste (Loss)</option>
+                                <option value="Expired">Spoiled / Expired</option>
+                                <option value="Damage">Damaged Goods</option>
+                                <option value="Theft">Unexplained Shrinkage / Theft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Explanation Reason</label>
+                        <textarea id="adjust-stock-notes" rows="3" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="Specify why this count deviation is being booked..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeAdjustStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md shadow-rose-500/10">Book Stock Audit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- STOCK TRANSFER REQUEST MODAL -->
+    <div id="transfer-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-2xl w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="transfer-modal-content">
+            <button onclick="closeRequestTransferModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6" dir="rtl">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 uppercase tracking-widest text-right block w-fit">طلب سلاسل الإمداد</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1 text-right">إنشاء طلب تحويل مخزني</h3>
+                </div>
+
+                <form id="form-stock-transfer" onsubmit="submitStockTransfer(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">المصدر (الفرع المرسل)</label>
+                            <select id="transfer-source-branch" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">الوجهة (الفرع المستلم)</label>
+                            <select id="transfer-dest-branch" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl"></select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">ملاحظات التحويل</label>
+                        <input type="text" id="transfer-notes" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none text-right" placeholder="مثال: تغذية مخزون أسبوعية، طلب طارئ..." dir="rtl">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center" dir="rtl">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider text-right">الأصناف المراد تحويلها</label>
+                            <button type="button" onclick="addTransferItemRow()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-750 text-slate-700 dark:text-white rounded-md text-[10px] font-bold transition-all"><i class="bi bi-plus-lg"></i> إضافة صنف</button>
+                        </div>
+
+                        <div class="max-h-48 overflow-y-auto border dark:border-darkBorder rounded-xl" dir="rtl">
+                            <table class="w-full text-right border-collapse text-[11px]" dir="rtl">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[9px] sticky top-0">
+                                        <th class="py-2 px-3 text-right">اسم الخامة</th>
+                                        <th class="py-2 text-right" style="width: 120px;">الكمية المطلوبة</th>
+                                        <th class="py-2 text-right" style="width: 100px;">الوحدة</th>
+                                        <th class="py-2 text-center" style="width: 50px;">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transfer-items-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2" dir="rtl">
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-send"></i> إرسال طلب التحويل</button>
+                        <button type="button" onclick="closeRequestTransferModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- TOAST CONTAINER FOR FLOATING LIVE NOTIFICATIONS -->
@@ -1990,7 +2428,10 @@
                 'product-sales-report': 'Product Sales Report',
                 'settings-mgmt': 'System Taxes & Service Settings',
                 'user-mgmt': 'System Access Control',
-                'branch-mgmt': 'Manage Restaurant Branches'
+                'branch-mgmt': 'Manage Restaurant Branches',
+                'inventory-mgmt': 'Multi-Branch Inventory & Stock Levels',
+                'stock-transfers': 'Branch Stock Transfers Workflow',
+                'recipe-mgmt': 'Menu Item Recipe Setup'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
             
@@ -2012,6 +2453,12 @@
                 loadProductSalesReportList();
             } else if (tabId === 'settings-mgmt') {
                 loadSystemSettings();
+            } else if (tabId === 'inventory-mgmt') {
+                loadInventoryStockList();
+            } else if (tabId === 'stock-transfers') {
+                loadStockTransfersList();
+            } else if (tabId === 'recipe-mgmt') {
+                loadRecipeMenuItems();
             } else if (tabId === 'dashboard' || tabId === 'user-mgmt' || tabId === 'branch-mgmt') {
                 // Static views
             } else {
@@ -5609,6 +6056,8 @@
             }
         }
 
+
+
         // Close on escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
@@ -5617,8 +6066,879 @@
                 closeEditMenuItemModal();
                 closeProductAnalyticsModal();
                 closeDailySalesModal();
+                closeAddStockModal();
+                closeAdjustStockModal();
+                closeRequestTransferModal();
+                closeIngredientCrudModal();
             }
         });
+
+        // ==============================================
+        // INVENTORY MANAGEMENT SYSTEM CORE JAVASCRIPT
+        // ==============================================
+        let inventoryStockData = [];
+        let recipeMenuItemsData = [];
+        let selectedRecipeMenuItemId = null;
+
+        // Toast alert helper (uses existing UI toast mechanism)
+        function showToastAlert(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const bgClass = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-red-500' : 'bg-brand-500');
+            const icon = type === 'success' ? 'bi-check-circle' : (type === 'error' ? 'bi-exclamation-triangle' : 'bi-info-circle');
+            const toast = document.createElement('div');
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-xs font-bold transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="bi ${icon} text-base"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // 1. Inventory Stock Actions
+        function loadInventoryStockList() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetStockLevels', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 inventoryStockData = data;
+                 renderInventoryTable();
+                 updateInventoryKPIs();
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load inventory stock levels.", "error");
+             });
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.querySelector('#table-inventory-stock tbody');
+            const alertList = document.getElementById('inventory-low-stock-list');
+            tbody.innerHTML = '';
+            alertList.innerHTML = '';
+
+            const searchTerm = $('#search-inventory').val().toLowerCase();
+            const filtered = inventoryStockData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) || 
+                (item.supplierName && item.supplierName.toLowerCase().includes(searchTerm))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">No inventory materials matched the criteria.</td></tr>`;
+            } else {
+                filtered.forEach(item => {
+                    const isLow = item.currentStock <= item.reorderLevel;
+                    const valuation = item.currentStock * parseFloat(item.costPerUnit);
+                    const stockClass = item.currentStock === 0 ? 'text-red-500 font-bold' : (isLow ? 'text-amber-500 font-semibold' : 'text-slate-700 dark:text-slate-350');
+                    const minBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">${item.reorderLevel} ${item.unit}</span>`;
+                    
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                            <td class="py-3.5 px-6 font-semibold text-slate-800 dark:text-white">${item.name}</td>
+                            <td class="py-3.5 text-slate-500 dark:text-slate-400">${item.supplierName || 'General Supplier'}</td>
+                            <td class="py-3.5 text-center ${stockClass}">${item.currentStock.toFixed(2)} ${item.unit}</td>
+                            <td class="py-3.5 text-center">${minBadge}</td>
+                            <td class="py-3.5 text-right font-semibold text-slate-600 dark:text-slate-400">${parseFloat(item.costPerUnit).toFixed(2)} EGP</td>
+                            <td class="py-3.5 text-right font-bold text-slate-900 dark:text-white">${valuation.toFixed(2)} EGP</td>
+                            <td class="py-3.5 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openAddStockModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}', ${item.costPerUnit})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-950/40 text-amber-500 border border-amber-500/10 transition-all flex items-center gap-0.5" title="Intake Stock"><i class="bi bi-plus-lg"></i> Intake</button>
+                                    <button onclick="openAdjustStockModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}')" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-500 border border-rose-500/10 transition-all flex items-center gap-0.5" title="Audit/Waste"><i class="bi bi-sliders"></i> Audit</button>
+                                    <button onclick="openEditIngredientModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}', ${item.costPerUnit}, ${item.reorderLevel}, ${item.supplierId || 'null'})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white transition-all" title="Edit Material Details"><i class="bi bi-pencil"></i></button>
+                                    <button onclick="deleteIngredient(${item.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-550 border border-red-500/10 transition-all" title="Delete Material"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+
+                    if (isLow) {
+                        const statusClass = item.currentStock === 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+                        const textStatus = item.currentStock === 0 ? 'OUT OF STOCK' : 'LOW STOCK';
+                        alertList.innerHTML += `
+                            <div class="p-3 border rounded-xl flex justify-between items-center ${statusClass}">
+                                <div>
+                                    <h5 class="font-bold text-xs">${item.name}</h5>
+                                    <span class="text-[9px] font-semibold tracking-wide uppercase opacity-75">${textStatus} • Min: ${item.reorderLevel} ${item.unit}</span>
+                                </div>
+                                <span class="text-xs font-black">${item.currentStock.toFixed(1)} ${item.unit}</span>
+                            </div>`;
+                    }
+                });
+            }
+
+            if (alertList.innerHTML === '') {
+                alertList.innerHTML = `
+                    <div class="p-4 border border-emerald-500/10 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl text-center font-bold">
+                        <i class="bi bi-shield-check text-2xl block mb-1"></i> All stock levels healthy! No critical alerts.
+                    </div>`;
+            }
+        }
+
+        function filterInventoryTable() {
+            renderInventoryTable();
+        }
+
+        async function updateInventoryKPIs() {
+            try {
+                // Fetch dynamic reports from analytics
+                const branchId = $('#header-branch-selector').val();
+                const response = await fetch(`/api/analytics/inventory?branchId=${branchId || ''}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('inv-kpi-valuation').textContent = `${parseFloat(data.totalInventoryValuation).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} EGP`;
+                    document.getElementById('inv-kpi-purchases').textContent = `${parseFloat(data.totalPurchasesAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} EGP`;
+                    document.getElementById('inv-kpi-waste').textContent = `${parseFloat(data.totalWasteAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} EGP`;
+                    document.getElementById('inv-kpi-foodcost').textContent = `${data.averageFoodCostPercentage}%`;
+                }
+            } catch (ex) {
+                console.error("Failed to load inventory KPI valuation reports:", ex);
+            }
+        }
+
+        // Ingredient CRUD Modal Actions
+        let suppliersListCache = [];
+
+        function loadSuppliersList(callback) {
+            if (suppliersListCache.length > 0) {
+                if (callback) callback(suppliersListCache);
+                return;
+            }
+            $.get('/Inventory/GetSuppliers')
+             .done(function(suppliers) {
+                 suppliersListCache = suppliers;
+                 const select = document.getElementById('ingredient-crud-supplier');
+                 if (select) {
+                     select.innerHTML = '<option value="">No Assigned Supplier</option>';
+                     suppliers.forEach(s => {
+                         select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                     });
+                 }
+                 if (callback) callback(suppliers);
+             })
+             .fail(function() {
+                 console.error("Failed to load suppliers list.");
+             });
+        }
+
+        function openCreateIngredientModal() {
+            document.getElementById('ingredient-modal-title').textContent = "Add New Material";
+            document.getElementById('ingredient-crud-id').value = "";
+            document.getElementById('ingredient-crud-name').value = "";
+            document.getElementById('ingredient-crud-initial-stock').value = "0";
+            document.getElementById('ingredient-crud-reorder-level').value = "5";
+            document.getElementById('ingredient-crud-unit').value = "Kg";
+            document.getElementById('ingredient-crud-cost').value = "";
+            document.getElementById('ingredient-crud-supplier').value = "";
+            
+            document.getElementById('initial-stock-container').classList.remove('hidden');
+
+            loadSuppliersList();
+
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('ingredient-crud-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function openEditIngredientModal(id, name, unit, cost, reorderLevel, supplierId) {
+            document.getElementById('ingredient-modal-title').textContent = "Edit Material Details";
+            document.getElementById('ingredient-crud-id').value = id;
+            document.getElementById('ingredient-crud-name').value = name;
+            document.getElementById('ingredient-crud-reorder-level').value = reorderLevel;
+            document.getElementById('ingredient-crud-unit').value = unit;
+            document.getElementById('ingredient-crud-cost').value = cost;
+            
+            document.getElementById('initial-stock-container').classList.add('hidden');
+
+            loadSuppliersList(function() {
+                document.getElementById('ingredient-crud-supplier').value = supplierId || "";
+            });
+
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('ingredient-crud-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeIngredientCrudModal() {
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('ingredient-crud-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitIngredientCrud(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header context first.", "error");
+                return;
+            }
+
+            const idVal = document.getElementById('ingredient-crud-id').value;
+            const isEdit = idVal !== "";
+
+            const url = isEdit ? '/Inventory/UpdateIngredient' : '/Inventory/CreateIngredient';
+            
+            const request = {
+                name: document.getElementById('ingredient-crud-name').value,
+                reorderLevel: parseFloat(document.getElementById('ingredient-crud-reorder-level').value),
+                unit: document.getElementById('ingredient-crud-unit').value,
+                costPerUnit: parseFloat(document.getElementById('ingredient-crud-cost').value),
+                supplierId: document.getElementById('ingredient-crud-supplier').value ? parseInt(document.getElementById('ingredient-crud-supplier').value) : null
+            };
+
+            if (isEdit) {
+                request.id = parseInt(idVal);
+            } else {
+                request.branchId = parseInt(branchId);
+                request.initialStock = parseFloat(document.getElementById('ingredient-crud-initial-stock').value);
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert(isEdit ? "Ingredient successfully updated." : "New ingredient created successfully.");
+                    closeIngredientCrudModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to save ingredient details.", "error");
+                }
+            });
+        }
+
+        function deleteIngredient(id) {
+            if (!confirm("Are you sure you want to delete this raw material? This will permanently erase it from branch stock, plus any recipe ingredient mappings, stock transfers, and waste logs connected to it. This action CANNOT be undone!")) return;
+
+            $.post('/Inventory/DeleteIngredient', { id: id })
+             .done(function() {
+                 showToastAlert("Ingredient and all its related logs successfully deleted.");
+                 loadInventoryStockList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to delete ingredient.", "error");
+             });
+        }
+
+        // Add Stock Modal Actions
+        function openAddStockModal(id, name, unit, cost) {
+            document.getElementById('add-stock-ingredient-id').value = id;
+            document.getElementById('add-stock-ingredient-name').value = name;
+            document.getElementById('add-stock-unit-lbl').textContent = unit;
+            document.getElementById('add-stock-quantity').value = '';
+            document.getElementById('add-stock-cost').value = cost || '';
+            document.getElementById('add-stock-notes').value = '';
+
+            const modal = document.getElementById('add-stock-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('add-stock-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeAddStockModal() {
+            const modal = document.getElementById('add-stock-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('add-stock-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitAddStock(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header select context to add stock.", "error");
+                return;
+            }
+
+            const request = {
+                branchId: parseInt(branchId),
+                ingredientId: parseInt(document.getElementById('add-stock-ingredient-id').value),
+                quantity: parseFloat(document.getElementById('add-stock-quantity').value),
+                cost: document.getElementById('add-stock-cost').value ? parseFloat(document.getElementById('add-stock-cost').value) : null,
+                notes: document.getElementById('add-stock-notes').value
+            };
+
+            $.ajax({
+                url: '/Inventory/AddStock',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("Inventory intake successfully logged into branch stock.");
+                    closeAddStockModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to add stock.", "error");
+                }
+            });
+        }
+
+        // Adjust Stock Modal Actions
+        function openAdjustStockModal(id, name, unit) {
+            document.getElementById('adjust-stock-ingredient-id').value = id;
+            document.getElementById('adjust-stock-ingredient-name').value = name;
+            document.getElementById('adjust-stock-unit-lbl').textContent = unit;
+            document.getElementById('adjust-stock-quantity').value = '';
+            document.getElementById('adjust-stock-notes').value = '';
+            document.getElementById('adjust-stock-type').value = 'StockCount';
+
+            const modal = document.getElementById('adjust-stock-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('adjust-stock-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeAdjustStockModal() {
+            const modal = document.getElementById('adjust-stock-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('adjust-stock-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitAdjustStock(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header select context to adjust stock.", "error");
+                return;
+            }
+
+            const request = {
+                branchId: parseInt(branchId),
+                ingredientId: parseInt(document.getElementById('adjust-stock-ingredient-id').value),
+                quantityAdjusted: parseFloat(document.getElementById('adjust-stock-quantity').value),
+                type: document.getElementById('adjust-stock-type').value,
+                notes: document.getElementById('adjust-stock-notes').value
+            };
+
+            $.ajax({
+                url: '/Inventory/AdjustStock',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("Stock adjustment successfully booked and calculated.");
+                    closeAdjustStockModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to book adjustment.", "error");
+                }
+            });
+        }
+
+
+        // 2. Stock Transfers Actions
+        function loadStockTransfersList() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetTransfers', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(transfers) {
+                 renderTransfersTable(transfers);
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load supply transfers.", "error");
+             });
+        }
+
+        function renderTransfersTable(transfers) {
+            const tbody = document.querySelector('#table-stock-transfers-list tbody');
+            tbody.innerHTML = '';
+
+            if (transfers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 dark:text-slate-500">No inter-branch transfers logged.</td></tr>`;
+                return;
+            }
+
+            transfers.forEach(t => {
+                let statusBadge = '';
+                let actionHtml = '';
+
+                switch (t.status) {
+                    case 'Pending':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">Pending Approval</span>`;
+                        actionHtml = `
+                            <div class="flex gap-1.5 justify-center">
+                                <button onclick="approveTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all">Approve</button>
+                                <button onclick="cancelTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg border dark:border-darkBorder hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-white transition-all">Cancel</button>
+                            </div>`;
+                        break;
+                    case 'InTransit':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">In Transit</span>`;
+                        actionHtml = `
+                            <div class="flex gap-1.5 justify-center">
+                                <button onclick="receiveTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition-all">Receive Intake</button>
+                                <button onclick="cancelTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg border dark:border-darkBorder hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-white transition-all">Cancel</button>
+                            </div>`;
+                        break;
+                    case 'Received':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Completed</span>`;
+                        actionHtml = `<span class="text-[10px] text-slate-400 font-semibold">Intake verified on ${t.receivedDate || '-'}</span>`;
+                        break;
+                    case 'Cancelled':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">Cancelled</span>`;
+                        actionHtml = `<span class="text-[10px] text-slate-400 font-semibold">Voided</span>`;
+                        break;
+                }
+
+                const itemsList = t.items.map(i => `${i.ingredientName} (${i.quantity} ${i.unit})`).join(', ');
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                        <td class="py-3.5 px-6 font-bold text-slate-800 dark:text-white">#TR-${t.id}</td>
+                        <td class="py-3.5 font-semibold text-slate-700 dark:text-slate-350">${t.sourceBranchName}</td>
+                        <td class="py-3.5 font-semibold text-slate-700 dark:text-slate-350">${t.destinationBranchName}</td>
+                        <td class="py-3.5 text-slate-500 dark:text-slate-400 max-w-xs truncate" title="${itemsList}">${itemsList}</td>
+                        <td class="py-3.5 text-center">${statusBadge}</td>
+                        <td class="py-3.5 text-slate-500 dark:text-slate-400">${t.createdBy}</td>
+                        <td class="py-3.5 text-slate-500 dark:text-slate-400">${t.createdOn}</td>
+                        <td class="py-3.5 text-center">${actionHtml}</td>
+                    </tr>`;
+            });
+        }
+
+        function approveTransfer(id) {
+            if (!confirm("Are you sure you want to approve this stock transfer? Ingredients will be deducted from the sending branch and placed in transit.")) return;
+            $.post('/Inventory/ApproveTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("Transfer approved. Goods are in transit.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to approve transfer.", "error");
+             });
+        }
+
+        function receiveTransfer(id) {
+            if (!confirm("Confirm you have received all items physically in good condition. This will add ingredients to your receiving branch stock.")) return;
+            $.post('/Inventory/ReceiveTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("Transfer received successfully. Dest stock updated.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to receive transfer.", "error");
+             });
+        }
+
+        function cancelTransfer(id) {
+            if (!confirm("Void this stock transfer? Action cannot be undone.")) return;
+            $.post('/Inventory/CancelTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("Transfer cancelled.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to cancel transfer.", "error");
+             });
+        }
+
+        // New Transfer Request Modal Actions
+        let globalAllIngredientsList = [];
+        let sourceBranchIngredientsMap = {};
+
+        function loadAllSystemIngredients(callback) {
+            $.get('/Inventory/GetStockLevels', { branchId: '' })
+             .done(function(data) {
+                 globalAllIngredientsList = data;
+                 if (callback) callback();
+             })
+             .fail(function() {
+                 console.error("Failed to load global ingredients list.");
+                 if (callback) callback();
+             });
+        }
+
+        function loadSourceBranchIngredients(branchId, callback) {
+            if (!branchId) return;
+            $.get('/Inventory/GetStockLevels', { branchId: parseInt(branchId) })
+             .done(function(data) {
+                 sourceBranchIngredientsMap = {};
+                 data.forEach(item => {
+                     sourceBranchIngredientsMap[item.name.toLowerCase().trim()] = item;
+                 });
+
+                 const rows = document.querySelectorAll('#transfer-items-tbody tr');
+                 if (rows.length === 0) {
+                     addTransferItemRow();
+                 } else {
+                     rows.forEach(row => {
+                         const select = row.querySelector('.transfer-item-select');
+                         if (select) {
+                             const selectedVal = select.value;
+                             populateIngredientDropdown(select, selectedVal);
+                         }
+                     });
+                 }
+                 if (callback) callback();
+             })
+             .fail(function() {
+                 console.error("Failed to load ingredients for source branch " + branchId);
+             });
+        }
+
+        function populateIngredientDropdown(selectElement, selectedValue = "") {
+            selectElement.innerHTML = '<option value="">-- اختر الخامة --</option>';
+            
+            const uniqueIngredients = [];
+            const seenNames = new Set();
+            
+            globalAllIngredientsList.forEach(item => {
+                const nameKey = item.name.trim().toLowerCase();
+                if (!seenNames.has(nameKey)) {
+                    seenNames.add(nameKey);
+                    uniqueIngredients.push({
+                        name: item.name.trim(),
+                        unit: item.unit
+                    });
+                }
+            });
+
+            uniqueIngredients.sort((a, b) => a.name.localeCompare(b.name));
+
+            uniqueIngredients.forEach(item => {
+                const nameKey = item.name.toLowerCase();
+                const sourceItem = sourceBranchIngredientsMap[nameKey];
+                const stock = sourceItem ? sourceItem.currentStock : 0;
+                const unit = sourceItem ? sourceItem.unit : item.unit;
+                
+                const isSelected = item.name === selectedValue ? 'selected' : '';
+                selectElement.innerHTML += `<option value="${item.name}" ${isSelected} data-unit="${unit}">${item.name} (المخزون بالمصدر: ${stock} ${unit})</option>`;
+            });
+        }
+
+        function openRequestTransferModal() {
+            const modal = document.getElementById('transfer-modal');
+            
+            $.get('/Inventory/GetBranches')
+             .done(function(branches) {
+                  const srcSelect = document.getElementById('transfer-source-branch');
+                  const destSelect = document.getElementById('transfer-dest-branch');
+                  srcSelect.innerHTML = '';
+                  destSelect.innerHTML = '';
+
+                  branches.forEach(b => {
+                      srcSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+                      destSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+                  });
+
+                  const activeBranchId = $('#header-branch-selector').val();
+                  if (activeBranchId) {
+                      destSelect.value = activeBranchId;
+                  }
+                  srcSelect.value = "3"; // Seeded Central Warehouse id
+
+                  $(srcSelect).off('change').on('change', function() {
+                      document.getElementById('transfer-items-tbody').innerHTML = '';
+                      loadSourceBranchIngredients(this.value, function() {
+                          addTransferItemRow();
+                      });
+                  });
+
+                  document.getElementById('transfer-notes').value = '';
+                  document.getElementById('transfer-items-tbody').innerHTML = '';
+
+                  loadAllSystemIngredients(function() {
+                      loadSourceBranchIngredients(srcSelect.value, function() {
+                          addTransferItemRow();
+                          
+                          modal.classList.remove('hidden');
+                          setTimeout(() => {
+                              modal.classList.add('opacity-100');
+                              document.getElementById('transfer-modal-content').classList.remove('scale-95');
+                          }, 50);
+                      });
+                  });
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load branches for dispatch mapping.", "error");
+             });
+        }
+
+        function closeRequestTransferModal() {
+            const modal = document.getElementById('transfer-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('transfer-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function addTransferItemRow() {
+            const tbody = document.getElementById('transfer-items-tbody');
+            const rowId = Date.now() + Math.random().toString(36).substr(2, 5);
+            
+            const tr = document.createElement('tr');
+            tr.id = `tr-item-${rowId}`;
+            tr.className = "border-b border-slate-50 dark:border-darkBorder/30";
+            
+            tr.innerHTML = `
+                <td class="py-2 px-3">
+                    <select required onchange="handleTransferIngredientChange(this)" class="transfer-item-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl">
+                        <option value="">-- اختر الخامة --</option>
+                    </select>
+                </td>
+                <td class="py-2">
+                    <input type="number" step="0.001" min="0.001" required placeholder="0.000" class="transfer-item-qty w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none text-right">
+                </td>
+                <td class="py-2">
+                    <input type="text" readonly class="transfer-item-unit w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-500 dark:text-slate-400 focus:outline-none text-center" value="جم">
+                </td>
+                <td class="py-2 text-center">
+                    <button type="button" onclick="removeTransferItemRow('${rowId}')" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-500"><i class="bi bi-trash"></i></button>
+                </td>`;
+            
+            tbody.appendChild(tr);
+            
+            const selectElement = tr.querySelector('.transfer-item-select');
+            populateIngredientDropdown(selectElement);
+        }
+
+        function handleTransferIngredientChange(select) {
+            const row = select.closest('tr');
+            const unitInput = row.querySelector('.transfer-item-unit');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const unit = selectedOption.getAttribute('data-unit');
+                unitInput.value = unit || 'جم';
+            } else {
+                unitInput.value = 'جم';
+            }
+        }
+
+        function removeTransferItemRow(rowId) {
+            const row = document.getElementById(`tr-item-${rowId}`);
+            if (row) row.remove();
+        }
+
+        function submitStockTransfer(e) {
+            e.preventDefault();
+
+            const srcBranch = parseInt(document.getElementById('transfer-source-branch').value);
+            const destBranch = parseInt(document.getElementById('transfer-dest-branch').value);
+
+            if (srcBranch === destBranch) {
+                showToastAlert("لا يمكن أن يكون الفرع المرسل والمستلم متطابقين.", "error");
+                return;
+            }
+
+            const items = [];
+            const rows = document.querySelectorAll('#transfer-items-tbody tr');
+
+            rows.forEach(row => {
+                const select = row.querySelector('.transfer-item-select');
+                const qtyInput = row.querySelector('.transfer-item-qty');
+                const unitInput = row.querySelector('.transfer-item-unit');
+                
+                if (select && select.value) {
+                    items.push({
+                        ingredientName: select.value,
+                        quantity: parseFloat(qtyInput.value),
+                        unit: unitInput.value
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                showToastAlert("يرجى اختيار صنف واحد على الأقل للتحويل.", "error");
+                return;
+            }
+
+            const request = {
+                sourceBranchId: srcBranch,
+                destinationBranchId: destBranch,
+                notes: document.getElementById('transfer-notes').value,
+                items: items
+            };
+
+            $.ajax({
+                url: '/Inventory/RequestTransfer',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("تم إنشاء طلب التحويل المخزني وإرساله بنجاح.");
+                    closeRequestTransferModal();
+                    loadStockTransfersList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to dispatch transfer request.", "error");
+                }
+            });
+        }
+
+
+        // 3. Recipes Config Actions
+        function loadRecipeMenuItems() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetMenuItems', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(items) {
+                 recipeMenuItemsData = items;
+                 filterRecipeMenuItems();
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load branch products.", "error");
+             });
+        }
+
+        function filterRecipeMenuItems() {
+            const container = document.getElementById('recipe-menu-list');
+            container.innerHTML = '';
+
+            const searchTerm = $('#search-recipe-menu').val().toLowerCase();
+            const filtered = recipeMenuItemsData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center py-4 text-slate-400 dark:text-slate-500 text-xs">No products found.</p>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const activeClass = selectedRecipeMenuItemId === item.id 
+                    ? 'bg-rose-500/10 text-rose-500 font-bold border border-rose-500/25' 
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent';
+                
+                container.innerHTML += `
+                    <button onclick="selectRecipeMenuItem(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})" class="w-full text-left px-4 py-2.5 text-xs rounded-xl transition-all ${activeClass}">
+                        <div class="flex justify-between items-center">
+                            <span>${item.name}</span>
+                            <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">${parseFloat(item.price).toFixed(2)} L.E.</span>
+                        </div>
+                    </button>`;
+            });
+        }
+
+        function selectRecipeMenuItem(id, name, price) {
+            selectedRecipeMenuItemId = id;
+            filterRecipeMenuItems(); // Refreshes active sidebar state highlight
+
+            document.getElementById('recipe-editor-empty').classList.add('hidden');
+            const editor = document.getElementById('recipe-editor-container');
+            editor.classList.remove('hidden');
+
+            document.getElementById('recipe-editor-name').textContent = name;
+            document.getElementById('recipe-editor-price').textContent = `Product Price: ${parseFloat(price).toFixed(2)} EGP`;
+
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400">Loading recipe components...</td></tr>';
+
+            $.get('/Inventory/GetRecipes', { menuItemId: id })
+             .done(function(recipes) {
+                 tbody.innerHTML = '';
+                 if (recipes.length === 0) {
+                     tbody.innerHTML = `<tr id="recipe-no-items"><td colspan="4" class="text-center py-8 text-slate-400 dark:text-slate-500"><i class="bi bi-exclamation-circle text-lg d-block mb-1"></i> No recipe ingredients mapped yet. Add a row to configure ingredient consumption.</td></tr>`;
+                 } else {
+                     recipes.forEach(r => {
+                         addRecipeIngredientRow(r.ingredientName, r.quantityRequired, r.unit);
+                     });
+                 }
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load recipe ingredients.", "error");
+             });
+        }
+
+        function addRecipeIngredientRow(name = '', quantity = '', unit = 'Grams') {
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            const noItemsRow = document.getElementById('recipe-no-items');
+            if (noItemsRow) noItemsRow.remove();
+
+            const rowId = Date.now();
+
+            tbody.innerHTML += `
+                <tr id="tr-rec-${rowId}" class="border-b border-slate-50 dark:border-darkBorder/30">
+                    <td class="py-2.5 px-3">
+                        <input type="text" required value="${name}" placeholder="Espresso Powder, Ground Beef..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
+                    </td>
+                    <td class="py-2.5 text-center">
+                        <input type="number" step="0.001" min="0.001" required value="${quantity}" placeholder="0.000" class="w-full text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
+                    </td>
+                    <td class="py-2.5">
+                        <select required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
+                            <option value="Grams" ${unit === 'Grams' ? 'selected' : ''}>Grams</option>
+                            <option value="Kg" ${unit === 'Kg' ? 'selected' : ''}>Kg (Kilograms)</option>
+                            <option value="Ltr" ${unit === 'Ltr' ? 'selected' : ''}>Ltr (Liters)</option>
+                            <option value="Pcs" ${unit === 'Pcs' ? 'selected' : ''}>Pcs (Pieces)</option>
+                        </select>
+                    </td>
+                    <td class="py-2.5 text-center">
+                        <button type="button" onclick="removeRecipeIngredientRow(${rowId})" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-500"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>`;
+        }
+
+        function removeRecipeIngredientRow(rowId) {
+            const row = document.getElementById(`tr-rec-${rowId}`);
+            if (row) row.remove();
+
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            if (tbody.querySelectorAll('tr').length === 0) {
+                tbody.innerHTML = `<tr id="recipe-no-items"><td colspan="4" class="text-center py-8 text-slate-400 dark:text-slate-500"><i class="bi bi-exclamation-circle text-lg d-block mb-1"></i> No recipe ingredients mapped yet. Add a row to configure ingredient consumption.</td></tr>`;
+            }
+        }
+
+        function cancelRecipeEdit() {
+            selectedRecipeMenuItemId = null;
+            filterRecipeMenuItems();
+            document.getElementById('recipe-editor-container').classList.add('hidden');
+            document.getElementById('recipe-editor-empty').classList.remove('hidden');
+        }
+
+        function saveRecipeChanges(e) {
+            e.preventDefault();
+            if (!selectedRecipeMenuItemId) return;
+
+            const items = [];
+            const rows = document.querySelectorAll('#recipe-ingredients-tbody tr');
+
+            if (rows.length === 1 && rows[0].id === 'recipe-no-items') {
+                // Empty recipe is allowed (means no deductions)
+            } else {
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const select = row.querySelector('select');
+                    if (inputs.length >= 2) {
+                        items.push({
+                            ingredientName: inputs[0].value,
+                            quantityRequired: parseFloat(inputs[1].value),
+                            unit: select.value
+                        });
+                    }
+                });
+            }
+
+            const request = {
+                menuItemId: selectedRecipeMenuItemId,
+                items: items
+            };
+
+            $.ajax({
+                url: '/Inventory/SaveRecipe',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("Menu item recipe map saved successfully!");
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to save recipe map.", "error");
+                }
+            });
+        }
+        // ==============================================
     </script>
 
     <!-- MENU ITEM SALES PERFORMANCE DETAIL MODAL -->

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Resturant.Infrastructure.Data;
 using Resturant.Core.Entities;
+using Resturant.Core.Interfaces;
 using Resturant.Web.UI.Hubs;
 using System;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace Resturant.Web.UI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
+        private readonly IInventoryService _inventoryService;
 
-        public OrderController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public OrderController(AppDbContext context, IHubContext<OrderHub> hubContext, IInventoryService inventoryService)
         {
             _context = context;
             _hubContext = hubContext;
+            _inventoryService = inventoryService;
         }
 
         // POST: Order/Create
@@ -321,6 +324,9 @@ namespace Resturant.Web.UI.Controllers
                     break;
                 case OrderStatus.Completed:
                     order.CompletedDate = DateTime.Now;
+                    // Deduct inventory based on recipes
+                    await _inventoryService.DeductStockForOrderAsync(order.Id);
+                    
                     // Cashier processed payment -> order is complete
                     await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
                     await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
