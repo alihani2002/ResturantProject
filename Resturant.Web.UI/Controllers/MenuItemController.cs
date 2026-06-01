@@ -79,59 +79,97 @@ namespace Resturant.Web.UI.Controllers
         }
 
         // POST: MenuItem/Edit/5
-        // POST: MenuItem/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, MenuItem menuItem, Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
             if (id != menuItem.Id)
-            {
                 return NotFound();
-            }
 
-            // Fetch existing item to retrive the current image URL
-            var existingMenuItem = await _context.MenuItems.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
-            if (existingMenuItem == null)
-            {
+            // Load existing entity with its AddOns
+            var existing = await _context.MenuItems
+                .Include(m => m.AddOns)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (existing == null)
                 return NotFound();
-            }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    // Upload new image if provided
-                    if (imageFile != null && imageFile.Length > 0)
-                    {
-                        menuItem.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
-                    }
-                    else
-                    {
-                        // Keep the existing image
-                        menuItem.ImageUrl = existingMenuItem.ImageUrl;
-                    }
-
-                    _context.Update(menuItem);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MenuItemExists(menuItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                // Repopulate dropdowns before returning view
+                ViewBag.MenuCategories = _context.MenuCategories.ToList();
+                ViewData["MenuCategoryId"] = new SelectList(_context.MenuCategories, "Id", "Name", menuItem.MenuCategoryId);
+                return View(menuItem);
             }
-            
-            // Repopulate ViewBag.MenuCategories for the dropdown if validation fails
-            ViewBag.MenuCategories = _context.MenuCategories.ToList();
-            ViewData["MenuCategoryId"] = new SelectList(_context.MenuCategories, "Id", "Name", menuItem.MenuCategoryId);
-            return View(menuItem);
+
+            // Image handling
+            if (imageFile != null && imageFile.Length > 0)
+                menuItem.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
+            else
+                menuItem.ImageUrl = existing.ImageUrl; // keep old image
+
+            // Update scalar fields of existing entity
+            existing.Name = menuItem.Name;
+            existing.Description = menuItem.Description;
+            existing.Price = menuItem.Price;
+            existing.Cost = menuItem.Cost;
+            existing.ImageUrl = menuItem.ImageUrl;
+            existing.IsAvailable = menuItem.IsAvailable;
+            existing.IsPopular = menuItem.IsPopular;
+            existing.IsTrending = menuItem.IsTrending;
+            existing.IsRecommended = menuItem.IsRecommended;
+            existing.OrderNumber = menuItem.OrderNumber;
+            existing.MenuCategoryId = menuItem.MenuCategoryId;
+            // BranchId should stay unchanged – it’s part of the multi‑branch design
+
+            // Process AddOns
+            var postedAddOns = menuItem.AddOns ?? new List<MenuItemAddOn>();
+
+            // Update existing or add new add‑ons
+            foreach (var posted in postedAddOns)
+            {
+                if (posted.Id == 0)
+                {
+                    // New add‑on
+                    posted.IsDeleted = false;
+                    existing.AddOns.Add(posted);
+                }
+                else
+                {
+                    var existingAddOn = existing.AddOns.FirstOrDefault(a => a.Id == posted.Id);
+                    if (existingAddOn != null)
+                    {
+                        existingAddOn.Name = posted.Name;
+                        existingAddOn.ExtraPrice = posted.ExtraPrice;
+                        // Preserve IsDeleted flag (should be false for active add‑ons)
+                    }
+                }
+            }
+
+            // Soft‑delete any add‑on that was removed from the posted list
+            var postedIds = postedAddOns.Select(a => a.Id).ToHashSet();
+            foreach (var addOn in existing.AddOns.Where(a => !postedIds.Contains(a.Id)).ToList())
+            {
+                bool referenced = await _context.OrderItemAddOns
+                    .AnyAsync(o => o.MenuItemAddOnId == addOn.Id);
+
+                if (referenced)
+                {
+                    ModelState.AddModelError(string.Empty,
+                        $"Add‑on \"{addOn.Name}\" cannot be removed because it is used in existing orders.");
+                    // Keep it alive – do not soft‑delete
+                }
+                else
+                {
+                    addOn.IsDeleted = true;
+                }
+            }
+
+            // Persist changes
+            _context.Update(existing);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: MenuItem/Delete/5
@@ -139,12 +177,43 @@ namespace Resturant.Web.UI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var menuItem = await _context.MenuItems.FindAsync(id);
-            if (menuItem != null)
+            var menuItem = await _context.MenuItems
+                .Include(m => m.AddOns)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (menuItem == null)
+                return NotFound();
+
+            // --- NEW: correct FK validation ---------------------------------
+            var addOnIds = menuItem.AddOns.Select(a => a.Id).ToList();
+
+            bool hasOrders = await _context.OrderItemAddOns
+                .AnyAsync(o => addOnIds.Contains(o.MenuItemAddOnId));
+
+            if (hasOrders)
             {
-                _context.MenuItems.Remove(menuItem);
+                ModelState.AddModelError(string.Empty,
+                    "Cannot delete this menu item because it is referenced by existing orders. " +
+                    "The item has been marked as deleted instead.");
+                // Soft‑delete anyway (requirement 4)
+                menuItem.IsDeleted = true;
+                foreach (var addOn in menuItem.AddOns)
+                    addOn.IsDeleted = true;
+
+                _context.Update(menuItem);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
+            // ----------------------------------------------------------------
+
+            // Soft delete the item and its add‑ons
+            menuItem.IsDeleted = true;
+            foreach (var addOn in menuItem.AddOns)
+                addOn.IsDeleted = true;
+
+            _context.Update(menuItem);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
