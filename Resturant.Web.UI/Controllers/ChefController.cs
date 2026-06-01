@@ -82,6 +82,7 @@ namespace Resturant.Web.UI.Controllers
             }
 
             int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
 
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)

@@ -343,6 +343,7 @@
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
+        const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
         // Check for toast notifications to show after reload
         document.addEventListener('DOMContentLoaded', () => {
             const storedToast = sessionStorage.getItem('cashier_toast');
@@ -909,19 +910,22 @@
         async function startConnection() {
             try {
                 await connection.start();
-                await connection.invoke("JoinDashboard", "cashier");
+                await connection.invoke("JoinDashboard", "cashier", activeBranchId);
                 updateConnectionStatus(true);
             } catch (err) {
+                console.error("SignalR Connection Failure:", err);
                 updateConnectionStatus(false);
                 setTimeout(startConnection, 5000);
             }
         }
 
         connection.onreconnecting(() => updateConnectionStatus(false));
-        connection.onreconnected(() => {
-            connection.invoke("JoinDashboard", "cashier");
-            updateConnectionStatus(true);
-            fetchAndRefreshOrders();
+        connection.onreconnected(async () => {
+            try {
+                await connection.invoke("JoinDashboard", "cashier", activeBranchId);
+                updateConnectionStatus(true);
+                fetchAndRefreshOrders();
+            } catch (e) { console.error("SignalR Reconnection error:", e); }
         });
         connection.onclose(() => updateConnectionStatus(false));
 

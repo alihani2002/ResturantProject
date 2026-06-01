@@ -2,27 +2,132 @@ using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 using Resturant.Core.Entities;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Resturant.Infrastructure.Data;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Resturant.Web.UI.Hubs
 {
     public class OrderHub : Hub
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AppDbContext _context;
+        private readonly ILogger<OrderHub> _logger;
+
+        public OrderHub(
+            UserManager<ApplicationUser> userManager,
+            AppDbContext context,
+            ILogger<OrderHub> logger)
+        {
+            _userManager = userManager;
+            _context = context;
+            _logger = logger;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var connectionId = Context.ConnectionId;
+            var user = Context.User;
+            string userId = "Anonymous";
+            string roleStr = "None";
+            int? branchId = null;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                var appUser = await _userManager.GetUserAsync(user);
+                if (appUser != null)
+                {
+                    userId = appUser.Id;
+                    branchId = appUser.BranchId;
+                    var roles = await _userManager.GetRolesAsync(appUser);
+                    roleStr = roles.Any() ? string.Join(", ", roles) : "None";
+                }
+            }
+
+            _logger.LogInformation(
+                "SignalR Connection Established: ConnectionId={ConnectionId}, UserId={UserId}, Roles={Roles}, BranchId={BranchId}",
+                connectionId, userId, roleStr, branchId ?? 0);
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(System.Exception exception)
+        {
+            var connectionId = Context.ConnectionId;
+            var user = Context.User;
+            string userId = "Anonymous";
+            string roleStr = "None";
+            int? branchId = null;
+
+            if (user?.Identity?.IsAuthenticated == true)
+            {
+                var appUser = await _userManager.GetUserAsync(user);
+                if (appUser != null)
+                {
+                    userId = appUser.Id;
+                    branchId = appUser.BranchId;
+                    var roles = await _userManager.GetRolesAsync(appUser);
+                    roleStr = roles.Any() ? string.Join(", ", roles) : "None";
+                }
+            }
+
+            if (exception != null)
+            {
+                _logger.LogError(exception,
+                    "SignalR Connection Disconnected with Error: ConnectionId={ConnectionId}, UserId={UserId}, Roles={Roles}, BranchId={BranchId}",
+                    connectionId, userId, roleStr, branchId ?? 0);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "SignalR Connection Disconnected: ConnectionId={ConnectionId}, UserId={UserId}, Roles={Roles}, BranchId={BranchId}",
+                    connectionId, userId, roleStr, branchId ?? 0);
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
         // Join a group based on the dashboard type (waiter, chef, cashier, admin) and branch ID
         public async Task JoinDashboard(string dashboardType, int? branchId)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, dashboardType);
+            var connectionId = Context.ConnectionId;
+            var user = Context.User;
+            string userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Anonymous";
+
+            await Groups.AddToGroupAsync(connectionId, dashboardType);
+            _logger.LogInformation(
+                "SignalR Connection Joined Group: ConnectionId={ConnectionId}, UserId={UserId}, Group={GroupName}",
+                connectionId, userId, dashboardType);
+
             if (branchId.HasValue && branchId.Value > 0)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"{dashboardType}_{branchId.Value}");
+                string branchGroup = $"{dashboardType}_{branchId.Value}";
+                await Groups.AddToGroupAsync(connectionId, branchGroup);
+                _logger.LogInformation(
+                    "SignalR Connection Joined Branch Group: ConnectionId={ConnectionId}, UserId={UserId}, Group={GroupName}",
+                    connectionId, userId, branchGroup);
             }
         }
 
         public async Task LeaveDashboard(string dashboardType, int? branchId)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, dashboardType);
+            var connectionId = Context.ConnectionId;
+            var user = Context.User;
+            string userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Anonymous";
+
+            await Groups.RemoveFromGroupAsync(connectionId, dashboardType);
+            _logger.LogInformation(
+                "SignalR Connection Left Group: ConnectionId={ConnectionId}, UserId={UserId}, Group={GroupName}",
+                connectionId, userId, dashboardType);
+
             if (branchId.HasValue && branchId.Value > 0)
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"{dashboardType}_{branchId.Value}");
+                string branchGroup = $"{dashboardType}_{branchId.Value}";
+                await Groups.RemoveFromGroupAsync(connectionId, branchGroup);
+                _logger.LogInformation(
+                    "SignalR Connection Left Branch Group: ConnectionId={ConnectionId}, UserId={UserId}, Group={GroupName}",
+                    connectionId, userId, branchGroup);
             }
         }
 

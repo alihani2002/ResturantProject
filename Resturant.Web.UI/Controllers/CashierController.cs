@@ -81,6 +81,7 @@ namespace Resturant.Web.UI.Controllers
             }
 
             int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             var activeShift = await _context.Set<CashierShift>()
