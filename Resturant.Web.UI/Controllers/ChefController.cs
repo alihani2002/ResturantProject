@@ -152,10 +152,10 @@ namespace Resturant.Web.UI.Controllers
 
             var orderData = BuildOrderData(order);
 
-            await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
             return Ok();
         }
@@ -179,13 +179,13 @@ namespace Resturant.Web.UI.Controllers
 
             var orderData = BuildOrderData(order);
 
-            await _hubContext.Clients.Group("waiter").SendAsync("OrderReady", orderData);
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderReady", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
-            await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Ready");
+            await _hubContext.Clients.Group($"accountant_{order.BranchId}").SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Ready");
 
             return Ok();
         }

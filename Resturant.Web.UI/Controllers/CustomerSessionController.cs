@@ -143,9 +143,9 @@ namespace Resturant.Web.UI.Controllers
 
             // === REAL-TIME UPDATE: Notify Waiter (and Admin) that a new guest has seated ===
             var notifyPayload = new { branchId = branchId, tableNumber = tableNumber, customerName = customerName, eventType = "GuestSeated" };
-            await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
+            await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", notifyPayload);
 
             return RedirectToAction("Index", "Menu");
         }

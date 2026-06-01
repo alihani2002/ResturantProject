@@ -7,15 +7,23 @@ namespace Resturant.Web.UI.Hubs
 {
     public class OrderHub : Hub
     {
-        // Join a group based on the dashboard type (waiter, chef, cashier, admin)
-        public async Task JoinDashboard(string dashboardType)
+        // Join a group based on the dashboard type (waiter, chef, cashier, admin) and branch ID
+        public async Task JoinDashboard(string dashboardType, int? branchId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, dashboardType);
+            if (branchId.HasValue && branchId.Value > 0)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"{dashboardType}_{branchId.Value}");
+            }
         }
 
-        public async Task LeaveDashboard(string dashboardType)
+        public async Task LeaveDashboard(string dashboardType, int? branchId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, dashboardType);
+            if (branchId.HasValue && branchId.Value > 0)
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"{dashboardType}_{branchId.Value}");
+            }
         }
 
         // New order created - notify waiters
