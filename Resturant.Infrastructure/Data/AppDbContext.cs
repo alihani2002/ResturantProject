@@ -32,6 +32,9 @@ namespace Resturant.Infrastructure.Data
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<WasteLog> WasteLogs { get; set; }
+        public DbSet<StockTransfer> StockTransfers { get; set; }
+        public DbSet<StockTransferItem> StockTransferItems { get; set; }
+        public DbSet<InventoryAdjustment> InventoryAdjustments { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -189,6 +192,40 @@ namespace Resturant.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<StockTransfer>(entity =>
+            {
+                entity.HasOne(s => s.SourceBranch)
+                    .WithMany()
+                    .HasForeignKey(s => s.SourceBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(s => s.DestinationBranch)
+                    .WithMany()
+                    .HasForeignKey(s => s.DestinationBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<StockTransferItem>(entity =>
+            {
+                entity.HasOne(i => i.StockTransfer)
+                    .WithMany(t => t.Items)
+                    .HasForeignKey(i => i.StockTransferId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<InventoryAdjustment>(entity =>
+            {
+                entity.HasOne(a => a.Branch)
+                    .WithMany()
+                    .HasForeignKey(a => a.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(a => a.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(a => a.IngredientId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             // Seed Branches
             modelBuilder.Entity<Branch>().HasData(
                 new Branch
@@ -208,6 +245,15 @@ namespace Resturant.Infrastructure.Data
                     ContactPhone = "01000000002",
                     IsActive = true,
                     CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new Branch
+                {
+                    Id = 3,
+                    Name = "Central Warehouse",
+                    Address = "Main Supply Depot, Cairo",
+                    ContactPhone = "01000000003",
+                    IsActive = true,
+                    CreatedOn = new DateTime(2026, 1, 1)
                 }
             );
 
@@ -225,6 +271,14 @@ namespace Resturant.Infrastructure.Data
                 {
                     Id = 2,
                     BranchId = 2,
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new RestaurantSetting
+                {
+                    Id = 3,
+                    BranchId = 3,
                     TaxPercentage = 14,
                     ServicePercentage = 12,
                     CreatedOn = new DateTime(2026, 1, 1)

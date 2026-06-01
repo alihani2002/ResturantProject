@@ -131,4 +131,85 @@ namespace Resturant.Core.Entities
         [Required]
         public DateTime WasteDate { get; set; } = DateTime.Now;
     }
+
+    // Supply Chain: Stock Transfer Entity (moves stock between branches/warehouses)
+    public class StockTransfer : BaseEntity
+    {
+        [Required]
+        public int SourceBranchId { get; set; }
+        public Branch? SourceBranch { get; set; }
+
+        [Required]
+        public int DestinationBranchId { get; set; }
+        public Branch? DestinationBranch { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; } = "Pending"; // "Pending", "Approved", "InTransit", "Received", "Cancelled"
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        [MaxLength(100)]
+        public string? CreatedBy { get; set; }
+
+        [MaxLength(100)]
+        public string? ProcessedBy { get; set; }
+
+        public DateTime? ProcessedDate { get; set; }
+
+        [MaxLength(100)]
+        public string? ReceivedBy { get; set; }
+
+        public DateTime? ReceivedDate { get; set; }
+
+        public System.Collections.Generic.ICollection<StockTransferItem> Items { get; set; } = new System.Collections.Generic.List<StockTransferItem>();
+    }
+
+    // Supply Chain: Stock Transfer Item Entity
+    public class StockTransferItem : BaseEntity
+    {
+        [Required]
+        public int StockTransferId { get; set; }
+        public StockTransfer? StockTransfer { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string IngredientName { get; set; }
+
+        [Required]
+        public double Quantity { get; set; }
+
+        [Required]
+        [MaxLength(10)]
+        public string Unit { get; set; }
+    }
+
+    // Inventory: Manual/Automated Inventory Adjustment Entity
+    public class InventoryAdjustment : BaseEntity
+    {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
+        public int IngredientId { get; set; }
+        public Ingredient? Ingredient { get; set; }
+
+        [Required]
+        public double QuantityAdjusted { get; set; } // positive or negative
+
+        [Required]
+        [MaxLength(50)]
+        public string Type { get; set; } // "StockCount", "Waste", "Damage", "Theft", "Expired", "Purchase", "Transfer"
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        [Required]
+        public DateTime AdjustmentDate { get; set; } = DateTime.Now;
+
+        [MaxLength(100)]
+        public string? AdjustedBy { get; set; }
+    }
 }
