@@ -13,6 +13,7 @@ namespace Resturant.Core.Interfaces
         
         // Automated consumption
         Task DeductStockForOrderAsync(int orderId);
+        Task DeductStockForShiftAsync(int shiftId);
 
         // Stock Transfers Workflow
         Task<IEnumerable<StockTransfer>> GetTransfersAsync(int? branchId);

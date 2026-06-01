@@ -412,8 +412,8 @@ namespace Resturant.Web.UI.Controllers
                     break;
                 case OrderStatus.Completed:
                     order.CompletedDate = DateTime.Now;
-                    // Deduct inventory based on recipes
-                    await _inventoryService.DeductStockForOrderAsync(order.Id);
+                    // Note: Automated inventory deduction is now deferred to the cashier's shift closure event (DeductStockForShiftAsync) as requested by the user.
+                    // await _inventoryService.DeductStockForOrderAsync(order.Id);
                     
                     // Cashier processed payment -> order is complete
                     await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);

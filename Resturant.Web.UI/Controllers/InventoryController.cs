@@ -332,6 +332,116 @@ namespace Resturant.Web.UI.Controllers
             return Ok(new { success = true });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetDailyConsumptionReport(string? date, int? branchId)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            if (!activeBranchId.HasValue)
+            {
+                return BadRequest("No active branch selected.");
+            }
+
+            DateTime selectedDate;
+            if (!DateTime.TryParse(date, out selectedDate))
+            {
+                selectedDate = DateTime.Today;
+            }
+
+            // 1. Get all completed/paid orders for this branch and date
+            var completedOrders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.BranchId == activeBranchId.Value && 
+                            (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid) &&
+                            o.OrderDate.Date == selectedDate.Date)
+                .ToListAsync();
+
+            // 2. Aggregate sold menu items
+            var soldItems = completedOrders
+                .SelectMany(o => o.OrderItems)
+                .GroupBy(oi => new { oi.MenuItemId, Name = oi.MenuItem != null ? oi.MenuItem.Name : $"Product {oi.MenuItemId}", Price = oi.MenuItem != null ? oi.MenuItem.Price : 0 })
+                .Select(g => new {
+                    MenuItemId = g.Key.MenuItemId,
+                    Name = g.Key.Name,
+                    Price = g.Key.Price,
+                    QuantitySold = g.Sum(oi => oi.Quantity),
+                    TotalRevenue = g.Sum(oi => oi.Quantity * (double)g.Key.Price)
+                })
+                .ToList();
+
+            // 3. Get all ingredients for this branch to display current stock levels
+            var branchIngredients = await _context.Ingredients
+                .Where(i => i.BranchId == activeBranchId.Value)
+                .ToListAsync();
+
+            // 4. Get all recipes for this branch's menu items
+            var menuItemIds = soldItems.Select(s => s.MenuItemId).ToList();
+            var recipes = await _context.Recipes
+                .Include(r => r.Ingredient)
+                .Where(r => menuItemIds.Contains(r.MenuItemId))
+                .ToListAsync();
+
+            // 5. Calculate consumption per ingredient
+            var consumptionSummary = new List<object>();
+
+            foreach (var ingredient in branchIngredients)
+            {
+                double theoreticalConsumption = 0;
+                
+                // Find all recipe portions mapping to this ingredient by name match (cross-branch compliant)
+                var matchingRecipes = recipes
+                    .Where(r => r.Ingredient != null && r.Ingredient.Name.Trim().ToLower() == ingredient.Name.Trim().ToLower())
+                    .ToList();
+
+                foreach (var recipe in matchingRecipes)
+                {
+                    var soldItem = soldItems.FirstOrDefault(s => s.MenuItemId == recipe.MenuItemId);
+                    if (soldItem != null)
+                    {
+                        theoreticalConsumption += recipe.QuantityRequired * soldItem.QuantitySold;
+                    }
+                }
+
+                // Sum actual adjustments under "OrderConsumption" for this date
+                var actualDeductions = await _context.InventoryAdjustments
+                    .Where(a => a.BranchId == activeBranchId.Value && 
+                                a.IngredientId == ingredient.Id && 
+                                a.Type == "OrderConsumption" && 
+                                a.AdjustmentDate.Date == selectedDate.Date)
+                    .SumAsync(a => a.QuantityAdjusted);
+
+                double actualDeducted = Math.Abs(actualDeductions);
+
+                if (theoreticalConsumption > 0 || actualDeducted > 0)
+                {
+                    string portionReference = "";
+                    if (matchingRecipes.Any())
+                    {
+                        var firstRecipe = matchingRecipes.First();
+                        var menuItemName = _context.MenuItems.Find(firstRecipe.MenuItemId)?.Name ?? "Item";
+                        portionReference = $"{firstRecipe.QuantityRequired} {ingredient.Unit} per {menuItemName}";
+                    }
+
+                    consumptionSummary.Add(new {
+                        IngredientId = ingredient.Id,
+                        Name = ingredient.Name,
+                        Unit = ingredient.Unit,
+                        CurrentStock = ingredient.CurrentStock,
+                        TheoreticalConsumption = theoreticalConsumption,
+                        ActualDeducted = actualDeducted,
+                        PortionReference = portionReference,
+                        Variance = theoreticalConsumption - actualDeducted
+                    });
+                }
+            }
+
+            return Json(new {
+                Date = selectedDate.ToString("yyyy-MM-dd"),
+                SoldItems = soldItems,
+                Consumption = consumptionSummary
+            });
+        }
+
         // --- Helper Methods ---
 
         private int? GetActiveBranchId(int? queryBranchId)

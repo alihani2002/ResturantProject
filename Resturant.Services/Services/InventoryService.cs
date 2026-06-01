@@ -184,6 +184,101 @@ namespace Resturant.Services.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeductStockForShiftAsync(int shiftId)
+        {
+            var shift = await _context.Set<CashierShift>()
+                .FirstOrDefaultAsync(s => s.Id == shiftId);
+
+            if (shift == null) return;
+
+            // Get all completed/paid orders for this shift
+            var shiftOrders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.ShiftId == shiftId && 
+                            (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid) &&
+                            o.BranchId == shift.BranchId)
+                .ToListAsync();
+
+            if (!shiftOrders.Any()) return;
+
+            // Group all order items by MenuItemId and sum quantities
+            var orderItemsGrouped = shiftOrders
+                .SelectMany(o => o.OrderItems)
+                .Where(oi => !oi.IsCancelled)
+                .GroupBy(oi => oi.MenuItemId)
+                .Select(g => new {
+                    MenuItemId = g.Key,
+                    TotalQuantity = g.Sum(oi => oi.Quantity)
+                })
+                .ToList();
+
+            var menuItemIds = orderItemsGrouped.Select(g => g.MenuItemId).ToList();
+
+            // Fetch recipes for all sold items
+            var recipes = await _context.Recipes
+                .Include(r => r.Ingredient)
+                .Where(r => menuItemIds.Contains(r.MenuItemId))
+                .ToListAsync();
+
+            // Fetch all local branch ingredients to update
+            var branchIngredients = await _context.Ingredients
+                .Where(i => i.BranchId == shift.BranchId)
+                .ToListAsync();
+
+            var ingredientConsumption = new Dictionary<string, double>();
+
+            foreach (var groupedItem in orderItemsGrouped)
+            {
+                var itemRecipes = recipes.Where(r => r.MenuItemId == groupedItem.MenuItemId).ToList();
+                foreach (var recipe in itemRecipes)
+                {
+                    if (recipe.Ingredient != null)
+                    {
+                        var ingNameKey = recipe.Ingredient.Name.Trim().ToLower();
+                        double quantityNeeded = recipe.QuantityRequired * groupedItem.TotalQuantity;
+
+                        if (ingredientConsumption.ContainsKey(ingNameKey))
+                        {
+                            ingredientConsumption[ingNameKey] += quantityNeeded;
+                        }
+                        else
+                        {
+                            ingredientConsumption[ingNameKey] = quantityNeeded;
+                        }
+                    }
+                }
+            }
+
+            foreach (var cons in ingredientConsumption)
+            {
+                var branchIngredient = branchIngredients
+                    .FirstOrDefault(i => i.Name.Trim().ToLower() == cons.Key);
+
+                if (branchIngredient != null && cons.Value > 0)
+                {
+                    branchIngredient.CurrentStock -= cons.Value;
+                    if (branchIngredient.CurrentStock < 0) branchIngredient.CurrentStock = 0;
+
+                    // Log combined adjustment for the shift
+                    var adjustment = new InventoryAdjustment
+                    {
+                        BranchId = shift.BranchId,
+                        IngredientId = branchIngredient.Id,
+                        QuantityAdjusted = -cons.Value,
+                        Type = "OrderConsumption",
+                        Notes = $"Automatic consumption deduction on Shift #{shiftId} closure",
+                        AdjustmentDate = DateTime.Now,
+                        AdjustedBy = "Shift Closing System"
+                    };
+                    _context.InventoryAdjustments.Add(adjustment);
+                    _context.Ingredients.Update(branchIngredient);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         // --- Stock Transfers Workflow ---
 
         public async Task<IEnumerable<StockTransfer>> GetTransfersAsync(int? branchId)

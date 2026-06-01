@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Resturant.Core.Interfaces;
+
 namespace Resturant.Web.UI.Controllers
 {
     [Authorize(Roles = AppRoles.Accountant + "," + AppRoles.Admin + "," + AppRoles.Manager)]
@@ -18,11 +20,13 @@ namespace Resturant.Web.UI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
+        private readonly IInventoryService _inventoryService;
 
-        public CashierController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public CashierController(AppDbContext context, IHubContext<OrderHub> hubContext, IInventoryService inventoryService)
         {
             _context = context;
             _hubContext = hubContext;
+            _inventoryService = inventoryService;
         }
 
         private async Task<int> GetSelectedBranchIdAsync()
@@ -163,6 +167,9 @@ namespace Resturant.Web.UI.Controllers
             activeShift.Difference = actualAmount - expectedAmount;
             activeShift.IsActive = false;
             activeShift.EndTime = DateTime.Now;
+
+            // Deduct local branch inventory stock based on recipes of all items sold in completed orders during this shift
+            await _inventoryService.DeductStockForShiftAsync(activeShift.Id);
 
             await _context.SaveChangesAsync();
 

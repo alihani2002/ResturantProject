@@ -170,6 +170,11 @@
                 <i class="bi bi-receipt text-base text-rose-500"></i>
                 <span>مكونات الوصفات (الريسبات)</span>
             </button>
+
+            <button onclick="switchTab('daily-consumption')" id="btn-tab-daily-consumption" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-calendar-check text-base text-emerald-500"></i>
+                <span>تقرير الاستهلاك ومطابقة المخزن</span>
+            </button>
         </nav>
 
         <!-- Footer Operations Link -->
@@ -2126,6 +2131,7 @@
                                             <!-- Dynamic Recipe Rows -->
                                         </tbody>
                                     </table>
+                                    <datalist id="branch-ingredients-datalist"></datalist>
                                 </div>
 
                                 <div class="border-t pt-4 dark:border-darkBorder flex justify-end gap-3 shrink-0">
@@ -2133,6 +2139,63 @@
                                     <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Recipe Map</button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- TAB: DAILY INVENTORY CONSUMPTION REPORT        -->
+            <!-- ============================================== -->
+            <div id="tab-daily-consumption" class="tab-content hidden space-y-6">
+                <!-- Header Control Row -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm">
+                    <div class="text-right" dir="rtl">
+                        <h3 class="outfit-font text-base font-extrabold text-slate-800 dark:text-white">تقرير الاستهلاك ومطابقة المخزن اليومي</h3>
+                        <p class="text-xs text-slate-400 mt-1">تتبع المبيعات اليومية ونسب استهلاك المواد الخام من مخزن الفرع المحلي لاكتشاف العجز والفروقات.</p>
+                    </div>
+                    <div class="flex items-center gap-3 w-full md:w-auto" dir="rtl">
+                        <label class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase shrink-0">تاريخ الجرد:</label>
+                        <input type="date" id="daily-consumption-date" onchange="loadDailyConsumptionReport()" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2 text-xs text-slate-880 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                        <button onclick="loadDailyConsumptionReport()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-md shadow-emerald-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-arrow-clockwise"></i> تحديث</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Sales Summary Card -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
+                        <div class="pb-4 border-b dark:border-darkBorder text-right" dir="rtl">
+                            <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">المنتجات المباعة اليوم</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">المبيعات التي تمت تسويتها واعتمادها بالفرع خلال اليوم</p>
+                        </div>
+                        <div id="daily-consumption-sales-list" class="flex-1 overflow-y-auto mt-4 space-y-3 pr-2" dir="rtl">
+                            <!-- Dynamic sold items list -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Ingredient Consumption / Discrepancy Table -->
+                    <div class="lg:col-span-2 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
+                        <div class="pb-4 border-b dark:border-darkBorder text-right" dir="rtl">
+                            <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-500 uppercase tracking-widest">مطابقة واستهلاك المواد الخام</span>
+                            <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base mt-1">جدول مطابقة المخزن المحلي وجرد المواد الخام</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">يقارن بين الاستهلاك النظري المطلوب والمخصوم فعلياً من مخزن الفرع مع توضيح الرصيد المتبقي.</p>
+                        </div>
+
+                        <div class="flex-1 overflow-y-auto mt-4 min-h-0 pr-2">
+                            <table class="w-full text-right border-collapse text-xs" dir="rtl">
+                                <thead>
+                                    <tr class="text-slate-450 dark:text-slate-400 font-bold uppercase text-[9px] border-b dark:border-darkBorder/40">
+                                        <th class="py-2.5 px-3 text-right">المادة الخام</th>
+                                        <th class="py-2.5 text-center">الاستهلاك النظري (الريسب)</th>
+                                        <th class="py-2.5 text-center">المخصوم فعلياً</th>
+                                        <th class="py-2.5 text-center">الرصيد المتبقي بالفرع</th>
+                                        <th class="py-2.5 text-center">الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="daily-consumption-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                    <!-- Dynamic Consumption Rows -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -2385,6 +2448,7 @@
             summary: null,
             'shift-reports': null
         };
+        let branchIngredientsCache = [];
 
         // Dark / Light Mode Toggle
         function toggleDarkMode() {
@@ -2452,7 +2516,8 @@
                 'branch-mgmt': 'Manage Restaurant Branches',
                 'inventory-mgmt': 'Multi-Branch Inventory & Stock Levels',
                 'stock-transfers': 'Branch Stock Transfers Workflow',
-                'recipe-mgmt': 'Menu Item Recipe Setup'
+                'recipe-mgmt': 'Menu Item Recipe Setup',
+                'daily-consumption': 'Daily Inventory Consumption & Variance Report'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
 
@@ -2480,6 +2545,9 @@
                 loadStockTransfersList();
             } else if (tabId === 'recipe-mgmt') {
                 loadRecipeMenuItems();
+                loadRecipeIngredientsDatalist();
+            } else if (tabId === 'daily-consumption') {
+                initDailyConsumptionTab();
             } else if (tabId === 'dashboard' || tabId === 'user-mgmt' || tabId === 'branch-mgmt') {
                 // Static views
             } else {
@@ -6949,33 +7017,83 @@
              });
         }
 
+        function loadRecipeIngredientsDatalist() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetStockLevels', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 branchIngredientsCache = data;
+             })
+             .fail(function() {
+                 console.error("Failed to load branch ingredients.");
+             });
+        }
+
+        function onRecipeIngredientSelectChange(selectElement) {
+            const tr = selectElement.closest('tr');
+            if (!tr) return;
+
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const unit = selectedOption.getAttribute('data-unit');
+                const unitSelect = tr.querySelector('.recipe-ingredient-unit-select');
+                if (unitSelect && unit) {
+                    let matchUnit = unit;
+                    if (matchUnit === 'Kilograms') matchUnit = 'Kg';
+                    if (matchUnit === 'Liters') matchUnit = 'Ltr';
+                    if (matchUnit === 'Pieces') matchUnit = 'Pcs';
+                    unitSelect.value = matchUnit;
+                }
+            }
+        }
+
         function addRecipeIngredientRow(name = '', quantity = '', unit = 'Grams') {
             const tbody = document.getElementById('recipe-ingredients-tbody');
             const noItemsRow = document.getElementById('recipe-no-items');
             if (noItemsRow) noItemsRow.remove();
 
-            const rowId = Date.now();
+            const rowId = Date.now() + Math.random().toString(36).substr(2, 9);
 
-            tbody.innerHTML += `
-                <tr id="tr-rec-${rowId}" class="border-b border-slate-50 dark:border-darkBorder/30">
-                    <td class="py-2.5 px-3">
-                        <input type="text" required value="${name}" placeholder="Espresso Powder, Ground Beef..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
-                    </td>
-                    <td class="py-2.5 text-center">
-                        <input type="number" step="0.001" min="0.001" required value="${quantity}" placeholder="0.000" class="w-full text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
-                    </td>
-                    <td class="py-2.5">
-                        <select required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
-                            <option value="Grams" ${unit === 'Grams' ? 'selected' : ''}>Grams</option>
-                            <option value="Kg" ${unit === 'Kg' ? 'selected' : ''}>Kg (Kilograms)</option>
-                            <option value="Ltr" ${unit === 'Ltr' ? 'selected' : ''}>Ltr (Liters)</option>
-                            <option value="Pcs" ${unit === 'Pcs' ? 'selected' : ''}>Pcs (Pieces)</option>
-                        </select>
-                    </td>
-                    <td class="py-2.5 text-center">
-                        <button type="button" onclick="removeRecipeIngredientRow(${rowId})" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-500"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>`;
+            const tr = document.createElement('tr');
+            tr.id = `tr-rec-${rowId}`;
+            tr.className = "border-b border-slate-50 dark:border-darkBorder/30";
+
+            let ingredientOptions = '<option value="">-- اختر الخامة --</option>';
+            let nameExistsInCache = false;
+
+            branchIngredientsCache.forEach(item => {
+                const isSelected = item.name.trim().toLowerCase() === name.trim().toLowerCase() ? 'selected' : '';
+                if (isSelected) nameExistsInCache = true;
+                ingredientOptions += `<option value="${item.name.replace(/"/g, '&quot;')}" ${isSelected} data-unit="${item.unit}">${item.name} (المخزون: ${item.currentStock.toFixed(2)} ${item.unit})</option>`;
+            });
+
+            if (name && !nameExistsInCache) {
+                ingredientOptions += `<option value="${name.replace(/"/g, '&quot;')}" selected data-unit="${unit}">${name} (غير مدرج بالمخزن حالياً)</option>`;
+            }
+
+            tr.innerHTML = `
+                <td class="py-2.5 px-3">
+                    <select required onchange="onRecipeIngredientSelectChange(this)" class="recipe-ingredient-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
+                        ${ingredientOptions}
+                    </select>
+                </td>
+                <td class="py-2.5 text-center">
+                    <input type="number" step="0.001" min="0.001" required value="${quantity}" placeholder="0.000" class="w-full text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
+                </td>
+                <td class="py-2.5">
+                    <select required class="recipe-ingredient-unit-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
+                        <option value="Grams" ${unit === 'Grams' ? 'selected' : ''}>Grams</option>
+                        <option value="Kg" ${unit === 'Kg' ? 'selected' : ''}>Kg (Kilograms)</option>
+                        <option value="Ltr" ${unit === 'Ltr' ? 'selected' : ''}>Ltr (Liters)</option>
+                        <option value="Pcs" ${unit === 'Pcs' ? 'selected' : ''}>Pcs (Pieces)</option>
+                        <option value="Box" ${unit === 'Box' ? 'selected' : ''}>Box</option>
+                    </select>
+                </td>
+                <td class="py-2.5 text-center">
+                    <button type="button" onclick="removeRecipeIngredientRow('${rowId}')" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-500"><i class="bi bi-trash"></i></button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
         }
 
         function removeRecipeIngredientRow(rowId) {
@@ -7006,14 +7124,20 @@
                 // Empty recipe is allowed (means no deductions)
             } else {
                 rows.forEach(row => {
+                    const selects = row.querySelectorAll('select');
                     const inputs = row.querySelectorAll('input');
-                    const select = row.querySelector('select');
-                    if (inputs.length >= 2) {
-                        items.push({
-                            ingredientName: inputs[0].value,
-                            quantityRequired: parseFloat(inputs[1].value),
-                            unit: select.value
-                        });
+                    if (selects.length >= 2 && inputs.length >= 1) {
+                        const ingredientName = selects[0].value;
+                        const quantityRequired = parseFloat(inputs[0].value);
+                        const unit = selects[1].value;
+
+                        if (ingredientName) {
+                            items.push({
+                                ingredientName: ingredientName,
+                                quantityRequired: quantityRequired,
+                                unit: unit
+                            });
+                        }
                     }
                 });
             }
@@ -7035,6 +7159,105 @@
                     showToastAlert(err.responseText || "Failed to save recipe map.", "error");
                 }
             });
+        }
+
+        function initDailyConsumptionTab() {
+            const dateInput = document.getElementById('daily-consumption-date');
+            if (dateInput && !dateInput.value) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1;
+                let dd = today.getDate();
+                if (mm < 10) mm = '0' + mm;
+                if (dd < 10) dd = '0' + dd;
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            loadDailyConsumptionReport();
+        }
+
+        function loadDailyConsumptionReport() {
+            const dateInput = document.getElementById('daily-consumption-date');
+            if (!dateInput) return;
+            const selectedDate = dateInput.value;
+            const branchId = $('#header-branch-selector').val();
+
+            const salesList = document.getElementById('daily-consumption-sales-list');
+            const tbody = document.getElementById('daily-consumption-tbody');
+
+            if (salesList) salesList.innerHTML = '<div class="text-center py-8 text-slate-400">جاري تحميل المبيعات...</div>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">جاري تحميل بيانات استهلاك المخزن...</td></tr>';
+
+            $.get('/Inventory/GetDailyConsumptionReport', { date: selectedDate, branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 // 1. Render Sold Items
+                 if (salesList) {
+                     salesList.innerHTML = '';
+                     if (!data.soldItems || data.soldItems.length === 0) {
+                         salesList.innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
+                                <i class="bi bi-cart-x text-3xl mb-2 text-slate-300"></i>
+                                <p class="text-xs font-semibold">لم يتم بيع أي منتجات في هذا اليوم</p>
+                            </div>`;
+                     } else {
+                         data.soldItems.forEach(item => {
+                             salesList.innerHTML += `
+                                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-darkBorder/40 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.name}</h5>
+                                        <p class="text-[10px] text-slate-450 mt-0.5">الكمية المباعة: <strong class="text-brand-500">${item.quantitySold} حبات</strong></p>
+                                    </div>
+                                    <div class="text-left font-semibold text-xs text-emerald-500">
+                                        ${item.totalRevenue.toFixed(2)} EGP
+                                    </div>
+                                </div>`;
+                         });
+                     }
+                 }
+
+                 // 2. Render Consumption & Discrepancies Table
+                 if (tbody) {
+                     tbody.innerHTML = '';
+                     if (!data.consumption || data.consumption.length === 0) {
+                         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 dark:text-slate-500">لا يوجد استهلاك مسجل للمواد الخام في هذا اليوم.</td></tr>';
+                     } else {
+                         data.consumption.forEach(item => {
+                             const variance = item.variance;
+                             let varianceBadge = '';
+                             if (Math.abs(variance) < 0.001) {
+                                 varianceBadge = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">مطابق</span>';
+                             } else if (variance > 0) {
+                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">عجز: ${variance.toFixed(2)} ${item.unit}</span>`;
+                             } else {
+                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500">زيادة: ${Math.abs(variance).toFixed(2)} ${item.unit}</span>`;
+                             }
+
+                             tbody.innerHTML += `
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-all border-b border-slate-50 dark:border-darkBorder/30">
+                                    <td class="py-3 px-3 text-right">
+                                        <div class="font-bold text-slate-850 dark:text-white">${item.name}</div>
+                                        <div class="text-[10px] text-slate-450 dark:text-slate-500 mt-0.5">${item.portionReference}</div>
+                                    </td>
+                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                        ${item.theoreticalConsumption.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                        ${item.actualDeducted.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center text-slate-800 dark:text-white font-bold">
+                                        ${item.currentStock.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        ${varianceBadge}
+                                    </td>
+                                </tr>`;
+                         });
+                     }
+                 }
+             })
+             .fail(function() {
+                 if (salesList) salesList.innerHTML = '<div class="text-center py-8 text-red-500">فشل في تحميل المبيعات.</div>';
+                 if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">فشل في تحميل تقرير مطابقة المخزن.</td></tr>';
+             });
         }
         // ==============================================
     </script>
