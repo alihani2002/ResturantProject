@@ -1614,12 +1614,12 @@
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
                                     <i class="bi bi-search text-xs"></i>
                                 </span>
-                                <input type="text" id="adminShiftSearch" onkeyup="renderShiftsTable(1)" placeholder="e.g. Sarah, 1001..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                                <input type="text" id="adminShiftSearch" onkeyup="loadShiftReportsList(1)" placeholder="e.g. Sarah, 1001..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                             </div>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Status</label>
-                            <select id="adminShiftStatus" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <select id="adminShiftStatus" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
                                 <option value="">All Statuses</option>
                                 <option value="Active">Active</option>
                                 <option value="Closed">Closed</option>
@@ -1627,15 +1627,15 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date From</label>
-                            <input type="date" id="adminShiftDateFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <input type="date" id="adminShiftDateFrom" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date To</label>
-                            <input type="date" id="adminShiftDateTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <input type="date" id="adminShiftDateTo" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour From</label>
-                            <select id="adminShiftHourFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <select id="adminShiftHourFrom" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
                                 <option value="">Any Hour</option>
                                 <option value="0">12:00 AM (00:00)</option>
                                 <option value="1">01:00 AM (01:00)</option>
@@ -1665,7 +1665,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour To</label>
-                            <select id="adminShiftHourTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <select id="adminShiftHourTo" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
                                 <option value="">Any Hour</option>
                                 <option value="0">12:00 AM (00:00)</option>
                                 <option value="1">01:00 AM (01:00)</option>
@@ -5567,173 +5567,95 @@
         // --- CASHIER SHIFT REPORTS LOGIC ---
         let allAdminShifts = [];
         let currentAdminShiftPage = 1;
+        let totalAdminShiftPages = 1;
+        let totalAdminShiftCount = 0;
         const shiftsPerPage = 10;
 
-        async function loadShiftReportsList() {
+        function buildShiftReportParams(page = 1, pageSize = shiftsPerPage) {
+            const params = new URLSearchParams();
+            const search = document.getElementById('adminShiftSearch')?.value || '';
+            const status = document.getElementById('adminShiftStatus')?.value || '';
+            const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
+            const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
+            const hourFrom = document.getElementById('adminShiftHourFrom')?.value || '';
+            const hourTo = document.getElementById('adminShiftHourTo')?.value || '';
+
+            if (dateFrom && dateTo && dateFrom > dateTo) {
+                throw new Error("Date From must be before or equal to Date To.");
+            }
+
+            if (hourFrom !== '' && hourTo !== '' && parseInt(hourFrom) > parseInt(hourTo)) {
+                throw new Error("Overnight hour ranges are not supported. Select a Date To on the next day instead.");
+            }
+
+            if (search.trim()) params.append('search', search.trim());
+            if (status) params.append('status', status);
+            if (dateFrom) params.append('dateFrom', dateFrom);
+            if (dateTo) params.append('dateTo', dateTo);
+            if (hourFrom !== '') params.append('hourFrom', hourFrom);
+            if (hourTo !== '') params.append('hourTo', hourTo);
+            params.append('page', page);
+            params.append('pageSize', pageSize);
+
+            return params;
+        }
+
+        async function fetchShiftReportsPage(page = 1, pageSize = shiftsPerPage) {
+            const params = buildShiftReportParams(page, pageSize);
+            const response = await fetch('/api/analytics/shifts?' + params.toString());
+
+            // Check if session is expired or redirected to login
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("text/html") !== -1) {
+                showToastAlert("Session expired or Unauthorized. Redirecting to login page...", "warning");
+                setTimeout(() => {
+                    window.location.href = "/Identity/Account/Login?ReturnUrl=" + encodeURIComponent(window.location.pathname);
+                }, 2200);
+                return null;
+            }
+
+            if (!response.ok) {
+                let message = "Server returned an error while loading shift reports.";
+                try {
+                    const error = await response.json();
+                    message = error.message || error.Message || message;
+                } catch (_) { }
+                throw new Error(message);
+            }
+
+            return await response.json();
+        }
+
+        async function loadShiftReportsList(page = 1) {
             showLoader();
             try {
-                const response = await fetch('/api/analytics/shifts');
+                const result = await fetchShiftReportsPage(page);
+                if (!result) return;
 
-                // Check if session is expired or redirected to login
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("text/html") !== -1) {
-                    showToastAlert("Session expired or Unauthorized. Redirecting to login page...", "warning");
-                    setTimeout(() => {
-                        window.location.href = "/Identity/Account/Login?ReturnUrl=" + encodeURIComponent(window.location.pathname);
-                    }, 2200);
-                    return;
-                }
-
-                if (response.ok) {
-                    allAdminShifts = await response.json();
-
-                    // Client-side fallback to high-fidelity mock data if no data was returned
-                    if (!allAdminShifts || allAdminShifts.length === 0) {
-                        console.log("No shift records returned from server database. Seeding high-fidelity sandbox shifts...");
-                        seedMockShifts();
-                    }
-                    renderShiftsTable(1);
-                } else {
-                    showToastAlert("Server returned an error. Loading high-fidelity sandbox shifts...", "warning");
-                    seedMockShifts();
-                    renderShiftsTable(1);
-                }
+                allAdminShifts = result.items || [];
+                currentAdminShiftPage = result.page || page;
+                totalAdminShiftPages = result.totalPages || 1;
+                totalAdminShiftCount = result.totalCount || 0;
+                renderShiftsTable();
             } catch (err) {
                 console.error("Failed to load shifts:", err);
-                showToastAlert("Could not connect to server. Loading sandbox shifts...", "warning");
-                seedMockShifts();
-                renderShiftsTable(1);
+                showToastAlert(err.message || "Could not load cashier shift reports.", "warning");
+                allAdminShifts = [];
+                totalAdminShiftPages = 1;
+                totalAdminShiftCount = 0;
+                renderShiftsTable();
             } finally {
                 hideLoader();
             }
         }
 
-        function seedMockShifts() {
-            allAdminShifts = [
-                {
-                    id: 1001,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 08:15 AM",
-                    endTime: "2026-05-28 04:00 PM",
-                    expectedAmount: 4500.00,
-                    actualAmount: 4500.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1002,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 04:30 PM",
-                    endTime: "2026-05-28 11:45 PM",
-                    expectedAmount: 7200.00,
-                    actualAmount: 7150.00,
-                    difference: -50.00,
-                    isActive: false
-                },
-                {
-                    id: 1003,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 09:00 AM",
-                    endTime: "2026-05-29 05:00 PM",
-                    expectedAmount: 3800.00,
-                    actualAmount: 3800.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1004,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 06:15 PM",
-                    endTime: "2026-05-30 02:00 AM",
-                    expectedAmount: 8900.00,
-                    actualAmount: 8950.00,
-                    difference: 50.00,
-                    isActive: false
-                },
-                {
-                    id: 1005,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 08:00 AM",
-                    endTime: "2026-05-30 04:30 PM",
-                    expectedAmount: 5120.00,
-                    actualAmount: 5120.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1006,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 05:00 PM",
-                    endTime: null,
-                    expectedAmount: 3200.00,
-                    actualAmount: null,
-                    difference: null,
-                    isActive: true
-                }
-            ];
-        }
-
-        function parseShiftDateTime(dateTimeStr) {
-            if (!dateTimeStr || dateTimeStr === '-') return null;
-            const parts = dateTimeStr.split(' ');
-            if (parts.length < 3) return null;
-            const datePart = parts[0];
-            const timePart = parts[1];
-            const ampmPart = parts[2];
-
-            const timeSplit = timePart.split(':');
-            let hour = parseInt(timeSplit[0]);
-            const minute = parseInt(timeSplit[1]);
-
-            if (ampmPart === 'PM' && hour < 12) hour += 12;
-            if (ampmPart === 'AM' && hour === 12) hour = 0;
-
-            return {
-                dateStr: datePart,
-                hour: hour,
-                minute: minute
-            };
-        }
-
-        function getFilteredAdminShifts() {
-            const searchTerm = document.getElementById('adminShiftSearch')?.value.toLowerCase() || '';
-            const statusFilter = document.getElementById('adminShiftStatus')?.value || '';
-            const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
-            const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
-            const hourFromVal = document.getElementById('adminShiftHourFrom')?.value;
-            const hourToVal = document.getElementById('adminShiftHourTo')?.value;
-            const hourFrom = hourFromVal !== "" && hourFromVal !== undefined ? parseInt(hourFromVal) : null;
-            const hourTo = hourToVal !== "" && hourToVal !== undefined ? parseInt(hourToVal) : null;
-
-            return allAdminShifts.filter(shift => {
-                // Search match
-                const searchMatch = !searchTerm ||
-                    (shift.cashierName && shift.cashierName.toLowerCase().includes(searchTerm)) ||
-                    shift.id.toString().includes(searchTerm);
-
-                // Status match
-                const shiftStatus = shift.isActive ? "Active" : "Closed";
-                const statusMatch = !statusFilter || shiftStatus === statusFilter;
-
-                // Date & hour parsing
-                const parsedStart = parseShiftDateTime(shift.startTime);
-
-                // Date range match
-                let dateMatch = true;
-                if (parsedStart) {
-                    if (dateFrom && parsedStart.dateStr < dateFrom) dateMatch = false;
-                    if (dateTo && parsedStart.dateStr > dateTo) dateMatch = false;
-                }
-
-                // Hour range match
-                let hourMatch = true;
-                if (parsedStart) {
-                    if (hourFrom !== null && !isNaN(hourFrom) && parsedStart.hour < hourFrom) hourMatch = false;
-                    if (hourTo !== null && !isNaN(hourTo) && parsedStart.hour > hourTo) hourMatch = false;
-                }
-
-                return searchMatch && statusMatch && dateMatch && hourMatch;
-            });
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         function resetShiftFilters() {
@@ -5755,12 +5677,11 @@
             const hourToInput = document.getElementById('adminShiftHourTo');
             if (hourToInput) hourToInput.value = '';
 
-            renderShiftsTable(1);
+            loadShiftReportsList(1);
             showToastAlert("Filters reset successfully.", "info");
         }
 
-        function renderShiftsTable(page = 1) {
-            currentAdminShiftPage = page;
+        function renderShiftsTable() {
             const tbody = document.querySelector('#table-shifts-list tbody');
             const paginationContainer = document.getElementById('shiftsPagination');
             tbody.innerHTML = '';
@@ -5769,10 +5690,7 @@
                 paginationContainer.innerHTML = '';
             }
 
-            // Get shared filtered data
-            let filteredShifts = getFilteredAdminShifts();
-
-            if (filteredShifts.length === 0) {
+            if (allAdminShifts.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="9" class="text-center py-8 text-slate-400 dark:text-slate-500">
@@ -5783,12 +5701,7 @@
                 return;
             }
 
-            // Pagination
-            const totalPages = Math.ceil(filteredShifts.length / shiftsPerPage);
-            const startIndex = (page - 1) * shiftsPerPage;
-            const paginatedShifts = filteredShifts.slice(startIndex, startIndex + shiftsPerPage);
-
-            paginatedShifts.forEach(shift => {
+            allAdminShifts.forEach(shift => {
                 let diffBadge = '-';
                 if (shift.difference !== null) {
                     const diffVal = parseFloat(shift.difference);
@@ -5813,9 +5726,9 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                         <td class="py-3.5 px-2 font-bold text-brand-500">#${shift.id}</td>
-                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${shift.cashierName}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.startTime}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.endTime || '-'}</td>
+                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${escapeHtml(shift.cashierName)}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${escapeHtml(shift.startTime)}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${escapeHtml(shift.endTime || '-')}</td>
                         <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} EGP</td>
                         <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${actualStr}</td>
                         <td class="py-3.5 px-2 text-center">${diffBadge}</td>
@@ -5825,36 +5738,50 @@
             });
 
             // Render Pagination Buttons
-            if (totalPages > 1 && paginationContainer) {
+            if (totalAdminShiftPages > 1 && paginationContainer) {
                 let paginationHtml = '';
 
                 // Prev button
-                paginationHtml += `<button onclick="renderShiftsTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
+                paginationHtml += `<button onclick="loadShiftReportsList(${currentAdminShiftPage - 1})" ${currentAdminShiftPage === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${currentAdminShiftPage === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
 
                 // Page numbers
-                for (let i = 1; i <= totalPages; i++) {
-                    const activeClass = i === page
+                for (let i = 1; i <= totalAdminShiftPages; i++) {
+                    const activeClass = i === currentAdminShiftPage
                         ? 'bg-brand-500 text-white border-brand-500'
                         : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
-                    paginationHtml += `<button onclick="renderShiftsTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
+                    paginationHtml += `<button onclick="loadShiftReportsList(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
                 }
 
                 // Next button
-                paginationHtml += `<button onclick="renderShiftsTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
+                paginationHtml += `<button onclick="loadShiftReportsList(${currentAdminShiftPage + 1})" ${currentAdminShiftPage === totalAdminShiftPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${currentAdminShiftPage === totalAdminShiftPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
 
                 paginationContainer.innerHTML = paginationHtml;
             }
         }
 
-        function exportAdminShiftsToExcel() {
-            if (!allAdminShifts || allAdminShifts.length === 0) return;
+        async function exportAdminShiftsToExcel() {
+            showLoader();
+            let filteredShifts = [];
+            try {
+                const exportPageSize = 100;
+                const firstPage = await fetchShiftReportsPage(1, exportPageSize);
+                if (!firstPage || !firstPage.items || firstPage.items.length === 0) {
+                    showToastAlert("No data matching current filters to export.", "warning");
+                    return;
+                }
 
-            // Get currently filtered list
-            let filteredShifts = getFilteredAdminShifts();
-
-            if (filteredShifts.length === 0) {
-                showToastAlert("No data matching current filters to export.", "warning");
+                filteredShifts = firstPage.items;
+                const totalPages = firstPage.totalPages || 1;
+                for (let page = 2; page <= totalPages; page++) {
+                    const nextPage = await fetchShiftReportsPage(page, exportPageSize);
+                    filteredShifts = filteredShifts.concat(nextPage?.items || []);
+                }
+            } catch (err) {
+                console.error("Failed to export shifts:", err);
+                showToastAlert(err.message || "Could not export cashier shifts.", "warning");
                 return;
+            } finally {
+                hideLoader();
             }
 
             // Generate clean array of objects for Excel

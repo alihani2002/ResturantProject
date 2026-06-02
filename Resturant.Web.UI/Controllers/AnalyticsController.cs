@@ -56,6 +56,35 @@ namespace Resturant.Web.UI.Controllers
             return null;
         }
 
+        private async Task<(bool IsAuthorized, int? BranchId, string? ErrorMessage)> GetAuthorizedReportBranchIdAsync()
+        {
+            var activeBranchId = GetActiveBranchId();
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+
+            if (isAdminOrManager)
+            {
+                if (!activeBranchId.HasValue)
+                {
+                    return (true, null, null);
+                }
+
+                var branchExists = await _context.Branches
+                    .AnyAsync(b => b.Id == activeBranchId.Value && !b.IsDeleted && b.IsActive);
+
+                return branchExists
+                    ? (true, activeBranchId, null)
+                    : (false, null, "Selected branch is invalid or inactive.");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user?.BranchId.HasValue != true)
+            {
+                return (false, null, "User is not assigned to a branch.");
+            }
+
+            return (true, user.BranchId.Value, null);
+        }
+
         // Helper to validate filter parameters
         private IActionResult ValidateFilters(ReportFilterParams filters)
         {
@@ -946,25 +975,122 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpGet("shifts")]
-        public async Task<IActionResult> GetShifts()
+        public async Task<IActionResult> GetShifts(
+            [FromQuery] string? search,
+            [FromQuery] string? status,
+            [FromQuery] DateTime? dateFrom,
+            [FromQuery] DateTime? dateTo,
+            [FromQuery] int? hourFrom,
+            [FromQuery] int? hourTo,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
                 _logger.LogInformation("Fetching cashier shift reports for admin.");
-                var activeBranchId = GetActiveBranchId();
+                if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value.Date > dateTo.Value.Date)
+                {
+                    return BadRequest(new { Message = "Date From must be before or equal to Date To." });
+                }
+
+                if ((hourFrom.HasValue && (hourFrom.Value < 0 || hourFrom.Value > 23)) ||
+                    (hourTo.HasValue && (hourTo.Value < 0 || hourTo.Value > 23)))
+                {
+                    return BadRequest(new { Message = "Hour filters must be between 0 and 23." });
+                }
+
+                if (hourFrom.HasValue && hourTo.HasValue && hourFrom.Value > hourTo.Value)
+                {
+                    return BadRequest(new { Message = "Overnight hour ranges are not supported. Use a Date/Time range that ends on the next day." });
+                }
+
+                page = Math.Max(page, 1);
+                pageSize = Math.Clamp(pageSize, 1, 100);
+
+                var branchScope = await GetAuthorizedReportBranchIdAsync();
+                if (!branchScope.IsAuthorized)
+                {
+                    return BadRequest(new { Message = branchScope.ErrorMessage });
+                }
+
                 var query = _context.Set<CashierShift>()
                     .Include(s => s.Cashier)
                     .AsQueryable();
-                if (activeBranchId.HasValue)
+
+                if (branchScope.BranchId.HasValue)
                 {
-                    query = query.Where(s => s.BranchId == activeBranchId.Value);
+                    query = query.Where(s => s.BranchId == branchScope.BranchId.Value);
                 }
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var trimmedSearch = search.Trim();
+                    query = query.Where(s =>
+                        s.Id.ToString().Contains(trimmedSearch) ||
+                        s.CashierId.Contains(trimmedSearch) ||
+                        (s.Cashier != null && (
+                            (s.Cashier.FullName != null && s.Cashier.FullName.Contains(trimmedSearch)) ||
+                            (s.Cashier.UserName != null && s.Cashier.UserName.Contains(trimmedSearch)))));
+                }
+
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    if (string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(s => s.IsActive);
+                    }
+                    else if (string.Equals(status, "Closed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(s => !s.IsActive);
+                    }
+                    else
+                    {
+                        return BadRequest(new { Message = "Status must be Active, Closed, or empty." });
+                    }
+                }
+
+                DateTime? rangeStart = null;
+                DateTime? rangeEndExclusive = null;
+                if (dateFrom.HasValue)
+                {
+                    rangeStart = dateFrom.Value.Date.AddHours(hourFrom ?? 0);
+                }
+                if (dateTo.HasValue)
+                {
+                    rangeEndExclusive = dateTo.Value.Date.AddHours((hourTo ?? 23) + 1);
+                }
+
+                if (rangeStart.HasValue)
+                {
+                    query = query.Where(s => (s.EndTime ?? DateTime.Now) >= rangeStart.Value);
+                }
+                if (rangeEndExclusive.HasValue)
+                {
+                    query = query.Where(s => s.StartTime < rangeEndExclusive.Value);
+                }
+
+                if (!dateFrom.HasValue && !dateTo.HasValue)
+                {
+                    if (hourFrom.HasValue)
+                    {
+                        query = query.Where(s => s.StartTime.Hour >= hourFrom.Value);
+                    }
+                    if (hourTo.HasValue)
+                    {
+                        query = query.Where(s => s.StartTime.Hour <= hourTo.Value);
+                    }
+                }
+
+                var totalCount = await query.CountAsync();
                 var shifts = await query
                     .OrderByDescending(s => s.StartTime)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
 
                 var result = shifts.Select(s => new {
                     id = s.Id,
+                    cashierId = s.CashierId,
                     cashierName = s.Cashier?.FullName ?? s.Cashier?.UserName ?? "N/A",
                     startTime = s.StartTime.ToString("yyyy-MM-dd hh:mm tt"),
                     endTime = s.EndTime.HasValue ? s.EndTime.Value.ToString("yyyy-MM-dd hh:mm tt") : "-",
@@ -974,7 +1100,14 @@ namespace Resturant.Web.UI.Controllers
                     isActive = s.IsActive
                 }).ToList();
 
-                return Ok(result);
+                return Ok(new
+                {
+                    items = result,
+                    page,
+                    pageSize,
+                    totalCount,
+                    totalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                });
             }
             catch (Exception ex)
             {

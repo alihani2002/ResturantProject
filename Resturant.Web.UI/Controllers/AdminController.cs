@@ -53,8 +53,13 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpPost]
-        public IActionResult SwitchBranch(int? branchId)
+        public async Task<IActionResult> SwitchBranch(int? branchId)
         {
+            if (!User.IsInRole(AppRoles.Admin) && !User.IsInRole(AppRoles.Manager))
+            {
+                return Forbid();
+            }
+
             CookieOptions option = new CookieOptions
             {
                 Expires = DateTime.Now.AddYears(1),
@@ -64,6 +69,13 @@ namespace Resturant.Web.UI.Controllers
 
             if (branchId.HasValue && branchId.Value > 0)
             {
+                var branchExists = await _context.Branches
+                    .AnyAsync(b => b.Id == branchId.Value && !b.IsDeleted && b.IsActive);
+                if (!branchExists)
+                {
+                    return BadRequest(new { success = false, message = "Invalid or inactive branch." });
+                }
+
                 Response.Cookies.Append("AdminActiveBranchId", branchId.Value.ToString(), option);
             }
             else
