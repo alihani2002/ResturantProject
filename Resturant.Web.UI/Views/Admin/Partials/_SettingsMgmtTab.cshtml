@@ -1,0 +1,41 @@
+﻿            <div id="tab-settings-mgmt" class="tab-content hidden space-y-6">
+                <div class="max-w-2xl mx-auto bg-white dark:bg-darkCard p-8 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-6">
+                    <div class="text-center pb-4 border-b border-slate-100 dark:border-darkBorder">
+                        <div class="inline-flex items-center justify-center bg-brand-50 dark:bg-brand-950/20 p-4 rounded-full text-brand-500 mb-3">
+                            <i class="bi bi-sliders text-3xl"></i>
+                        </div>
+                        <h3 class="outfit-font text-lg font-bold text-slate-900 dark:text-white">System Taxes & Service Charges</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure global percentage charges applied automatically to all tickets.</p>
+                    </div>
+
+                    <form id="form-system-settings" onsubmit="submitSystemSettings(event)" class="space-y-6">
+                        <!-- Success Message -->
+                        <div id="settings-success-alert" class="hidden p-4 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-center">
+                            <i class="bi bi-check-circle-fill me-1"></i> Settings updated successfully!
+                        </div>
+
+                        <!-- Tax Percentage Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Value Added Tax (VAT) %</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-tax" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="14.00">
+                            </div>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">Default value-added tax percentage added to orders.</span>
+                        </div>
+
+                        <!-- Service Percentage Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Service Charge %</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-service" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="12.00">
+                            </div>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">Default dining room and hall service charge percentage.</span>
+                        </div>
+
+                        <!-- Action Button -->
+                        <button type="submit" class="w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm transition-all shadow-md shadow-brand-500/10">Save Global Settings</button>
+                    </form>
+                </div>
+            </div>

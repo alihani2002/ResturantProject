@@ -1,0 +1,123 @@
+﻿            <div id="tab-inventory" class="tab-content hidden space-y-6">
+                <!-- Inventory Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Valuation of Stock</p>
+                            <h4 id="inv-valuation" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
+                        </div>
+                        <div class="p-3 bg-teal-50 text-teal-500 rounded-lg"><i class="bi bi-wallet2 text-xl"></i></div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Purchases (Stock In)</p>
+                            <h4 id="inv-purchases" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
+                        </div>
+                        <div class="p-3 bg-blue-50 text-blue-500 rounded-lg"><i class="bi bi-cart-check text-xl"></i></div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Kitchen Waste Logs</p>
+                            <h4 id="inv-waste" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">$0.00</h4>
+                        </div>
+                        <div class="p-3 bg-red-50 text-red-500 rounded-lg"><i class="bi bi-trash3 text-xl"></i></div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Average Food Cost %</p>
+                            <h4 id="inv-foodcost" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0%</h4>
+                        </div>
+                        <div class="p-3 bg-amber-50 text-amber-500 rounded-lg"><i class="bi bi-percent text-xl"></i></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Low Stock Alerts -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm lg:col-span-2 space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-red-500 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Low Stock Warnings & Supplier Orders
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-inv-lowstock" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">Ingredient Name</th>
+                                        <th class="py-2.5">Current Inventory</th>
+                                        <th class="py-2.5">Reorder Level</th>
+                                        <th class="py-2.5">Unit</th>
+                                        <th class="py-2.5">Supplier Name</th>
+                                        <th class="py-2.5">Status Alert</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Supplier Performance -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Supplier Purchase Audit</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-inv-suppliers" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">Supplier Name</th>
+                                        <th class="py-2.5">Purchases Count</th>
+                                        <th class="py-2.5">Total Value</th>
+                                        <th class="py-2.5">Lead Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Food Cost Recipe Margins -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Recipe Ingredient Margin Analysis</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-inv-recipes" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">MenuItem (Product)</th>
+                                        <th class="py-2.5">Selling Price</th>
+                                        <th class="py-2.5">Ingredient Cost</th>
+                                        <th class="py-2.5">Gross Margin</th>
+                                        <th class="py-2.5">Food Cost %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Waste Log report -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Kitchen Ingredient Waste & Damage Records</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-inv-waste" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">Ingredient</th>
+                                        <th class="py-2.5">Quantity Wasted</th>
+                                        <th class="py-2.5">Cost Impact</th>
+                                        <th class="py-2.5">Reason Code</th>
+                                        <th class="py-2.5">Logged Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>

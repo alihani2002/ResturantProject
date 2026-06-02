@@ -1,0 +1,97 @@
+﻿            <div id="tab-customers" class="tab-content hidden space-y-6">
+                <!-- Customer CRM KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm relative overflow-hidden group">
+                        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">New Customer Sessions</p>
+                        <h4 id="customer-new-count" class="outfit-font text-2xl font-black text-slate-800 dark:text-white mt-1">0</h4>
+                        <span class="text-[10px] text-slate-400">First-time scans in selected period</span>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm relative overflow-hidden group">
+                        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Returning Customers</p>
+                        <h4 id="customer-return-count" class="outfit-font text-2xl font-black text-slate-800 dark:text-white mt-1">0</h4>
+                        <span class="text-[10px] text-slate-400">Frequent visitors rate tracking active</span>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm relative overflow-hidden group">
+                        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Retention rate</p>
+                        <h4 id="customer-retention-rate" class="outfit-font text-2xl font-black text-slate-800 dark:text-white mt-1">0%</h4>
+                        <span class="text-[10px] text-brand-500 font-semibold">Healthy customer loyalty trend</span>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm relative overflow-hidden group">
+                        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Average Session Spend</p>
+                        <h4 id="customer-avg-spend" class="outfit-font text-2xl font-black text-slate-800 dark:text-white mt-1">0.00 L.E.</h4>
+                        <span class="text-[10px] text-slate-400">Calculated average basket total</span>
+                    </div>
+                </div>
+
+                <!-- Professional CRM Guest Directory Database Ledger -->
+                <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
+                        <div>
+                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">CRM Guest Profile Directory Database</h3>
+                            <p class="text-xs text-slate-400 mt-0.5 font-medium">Search, filter, and drill-down into detailed order habits and lifetime value of all guest accounts</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="exportGuestCRM('excel')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all flex items-center gap-1">
+                                <i class="bi bi-file-earmark-excel"></i> Export CSV
+                            </button>
+                            <button onclick="exportGuestCRM('pdf')" class="px-3 py-1.5 bg-red-650 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition-all flex items-center gap-1">
+                                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter / Search toolbar -->
+                    <div class="flex flex-wrap items-center gap-3 justify-between">
+                        <div class="relative w-full md:w-80">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="bi bi-search text-xs"></i>
+                            </span>
+                            <input type="text" id="crm-search" onkeyup="filterCRMDirectory()" placeholder="Search guests by name, phone, or email..." class="w-full pl-9 pr-4 py-2 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 dark:border-darkBorder focus:ring-1 focus:ring-brand-500 focus:outline-none dark:text-white">
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="crm-filter-loyalty" onchange="filterCRMDirectory()" class="px-3 py-2 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 dark:border-darkBorder focus:outline-none dark:text-white">
+                                <option value="">All Loyalty Segments</option>
+                                <option value="Elite VIP">Elite VIP (LTV &gt; 1500)</option>
+                                <option value="Frequent Buyer">Frequent Buyer (Orders &gt;= 5)</option>
+                                <option value="Standard Loyalty">Standard Loyalty</option>
+                            </select>
+
+                            <select id="crm-filter-status" onchange="filterCRMDirectory()" class="px-3 py-2 border rounded-xl text-xs bg-slate-50 dark:bg-slate-900 dark:border-darkBorder focus:outline-none dark:text-white">
+                                <option value="">All Statuses</option>
+                                <option value="Active">Active Visitors</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Responsive CRM Data Table -->
+                    <div class="overflow-x-auto">
+                        <table id="table-vip-customers" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                    <th class="py-3 cursor-pointer select-none" onclick="sortCRMDirectory('customerName')">Guest Name <i class="bi bi-arrow-down-up ml-0.5 text-[8px]"></i></th>
+                                    <th class="py-3 cursor-pointer select-none" onclick="sortCRMDirectory('phoneNumber')">Phone / Email <i class="bi bi-arrow-down-up ml-0.5 text-[8px]"></i></th>
+                                    <th class="py-3 cursor-pointer select-none text-center" onclick="sortCRMDirectory('totalOrders')">Orders <i class="bi bi-arrow-down-up ml-0.5 text-[8px]"></i></th>
+                                    <th class="py-3 cursor-pointer select-none text-right" onclick="sortCRMDirectory('totalSpent')">Lifetime Spent <i class="bi bi-arrow-down-up ml-0.5 text-[8px]"></i></th>
+                                    <th class="py-3 cursor-pointer select-none text-right" onclick="sortCRMDirectory('customerLifetimeValue')">Est. CLV <i class="bi bi-arrow-down-up ml-0.5 text-[8px]"></i></th>
+                                    <th class="py-3">Segment</th>
+                                    <th class="py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamic Guest rows populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- CRM Table Pagination -->
+                    <div class="flex items-center justify-between border-t pt-4 border-slate-100 dark:border-darkBorder text-xs text-slate-400">
+                        <span id="crm-pagination-info">Showing 0 to 0 of 0 guests</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="paginateCRM('prev')" class="px-3 py-1.5 border dark:border-darkBorder rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 font-semibold">Prev</button>
+                            <button onclick="paginateCRM('next')" class="px-3 py-1.5 border dark:border-darkBorder rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 font-semibold">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>

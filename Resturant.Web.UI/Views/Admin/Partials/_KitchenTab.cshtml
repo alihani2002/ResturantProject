@@ -1,0 +1,67 @@
+﻿            <div id="tab-kitchen" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Average Prep Time</p>
+                            <h4 id="kitchen-avg-prep" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0 min</h4>
+                        </div>
+                        <div class="p-3 bg-red-50 text-red-500 rounded-lg"><i class="bi bi-fire text-xl"></i></div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Delayed Orders Count</p>
+                            <h4 id="kitchen-delayed-count" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0</h4>
+                        </div>
+                        <div class="p-3 bg-amber-50 text-amber-500 rounded-lg"><i class="bi bi-clock-fill text-xl"></i></div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Kitchen Load Efficiency</p>
+                            <h4 id="kitchen-efficiency-score" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0%</h4>
+                        </div>
+                        <div class="p-3 bg-emerald-50 text-emerald-500 rounded-lg"><i class="bi bi-lightning-charge-fill text-xl"></i></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Kitchen Hourly Operations Traffic Ledger -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm lg:col-span-2 space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Kitchen Load By Hour (Operational Capacity)</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-kitchen-hourly-load" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                                        <th class="py-2.5">Hour Period</th>
+                                        <th class="py-2.5 text-center">Orders Prepared</th>
+                                        <th class="py-2.5 text-center">Delayed Orders</th>
+                                        <th class="py-2.5 text-right">Avg Prep Duration</th>
+                                        <th class="py-2.5 text-right">Kitchen Capacity Load</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically in JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Prep Speed lists -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Preparation Performance</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-600 mb-2">Fastest Prepared Items (Avg. mins)</h4>
+                                <div id="kitchen-fastest-list" class="space-y-2 text-xs">
+                                    <!-- Filled dynamically -->
+                                </div>
+                            </div>
+                            <div class="border-t pt-4 border-slate-100 dark:border-darkBorder">
+                                <h4 class="text-xs font-bold text-red-600 mb-2">Slowest / Complex Items (Needs Monitor)</h4>
+                                <div id="kitchen-slowest-list" class="space-y-2 text-xs">
+                                    <!-- Filled dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>

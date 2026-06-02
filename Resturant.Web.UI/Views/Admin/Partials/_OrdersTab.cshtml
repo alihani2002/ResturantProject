@@ -1,0 +1,64 @@
+﻿            <div id="tab-orders" class="tab-content hidden space-y-6">
+                <!-- Orders Status Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400">Total Orders Processed</p>
+                        <h4 id="order-total-count" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0</h4>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400">Average Preparation Time</p>
+                        <h4 id="order-avg-prep" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0 min</h4>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400">Average Serving Speed</p>
+                        <h4 id="order-avg-serve" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0 min</h4>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-5 border rounded-xl shadow-sm">
+                        <p class="text-xs font-semibold text-slate-400">Table Turnover Duration</p>
+                        <h4 id="order-avg-turnover" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0 min</h4>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Orders Category Volume Ledger -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Orders Breakdown By Menu Category</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-orders-category" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase text-[9px] tracking-wider">
+                                        <th class="py-2.5">Category Name</th>
+                                        <th class="py-2.5 text-center">Orders Count</th>
+                                        <th class="py-2.5 text-right">Revenue Yield</th>
+                                        <th class="py-2.5 text-right">Market Share %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically in JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Busy Tables Leaderboard -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Most Busy Tables & Turnover Leaderboard</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-busy-tables" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">Table Number</th>
+                                        <th class="py-2.5">Total Sessions</th>
+                                        <th class="py-2.5">Total Orders</th>
+                                        <th class="py-2.5">Total Spent</th>
+                                        <th class="py-2.5">Avg Session Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>

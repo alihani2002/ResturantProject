@@ -1,0 +1,283 @@
+﻿            <div id="tab-dashboard" class="tab-content space-y-6">
+
+                <!-- Dynamic Branch Terminals Gateway (White Background Premium Panel) -->
+                @{
+                    var activeBranchId = ViewBag.ActiveBranchId as string;
+                    var activeBranch = (ViewBag.Branches as List<Resturant.Core.Entities.Branch>)?.FirstOrDefault(b => b.Id.ToString() == activeBranchId);
+                }
+
+                <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 border-slate-105 gap-4">
+                        <div class="text-left">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-500/10 text-brand-600 uppercase tracking-widest">Selected Branch Operations</span>
+                            <h2 class="outfit-font text-xl font-extrabold text-slate-900 mt-1">
+                                @if (activeBranch != null)
+                                {
+                                    <i class="bi bi-shop text-brand-500 me-2"></i>@activeBranch.Name
+                                }
+                                else
+                                {
+                                    <i class="bi bi-layers text-slate-400 me-2"></i><span>Consolidated View (All Branches)</span>
+                                }
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Quick operational terminals launchpad. Select a branch from the top header to control distinct terminals.</p>
+                        </div>
+
+                        @if (activeBranch == null)
+                        {
+                            <span class="text-xs text-amber-600 font-bold bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100 flex items-center gap-1.5">
+                                <i class="bi bi-exclamation-circle-fill"></i> Please select a branch from the top-right header to unlock terminals.
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 flex items-center gap-1.5">
+                                <i class="bi bi-check-circle-fill"></i> Branch active and routed.
+                            </span>
+                        }
+                    </div>
+
+                    @if (activeBranch != null)
+                    {
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Waiter Terminal Card -->
+                            <a href="/Waiter?branchId=@activeBranch.Id" target="_blank" class="block bg-slate-50 hover:bg-indigo-50/30 border border-slate-200/60 rounded-2xl p-6 transition-all duration-300 group hover:shadow-md hover:border-indigo-500/30 text-left">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 bg-indigo-500 text-white rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                                        <i class="bi bi-person-badge text-xl"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="outfit-font font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">Waiter Terminal</h4>
+                                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">صالة المطعم & الطلبات</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-4 leading-relaxed">Launch table management, take table orders, and respond to waiter call-outs for @activeBranch.Name.</p>
+                                <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-indigo-600">
+                                    <span>Launch Terminal</span>
+                                    <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                            </a>
+
+                            <!-- Chef Terminal Card -->
+                            <a href="/Chef?branchId=@activeBranch.Id" target="_blank" class="block bg-slate-50 hover:bg-rose-50/30 border border-slate-200/60 rounded-2xl p-6 transition-all duration-300 group hover:shadow-md hover:border-rose-500/30 text-left">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 bg-rose-500 text-white rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                                        <i class="bi bi-fire text-xl"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="outfit-font font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Kitchen Queue</h4>
+                                        <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">لوحة تحكم الشيف والمطبخ</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-4 leading-relaxed">Monitor prep lists, manage recipe items in real-time, and dispatch chef-completed orders.</p>
+                                <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-rose-600">
+                                    <span>Launch Display</span>
+                                    <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                            </a>
+
+                            <!-- Cashier Terminal Card -->
+                            <a href="/Cashier?branchId=@activeBranch.Id" target="_blank" class="block bg-slate-50 hover:bg-emerald-50/30 border border-slate-200/60 rounded-2xl p-6 transition-all duration-300 group hover:shadow-md hover:border-emerald-500/30 text-left">
+                                <div class="flex items-center gap-4">
+                                    <div class="p-3 bg-emerald-500 text-white rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                                        <i class="bi bi-pc-display-horizontal text-xl"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <h4 class="outfit-font font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Cashier POS</h4>
+                                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">نظام المبيعات والحسابات</span>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-4 leading-relaxed">Activate shifts, accept payments, print receipts, and reconcile registers for @activeBranch.Name.</p>
+                                <div class="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-600">
+                                    <span>Launch POS</span>
+                                    <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Grid of All Branches with Quick Icons -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @if (ViewBag.Branches != null)
+                            {
+                                foreach (var branch in ViewBag.Branches)
+                                {
+                                    <div class="bg-slate-50 border border-slate-200/70 p-4 rounded-xl flex flex-col justify-between gap-3 text-left">
+                                        <div>
+                                            <h4 class="outfit-font font-bold text-slate-850"><i class="bi bi-shop text-brand-500 me-1.5"></i>@branch.Name</h4>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">Quick select shortcuts</p>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <a href="/Waiter?branchId=@branch.Id" target="_blank" class="flex-1 py-2 bg-white hover:bg-indigo-50 border border-slate-200 text-slate-700 hover:text-indigo-600 rounded-lg text-[10px] font-bold text-center transition-all flex items-center justify-center gap-1">
+                                                <i class="bi bi-person-badge"></i> Waiter
+                                            </a>
+                                            <a href="/Chef?branchId=@branch.Id" target="_blank" class="flex-1 py-2 bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 hover:text-rose-600 rounded-lg text-[10px] font-bold text-center transition-all flex items-center justify-center gap-1">
+                                                <i class="bi bi-fire"></i> Chef
+                                            </a>
+                                            <a href="/Cashier?branchId=@branch.Id" target="_blank" class="flex-1 py-2 bg-white hover:bg-emerald-50 border border-slate-200 text-slate-700 hover:text-emerald-600 rounded-lg text-[10px] font-bold text-center transition-all flex items-center justify-center gap-1">
+                                                <i class="bi bi-pc-display-horizontal"></i> Cashier
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Features Directory Map Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1: Add / Manage Menu -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-rose-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-xl">
+                                    <i class="bi bi-journal-plus text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Menu</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Create, edit, and archive dishes or drinks, configure their prices, popularity badges, and upload high-resolution food images to Cloudinary.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('menu-mgmt')" class="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-rose-500/10">
+                                <span>Access Menu Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Manage Categories -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-cyan-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-cyan-50 dark:bg-cyan-950/20 text-cyan-500 rounded-xl">
+                                    <i class="bi bi-tags text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Categories</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Organize your menu items into custom food and beverage categories (e.g. Appetizers, Desserts). Set display order numbers and descriptions.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('category-mgmt')" class="w-full py-2.5 px-4 bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-950/20 dark:hover:bg-cyan-950/40 text-cyan-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-cyan-500/10">
+                                <span>Access Category Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Add / Manage Tables -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-orange-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-orange-50 dark:bg-orange-950/20 text-orange-500 rounded-xl">
+                                    <i class="bi bi-grid text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Add / Manage Tables</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Register physical restaurant tables and instantly generate high-quality QR codes with custom branding ready to print for guest scanning.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('table-mgmt')" class="w-full py-2.5 px-4 bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/20 dark:hover:bg-orange-950/40 text-orange-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-orange-500/10">
+                                <span>Access Table Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Assign Waiter Tables -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-indigo-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 rounded-xl">
+                                    <i class="bi bi-person-lines-fill text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Assign Waiter Tables</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Map dining room tables to specific active waiter accounts. Waiters will only receive customer call and order notifications for assigned tables.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('waiter-assignment')" class="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 text-indigo-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-indigo-500/10">
+                                <span>Access Waiter Assignment</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Shift Reports -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-warning/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl">
+                                    <i class="bi bi-clock-history text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Shift Reports</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Review historical cashier shift logs, expected cash register totals vs actual cash input, and audit balanced, shortage, or surplus reports.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('shift-reports')" class="w-full py-2.5 px-4 bg-brand-50 hover:bg-brand-100 dark:bg-brand-950/20 dark:hover:bg-brand-950/40 text-brand-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-brand-500/10">
+                                <span>Access Shift Reports</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Manage Users & Roles -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-sky-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-sky-50 dark:bg-sky-950/20 text-sky-500 rounded-xl">
+                                    <i class="bi bi-people-fill text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Manage Users & Roles</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Register new staff accounts, manage security access levels, assign waiter/chef/cashier roles, and toggle account activation status.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('user-mgmt')" class="w-full py-2.5 px-4 bg-sky-50 hover:bg-sky-100 dark:bg-sky-950/20 dark:hover:bg-sky-950/40 text-sky-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-sky-500/10">
+                                <span>Access User Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 7: Taxes & Service Settings -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 rounded-xl">
+                                    <i class="bi bi-sliders text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Global Taxes & Service settings</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Set up default VAT tax percentages and restaurant service/hall charge percentages applied dynamically to all new orders and customer billing invoices.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('settings-mgmt')" class="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:hover:bg-emerald-950/40 text-emerald-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-emerald-500/10">
+                                <span>Configure Global Settings</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 8: Manage Branches -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group hover:border-brand-500/40 transition-all duration-300">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-brand-50 dark:bg-brand-950/20 text-brand-500 rounded-xl">
+                                    <i class="bi bi-geo-alt text-xl"></i>
+                                </div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Manage Branches</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Create, configure, toggle active states, and coordinate multiple physical branches or cloud kitchens under your restaurant account.</p>
+                        </div>
+                        <div class="mt-6">
+                            <button onclick="switchTab('branch-mgmt')" class="w-full py-2.5 px-4 bg-brand-50 hover:bg-brand-100 dark:bg-brand-950/20 dark:hover:bg-brand-950/40 text-brand-500 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border border-brand-500/10">
+                                <span>Access Branch Manager</span>
+                                <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>

@@ -1,0 +1,134 @@
+﻿            <div id="tab-shift-reports" class="tab-content hidden space-y-6">
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
+                        <div>
+                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="bi bi-clock-history text-warning"></i> Cashier Shift Reports
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Historical list of closed cashier shifts with cash reconciliations, shortages and surpluses.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetShiftFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <button onclick="exportAdminShiftsToExcel()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40">
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Search Cashier / ID</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
+                                    <i class="bi bi-search text-xs"></i>
+                                </span>
+                                <input type="text" id="adminShiftSearch" onkeyup="renderShiftsTable(1)" placeholder="e.g. Sarah, 1001..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Status</label>
+                            <select id="adminShiftStatus" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date From</label>
+                            <input type="date" id="adminShiftDateFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date To</label>
+                            <input type="date" id="adminShiftDateTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour From</label>
+                            <select id="adminShiftHourFrom" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">Any Hour</option>
+                                <option value="0">12:00 AM (00:00)</option>
+                                <option value="1">01:00 AM (01:00)</option>
+                                <option value="2">02:00 AM (02:00)</option>
+                                <option value="3">03:00 AM (03:00)</option>
+                                <option value="4">04:00 AM (04:00)</option>
+                                <option value="5">05:00 AM (05:00)</option>
+                                <option value="6">06:00 AM (06:00)</option>
+                                <option value="7">07:00 AM (07:00)</option>
+                                <option value="8">08:00 AM (08:00)</option>
+                                <option value="9">09:00 AM (09:00)</option>
+                                <option value="10">10:00 AM (10:00)</option>
+                                <option value="11">11:00 AM (11:00)</option>
+                                <option value="12">12:00 PM (12:00)</option>
+                                <option value="13">01:00 PM (13:00)</option>
+                                <option value="14">02:00 PM (14:00)</option>
+                                <option value="15">03:00 PM (15:00)</option>
+                                <option value="16">04:00 PM (16:00)</option>
+                                <option value="17">05:00 PM (17:00)</option>
+                                <option value="18">06:00 PM (18:00)</option>
+                                <option value="19">07:00 PM (19:00)</option>
+                                <option value="20">08:00 PM (20:00)</option>
+                                <option value="21">09:00 PM (21:00)</option>
+                                <option value="22">10:00 PM (22:00)</option>
+                                <option value="23">11:00 PM (23:00)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour To</label>
+                            <select id="adminShiftHourTo" onchange="renderShiftsTable(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                                <option value="">Any Hour</option>
+                                <option value="0">12:00 AM (00:00)</option>
+                                <option value="1">01:00 AM (01:00)</option>
+                                <option value="2">02:00 AM (02:00)</option>
+                                <option value="3">03:00 AM (03:00)</option>
+                                <option value="4">04:00 AM (04:00)</option>
+                                <option value="5">05:00 AM (05:00)</option>
+                                <option value="6">06:00 AM (06:00)</option>
+                                <option value="7">07:00 AM (07:00)</option>
+                                <option value="8">08:00 AM (08:00)</option>
+                                <option value="9">09:00 AM (09:00)</option>
+                                <option value="10">10:00 AM (10:00)</option>
+                                <option value="11">11:00 AM (11:00)</option>
+                                <option value="12">12:00 PM (12:00)</option>
+                                <option value="13">01:00 PM (13:00)</option>
+                                <option value="14">02:00 PM (14:00)</option>
+                                <option value="15">03:00 PM (15:00)</option>
+                                <option value="16">04:00 PM (16:00)</option>
+                                <option value="17">05:00 PM (17:00)</option>
+                                <option value="18">06:00 PM (18:00)</option>
+                                <option value="19">07:00 PM (19:00)</option>
+                                <option value="20">08:00 PM (20:00)</option>
+                                <option value="21">09:00 PM (21:00)</option>
+                                <option value="22">10:00 PM (22:00)</option>
+                                <option value="23">11:00 PM (23:00)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto mt-4">
+                        <table id="table-shifts-list" class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                    <th class="py-3">Shift ID</th>
+                                    <th class="py-3">Cashier</th>
+                                    <th class="py-3">Start Time</th>
+                                    <th class="py-3">End Time</th>
+                                    <th class="py-3 text-right">System Expected</th>
+                                    <th class="py-3 text-right">Actual Entered</th>
+                                    <th class="py-3 text-center">Difference</th>
+                                    <th class="py-3 text-center">Status</th>
+                                    <th class="py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div id="shiftsPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
+                    </div>
+                </div>
+            </div>

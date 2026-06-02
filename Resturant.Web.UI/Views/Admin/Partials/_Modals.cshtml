@@ -1,0 +1,231 @@
+﻿
+    <!-- ADD INVENTORY STOCK INTAKE MODAL -->
+    <div id="add-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="add-stock-modal-content">
+            <button onclick="closeAddStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-500 dark:text-amber-400 uppercase tracking-widest">Inventory intake</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Purchase / Add Stock Intake</h3>
+                </div>
+
+                <form id="form-add-stock" onsubmit="submitAddStock(event)" class="space-y-4">
+                    <input type="hidden" id="add-stock-ingredient-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
+                        <input type="text" id="add-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Quantity Added</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <input type="number" step="0.001" min="0.001" id="add-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="add-stock-unit-lbl">Kg</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
+                            <input type="number" step="0.01" min="0" id="add-stock-cost" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Intake / Purchase Notes</label>
+                        <textarea id="add-stock-notes" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Supplier invoice ref, delivery confirmation, batch details..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/10">Confirm Stock Intake</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE / UPDATE INGREDIENT CRUD MODAL -->
+    <div id="ingredient-crud-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="ingredient-crud-modal-content">
+            <button onclick="closeIngredientCrudModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest" id="ingredient-modal-badge">Inventory Material</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1" id="ingredient-modal-title">Add New Material</h3>
+                </div>
+
+                <form id="form-ingredient-crud" onsubmit="submitIngredientCrud(event)" class="space-y-4">
+                    <input type="hidden" id="ingredient-crud-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Material / Ingredient Name</label>
+                        <input type="text" id="ingredient-crud-name" required placeholder="e.g. Ground Beef, Milk, Espresso Beans" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div id="initial-stock-container">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Initial Stock</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-initial-stock" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Reorder Level (Min)</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-reorder-level" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="5">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Measurement Unit</label>
+                            <select id="ingredient-crud-unit" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                                <option value="Kg">Kg (Kilograms)</option>
+                                <option value="Grams">Grams</option>
+                                <option value="Ltr">Ltr (Liters)</option>
+                                <option value="Pcs">Pcs (Pieces)</option>
+                                <option value="Box">Box</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
+                            <input type="number" step="0.01" min="0.01" id="ingredient-crud-cost" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="e.g. 150.00">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Default Supplier</label>
+                        <select id="ingredient-crud-supplier" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                            <option value="">No Assigned Supplier</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeIngredientCrudModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Material</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL STOCK ADJUSTMENT AUDIT MODAL -->
+    <div id="adjust-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="adjust-stock-modal-content">
+            <button onclick="closeAdjustStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest">Inventory audit</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Manual Stock Audit / Adjust</h3>
+                </div>
+
+                <form id="form-adjust-stock" onsubmit="submitAdjustStock(event)" class="space-y-4">
+                    <input type="hidden" id="adjust-stock-ingredient-id">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
+                        <input type="text" id="adjust-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Qty (Diff)</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <input type="number" step="0.001" id="adjust-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="e.g. -2.50 or 5.00">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="adjust-stock-unit-lbl">Kg</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Type</label>
+                            <select id="adjust-stock-type" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                                <option value="StockCount">Stock Count Audit (Correction)</option>
+                                <option value="Waste">Kitchen Waste (Loss)</option>
+                                <option value="Expired">Spoiled / Expired</option>
+                                <option value="Damage">Damaged Goods</option>
+                                <option value="Theft">Unexplained Shrinkage / Theft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Explanation Reason</label>
+                        <textarea id="adjust-stock-notes" rows="3" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="Specify why this count deviation is being booked..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeAdjustStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md shadow-rose-500/10">Book Stock Audit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- STOCK TRANSFER REQUEST MODAL -->
+    <div id="transfer-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard rounded-2xl max-w-2xl w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="transfer-modal-content">
+            <button onclick="closeRequestTransferModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+            <div class="space-y-6" dir="rtl">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 uppercase tracking-widest text-right block w-fit">طلب سلاسل الإمداد</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1 text-right">إنشاء طلب تحويل مخزني</h3>
+                </div>
+
+                <form id="form-stock-transfer" onsubmit="submitStockTransfer(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">المصدر (الفرع المرسل)</label>
+                            <select id="transfer-source-branch" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">الوجهة (الفرع المستلم)</label>
+                            <select id="transfer-dest-branch" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl"></select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">ملاحظات التحويل</label>
+                        <input type="text" id="transfer-notes" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none text-right" placeholder="مثال: تغذية مخزون أسبوعية، طلب طارئ..." dir="rtl">
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center" dir="rtl">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider text-right">الأصناف المراد تحويلها</label>
+                            <button type="button" onclick="addTransferItemRow()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-750 text-slate-700 dark:text-white rounded-md text-[10px] font-bold transition-all"><i class="bi bi-plus-lg"></i> إضافة صنف</button>
+                        </div>
+
+                        <div class="max-h-48 overflow-y-auto border dark:border-darkBorder rounded-xl" dir="rtl">
+                            <table class="w-full text-right border-collapse text-[11px]" dir="rtl">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[9px] sticky top-0">
+                                        <th class="py-2 px-3 text-right">اسم الخامة</th>
+                                        <th class="py-2 text-right" style="width: 120px;">الكمية المطلوبة</th>
+                                        <th class="py-2 text-right" style="width: 100px;">الوحدة</th>
+                                        <th class="py-2 text-center" style="width: 50px;">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transfer-items-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2" dir="rtl">
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-send"></i> إرسال طلب التحويل</button>
+                        <button type="button" onclick="closeRequestTransferModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER FOR FLOATING LIVE NOTIFICATIONS -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm w-full"></div>
+

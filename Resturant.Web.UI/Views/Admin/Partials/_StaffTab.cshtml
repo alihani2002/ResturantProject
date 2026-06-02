@@ -1,0 +1,36 @@
+﻿            <div id="tab-staff" class="tab-content hidden space-y-6">
+                <!-- Shift metrics -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Waiter Productivity Ranking -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm lg:col-span-2 space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Waiter Performance & Productivity Leaderboard</h3>
+                        <div class="overflow-x-auto">
+                            <table id="table-staff-rankings" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
+                                        <th class="py-2.5">Waiter Name</th>
+                                        <th class="py-2.5">Total Revenue</th>
+                                        <th class="py-2.5">Orders Handled</th>
+                                        <th class="py-2.5">Avg Service Speed</th>
+                                        <th class="py-2.5">Tables Managed</th>
+                                        <th class="py-2.5">Active Session</th>
+                                        <th class="py-2.5">Rating Score</th>
+                                        <th class="py-2.5">Award Badge</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Shifts Performance Card -->
+                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Daily Shift Performance Reports</h3>
+                        <div class="space-y-4" id="shift-reports-list">
+                            <!-- Filled dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
