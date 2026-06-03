@@ -1,7 +1,7 @@
 @model IEnumerable<Resturant.Core.Entities.Branch>
 
 @{
-    ViewData["Title"] = "Branch Management";
+    ViewData["Title"] = "إدارة فروع المطعم";
     bool isIframe = Context.Request.Query["iframe"] == "true";
     Layout = isIframe ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -11,10 +11,10 @@
         <div class="card border-0 shadow-sm rounded-3">
             <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3 border-light">
                 <h4 class="card-title mb-0 text-primary fw-bold">
-                    <i class="feather-map-pin me-2"></i>Restaurant Branches
+                    <i class="feather-map-pin me-2"></i>فروع المطعم
                 </h4>
                 <a asp-action="Create" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-primary px-3 rounded-pill">
-                    <i class="feather-plus me-1"></i>Create New Branch
+                    <i class="feather-plus me-1"></i>إنشاء فرع جديد
                 </a>
             </div>
             <div class="card-body p-4">
@@ -22,11 +22,11 @@
                     <table class="table align-middle table-hover" id="branchesTable">
                         <thead class="table-light">
                             <tr>
-                                <th>Branch Name</th>
-                                <th>Address</th>
-                                <th>Contact Phone</th>
-                                <th>Status</th>
-                                <th class="text-center">Actions</th>
+                                <th>اسم الفرع</th>
+                                <th>العنوان</th>
+                                <th>هاتف التواصل</th>
+                                <th>الحالة</th>
+                                <th class="text-center">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,31 +40,31 @@
                                             </div>
                                             <div>
                                                 <h6 class="mb-0 fw-semibold text-dark">@item.Name</h6>
-                                                <small class="text-muted">ID: #@item.Id</small>
+                                                <small class="text-muted">الرقم التعريفي: #@item.Id</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-secondary">@(string.IsNullOrEmpty(item.Address) ? "N/A" : item.Address)</span>
+                                        <span class="text-secondary">@(string.IsNullOrEmpty(item.Address) ? "غير متوفر" : item.Address)</span>
                                     </td>
                                     <td>
-                                        <span class="text-secondary font-monospace">@(string.IsNullOrEmpty(item.ContactPhone) ? "N/A" : item.ContactPhone)</span>
+                                        <span class="text-secondary font-monospace">@(string.IsNullOrEmpty(item.ContactPhone) ? "غير متوفر" : item.ContactPhone)</span>
                                     </td>
                                     <td>
                                         <form asp-action="ToggleActive" asp-route-id="@item.Id" asp-route-iframe="@(isIframe ? "true" : "")" method="post" class="d-inline">
                                             @if (item.IsActive)
                                             {
                                                 <button type="submit" class="border-0 bg-transparent p-0">
-                                                    <span class="badge bg-light-success text-success px-3 py-2 rounded-pill cursor-pointer" title="Click to Deactivate">
-                                                        <i class="feather-check-circle me-1"></i>Active
+                                                    <span class="badge bg-light-success text-success px-3 py-2 rounded-pill cursor-pointer" title="اضغط لتعطيل الفرع">
+                                                        <i class="feather-check-circle me-1"></i>نشط
                                                     </span>
                                                 </button>
                                             }
                                             else
                                             {
                                                 <button type="submit" class="border-0 bg-transparent p-0">
-                                                    <span class="badge bg-light-warning text-warning px-3 py-2 rounded-pill cursor-pointer" title="Click to Activate">
-                                                        <i class="feather-alert-circle me-1"></i>Inactive
+                                                    <span class="badge bg-light-warning text-warning px-3 py-2 rounded-pill cursor-pointer" title="اضغط لتفعيل الفرع">
+                                                        <i class="feather-alert-circle me-1"></i>غير نشط
                                                     </span>
                                                 </button>
                                             }
@@ -73,10 +73,10 @@
                                     <td class="text-center">
                                         <div class="d-inline-flex gap-2">
                                             <a asp-action="Edit" asp-route-id="@item.Id" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-sm btn-outline-info rounded-pill px-3">
-                                                <i class="feather-edit-2 me-1"></i>Edit
+                                                <i class="feather-edit-2 me-1"></i>تعديل
                                             </a>
                                             <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteBranch(@item.Id, '@item.Name')">
-                                                <i class="feather-trash-2 me-1"></i>Delete
+                                                <i class="feather-trash-2 me-1"></i>حذف
                                             </button>
                                         </div>
                                     </td>
@@ -105,14 +105,24 @@
                 "autoWidth": false,
                 "responsive": true,
                 "language": {
-                    "search": "Search branches:",
-                    "lengthMenu": "Show _MENU_ per page"
+                    "search": "البحث عن الفروع:",
+                    "lengthMenu": "عرض _MENU_ فروع لكل صفحة",
+                    "info": "عرض من _START_ إلى _END_ من إجمالي _TOTAL_ فرع",
+                    "infoEmpty": "عرض 0 إلى 0 من 0 فرع",
+                    "infoFiltered": "(تصفية من إجمالي _MAX_ فرع)",
+                    "emptyTable": "لا توجد فروع مسجلة بعد",
+                    "paginate": {
+                        "first": "الأول",
+                        "previous": "السابق",
+                        "next": "التالي",
+                        "last": "الأخير"
+                    }
                 }
             });
         });
 
         function deleteBranch(id, name) {
-            if (confirm("Are you sure you want to delete the branch '" + name + "'? All tables, staff, and order contexts associated with it will remain scoped, but the branch itself will be marked deleted.")) {
+            if (confirm("هل أنت متأكد من حذف فرع '" + name + "'؟ جميع الطاولات والموظفين وسجلات الطلبات المرتبطة بالفرع ستظل كما هي، ولكن سيتم تمييز الفرع كملغى.")) {
                 $.ajax({
                     url: '/Branches/Delete/' + id,
                     type: 'POST',
@@ -121,11 +131,11 @@
                             alert(result.message);
                             location.reload();
                         } else {
-                            alert("Error: " + result.message);
+                            alert("خطأ: " + result.message);
                         }
                     },
                     error: function () {
-                        alert("An error occurred while deleting the branch.");
+                        alert("حدث خطأ أثناء حذف الفرع.");
                     }
                 });
             }

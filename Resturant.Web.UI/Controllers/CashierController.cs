@@ -155,9 +155,9 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("No active shift found.");
             }
 
-            // Calculate Expected Amount based on completed orders in this branch
+            // Calculate Expected Amount based on completed and paid orders in this branch
             var shiftOrders = await _context.Orders
-                .Where(o => o.ShiftId == activeShift.Id && o.Status == OrderStatus.Completed && o.BranchId == branchId)
+                .Where(o => o.ShiftId == activeShift.Id && (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid) && o.BranchId == branchId)
                 .ToListAsync();
 
             decimal expectedAmount = shiftOrders.Sum(o => o.TotalAmount + (o.Tips ?? 0));
@@ -168,7 +168,7 @@ namespace Resturant.Web.UI.Controllers
             activeShift.IsActive = false;
             activeShift.EndTime = DateTime.Now;
 
-            // Deduct local branch inventory stock based on recipes of all items sold in completed orders during this shift
+            // Deduct local branch inventory stock based on recipes of all items sold in completed/paid orders during this shift
             await _inventoryService.DeductStockForShiftAsync(activeShift.Id);
 
             await _context.SaveChangesAsync();
@@ -184,9 +184,17 @@ namespace Resturant.Web.UI.Controllers
 
             if (shift == null) return NotFound();
 
+            // Branch Security & Isolation check
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (dbUser != null && dbUser.BranchId.HasValue && shift.BranchId != dbUser.BranchId.Value)
+            {
+                return Forbid();
+            }
+
             var shiftOrders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .Where(o => o.ShiftId == id && o.Status == OrderStatus.Completed)
+                .Where(o => o.ShiftId == id && (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid))
                 .ToListAsync();
 
             ViewBag.ShiftOrdersCount = shiftOrders.Count;

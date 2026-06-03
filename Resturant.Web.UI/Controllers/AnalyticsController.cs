@@ -56,6 +56,33 @@ namespace Resturant.Web.UI.Controllers
             return null;
         }
 
+        private async Task<int?> GetAuthorizedBranchIdAsync(int? requestedBranchId = null)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId)) return -1;
+
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (dbUser == null) return -1;
+
+            if (dbUser.BranchId.HasValue)
+            {
+                return dbUser.BranchId.Value;
+            }
+
+            if (requestedBranchId.HasValue && requestedBranchId.Value > 0)
+            {
+                return requestedBranchId.Value;
+            }
+
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                return parsedId;
+            }
+            return null; // Consolidated mode
+        }
+
+
         // Helper to validate filter parameters
         private IActionResult ValidateFilters(ReportFilterParams filters)
         {
@@ -946,26 +973,160 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpGet("shifts")]
-        public async Task<IActionResult> GetShifts()
+        [Authorize(Roles = AppRoles.Admin + "," + AppRoles.Manager + "," + AppRoles.Accountant)]
+        public async Task<IActionResult> GetShifts(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? status,
+            [FromQuery] DateTime? dateFrom,
+            [FromQuery] DateTime? dateTo,
+            [FromQuery] int? hourFrom,
+            [FromQuery] int? hourTo,
+            [FromQuery] int? branchId,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] bool export = false
+        )
         {
             try
             {
                 _logger.LogInformation("Fetching cashier shift reports for admin.");
-                var activeBranchId = GetActiveBranchId();
+
+                var authorizedBranchId = await GetAuthorizedBranchIdAsync(branchId);
+                if (authorizedBranchId == -1)
+                {
+                    return Forbid();
+                }
+
+                // If user is restricted to a specific branch, and tried to request a different branch or consolidated mode, force/validate
+                var userId = _userManager.GetUserId(User);
+                var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (dbUser != null && dbUser.BranchId.HasValue)
+                {
+                    if (branchId.HasValue && branchId.Value != dbUser.BranchId.Value)
+                    {
+                        return BadRequest(new { Message = "You are not authorized to view reports for this branch." });
+                    }
+                }
+
                 var query = _context.Set<CashierShift>()
                     .Include(s => s.Cashier)
                     .AsQueryable();
-                if (activeBranchId.HasValue)
+
+                if (authorizedBranchId.HasValue)
                 {
-                    query = query.Where(s => s.BranchId == activeBranchId.Value);
+                    query = query.Where(s => s.BranchId == authorizedBranchId.Value);
                 }
+
+                // Apply Filters
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    var term = searchTerm.Trim().ToLower();
+                    if (int.TryParse(term, out int parsedId))
+                    {
+                        query = query.Where(s => s.Id == parsedId || 
+                                                 s.CashierId.ToLower().Contains(term) || 
+                                                 (s.Cashier != null && (s.Cashier.FullName != null && s.Cashier.FullName.ToLower().Contains(term) || s.Cashier.UserName.ToLower().Contains(term))));
+                    }
+                    else
+                    {
+                        query = query.Where(s => s.CashierId.ToLower().Contains(term) || 
+                                                 (s.Cashier != null && (s.Cashier.FullName != null && s.Cashier.FullName.ToLower().Contains(term) || s.Cashier.UserName.ToLower().Contains(term))));
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    if (status.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(s => s.IsActive);
+                    }
+                    else if (status.Equals("Closed", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(s => !s.IsActive);
+                    }
+                }
+
+                if (dateFrom.HasValue && dateTo.HasValue && dateFrom.Value > dateTo.Value)
+                {
+                    return BadRequest(new { Message = "Start date must be before or equal to the end date." });
+                }
+
+                if (dateFrom.HasValue)
+                {
+                    var startOfFrom = dateFrom.Value.Date;
+                    query = query.Where(s => s.StartTime >= startOfFrom);
+                }
+                if (dateTo.HasValue)
+                {
+                    var endOfTo = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(s => s.StartTime <= endOfTo);
+                }
+
+                if (hourFrom.HasValue && (hourFrom.Value < 0 || hourFrom.Value > 23))
+                {
+                    return BadRequest(new { Message = "Hour From must be between 0 and 23." });
+                }
+                if (hourTo.HasValue && (hourTo.Value < 0 || hourTo.Value > 23))
+                {
+                    return BadRequest(new { Message = "Hour To must be between 0 and 23." });
+                }
+
+                if (hourFrom.HasValue && hourTo.HasValue)
+                {
+                    if (hourFrom.Value <= hourTo.Value)
+                    {
+                        query = query.Where(s => s.StartTime.Hour >= hourFrom.Value && s.StartTime.Hour <= hourTo.Value);
+                    }
+                    else
+                    {
+                        // Cross-midnight shifts
+                        query = query.Where(s => s.StartTime.Hour >= hourFrom.Value || s.StartTime.Hour <= hourTo.Value);
+                    }
+                }
+                else if (hourFrom.HasValue)
+                {
+                    query = query.Where(s => s.StartTime.Hour >= hourFrom.Value);
+                }
+                else if (hourTo.HasValue)
+                {
+                    query = query.Where(s => s.StartTime.Hour <= hourTo.Value);
+                }
+
+                // Sort by StartTime descending (newest first)
+                query = query.OrderByDescending(s => s.StartTime);
+
+                if (export)
+                {
+                    var allShifts = await query.ToListAsync();
+                    var exportResult = allShifts.Select(s => new {
+                        id = s.Id,
+                        cashierName = s.Cashier != null ? (s.Cashier.FullName ?? s.Cashier.UserName ?? "N/A") : "N/A",
+                        startTime = s.StartTime.ToString("yyyy-MM-dd hh:mm tt"),
+                        endTime = s.EndTime.HasValue ? s.EndTime.Value.ToString("yyyy-MM-dd hh:mm tt") : "-",
+                        expectedAmount = s.ExpectedAmount,
+                        actualAmount = s.ActualAmountEntered,
+                        difference = s.Difference,
+                        isActive = s.IsActive
+                    }).ToList();
+
+                    return Ok(exportResult);
+                }
+
+                // Pagination
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+
+                int totalCount = await query.CountAsync();
+                int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
                 var shifts = await query
-                    .OrderByDescending(s => s.StartTime)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
 
-                var result = shifts.Select(s => new {
+                var shiftsList = shifts.Select(s => new {
                     id = s.Id,
-                    cashierName = s.Cashier?.FullName ?? s.Cashier?.UserName ?? "N/A",
+                    cashierName = s.Cashier != null ? (s.Cashier.FullName ?? s.Cashier.UserName ?? "N/A") : "N/A",
                     startTime = s.StartTime.ToString("yyyy-MM-dd hh:mm tt"),
                     endTime = s.EndTime.HasValue ? s.EndTime.Value.ToString("yyyy-MM-dd hh:mm tt") : "-",
                     expectedAmount = s.ExpectedAmount,
@@ -974,7 +1135,13 @@ namespace Resturant.Web.UI.Controllers
                     isActive = s.IsActive
                 }).ToList();
 
-                return Ok(result);
+                return Ok(new {
+                    shifts = shiftsList,
+                    page,
+                    pageSize,
+                    totalCount,
+                    totalPages
+                });
             }
             catch (Exception ex)
             {
@@ -982,6 +1149,7 @@ namespace Resturant.Web.UI.Controllers
                 return StatusCode(500, new { Message = "An error occurred while fetching shifts.", Details = ex.Message });
             }
         }
+
 
         [HttpGet("branches")]
         public async Task<IActionResult> GetBranches()

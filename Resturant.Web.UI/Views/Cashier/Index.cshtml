@@ -1,11 +1,11 @@
 @model IEnumerable<Resturant.Core.Entities.Order>
 @{
-    ViewData["Title"] = "Cashier - Payments Dashboard";
+    ViewData["Title"] = "لوحة الكاشير والدفع";
     bool noActiveShift = ViewBag.NoActiveShift == true;
     var activeShift = ViewBag.ActiveShift as Resturant.Core.Entities.CashierShift;
 }
 
-<div class="container-fluid py-4" style="font-family: 'Inter', 'Outfit', sans-serif;">
+<div class="container-fluid py-4 text-right" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
     
     @if (noActiveShift)
     {
@@ -14,7 +14,7 @@
         <!-- ================================================================ -->
         <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
             <div class="col-xl-5 col-lg-7 col-md-9 text-center">
-                <div class="card border-0 shadow-sm p-5" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05);">
+                <div class="card border-0 shadow-sm p-5" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05); position: relative;">
                     <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); position: absolute; top: 0; left: 0; right: 0; border-radius: 24px 24px 0 0;"></div>
                     
                     <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 90px; height: 90px; border: 2px solid #d4af37; box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);">
@@ -22,22 +22,22 @@
                     </div>
                     
                     <h2 class="fw-bold text-dark mb-2" style="letter-spacing: 0.5px;">بدء وردية الكاشير</h2>
-                    <p class="text-warning fw-semibold mb-4">Start Cashier Shift</p>
+                    <p class="text-warning fw-semibold mb-4">تفعيل الوردية الجديدة</p>
                     
                     <p class="text-muted mb-4 px-3">
-                        مرحباً بك في لوحة تحكم المبيعات. لدواعي الأمان المالي وضمان مطابقة الحسابات والدرج، يرجى تفعيل بدء الشفت قبل استقبال أو محاسبة أي طلبات.
+                        مرحباً بك في لوحة تحكم المبيعات. لدواعي الأمان المالي وضمان مطابقة الحسابات والدرج، يرجى تفعيل بدء الوردية قبل استقبال أو محاسبة أي طلبات.
                     </p>
 
                     @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
                     {
-                        <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-2.5 fw-bold rounded-pill mb-3" style="font-size: 1rem;">
-                            <i class="bi bi-arrow-left-right me-1"></i> Switch Branch / تغيير الفرع
+                        <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-2.5 fw-bold rounded-pill mb-3" style="font-size: 1rem; color: #1e1e2d; border-color: #d4af37;">
+                            <i class="bi bi-arrow-left-right ms-1"></i> تغيير الفرع الحالي
                         </a>
                     }
 
                     <form asp-action="StartShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                         <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px; transition: all 0.3s ease;">
-                            <i class="bi bi-play-circle-fill me-2"></i> بدأ الشفت الآن / Start Shift
+                            <i class="bi bi-play-circle-fill ms-2"></i> بدأ الوردية الآن
                         </button>
                     </form>
                 </div>
@@ -51,18 +51,18 @@
         <!-- ================================================================ -->
         
         <!-- Header & Info Panel -->
-        <div class="card border-0 mb-4 shadow-sm" style="border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+        <div class="card border-0 mb-4 shadow-sm" style="border-radius: 16px; border: 1px solid rgba(0, 0, 0, 0.05); background: #ffffff;">
             <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 
                 <div>
                     <h3 class="fw-bold text-dark mb-1">
-                        <i class="bi bi-cash-coin text-dark me-2"></i>لوحة الكاشير والدفع
-                        <span id="connection-status" class="badge bg-secondary text-dark ms-2" style="font-size: 0.75rem;"><i class="bi bi-wifi"></i> Connecting...</span>
+                        <i class="bi bi-cash-coin text-dark ms-2"></i>لوحة الكاشير والدفع
+                        <span id="connection-status" class="badge bg-secondary text-dark ms-2" style="font-size: 0.75rem;"><i class="bi bi-wifi"></i> جاري الاتصال...</span>
                     </h3>
                     <div class="d-flex align-items-center gap-3 mt-2 text-muted small">
-                        <span><i class="bi bi-clock-fill text-warning me-1"></i> الشفت بدأ: @activeShift?.StartTime.ToString("hh:mm tt")</span>
+                        <span><i class="bi bi-clock-fill text-warning ms-1"></i> الوردية بدأت: @activeShift?.StartTime.ToString("hh:mm tt")</span>
                         <span class="text-secondary">|</span>
-                        <span><i class="bi bi-person-circle text-warning me-1"></i> الكاشير: @User.Identity?.Name</span>
+                        <span><i class="bi bi-person-circle text-warning ms-1"></i> الكاشير: @User.Identity?.Name</span>
                     </div>
                 </div>
                 
@@ -71,16 +71,16 @@
                     @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
                     {
                         <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning fw-bold px-3 py-2 rounded-pill shadow-sm" style="color: #1e1e2d; border-color: #ffc107;">
-                            <i class="bi bi-arrow-left-right me-1"></i> Switch Branch
+                            <i class="bi bi-arrow-left-right ms-1"></i> تغيير الفرع
                         </a>
                     }
 
                     <button class="btn btn-warning fw-bold px-3 py-2 rounded-pill shadow-sm" onclick="openTakeawayModal()">
-                        <i class="bi bi-bag-plus-fill me-1"></i> تيك أواي جديد / Takeaway
+                        <i class="bi bi-bag-plus-fill ms-1"></i> تيك أواي جديد
                     </button>
                     
                     <button class="btn btn-danger fw-bold px-3 py-2 rounded-pill shadow-sm" onclick="triggerCloseShiftModal()">
-                        <i class="bi bi-power me-1"></i> تقفيل الشفت / Close Shift
+                        <i class="bi bi-power ms-1"></i> تقفيل وإنهاء الوردية
                     </button>
                 </div>
             </div>
@@ -89,10 +89,10 @@
         <!-- Orders Grid Container -->
         @if (!Model.Any())
         {
-            <div class="text-center py-5" id="empty-state">
+            <div class="text-center py-5" id="empty-state" style="background: #ffffff; border-radius: 16px; border: 1px solid rgba(0, 0, 0, 0.05);">
                 <i class="bi bi-wallet2 display-1 text-secondary"></i>
-                <h3 class="mt-3 text-light">لا توجد طلبات معلقة حالياً</h3>
-                <p class="text-muted">الرجاء الانتظار حتى يقوم الكابتن أو المطبخ بتجهيز وتأكيد الطلبات.</p>
+                <h3 class="mt-3 text-dark">لا توجد طلبات معلقة حالياً</h3>
+                <p class="text-muted">الرجاء الانتظار حتى يقوم النادل أو المطبخ بتأكيد وتجهيز الطلبات.</p>
             </div>
         }
         else
@@ -112,29 +112,29 @@
                     <div class="col-lg-4 col-md-6" id="order-card-@(group.Key)">
                         <div class="card h-100 shadow-sm border-0" style="background: #1e1e2d; border-radius: 16px; border: 1px solid @(isCancelledGroup ? "rgba(220, 53, 69, 0.4)" : "rgba(255,255,255,0.05)") !important; color: #fff;">
                             <div class="card-header border-0 d-flex justify-content-between align-items-center p-3 rounded-top-4" style="background: @(isCancelledGroup ? "rgba(220, 53, 69, 0.15)" : isReady ? "rgba(40, 167, 69, 0.15)" : "rgba(255, 193, 7, 0.1)"); border-bottom: 1px solid rgba(255,255,255,0.05) !important;">
-                                <h5 class="mb-0 fw-bold text-light">Table @firstOrder.TableNumber @(isCancelledGroup ? "— CANCELLED" : "")</h5>
+                                <h5 class="mb-0 fw-bold text-light">طاولة @firstOrder.TableNumber @(isCancelledGroup ? "— ملغي" : "")</h5>
                                 <span class="badge @(isCancelledGroup ? "bg-danger" : isReady ? "bg-success" : "bg-warning") text-dark fw-bold">
-                                    @(isCancelledGroup ? "Cancelled" : isReady ? "Ready" : firstOrder.Status.ToString())
+                                    @(isCancelledGroup ? "ملغي" : isReady ? "جاهز" : firstOrder.Status == Resturant.Core.Entities.OrderStatus.Pending ? "معلق" : "نشط")
                                 </span>
                             </div>
                             
-                            <div class="card-body p-4">
-                                <div class="customer-info mb-3 p-3 rounded-4" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid @(isCancelledGroup ? "#dc3545" : "#d4af37");">
-                                    <div class="fw-bold text-light"><i class="bi bi-person-fill me-1 text-warning"></i> @(firstOrder.CustomerName ?? "Guest")</div>
-                                    <div class="small text-muted mt-1"><i class="bi bi-telephone-fill me-1"></i> @(firstOrder.PhoneNumber ?? "N/A")</div>
+                            <div class="card-body p-4 text-right" style="direction: rtl;">
+                                <div class="customer-info mb-3 p-3 rounded-4" style="background: rgba(255, 255, 255, 0.02); border-right: 4px solid @(isCancelledGroup ? "#dc3545" : "#d4af37"); border-left: 0;">
+                                    <div class="fw-bold text-light"><i class="bi bi-person-fill ms-1 text-warning"></i> @(firstOrder.CustomerName ?? "ضيف")</div>
+                                    <div class="small text-muted mt-1"><i class="bi bi-telephone-fill ms-1"></i> @(firstOrder.PhoneNumber ?? "غير متوفر")</div>
                                 </div>
 
                                 <h3 class="card-title text-center my-3 fw-bold @(isCancelledGroup ? "text-danger text-decoration-line-through" : "text-warning")" style="font-size: 2.2rem;">
-                                    @totalAmount.ToString("N2") <span style="font-size: 1.1rem; color: #fff;">EGP</span>
+                                    @totalAmount.ToString("N2") <span style="font-size: 1.1rem; color: #fff;">ج.م</span>
                                 </h3>
                                 
                                 <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
                                     <table class="table table-sm table-dark table-borderless mb-0">
                                         <thead>
                                             <tr style="color: #d4af37; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                                <th>الصنف</th>
-                                                <th class="text-end">الكمية</th>
-                                                <th class="text-end">السعر</th>
+                                                <th class="text-right">الصنف</th>
+                                                <th class="text-left">الكمية</th>
+                                                <th class="text-left">السعر</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -143,9 +143,9 @@
                                                 @foreach (var item in order.OrderItems)
                                                 {
                                                     <tr class="@(item.IsCancelled ? "text-decoration-line-through text-danger" : "")">
-                                                        <td class="py-1">@item.MenuItem.Name @(item.IsCancelled ? "(ملغي)" : "")</td>
-                                                        <td class="text-end py-1">@item.Quantity</td>
-                                                        <td class="text-end py-1">@item.Price.ToString("N2")</td>
+                                                        <td class="py-1 text-right">@item.MenuItem.Name @(item.IsCancelled ? "(ملغي)" : "")</td>
+                                                        <td class="text-left py-1">@item.Quantity</td>
+                                                        <td class="text-left py-1">@item.Price.ToString("N2")</td>
                                                     </tr>
                                                 }
                                             }
@@ -158,16 +158,16 @@
                                 @if (isCancelledGroup)
                                 {
                                     <button class="btn btn-danger w-100 fw-bold rounded-pill py-2.5" onclick="dismissCancelled('@orderIds')">
-                                        <i class="bi bi-x-circle me-1"></i> تجاهل وإزالة الإلغاء
+                                        <i class="bi bi-x-circle ms-1"></i> تجاهل وإزالة الإلغاء
                                     </button>
                                 }
                                 else
                                 {
                                     <a href="@Url.Action("Receipt", "Cashier", new { ids = orderIds })" target="_blank" class="btn btn-outline-light w-50 rounded-pill py-2.5">
-                                        <i class="bi bi-printer me-1"></i> الفاتورة
+                                        <i class="bi bi-printer ms-1"></i> الفاتورة
                                     </a>
                                     <button class="btn btn-success w-50 fw-bold rounded-pill py-2.5 shadow-sm" onclick="initiatePaymentModal('@orderIds', @totalAmount)">
-                                        <i class="bi bi-cash-stack me-1"></i> محاسبة / Paid
+                                        <i class="bi bi-cash-stack ms-1"></i> محاسبة
                                     </button>
                                 }
                             </div>
@@ -182,32 +182,32 @@
 <!-- ================================================================ -->
 <!-- [START] MODAL: CHOOSE CASH & CLOSE SHIFT (تقفيل الشفت)           -->
 <!-- ================================================================ -->
-<div class="modal fade" id="closeShiftModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
+<div class="modal fade" id="closeShiftModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 20px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 5px; background: linear-gradient(90deg, #dc3545, #ff6b6b); border-radius: 20px 20px 0 0;"></div>
             
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-power text-danger me-2"></i>تقفيل وإنهاء الوردية</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-power text-danger ms-2"></i>تقفيل وإنهاء الوردية</h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
             <form asp-action="CloseShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
-                <div class="modal-body p-4">
+                <div class="modal-body p-4 text-right" style="direction: rtl;">
                     <p class="text-muted small">
                         أنت على وشك إغلاق الوردية الحالية. لدواعي الأمان وضمان الشفافية، الرجاء جرد وكتابة المبلغ الفعلي المتواجد في صندوق الكاش (الدرج) حالياً بالجنيه المصري.
                     </p>
                     
                     <div class="mb-3">
-                        <label class="form-label text-warning small fw-bold">إجمالي الكاش الفعلي بالدرج / Actual Cash Amount</label>
-                        <div class="input-group">
+                        <label class="form-label text-warning small fw-bold">إجمالي الكاش الفعلي بالدرج / ج.م</label>
+                        <div class="input-group" style="direction: ltr;">
+                            <input type="number" step="0.01" min="0" required name="actualAmount" id="actualAmount" class="form-control bg-white text-dark border-1 py-3 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="0.00 ج.م" />
                             <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-wallet2"></i></span>
-                            <input type="number" step="0.01" min="0" required name="actualAmount" id="actualAmount" class="form-control bg-white text-dark border-1 py-3" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00 EGP" />
                         </div>
                     </div>
                 </div>
                 
-                <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer border-0 pt-0 d-flex justify-content-between" style="direction: rtl;">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
                     <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">تأكيد إنهاء الوردية</button>
                 </div>
@@ -219,54 +219,54 @@
 <!-- ================================================================ -->
 <!-- [START] MODAL: ADVANCED PAYMENT & TIPPING CALCULATOR            -->
 <!-- ================================================================ -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 20px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 5px; background: linear-gradient(90deg, #4caf50, #81c784); border-radius: 20px 20px 0 0;"></div>
             
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-calculator-fill text-success me-2"></i>حاسبة الدفع والبقشيش</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-calculator-fill text-success ms-2"></i>حاسبة الدفع والبقشيش</h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <div class="modal-body p-4">
+            <div class="modal-body p-4 text-right" style="direction: rtl;">
                 <input type="hidden" id="payOrderIds" />
                 
                 <!-- Total Display -->
                 <div class="text-center p-3 rounded-4 mb-4" style="background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0, 0, 0, 0.04);">
-                    <div class="text-secondary small mb-1">المبلغ المطلوب / Total Amount Due</div>
-                    <div class="fs-2 fw-bold text-success" id="payTotalLabel">0.00 <span style="font-size: 1rem;">EGP</span></div>
+                    <div class="text-secondary small mb-1">المبلغ المطلوب</div>
+                    <div class="fs-2 fw-bold text-success" id="payTotalLabel">0.00 <span style="font-size: 1rem;">ج.م</span></div>
                 </div>
 
                 <!-- Input Amount Received -->
                 <div class="mb-3">
-                    <label class="form-label text-warning small fw-bold">المبلغ المدفوع من العميل / Amount Received</label>
-                    <div class="input-group">
+                    <label class="form-label text-warning small fw-bold">المبلغ المدفوع من العميل</label>
+                    <div class="input-group" style="direction: ltr;">
+                        <input type="number" step="0.01" min="0" id="payAmountReceived" class="form-control bg-white text-dark border-1 py-2.5 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                         <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-cash-stack"></i></span>
-                        <input type="number" step="0.01" min="0" id="payAmountReceived" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                     </div>
                 </div>
 
                 <!-- Input Change Returned -->
                 <div class="mb-4">
-                    <label class="form-label text-warning small fw-bold">المتبقي المرتجع للعميل / Change Returned</label>
-                    <div class="input-group">
+                    <label class="form-label text-warning small fw-bold">المتبقي المرتجع للعميل</label>
+                    <div class="input-group" style="direction: ltr;">
+                        <input type="number" step="0.01" min="0" id="payChangeReturned" class="form-control bg-white text-dark border-1 py-2.5 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                         <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-arrow-return-left"></i></span>
-                        <input type="number" step="0.01" min="0" id="payChangeReturned" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="0.00" oninput="calculateChangeAndTips()" />
                     </div>
                 </div>
 
                 <!-- Tips display card -->
-                <div class="p-3 rounded-4 text-center d-flex justify-content-between align-items-center" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15);">
-                    <div class="text-start">
-                        <span class="fw-bold text-warning d-block" style="font-size: 0.95rem;">البقشيش المستلم للدرج / Tips</span>
+                <div class="p-3 rounded-4 text-center d-flex justify-content-between align-items-center" style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.15); direction: rtl;">
+                    <div class="text-right">
+                        <span class="fw-bold text-warning d-block" style="font-size: 0.95rem;">البقشيش المستلم للدرج</span>
                         <small class="text-muted">يُحسب تلقائياً من الفارق</small>
                     </div>
-                    <div class="fs-4 fw-bold text-warning" id="payTipsLabel">0.00 EGP</div>
+                    <div class="fs-4 fw-bold text-warning" id="payTipsLabel">0.00 ج.م</div>
                 </div>
             </div>
             
-            <div class="modal-footer border-0 pt-0">
+            <div class="modal-footer border-0 pt-0 d-flex justify-content-between" style="direction: rtl;">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">إلغاء</button>
                 <button type="button" class="btn btn-success fw-bold rounded-pill px-4" onclick="submitProcessedPayment()">تأكيد واستلام النقد</button>
             </div>
@@ -277,43 +277,43 @@
 <!-- ================================================================ -->
 <!-- [START] MODAL: TAKEAWAY MENU & ORDER CREATOR                      -->
 <!-- ================================================================ -->
-<div class="modal fade modal-xl" id="takeawayModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
+<div class="modal fade modal-xl" id="takeawayModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); border-radius: 24px 24px 0 0;"></div>
             
-            <div class="modal-header border-0 pb-0 px-4 pt-4">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-bag-plus-fill text-warning me-2"></i>طلب تيك أواي جديد / Takeaway Order</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 pb-0 px-4 pt-4 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-bag-plus-fill text-warning ms-2"></i>طلب تيك أواي جديد</h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
             <div class="modal-body px-4 py-3">
                 <div class="row g-4" style="height: 60vh;">
                     
-                    <!-- Left: Menu Explorer (Categories and Items) -->
-                    <div class="col-lg-8 d-flex flex-column h-100">
-                        <div class="input-group mb-3 shadow-sm">
+                    <!-- Right: Menu Explorer (Categories and Items) -->
+                    <div class="col-lg-8 d-flex flex-column h-100 border-start ps-3">
+                        <div class="input-group mb-3 shadow-sm" style="direction: ltr;">
+                            <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="ابحث عن صنف من المنيو..." oninput="filterMenuItems()" />
                             <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-search"></i></span>
-                            <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; py: 2.5rem;" placeholder="ابحث عن صنف من المنيو..." oninput="filterMenuItems()" />
                         </div>
                         
                         <!-- Categories slider -->
-                        <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categoriesSlider" style="scrollbar-width: thin;">
+                        <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categoriesSlider" style="scrollbar-width: thin; direction: rtl;">
                             <!-- Dynamically loaded -->
                         </div>
 
                         <!-- Menu items grid -->
-                        <div class="row g-3 overflow-auto flex-grow-1" id="menuItemsGrid" style="scrollbar-width: thin; max-height: calc(60vh - 120px);">
+                        <div class="row g-3 overflow-auto flex-grow-1" id="menuItemsGrid" style="scrollbar-width: thin; max-height: calc(60vh - 120px); direction: rtl;">
                             <!-- Dynamically loaded -->
                         </div>
                     </div>
                     
-                    <!-- Right: Active Cart Pane -->
-                    <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                        <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 me-2"></i>سلة الطلبات / Cart</h5>
+                    <!-- Left: Active Cart Pane -->
+                    <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4 bg-light border">
+                        <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 ms-2"></i>سلة الطلبات</h5>
                         
                         <!-- Cart list -->
-                        <div class="flex-grow-1 overflow-auto mb-3" id="cartItemsList" style="scrollbar-width: thin; max-height: calc(60vh - 180px);">
+                        <div class="flex-grow-1 overflow-auto mb-3" id="cartItemsList" style="scrollbar-width: thin; max-height: calc(60vh - 180px); direction: rtl;">
                             <!-- Dynamic -->
                             <div class="text-center py-5 text-muted" id="cartEmptyState">
                                 <i class="bi bi-cart-x display-4 mb-3 d-block text-secondary"></i>
@@ -322,14 +322,14 @@
                         </div>
                         
                         <!-- Summary and Checkout -->
-                        <div class="border-top pt-3" style="border-color: rgba(0,0,0,0.08) !important;">
+                        <div class="border-top pt-3" style="border-color: rgba(0, 0, 0, 0.08) !important; direction: rtl;">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">الإجمالي المبدئي:</span>
-                                <span class="fw-bold" id="cartSubtotal">0.00 EGP</span>
+                                <span class="fw-bold text-dark" id="cartSubtotal">0.00 ج.م</span>
                             </div>
                             
                             <button class="btn btn-warning w-100 py-3 fw-bold rounded-pill mt-2 shadow" id="btnCartCheckout" disabled onclick="checkoutTakeawayOrder()">
-                                <i class="bi bi-credit-card-2-back-fill me-2"></i> دفع وإنهاء الطلب / Pay
+                                <i class="bi bi-credit-card-2-back-fill ms-2"></i> دفع وإنهاء الطلب
                             </button>
                         </div>
                     </div>
@@ -344,7 +344,6 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
         const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
-        // Check for toast notifications to show after reload
         document.addEventListener('DOMContentLoaded', () => {
             const storedToast = sessionStorage.getItem('cashier_toast');
             if (storedToast) {
@@ -356,21 +355,19 @@
             }
         });
 
-        // SignalR Connection
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub")
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)
             .build();
 
-        // Client-side idempotency guard to prevent double-clicks/duplicate submissions
         const pendingRequests = new Set();
         function safeFetch(url, options = {}) {
             const method = options.method || 'GET';
             if (method !== 'GET') {
                 const requestKey = `${method}:${url}:${options.body || ''}`;
                 if (pendingRequests.has(requestKey)) {
-                    console.warn("Blocked duplicate request (idempotency guard):", requestKey);
+                    console.warn("Blocked duplicate request:", requestKey);
                     return Promise.reject(new Error("Request is already in progress."));
                 }
                 pendingRequests.add(requestKey);
@@ -385,7 +382,7 @@
             const badge = document.getElementById('connection-status');
             if (badge) {
                 badge.className = connected ? 'badge bg-success text-dark ms-2' : 'badge bg-danger text-light ms-2';
-                badge.innerHTML = connected ? '<i class="bi bi-wifi"></i> Live' : '<i class="bi bi-wifi-off"></i> Offline';
+                badge.innerHTML = connected ? '<i class="bi bi-wifi"></i> مباشر' : '<i class="bi bi-wifi-off"></i> غير متصل';
             }
         }
 
@@ -393,32 +390,25 @@
             const container = document.getElementById('orders-container');
             const count = container ? container.querySelectorAll('.col-lg-4').length : 0;
             const badge = document.getElementById('active-count');
-            if (badge) badge.textContent = count + ' معلق للدفع / Active';
+            if (badge) badge.textContent = count + ' معلق للدفع';
         }
 
-        // ================================================================
-        // MODAL ACTIONS: CLOSE SHIFT
-        // ================================================================
         function triggerCloseShiftModal() {
             const modal = new bootstrap.Modal(document.getElementById('closeShiftModal'));
             modal.show();
         }
 
-        // ================================================================
-        // MODAL ACTIONS: TIPPING PAYMENT SYSTEM
-        // ================================================================
         let currentOrderTotal = 0;
         let payModalInstance = null;
 
         function initiatePaymentModal(orderIds, total) {
             document.getElementById('payOrderIds').value = orderIds;
             currentOrderTotal = total;
-            document.getElementById('payTotalLabel').innerHTML = `${total.toFixed(2)} <span style="font-size: 1rem;">EGP</span>`;
+            document.getElementById('payTotalLabel').innerHTML = `${total.toFixed(2)} <span style="font-size: 1rem;">ج.م</span>`;
             
-            // Auto fill
             document.getElementById('payAmountReceived').value = total.toFixed(2);
             document.getElementById('payChangeReturned').value = (0).toFixed(2);
-            document.getElementById('payTipsLabel').textContent = "0.00 EGP";
+            document.getElementById('payTipsLabel').textContent = "0.00 ج.م";
 
             payModalInstance = new bootstrap.Modal(document.getElementById('paymentModal'));
             payModalInstance.show();
@@ -428,12 +418,10 @@
             const amountReceived = parseFloat(document.getElementById('payAmountReceived').value) || 0;
             const changeReturned = parseFloat(document.getElementById('payChangeReturned').value) || 0;
             
-            // Calculate change suggestion if they just input amountReceived but changeReturned is 0 (or pristine)
-            // But let them edit it!
             let tips = amountReceived - currentOrderTotal - changeReturned;
             if (tips < 0) tips = 0;
 
-            document.getElementById('payTipsLabel').textContent = `${tips.toFixed(2)} EGP`;
+            document.getElementById('payTipsLabel').textContent = `${tips.toFixed(2)} ج.م`;
         }
 
         function submitProcessedPayment() {
@@ -453,7 +441,7 @@
             const originalText = btn ? btn.innerHTML : '';
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري الحفظ...';
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-2"></span>جاري الحفظ...';
             }
 
             safeFetch('/Cashier/ProcessPayment', {
@@ -477,9 +465,6 @@
             });
         }
 
-        // ================================================================
-        // MODAL ACTIONS: TAKEAWAY MENU & CART SYSTEM
-        // ================================================================
         let takeawayModalInstance = null;
         let fullMenuData = [];
         let selectedCategory = 0;
@@ -489,7 +474,6 @@
             takeawayModalInstance = new bootstrap.Modal(document.getElementById('takeawayModal'));
             takeawayModalInstance.show();
 
-            // Load menu once
             if (fullMenuData.length === 0) {
                 fetch('/Cashier/GetMenuData')
                 .then(res => res.json())
@@ -499,7 +483,6 @@
                     renderMenuItems();
                 });
             } else {
-                // Reset cart
                 cart = [];
                 updateCartUI();
                 renderMenuItems();
@@ -508,7 +491,7 @@
 
         function renderCategories() {
             const container = document.getElementById('categoriesSlider');
-            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">All</button>`;
+            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">الكل</button>`;
             
             fullMenuData.forEach(cat => {
                 html += `<button class="btn btn-sm ${selectedCategory === cat.categoryId ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(${cat.categoryId})">${cat.categoryName}</button>`;
@@ -536,14 +519,14 @@
 
                     html += `
                         <div class="col-sm-6 col-md-4">
-                            <div class="card h-100 border-0 shadow-sm p-3" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08) !important; color: #1e1e2d;">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-right" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.08) !important; color: #1e1e2d; direction: rtl;">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="fw-bold text-dark" style="font-size: 0.95rem;">${item.name}</div>
-                                    <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} EGP</span>
+                                    <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} ج.م</span>
                                 </div>
                                 <div class="mt-3">
                                     <button class="btn btn-outline-warning btn-xs w-100 py-1.5 fw-bold rounded-pill text-dark" onclick="handleMenuAddClick(${item.id})">
-                                        <i class="bi bi-plus-circle me-1"></i> إضافة للسلة
+                                        <i class="bi bi-plus-circle ms-1"></i> إضافة للسلة
                                     </button>
                                 </div>
                             </div>
@@ -618,7 +601,7 @@
                         السلة فارغة
                     </div>
                 `;
-                document.getElementById('cartSubtotal').textContent = "0.00 EGP";
+                document.getElementById('cartSubtotal').textContent = "0.00 ج.م";
                 checkoutBtn.disabled = true;
                 return;
             }
@@ -633,15 +616,15 @@
 
                 let addonsText = '';
                 if (item.addOns && item.addOns.length > 0) {
-                    addonsText = `<div class="text-muted small ps-2 border-start border-2 border-warning mt-1" style="font-size: 0.75rem; text-align: left;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
+                    addonsText = `<div class="text-muted small pr-2 border-right border-2 border-warning mt-1" style="font-size: 0.75rem; text-align: right;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
                 }
 
                 html += `
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-2.5 rounded-3" style="background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0,0,0,0.08);">
-                        <div class="text-start" style="max-width: 65%;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2.5 rounded-3 text-right" style="background: rgba(0, 0, 0, 0.02); border: 1px solid rgba(0,0,0,0.08); direction: rtl;">
+                        <div style="max-width: 65%;">
                             <span class="fw-bold d-block text-dark" style="font-size: 0.9rem;">${item.name}</span>
                             ${addonsText}
-                            <span class="text-muted small">${(item.price + addonsTotal).toFixed(2)} EGP</span>
+                            <span class="text-muted small">${(item.price + addonsTotal).toFixed(2)} ج.م</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', -1)"><i class="bi bi-dash"></i></button>
@@ -653,7 +636,7 @@
             });
 
             container.innerHTML = html;
-            document.getElementById('cartSubtotal').textContent = `${subtotal.toFixed(2)} EGP`;
+            document.getElementById('cartSubtotal').textContent = `${subtotal.toFixed(2)} ج.م`;
             checkoutBtn.disabled = false;
         }
 
@@ -663,20 +646,17 @@
                 return acc + ((i.price + addonsTotal) * i.quantity);
             }, 0);
             
-            // Close Takeaway modal and open payment modal!
             if (takeawayModalInstance) takeawayModalInstance.hide();
             
             setTimeout(() => {
-                // Hook payment confirm to takeaway checkout!
                 document.getElementById('payOrderIds').value = "TAKEAWAY";
                 currentOrderTotal = subtotal;
-                document.getElementById('payTotalLabel').innerHTML = `${subtotal.toFixed(2)} <span style="font-size: 1rem;">EGP</span>`;
+                document.getElementById('payTotalLabel').innerHTML = `${subtotal.toFixed(2)} <span style="font-size: 1rem;">ج.م</span>`;
                 
                 document.getElementById('payAmountReceived').value = subtotal.toFixed(2);
                 document.getElementById('payChangeReturned').value = (0).toFixed(2);
-                document.getElementById('payTipsLabel').textContent = "0.00 EGP";
+                document.getElementById('payTipsLabel').textContent = "0.00 ج.م";
  
-                // Re-wire pay confirm to submit takeaway
                 const confirmBtn = document.querySelector('#paymentModal .btn-success');
                 confirmBtn.setAttribute('onclick', 'submitTakeawayPayment()');
  
@@ -711,14 +691,14 @@
                 changeReturned: changeReturned,
                 tips: tips
             };
-
+ 
             const btn = document.querySelector('#paymentModal .btn-success');
             const originalText = btn ? btn.innerHTML : '';
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري حفظ الطلب...';
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-2"></span>جاري حفظ الطلب...';
             }
-
+ 
             safeFetch('/Cashier/CreateTakeawayOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -740,9 +720,6 @@
             });
         }
 
-        // ================================================================
-        // OTHER SYSTEM REFRESH & SIGNALR EVENTS
-        // ================================================================
         function playNotificationSound() {
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -762,13 +739,13 @@
         function showNotification(message, type = 'info') {
             const container = document.querySelector('.toast-container') || createToastContainer();
             const toastId = 'toast-' + Date.now();
-            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
+            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : 'bg-info';
 
             const toastHtml = `
                 <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
                     <div class="d-flex">
                         <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        <button type="button" class="btn-close btn-close-white ms-2 m-auto" data-bs-dismiss="toast"></button>
                     </div>
                 </div>
             `;
@@ -781,12 +758,11 @@
 
         function createToastContainer() {
             const container = document.createElement('div');
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            container.className = 'toast-container position-fixed bottom-0 start-0 p-3';
             document.body.appendChild(container);
             return container;
         }
 
-        // SignalR Handlers
         connection.on("OrderAccepted", () => fetchAndRefreshOrders());
         connection.on("OrderReady", () => {
             fetchAndRefreshOrders();
@@ -824,7 +800,6 @@
 
                 if (!container) return;
 
-                // Re-render group list
                 let html = '';
                 orders.forEach(group => {
                     const isReady = group.status === 3;
@@ -836,48 +811,48 @@
                         const itemCancelled = item.isCancelled === true;
                         itemsHtml += `
                             <tr class="${itemCancelled ? "text-decoration-line-through text-danger" : ""}">
-                                <td class="py-1">${item.menuItemName} ${itemCancelled ? "(ملغي)" : ""}</td>
-                                <td class="text-end py-1">${item.quantity}</td>
-                                <td class="text-end py-1">${item.price.toFixed(2)}</td>
+                                <td class="py-1 text-right">${item.menuItemName} ${itemCancelled ? "(ملغي)" : ""}</td>
+                                <td class="text-left py-1">${item.quantity}</td>
+                                <td class="text-left py-1">${item.price.toFixed(2)}</td>
                             </tr>
                         `;
                     });
 
                     const actionHtml = isCancelled
                         ? `<button class="btn btn-danger w-100 fw-bold rounded-pill py-2.5" onclick="dismissCancelled('${orderIdsStr}')">
-                                <i class="bi bi-x-circle me-1"></i> تجاهل وإزالة الإلغاء
+                                <i class="bi bi-x-circle ms-1"></i> تجاهل وإزالة الإلغاء
                            </button>`
                         : `<a href="/Cashier/Receipt?ids=${orderIdsStr}" target="_blank" class="btn btn-outline-light w-50 rounded-pill py-2.5">
-                                <i class="bi bi-printer me-1"></i> الفاتورة
+                                <i class="bi bi-printer ms-1"></i> الفاتورة
                            </a>
                            <button class="btn btn-success w-50 fw-bold rounded-pill py-2.5 shadow-sm" onclick="initiatePaymentModal('${orderIdsStr}', ${group.totalAmount})">
-                                <i class="bi bi-cash-stack me-1"></i> محاسبة / Paid
+                                <i class="bi bi-cash-stack ms-1"></i> محاسبة
                            </button>`;
 
                     html += `
                         <div class="col-lg-4 col-md-6" id="order-card-${group.sessionId ? group.sessionId : -group.tableNumber}">
                             <div class="card h-100 shadow-sm border-0" style="background: #1e1e2d; border-radius: 16px; border: 1px solid ${isCancelled ? "rgba(220, 53, 69, 0.4)" : "rgba(255,255,255,0.05)"} !important; color: #fff;">
                                 <div class="card-header border-0 d-flex justify-content-between align-items-center p-3 rounded-top-4" style="background: ${isCancelled ? "rgba(220, 53, 69, 0.15)" : isReady ? "rgba(40, 167, 69, 0.15)" : "rgba(255, 193, 7, 0.1)"}; border-bottom: 1px solid rgba(255,255,255,0.05) !important;">
-                                    <h5 class="mb-0 fw-bold text-light">Table ${group.tableNumber} ${isCancelled ? '— CANCELLED' : ''}</h5>
+                                    <h5 class="mb-0 fw-bold text-light">طاولة ${group.tableNumber} ${isCancelled ? '— ملغي' : ''}</h5>
                                     <span class="badge ${isCancelled ? "bg-danger" : isReady ? "bg-success" : "bg-warning"} text-dark fw-bold">
-                                        ${isCancelled ? "Cancelled" : isReady ? "Ready" : (group.status === 1 ? 'Confirmed' : 'Active')}
+                                        ${isCancelled ? "ملغي" : isReady ? "جاهز" : (group.status === 1 ? 'مؤكد' : 'نشط')}
                                     </span>
                                 </div>
-                                <div class="card-body p-4">
-                                    <div class="customer-info mb-3 p-3 rounded-4" style="background: rgba(255, 255, 255, 0.02); border-left: 4px solid ${isCancelled ? "#dc3545" : "#d4af37"};">
-                                        <div class="fw-bold text-light"><i class="bi bi-person-fill me-1 text-warning"></i> ${group.customerName}</div>
-                                        <div class="small text-muted mt-1"><i class="bi bi-telephone-fill me-1"></i> ${group.phoneNumber}</div>
+                                <div class="card-body p-4 text-right" style="direction: rtl;">
+                                    <div class="customer-info mb-3 p-3 rounded-4" style="background: rgba(255, 255, 255, 0.02); border-right: 4px solid ${isCancelled ? "#dc3545" : "#d4af37"}; border-left: 0;">
+                                        <div class="fw-bold text-light"><i class="bi bi-person-fill ms-1 text-warning"></i> ${group.customerName}</div>
+                                        <div class="small text-muted mt-1"><i class="bi bi-telephone-fill ms-1"></i> ${group.phoneNumber}</div>
                                     </div>
                                     <h3 class="card-title text-center my-3 fw-bold ${isCancelled ? "text-danger text-decoration-line-through" : "text-warning"}" style="font-size: 2.2rem;">
-                                        ${group.totalAmount.toFixed(2)} <span style="font-size: 1.1rem; color: #fff;">EGP</span>
+                                        ${group.totalAmount.toFixed(2)} <span style="font-size: 1.1rem; color: #fff;">ج.م</span>
                                     </h3>
                                     <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
                                         <table class="table table-sm table-dark table-borderless mb-0">
                                             <thead>
                                                 <tr style="color: #d4af37; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                                    <th>الصنف</th>
-                                                    <th class="text-end">الكمية</th>
-                                                    <th class="text-end">السعر</th>
+                                                    <th class="text-right">الصنف</th>
+                                                    <th class="text-left">الكمية</th>
+                                                    <th class="text-left">السعر</th>
                                                 </tr>
                                             </thead>
                                             <tbody>${itemsHtml}</tbody>
@@ -895,10 +870,10 @@
                 
                 if (orders.length === 0) {
                     container.outerHTML = `
-                        <div class="text-center py-5" id="empty-state">
+                        <div class="text-center py-5" id="empty-state" style="background: #ffffff; border-radius: 16px; border: 1px solid rgba(0, 0, 0, 0.05);">
                             <i class="bi bi-wallet2 display-1 text-secondary"></i>
-                            <h3 class="mt-3 text-light">لا توجد طلبات معلقة حالياً</h3>
-                            <p class="text-muted">الرجاء الانتظار حتى يقوم الكابتن أو المطبخ بتجهيز وتأكيد الطلبات.</p>
+                            <h3 class="mt-3 text-dark">لا توجد طلبات معلقة حالياً</h3>
+                            <p class="text-muted">الرجاء الانتظار حتى يقوم النادل أو المطبخ بتأكيد وتجهيز الطلبات.</p>
                         </div>
                     `;
                 }
@@ -938,7 +913,7 @@
             const originalText = btn ? btn.innerHTML : '';
             if (btn && btn.tagName === 'BUTTON') {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري المعالجة...';
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span>جاري المعالجة...';
             }
 
             safeFetch('/Cashier/ProcessPayment', {
@@ -962,7 +937,6 @@
             });
         }
 
-        // --- CUSTOMIZATION FLOW ---
         let activeCustomItem = null;
         let customizationQty = 1;
 
@@ -981,11 +955,10 @@
             customizationQty = 1;
             
             document.getElementById('customization-item-name').textContent = item.name;
-            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} EGP`;
+            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} ج.م`;
             document.getElementById('customization-item-description').textContent = item.description || '';
             document.getElementById('customization-qty-val').textContent = customizationQty;
 
-            // Render Sizes
             const sizesSection = document.getElementById('sizes-section');
             const sizesList = document.getElementById('sizes-list');
             if (item.sizes && item.sizes.length > 0) {
@@ -995,7 +968,7 @@
                         <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
                         <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
                             <span class="size-name small text-muted">${size.name}</span>
-                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} EGP</span>
+                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} ج.م</span>
                         </label>
                     </div>
                 `).join('');
@@ -1004,7 +977,6 @@
                 sizesList.innerHTML = '';
             }
 
-            // Render Add-ons
             const addonsSection = document.getElementById('addons-section');
             const addonsList = document.getElementById('addons-list');
             if (item.addOns && item.addOns.length > 0) {
@@ -1016,11 +988,11 @@
                              onclick="toggleAddonCard(${addon.id})">
                             <div class="form-check m-0" style="pointer-events: none;">
                                 <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.price}" data-name="${addon.name}" onclick="event.stopPropagation()">
-                                <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                <label class="form-check-label fw-bold text-dark mr-2" for="addon-${addon.id}">
                                     ${addon.name}
                                 </label>
                             </div>
-                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} EGP</span>
+                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} ج.م</span>
                         </div>
                     </div>
                 `).join('');
@@ -1072,7 +1044,7 @@
 
             total = total * customizationQty;
 
-            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} EGP`;
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} ج.م`;
         }
 
         function addCustomizedToCart() {
@@ -1120,24 +1092,24 @@
     </script>
 
     <!-- Customization Modal HTML -->
-    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content shadow-lg border-0 rounded-4 bg-white text-dark">
-                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
-                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 EGP</span>
+                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1 text-right" style="direction: rtl;">
+                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">اسم الصنف</h4>
+                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 ج.م</span>
                     </div>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
-                    <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+                <div class="modal-body px-3 py-3 text-right" style="max-height: 50vh; overflow-y: auto; direction: rtl;">
+                    <p class="text-muted small mb-3" id="customization-item-description">الوصف هنا.</p>
                     
                     <!-- Sizes Section -->
                     <div id="sizes-section" class="mb-4" style="display: none;">
                         <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                            <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                            <i class="bi bi-arrows-angle-expand text-warning ms-2"></i>اختر الحجم
                         </h6>
                         <div id="sizes-list" class="d-flex flex-wrap gap-2">
                             <!-- Dynamic sizes -->
@@ -1147,7 +1119,7 @@
                     <!-- Add-Ons Section -->
                     <div id="addons-section" class="mb-4" style="display: none;">
                         <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                            <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order / الإضافات
+                            <i class="bi bi-gear-wide-connected text-warning ms-2"></i>تخصيص الطلب / الإضافات
                         </h6>
                         <div id="addons-list" class="row g-2">
                             <!-- Custom options -->
@@ -1155,7 +1127,7 @@
                     </div>
                 </div>
                 
-                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center" style="direction: rtl;">
                     <!-- Quantity selector -->
                     <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
                         <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(-1)">-</button>
@@ -1165,8 +1137,8 @@
                     
                     <!-- Action Button -->
                     <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark d-flex align-items-center shadow-sm" id="add-customized-to-cart-btn" onclick="addCustomizedToCart()">
-                        <span class="me-2">Add to Cart</span>
-                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 EGP</span>
+                        <span class="ms-2">إضافة للسلة</span>
+                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 ج.م</span>
                     </button>
                 </div>
             </div>

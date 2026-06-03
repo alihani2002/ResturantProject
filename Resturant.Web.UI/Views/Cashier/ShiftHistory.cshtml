@@ -1,124 +1,112 @@
 @model IEnumerable<Resturant.Core.Entities.CashierShift>
 @{
-    ViewData["Title"] = "سجل الورديات - Shift History";
+    ViewData["Title"] = "سجل الورديات";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid py-4" style="font-family: 'Inter', 'Outfit', sans-serif;">
-    <div class="card border-0 shadow-lg" style="background: #1e1e2d; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05);">
+<div class="container-fluid py-4" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
+    <div class="card border-0 shadow-lg" style="background: #1e1e2d; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); color: #fff;">
         <!-- Top bar/header -->
         <div class="card-header border-0 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center p-4 gap-3" style="background: rgba(0, 0, 0, 0.2);">
             <div>
-                <h4 class="fw-bold mb-1 text-light"><i class="bi bi-clock-history text-warning me-2"></i>سجل الورديات والتقفيلات (Shift History)</h4>
+                <h4 class="fw-bold mb-1 text-light"><i class="bi bi-clock-history text-warning ms-2"></i>سجل الورديات ومطابقة الإيرادات</h4>
                 <p class="text-muted small mb-0">قائمة الورديات ومطابقة الإيرادات النقدية التاريخية للكاشيرات</p>
             </div>
-            <a asp-action="Index" class="btn btn-warning btn-sm fw-bold px-3 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-cash-stack me-1"></i> لوحة الكاشير / Dashboard
+            <a asp-action="Index" class="btn btn-warning btn-sm fw-bold px-3 py-2 rounded-pill shadow-sm" style="background-color: #f97316 !important; border-color: #f97316 !important; color: #fff !important;">
+                <i class="bi bi-cash-stack ms-1"></i> لوحة الكاشير
             </a>
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body p-4">
             <!-- Table container -->
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0" style="border-collapse: collapse;">
+                <table class="table table-dark table-hover align-middle mb-0" id="shiftsTable" style="border-collapse: collapse;">
                     <thead>
                         <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 2px solid rgba(255, 255, 255, 0.05); color: #d4af37;">
-                            <th class="ps-4 py-3">معرف الوردية / ID</th>
-                            <th class="py-3">الكاشير / Cashier</th>
-                            <th class="py-3">وقت البدء / Start Time</th>
-                            <th class="py-3">وقت الإغلاق / End Time</th>
+                            <th class="ps-4 py-3">رقم الوردية</th>
+                            <th class="py-3">الكاشير</th>
+                            <th class="py-3">وقت البدء</th>
+                            <th class="py-3">وقت الإغلاق</th>
                             <th class="py-3 text-end">المتوقع بالسيستم</th>
                             <th class="py-3 text-end">المدخل يدوياً</th>
-                            <th class="py-3 text-center">الفارق / Difference</th>
-                            <th class="py-3 text-center">الحالة / Status</th>
-                            <th class="pe-4 py-3 text-center">إجراءات</th>
+                            <th class="py-3 text-center">الفارق</th>
+                            <th class="py-3 text-center">الحالة</th>
+                            <th class="pe-4 py-3 text-center">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Any())
+                        @foreach (var shift in Model)
                         {
-                            <tr>
-                                <td colspan="9" class="text-center py-5 text-muted">
-                                    <i class="bi bi-inbox-fill text-warning display-4 mb-3 d-block"></i>
-                                    لا توجد أي ورديات مسجلة حالياً
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                                <td class="ps-4 fw-semibold text-warning">#@shift.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-dark rounded-circle d-flex align-items-center justify-content-center text-warning fw-bold border border-warning-subtle ms-2" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                            @(shift.Cashier?.UserName?.Substring(0, Math.Min(2, shift.Cashier.UserName.Length)).ToUpper() ?? "CS")
+                                        </div>
+                                        <span>@shift.Cashier?.UserName</span>
+                                    </div>
+                                </td>
+                                <td><i class="bi bi-calendar-event ms-1 text-secondary"></i>@shift.StartTime.ToString("yyyy-MM-dd hh:mm tt")</td>
+                                <td>
+                                    @if (shift.EndTime.HasValue)
+                                    {
+                                        <span><i class="bi bi-calendar-check ms-1 text-secondary"></i>@shift.EndTime?.ToString("yyyy-MM-dd hh:mm tt")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end fw-bold text-info">@shift.ExpectedAmount.ToString("N2") ج.م</td>
+                                <td class="text-end fw-bold text-warning">
+                                    @(shift.ActualAmountEntered.HasValue ? shift.ActualAmountEntered.Value.ToString("N2") + " ج.م" : "-")
+                                </td>
+                                <td class="text-center">
+                                    @if (shift.Difference.HasValue)
+                                    {
+                                        decimal diff = shift.Difference.Value;
+                                        if (diff == 0)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">متزن</span>
+                                        }
+                                        else if (diff > 0)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">+@diff.ToString("N2") ج.م</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">@diff.ToString("N2") ج.م (عجز)</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (shift.IsActive)
+                                    {
+                                        <span class="badge bg-success text-dark fw-bold px-3 py-1.5 rounded-pill"><i class="bi bi-activity ms-1"></i>نشط</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary text-light px-3 py-1.5 rounded-pill"><i class="bi bi-lock-fill ms-1"></i>مغلق</span>
+                                    }
+                                </td>
+                                <td class="pe-4 text-center">
+                                    @if (!shift.IsActive)
+                                    {
+                                        <a asp-action="ShiftSummary" asp-route-id="@shift.Id" class="btn btn-outline-warning btn-xs px-2.5 py-1 fw-bold rounded-pill text-xs">
+                                            <i class="bi bi-eye-fill ms-1"></i> تفاصيل الوردية
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">شفت نشط</span>
+                                    }
                                 </td>
                             </tr>
-                        }
-                        else
-                        {
-                            foreach (var shift in Model)
-                            {
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-                                    <td class="ps-4 fw-semibold text-warning">#@shift.Id</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-dark rounded-circle d-flex align-items-center justify-content-center text-warning fw-bold border border-warning-subtle me-2" style="width: 32px; height: 32px; font-size: 0.85rem;">
-                                                @(shift.Cashier?.UserName?.Substring(0, Math.Min(2, shift.Cashier.UserName.Length)).ToUpper() ?? "CS")
-                                            </div>
-                                            <span>@shift.Cashier?.UserName</span>
-                                        </div>
-                                    </td>
-                                    <td><i class="bi bi-calendar-event me-1 text-secondary"></i>@shift.StartTime.ToString("yyyy-MM-dd hh:mm tt")</td>
-                                    <td>
-                                        @if (shift.EndTime.HasValue)
-                                        {
-                                            <span><i class="bi bi-calendar-check me-1 text-secondary"></i>@shift.EndTime?.ToString("yyyy-MM-dd hh:mm tt")</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">-</span>
-                                        }
-                                    </td>
-                                    <td class="text-end fw-bold text-info">@shift.ExpectedAmount.ToString("N2") EGP</td>
-                                    <td class="text-end fw-bold text-warning">
-                                        @(shift.ActualAmountEntered.HasValue ? shift.ActualAmountEntered.Value.ToString("N2") + " EGP" : "-")
-                                    </td>
-                                    <td class="text-center">
-                                        @if (shift.Difference.HasValue)
-                                        {
-                                            decimal diff = shift.Difference.Value;
-                                            if (diff == 0)
-                                            {
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">متزن</span>
-                                            }
-                                            else if (diff > 0)
-                                            {
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fw-bold">+@diff.ToString("N2") EGP</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fw-bold">@diff.ToString("N2") EGP (عجز)</span>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">-</span>
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        @if (shift.IsActive)
-                                        {
-                                            <span class="badge bg-success text-dark fw-bold px-3 py-1.5 rounded-pill"><i class="bi bi-activity me-1"></i>نشط حالياً</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary text-light px-3 py-1.5 rounded-pill"><i class="bi bi-lock-fill me-1"></i>شفت مغلق</span>
-                                        }
-                                    </td>
-                                    <td class="pe-4 text-center">
-                                        @if (!shift.IsActive)
-                                        {
-                                            <a asp-action="ShiftSummary" asp-route-id="@shift.Id" class="btn btn-outline-warning btn-xs px-2.5 py-1 fw-bold rounded-pill text-xs">
-                                                <i class="bi bi-eye-fill me-1"></i> عرض التفاصيل
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">شفت نشط</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
                         }
                     </tbody>
                 </table>
@@ -126,3 +114,38 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/vendors/css/dataTables.bs5.min.css">
+    <!-- Vendors JS -->
+    <script src="/assets/vendors/js/dataTables.min.js"></script>
+    <script src="/assets/vendors/js/dataTables.bs5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#shiftsTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "البحث في الورديات:",
+                    "lengthMenu": "عرض _MENU_ وردية لكل صفحة",
+                    "info": "عرض من _START_ إلى _END_ من إجمالي _TOTAL_ وردية",
+                    "infoEmpty": "عرض 0 إلى 0 من 0 وردية",
+                    "infoFiltered": "(تصفية من إجمالي _MAX_ وردية)",
+                    "emptyTable": "لا توجد ورديات مسجلة بعد",
+                    "paginate": {
+                        "first": "الأول",
+                        "previous": "السابق",
+                        "next": "التالي",
+                        "last": "الأخير"
+                    }
+                }
+            });
+        });
+    </script>
+}

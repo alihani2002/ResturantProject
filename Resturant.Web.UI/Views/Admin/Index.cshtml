@@ -1,9 +1,9 @@
-﻿@{
+@{
     Layout = null;
     ViewData["Title"] = "Qore ERP - Reports & Analytics";
 }
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="ar" class="h-full" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -938,16 +938,16 @@
         function openDailySalesModal(dateString) {
             // Show Loader State in the Modal
             document.getElementById('audit-modal-date').textContent = dateString;
-            document.getElementById('audit-modal-orders').textContent = 'Loading...';
-            document.getElementById('audit-modal-completed').textContent = 'Loading...';
-            document.getElementById('audit-modal-cancelled').textContent = 'Loading...';
-            document.getElementById('audit-modal-revenue').textContent = 'Loading...';
-            document.getElementById('audit-modal-discounts').textContent = 'Loading...';
-            document.getElementById('audit-modal-taxes').textContent = 'Loading...';
-            document.getElementById('audit-modal-aov').textContent = 'Loading...';
+            document.getElementById('audit-modal-orders').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-completed').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-cancelled').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-revenue').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-discounts').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-taxes').textContent = 'جاري التحميل...';
+            document.getElementById('audit-modal-aov').textContent = 'جاري التحميل...';
 
             const tbody = document.querySelector('#table-audit-orders tbody');
-            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400"><i class="bi bi-arrow-repeat animate-spin mr-1"></i> Generating day transactions ledger...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400"><i class="bi bi-arrow-repeat animate-spin mr-1"></i> جاري إنشاء سجل حركات اليوم...</td></tr>`;
 
             // Open Modal
             const modal = document.getElementById('daily-sales-modal');
@@ -968,33 +968,36 @@
                     document.getElementById('audit-modal-orders').textContent = data.totalOrders;
                     document.getElementById('audit-modal-completed').textContent = data.completedOrdersCount;
                     document.getElementById('audit-modal-cancelled').textContent = data.cancelledOrdersCount;
-                    document.getElementById('audit-modal-revenue').textContent = `${data.netRevenue.toFixed(2)} L.E.`;
-                    document.getElementById('audit-modal-discounts').textContent = `${data.totalDiscounts.toFixed(2)} L.E.`;
-                    document.getElementById('audit-modal-taxes').textContent = `${data.totalTaxes.toFixed(2)} L.E.`;
-                    document.getElementById('audit-modal-aov').textContent = `${data.averageOrderValue.toFixed(2)} L.E.`;
+                    document.getElementById('audit-modal-revenue').textContent = `${data.netRevenue.toFixed(2)} ج.م`;
+                    document.getElementById('audit-modal-discounts').textContent = `${data.totalDiscounts.toFixed(2)} ج.م`;
+                    document.getElementById('audit-modal-taxes').textContent = `${data.totalTaxes.toFixed(2)} ج.م`;
+                    document.getElementById('audit-modal-aov').textContent = `${data.averageOrderValue.toFixed(2)} ج.م`;
 
                     // Render dynamic transactions list
                     tbody.innerHTML = '';
                     if (!data.orders || data.orders.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">No transactions recorded on this date.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">لم يتم تسجيل أي معاملات في هذا التاريخ.</td></tr>`;
                         return;
                     }
 
                     data.orders.forEach(o => {
-                        const statusBadge = o.orderStatus === 'Completed'
+                        const isCompleted = o.orderStatus === 'Completed';
+                        const isCancelled = o.orderStatus === 'Cancelled';
+                        const statusLabel = isCompleted ? 'مكتمل' : (isCancelled ? 'ملغي' : 'نشط');
+                        const statusBadge = isCompleted
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
-                            : (o.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400');
+                            : (isCancelled ? 'bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400' : 'bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400');
 
                         const tr = `
                             <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
                                 <td class="py-2.5 font-bold text-slate-700 dark:text-slate-200">#${o.orderId}</td>
-                                <td class="py-2.5">Table ${o.tableNumber}</td>
-                                <td class="py-2.5 font-medium">${o.waiterName}</td>
-                                <td class="py-2.5 text-center">${o.itemsCount} items</td>
-                                <td class="py-2.5 text-right font-bold text-slate-805 dark:text-slate-100">${o.totalValue.toFixed(2)} L.E.</td>
-                                <td class="py-2.5 text-center"><span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800">${o.paymentMethod}</span></td>
-                                <td class="py-2.5 text-center font-medium">${o.serviceDurationMinutes} min</td>
-                                <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${statusBadge}">${o.orderStatus}</span></td>
+                                <td class="py-2.5">طاولة ${o.tableNumber}</td>
+                                <td class="py-2.5 font-medium">${o.waiterName || 'غير مسند'}</td>
+                                <td class="py-2.5 text-center">${o.itemsCount} أصناف</td>
+                                <td class="py-2.5 text-left font-bold text-slate-850 dark:text-slate-100">${o.totalValue.toFixed(2)} ج.م</td>
+                                <td class="py-2.5 text-center"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-800">${o.paymentMethod === 'Cash' ? 'نقدي' : (o.paymentMethod === 'Card' ? 'بطاقة' : o.paymentMethod || 'غير محدد')}</span></td>
+                                <td class="py-2.5 text-center font-medium">${o.serviceDurationMinutes} دقيقة</td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold ${statusBadge}">${statusLabel}</span></td>
                             </tr>
                         `;
                         tbody.insertAdjacentHTML('beforeend', tr);
@@ -1002,8 +1005,8 @@
                 })
                 .catch(err => {
                     console.error(err);
-                    showToastAlert("Error retrieving daily audit details.", "error");
-                    tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-red-500">Failed to render day ledger records.</td></tr>`;
+                    showToastAlert("خطأ في جلب تفاصيل الجرد اليومي.", "error");
+                    tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-red-500">فشل في تحميل سجلات حركات اليوم.</td></tr>`;
                 });
         }
 
@@ -1306,15 +1309,15 @@
         // Export Menu Products list
         function exportProductsReport(format) {
             if (globalAllProducts.length === 0) {
-                showToastAlert("No data available to export.", "warning");
+                showToastAlert("لا توجد بيانات متاحة للتصدير.", "warning");
                 return;
             }
 
             if (format === 'excel') {
                 // Generate CSV
-                let csv = 'Product Name,Category,Qty Sold,Price (L.E.),Total Revenue (L.E.),Margin Profit (L.E.),Orders Containing It,Unique Guests,Avg Qty Per Order,Avg Revenue Per Order,Availability\n';
+                let csv = 'اسم المنتج,القسم,الكمية المباعة,السعر (ج.م),إجمالي المبيعات (ج.م),هامش الربح (ج.م),الطلبات المحتوية عليه,الضيوف الفريدين,متوسط الكمية لكل طلب,متوسط الإيراد لكل طلب,الحالة\n';
                 globalAllProducts.forEach(p => {
-                    csv += `"${p.productName}","${p.categoryName}",${p.salesCount},${(p.price ?? 0).toFixed(2)},${p.revenue.toFixed(2)},${p.profit.toFixed(2)},${p.totalOrdersContaining ?? 0},${p.guestsCount ?? 0},${(p.avgQtyPerOrder ?? 1).toFixed(2)},${(p.avgRevenuePerOrder ?? 0).toFixed(2)},"${p.isAvailable ? 'Available' : 'Sold Out'}"\n`;
+                    csv += `"${p.productName}","${p.categoryName}",${p.salesCount},${(p.price ?? 0).toFixed(2)},${p.revenue.toFixed(2)},${p.profit.toFixed(2)},${p.totalOrdersContaining ?? 0},${p.guestsCount ?? 0},${(p.avgQtyPerOrder ?? 1).toFixed(2)},${(p.avgRevenuePerOrder ?? 0).toFixed(2)},"${p.isAvailable ? 'متاح' : 'نفذت الكمية'}"\n`;
                 });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
@@ -1323,7 +1326,7 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                showToastAlert("Menu Items sales report exported as CSV.", "success");
+                showToastAlert("تم تصدير تقرير مبيعات المنتجات كملف CSV بنجاح.", "success");
             } else if (format === 'pdf') {
                 window.print();
             }
@@ -1334,11 +1337,11 @@
             // Badges
             if (data.bestSellers && data.bestSellers.length > 0) {
                 document.getElementById('badge-best-seller').textContent = data.bestSellers[0].productName;
-                document.getElementById('badge-best-seller-stats').textContent = `${data.bestSellers[0].salesCount} portions sold (${data.bestSellers[0].revenue.toFixed(2)} L.E.)`;
+                document.getElementById('badge-best-seller-stats').textContent = `${data.bestSellers[0].salesCount} حبة مباعة (${data.bestSellers[0].revenue.toFixed(2)} ج.م)`;
             }
             if (data.trendingProducts && data.trendingProducts.length > 0) {
                 document.getElementById('badge-trending').textContent = data.trendingProducts[0].productName;
-                document.getElementById('badge-trending-stats').textContent = `Popularity score index: ${data.trendingProducts[0].popularityScore}`;
+                document.getElementById('badge-trending-stats').textContent = `مؤشر نقاط الرواج: ${data.trendingProducts[0].popularityScore}`;
             }
             if (data.bestSellers && data.bestSellers.length > 1) {
                 document.getElementById('badge-recommended').textContent = data.bestSellers[1].productName;
@@ -1348,11 +1351,11 @@
             const upsellSpan = document.getElementById('badge-upsell-rate');
             if (upsellSpan) upsellSpan.textContent = `${upsellRate}%`;
             const upsellDesc = document.getElementById('badge-upsell-rate-desc');
-            if (upsellDesc) upsellDesc.textContent = `System successfully upsold add-ons and extra ingredients on ${upsellRate}% of order baskets.`;
+            if (upsellDesc) upsellDesc.textContent = `نجح النظام في تسويق الإضافات والمكونات الإضافية بنسبة ${upsellRate}% من سلال الطلبات.`;
 
             const recommendationRate = (data.recommendationConversionRate ?? 0).toFixed(1);
             const recStats = document.getElementById('badge-recommended-stats');
-            if (recStats) recStats.textContent = `Cross-selling conversion rate ${recommendationRate}%`;
+            if (recStats) recStats.textContent = `معدل تحويل البيع المتقاطع ${recommendationRate}%`;
 
             // Bind Product Database
             globalAllProducts = data.bestSellers || [];
@@ -2288,18 +2291,18 @@
                     const tbody = document.querySelector('#table-cat-list tbody');
                     if (tbody) {
                         if (categories.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">No categories created yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">لم يتم إنشاء أي أقسام بعد.</td></tr>`;
                         } else {
                             tbody.innerHTML = categories.map(c => `
                                 <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
                                     <td class="py-3 font-semibold text-slate-800 dark:text-slate-200 text-xs">${c.name}</td>
                                     <td class="py-3 font-bold text-slate-500 dark:text-slate-400 text-xs">${c.orderNumber}</td>
                                     <td class="py-3">
-                                        ${c.imageUrl ? `<img src="${c.imageUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-darkBorder">` : `<span class="text-slate-400 italic text-[10px]">No thumbnail</span>`}
+                                        ${c.imageUrl ? `<img src="${c.imageUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-darkBorder">` : `<span class="text-slate-400 italic text-[10px]">بدون صورة</span>`}
                                     </td>
                                     <td class="py-3 text-right space-x-2 whitespace-nowrap">
-                                        <button onclick="openEditCategoryModal(${c.id}, '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'").replace(/\n/g, "\\n")}', ${c.isActive}, '${c.imageUrl || ''}', ${c.orderNumber})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> Edit</button>
-                                        <button onclick="deleteCategory(${c.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-trash"></i> Delete</button>
+                                        <button onclick="openEditCategoryModal(${c.id}, '${c.name.replace(/'/g, "\\'")}', '${(c.description || '').replace(/'/g, "\\'").replace(/\n/g, "\\n")}', ${c.isActive}, '${c.imageUrl || ''}', ${c.orderNumber})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> تعديل</button>
+                                        <button onclick="deleteCategory(${c.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-trash"></i> حذف</button>
                                     </td>
                                 </tr>
                             `).join('');
@@ -2424,24 +2427,24 @@
                     const tbody = document.querySelector('#table-menu-list tbody');
                     if (tbody) {
                         if (items.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">No menu items added yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">لم يتم إضافة أصناف في المنيو بعد.</td></tr>`;
                         } else {
                             tbody.innerHTML = items.map(i => `
                                 <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
                                     <td class="py-3 text-xs">
                                         <div class="font-bold text-slate-800 dark:text-slate-200">${i.name}</div>
-                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1 max-w-xs">${i.description || 'No description provided'}</div>
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 line-clamp-1 max-w-xs">${i.description || 'لا يوجد وصف'}</div>
                                     </td>
-                                    <td class="py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200/40 dark:border-darkBorder">${i.categoryName || 'Uncategorized'}</span></td>
-                                    <td class="py-3 font-semibold text-rose-500 text-xs">${i.price.toFixed(2)} L.E.</td>
-                                    <td class="py-3 font-semibold text-slate-500 dark:text-slate-400 text-xs">${(i.cost || 0).toFixed(2)} L.E.</td>
+                                    <td class="py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-850 text-slate-600 dark:text-slate-400 border border-slate-200/40 dark:border-darkBorder">${i.categoryName || 'غير مصنف'}</span></td>
+                                    <td class="py-3 font-semibold text-rose-500 text-xs">${i.price.toFixed(2)} ج.م</td>
+                                    <td class="py-3 font-semibold text-slate-500 dark:text-slate-400 text-xs">${(i.cost || 0).toFixed(2)} ج.م</td>
                                     <td class="py-3 font-bold text-slate-500 dark:text-slate-400 text-xs">${i.orderNumber || 0}</td>
                                     <td class="py-3">
-                                        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-darkBorder">` : `<span class="text-slate-400 italic text-[10px]">No image</span>`}
+                                        ${i.imageUrl ? `<img src="${i.imageUrl}" class="w-12 h-12 object-cover rounded-lg border border-slate-100 dark:border-darkBorder">` : `<span class="text-slate-400 italic text-[10px]">بدون صورة</span>`}
                                     </td>
                                     <td class="py-3 text-right space-x-2 whitespace-nowrap">
-                                        <button onclick="openEditMenuItemModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.description ? i.description.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "") : ''}', ${i.price}, ${i.cost || 0}, ${i.menuCategoryId}, ${i.isAvailable}, ${i.isPopular}, ${i.isTrending}, ${i.isRecommended}, '${i.imageUrl || ''}', ${i.orderNumber || 0})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> Edit</button>
-                                        <button onclick="deleteMenuItem(${i.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-trash"></i> Delete</button>
+                                        <button onclick="openEditMenuItemModal(${i.id}, '${i.name.replace(/'/g, "\\'")}', '${i.description ? i.description.replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "") : ''}', ${i.price}, ${i.cost || 0}, ${i.menuCategoryId}, ${i.isAvailable}, ${i.isPopular}, ${i.isTrending}, ${i.isRecommended}, '${i.imageUrl || ''}', ${i.orderNumber || 0})" class="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-200 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-pencil"></i> تعديل</button>
+                                        <button onclick="deleteMenuItem(${i.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] inline-flex items-center gap-1"><i class="bi bi-trash"></i> حذف</button>
                                     </td>
                                 </tr>
                             `).join('');
@@ -2475,7 +2478,7 @@
             list.insertAdjacentHTML('beforeend', `
                 <div id="${rowId}" class="grid grid-cols-12 gap-1 items-center">
                     <input type="text" class="col-span-4 admin-size-name bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                           placeholder="e.g. Small / S" value="${name.replace(/"/g,'&quot;')}">
+                           placeholder="مثال: وسط / M" value="${name.replace(/"/g,'&quot;')}">
                     <div class="col-span-3 flex items-center">
                         <input type="number" step="0.01" min="0.01" class="w-full admin-size-price bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                                placeholder="0.00" value="${price}" oninput="syncFirstSizeToBasePrice('${listId}')">
@@ -2685,18 +2688,18 @@
                     const tbody = document.querySelector('#table-tbl-list tbody');
                     if (tbody) {
                         if (tables.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">No tables registered yet.</td></tr>`;
+                            tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400 dark:text-slate-500 italic">لم يتم تسجيل أي طاولات بعد.</td></tr>`;
                         } else {
                             tbody.innerHTML = tables.map(t => `
                                 <tr class="border-b border-slate-100 dark:border-darkBorder hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all">
-                                    <td class="py-3 font-semibold text-slate-800 dark:text-slate-200 text-xs">Table ${t.tableNumber}</td>
+                                    <td class="py-3 font-semibold text-slate-800 dark:text-slate-200 text-xs">طاولة ${t.tableNumber}</td>
                                     <td class="py-3">
                                         ${t.qrCodeImageUrl ? `
-                                            <button onclick="openQrModal(${t.tableNumber}, '${t.qrCodeImageUrl}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/30 dark:text-indigo-400 font-bold transition-all text-[10px] flex items-center gap-1"><i class="bi bi-qr-code"></i> View QR Code</button>
-                                        ` : `<span class="text-slate-400 italic text-[10px]">No QR Code Generated</span>`}
+                                            <button onclick="openQrModal(${t.tableNumber}, '${t.qrCodeImageUrl}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/30 dark:text-indigo-400 font-bold transition-all text-[10px] flex items-center gap-1"><i class="bi bi-qr-code"></i> عرض رمز QR</button>
+                                        ` : `<span class="text-slate-400 italic text-[10px]">لم يتم إنشاء رمز QR</span>`}
                                     </td>
                                     <td class="py-3 text-right">
-                                        <button onclick="deleteTable(${t.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] flex items-center gap-1 ml-auto"><i class="bi bi-trash"></i> Delete</button>
+                                        <button onclick="deleteTable(${t.id})" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 font-bold transition-all text-[10px] flex items-center gap-1 ml-auto"><i class="bi bi-trash"></i> حذف</button>
                                     </td>
                                 </tr>
                             `).join('');
@@ -3287,13 +3290,13 @@
                 tbody.innerHTML = '';
 
                 if (data.tables.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">No tables configured yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">لم يتم إعداد أي طاولات بعد.</td></tr>`;
                     return;
                 }
 
                 data.tables.forEach(table => {
                     let waiterSelectHtml = `<select class="w-full max-w-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-3 py-2 text-xs font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500" onchange="assignWaiterToTable(${table.id}, this.value)">
-                        <option value="">-- Unassigned / No Waiter --</option>`;
+                        <option value="">-- غير مسند / لا يوجد نادل --</option>`;
                     data.waiters.forEach(waiter => {
                         const isSelected = table.waiterId === waiter.id ? 'selected' : '';
                         waiterSelectHtml += `<option value="${waiter.id}" ${isSelected}>${waiter.fullName}</option>`;
@@ -3303,10 +3306,10 @@
                     const tr = document.createElement('tr');
                     tr.className = 'border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors';
                     tr.innerHTML = `
-                        <td class="py-3 px-2 font-bold text-slate-800 dark:text-white">Table ${table.tableNumber}</td>
+                        <td class="py-3 px-2 font-bold text-slate-800 dark:text-white">طاولة ${table.tableNumber}</td>
                         <td class="py-3 px-2">${waiterSelectHtml}</td>
                         <td class="py-3 px-2 text-right">
-                            <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-opacity opacity-0" id="waiter-status-${table.id}">Saved <i class="bi bi-check-circle-fill"></i></span>
+                            <span class="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 transition-opacity opacity-0" id="waiter-status-${table.id}">تم الحفظ <i class="bi bi-check-circle-fill"></i></span>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -3328,11 +3331,11 @@
                     statusSpan.classList.remove('opacity-0');
                     setTimeout(() => statusSpan.classList.add('opacity-0'), 2500);
                 } else {
-                    alert(result.message || "Failed to assign waiter");
+                    alert(result.message || "فشل إسناد النادل.");
                 }
             } catch (error) {
                 console.error('Error saving waiter assignment:', error);
-                alert("An error occurred while saving.");
+                alert("حدث خطأ أثناء الحفظ.");
             }
         }
 
@@ -3341,10 +3344,43 @@
         let currentAdminShiftPage = 1;
         const shiftsPerPage = 10;
 
-        async function loadShiftReportsList() {
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        async function loadShiftReportsList(page = 1) {
             showLoader();
             try {
-                const response = await fetch('/api/analytics/shifts');
+                const searchTerm = document.getElementById('adminShiftSearch')?.value || '';
+                const status = document.getElementById('adminShiftStatus')?.value || '';
+                const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
+                const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
+                const hourFrom = document.getElementById('adminShiftHourFrom')?.value || '';
+                const hourTo = document.getElementById('adminShiftHourTo')?.value || '';
+
+                if (dateFrom && dateTo && dateFrom > dateTo) {
+                    showToastAlert("Start date must be before or equal to the end date.", "warning");
+                    hideLoader();
+                    return;
+                }
+
+                const params = new URLSearchParams();
+                if (searchTerm) params.append('searchTerm', searchTerm);
+                if (status) params.append('status', status);
+                if (dateFrom) params.append('dateFrom', dateFrom);
+                if (dateTo) params.append('dateTo', dateTo);
+                if (hourFrom !== '') params.append('hourFrom', hourFrom);
+                if (hourTo !== '') params.append('hourTo', hourTo);
+                params.append('page', page);
+                params.append('pageSize', shiftsPerPage);
+
+                const response = await fetch(`/api/analytics/shifts?${params.toString()}`);
 
                 // Check if session is expired or redirected to login
                 const contentType = response.headers.get("content-type");
@@ -3357,155 +3393,20 @@
                 }
 
                 if (response.ok) {
-                    allAdminShifts = await response.json();
-
-                    // Client-side fallback to high-fidelity mock data if no data was returned
-                    if (!allAdminShifts || allAdminShifts.length === 0) {
-                        console.log("No shift records returned from server database. Seeding high-fidelity sandbox shifts...");
-                        seedMockShifts();
-                    }
-                    renderShiftsTable(1);
+                    const data = await response.json();
+                    allAdminShifts = data.shifts;
+                    currentAdminShiftPage = data.page;
+                    renderShiftsTable(data.page, data.totalPages, data.totalCount);
                 } else {
-                    showToastAlert("Server returned an error. Loading high-fidelity sandbox shifts...", "warning");
-                    seedMockShifts();
-                    renderShiftsTable(1);
+                    const errData = await response.json().catch(() => ({}));
+                    showToastAlert(errData.message || "Server returned an error fetching shifts.", "error");
                 }
             } catch (err) {
                 console.error("Failed to load shifts:", err);
-                showToastAlert("Could not connect to server. Loading sandbox shifts...", "warning");
-                seedMockShifts();
-                renderShiftsTable(1);
+                showToastAlert("Could not connect to server.", "error");
             } finally {
                 hideLoader();
             }
-        }
-
-        function seedMockShifts() {
-            allAdminShifts = [
-                {
-                    id: 1001,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 08:15 AM",
-                    endTime: "2026-05-28 04:00 PM",
-                    expectedAmount: 4500.00,
-                    actualAmount: 4500.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1002,
-                    cashierName: "Sarah Cashier",
-                    startTime: "2026-05-28 04:30 PM",
-                    endTime: "2026-05-28 11:45 PM",
-                    expectedAmount: 7200.00,
-                    actualAmount: 7150.00,
-                    difference: -50.00,
-                    isActive: false
-                },
-                {
-                    id: 1003,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 09:00 AM",
-                    endTime: "2026-05-29 05:00 PM",
-                    expectedAmount: 3800.00,
-                    actualAmount: 3800.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1004,
-                    cashierName: "Ahmed Cashier",
-                    startTime: "2026-05-29 06:15 PM",
-                    endTime: "2026-05-30 02:00 AM",
-                    expectedAmount: 8900.00,
-                    actualAmount: 8950.00,
-                    difference: 50.00,
-                    isActive: false
-                },
-                {
-                    id: 1005,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 08:00 AM",
-                    endTime: "2026-05-30 04:30 PM",
-                    expectedAmount: 5120.00,
-                    actualAmount: 5120.00,
-                    difference: 0.00,
-                    isActive: false
-                },
-                {
-                    id: 1006,
-                    cashierName: "John Waiter",
-                    startTime: "2026-05-30 05:00 PM",
-                    endTime: null,
-                    expectedAmount: 3200.00,
-                    actualAmount: null,
-                    difference: null,
-                    isActive: true
-                }
-            ];
-        }
-
-        function parseShiftDateTime(dateTimeStr) {
-            if (!dateTimeStr || dateTimeStr === '-') return null;
-            const parts = dateTimeStr.split(' ');
-            if (parts.length < 3) return null;
-            const datePart = parts[0];
-            const timePart = parts[1];
-            const ampmPart = parts[2];
-
-            const timeSplit = timePart.split(':');
-            let hour = parseInt(timeSplit[0]);
-            const minute = parseInt(timeSplit[1]);
-
-            if (ampmPart === 'PM' && hour < 12) hour += 12;
-            if (ampmPart === 'AM' && hour === 12) hour = 0;
-
-            return {
-                dateStr: datePart,
-                hour: hour,
-                minute: minute
-            };
-        }
-
-        function getFilteredAdminShifts() {
-            const searchTerm = document.getElementById('adminShiftSearch')?.value.toLowerCase() || '';
-            const statusFilter = document.getElementById('adminShiftStatus')?.value || '';
-            const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
-            const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
-            const hourFromVal = document.getElementById('adminShiftHourFrom')?.value;
-            const hourToVal = document.getElementById('adminShiftHourTo')?.value;
-            const hourFrom = hourFromVal !== "" && hourFromVal !== undefined ? parseInt(hourFromVal) : null;
-            const hourTo = hourToVal !== "" && hourToVal !== undefined ? parseInt(hourToVal) : null;
-
-            return allAdminShifts.filter(shift => {
-                // Search match
-                const searchMatch = !searchTerm ||
-                    (shift.cashierName && shift.cashierName.toLowerCase().includes(searchTerm)) ||
-                    shift.id.toString().includes(searchTerm);
-
-                // Status match
-                const shiftStatus = shift.isActive ? "Active" : "Closed";
-                const statusMatch = !statusFilter || shiftStatus === statusFilter;
-
-                // Date & hour parsing
-                const parsedStart = parseShiftDateTime(shift.startTime);
-
-                // Date range match
-                let dateMatch = true;
-                if (parsedStart) {
-                    if (dateFrom && parsedStart.dateStr < dateFrom) dateMatch = false;
-                    if (dateTo && parsedStart.dateStr > dateTo) dateMatch = false;
-                }
-
-                // Hour range match
-                let hourMatch = true;
-                if (parsedStart) {
-                    if (hourFrom !== null && !isNaN(hourFrom) && parsedStart.hour < hourFrom) hourMatch = false;
-                    if (hourTo !== null && !isNaN(hourTo) && parsedStart.hour > hourTo) hourMatch = false;
-                }
-
-                return searchMatch && statusMatch && dateMatch && hourMatch;
-            });
         }
 
         function resetShiftFilters() {
@@ -3527,11 +3428,11 @@
             const hourToInput = document.getElementById('adminShiftHourTo');
             if (hourToInput) hourToInput.value = '';
 
-            renderShiftsTable(1);
+            loadShiftReportsList(1);
             showToastAlert("Filters reset successfully.", "info");
         }
 
-        function renderShiftsTable(page = 1) {
+        function renderShiftsTable(page = 1, totalPages = 1, totalCount = 0) {
             currentAdminShiftPage = page;
             const tbody = document.querySelector('#table-shifts-list tbody');
             const paginationContainer = document.getElementById('shiftsPagination');
@@ -3541,54 +3442,46 @@
                 paginationContainer.innerHTML = '';
             }
 
-            // Get shared filtered data
-            let filteredShifts = getFilteredAdminShifts();
-
-            if (filteredShifts.length === 0) {
+            if (!allAdminShifts || allAdminShifts.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="9" class="text-center py-8 text-slate-400 dark:text-slate-500">
                             <i class="bi bi-clock-history text-3xl text-warning mb-2 d-block"></i>
-                            No cashier shifts matched the criteria.
+                            لم يتم العثور على ورديات تطابق معايير البحث.
                         </td>
                     </tr>`;
                 return;
             }
 
-            // Pagination
-            const totalPages = Math.ceil(filteredShifts.length / shiftsPerPage);
-            const startIndex = (page - 1) * shiftsPerPage;
-            const paginatedShifts = filteredShifts.slice(startIndex, startIndex + shiftsPerPage);
-
-            paginatedShifts.forEach(shift => {
+            allAdminShifts.forEach(shift => {
                 let diffBadge = '-';
                 if (shift.difference !== null) {
                     const diffVal = parseFloat(shift.difference);
                     if (diffVal === 0) {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Balanced</span>`;
+                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">متطابقة</span>`;
                     } else if (diffVal > 0) {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">+${diffVal.toFixed(2)} EGP</span>`;
+                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">+${diffVal.toFixed(2)} ج.م</span>`;
                     } else {
-                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">${diffVal.toFixed(2)} EGP (Short)</span>`;
+                        diffBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">${diffVal.toFixed(2)} ج.م (عجز)</span>`;
                     }
                 }
 
                 const statusBadge = shift.isActive
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse">Active</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-550/15 text-slate-400">Closed</span>`;
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse">نشطة</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-555/15 text-slate-400">مغلقة</span>`;
 
-                const actualStr = shift.actualAmount !== null ? `${parseFloat(shift.actualAmount).toFixed(2)} EGP` : '-';
+                const actualStr = shift.actualAmount !== null ? `${parseFloat(shift.actualAmount).toFixed(2)} ج.م` : '-';
                 const actionBtn = !shift.isActive
-                    ? `<button onclick="viewShiftDetails(${shift.id})" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-500/20 text-brand-500 hover:bg-brand-500/10 transition-all">View Details</button>`
-                    : `<span class="text-xs text-slate-400">Active Shift</span>`;
+                    ? `<button onclick="viewShiftDetails(${shift.id})" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-500/20 text-brand-500 hover:bg-brand-500/10 transition-all">عرض التفاصيل</button>`
+                    : `<span class="text-xs text-slate-400">وردية نشطة</span>`;
 
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                         <td class="py-3.5 px-2 font-bold text-brand-500">#${shift.id}</td>
-                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${shift.cashierName}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.startTime}</td>
-                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${shift.endTime || '-'}</td>
-                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} EGP</td>
+                        <td class="py-3.5 px-2 font-semibold text-slate-800 dark:text-white">${escapeHtml(shift.cashierName)}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${escapeHtml(shift.startTime)}</td>
+                        <td class="py-3.5 px-2 text-slate-500 dark:text-slate-400">${escapeHtml(shift.endTime || '-')}</td>
+                        <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${parseFloat(shift.expectedAmount).toFixed(2)} ج.م</td>
                         <td class="py-3.5 px-2 text-right font-bold text-slate-900 dark:text-white">${actualStr}</td>
                         <td class="py-3.5 px-2 text-center">${diffBadge}</td>
                         <td class="py-3.5 px-2 text-center">${statusBadge}</td>
@@ -3601,58 +3494,81 @@
                 let paginationHtml = '';
 
                 // Prev button
-                paginationHtml += `<button onclick="renderShiftsTable(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Prev</button>`;
+                paginationHtml += `<button onclick="loadShiftReportsList(${page - 1})" ${page === 1 ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === 1 ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">السابق</button>`;
 
                 // Page numbers
                 for (let i = 1; i <= totalPages; i++) {
                     const activeClass = i === page
                         ? 'bg-brand-500 text-white border-brand-500'
                         : 'text-slate-700 dark:text-white border-slate-200 dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800';
-                    paginationHtml += `<button onclick="renderShiftsTable(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
+                    paginationHtml += `<button onclick="loadShiftReportsList(${i})" class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border ${activeClass}">${i}</button>`;
                 }
 
                 // Next button
-                paginationHtml += `<button onclick="renderShiftsTable(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">Next</button>`;
+                paginationHtml += `<button onclick="loadShiftReportsList(${page + 1})" ${page === totalPages ? 'disabled' : ''} class="px-3 py-1.5 mx-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-darkBorder ${page === totalPages ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800'}">التالي</button>`;
 
                 paginationContainer.innerHTML = paginationHtml;
             }
         }
 
-        function exportAdminShiftsToExcel() {
-            if (!allAdminShifts || allAdminShifts.length === 0) return;
+        async function exportAdminShiftsToExcel() {
+            showLoader();
+            try {
+                const searchTerm = document.getElementById('adminShiftSearch')?.value || '';
+                const status = document.getElementById('adminShiftStatus')?.value || '';
+                const dateFrom = document.getElementById('adminShiftDateFrom')?.value || '';
+                const dateTo = document.getElementById('adminShiftDateTo')?.value || '';
+                const hourFrom = document.getElementById('adminShiftHourFrom')?.value || '';
+                const hourTo = document.getElementById('adminShiftHourTo')?.value || '';
 
-            // Get currently filtered list
-            let filteredShifts = getFilteredAdminShifts();
+                const params = new URLSearchParams();
+                if (searchTerm) params.append('searchTerm', searchTerm);
+                if (status) params.append('status', status);
+                if (dateFrom) params.append('dateFrom', dateFrom);
+                if (dateTo) params.append('dateTo', dateTo);
+                if (hourFrom !== '') params.append('hourFrom', hourFrom);
+                if (hourTo !== '') params.append('hourTo', hourTo);
+                params.append('export', 'true');
 
-            if (filteredShifts.length === 0) {
-                showToastAlert("No data matching current filters to export.", "warning");
-                return;
-            }
+                const response = await fetch(`/api/analytics/shifts?${params.toString()}`);
+                if (response.ok) {
+                    const exportDataRaw = await response.json();
+                    if (!exportDataRaw || exportDataRaw.length === 0) {
+                        showToastAlert("لا توجد بيانات مطابقة للتصدير.", "warning");
+                        return;
+                    }
 
-            // Generate clean array of objects for Excel
-            const exportData = filteredShifts.map(shift => {
-                const diffVal = shift.difference !== null ? parseFloat(shift.difference).toFixed(2) : '0.00';
-                return {
-                    "Shift ID": shift.id,
-                    "Cashier": shift.cashierName,
-                    "Start Time": shift.startTime,
-                    "End Time": shift.endTime || '-',
-                    "System Expected (EGP)": parseFloat(shift.expectedAmount).toFixed(2),
-                    "Actual Entered (EGP)": shift.actualAmount !== null ? parseFloat(shift.actualAmount).toFixed(2) : '0.00',
-                    "Difference (EGP)": diffVal,
-                    "Status": shift.isActive ? "Active" : "Closed"
-                };
-            });
+                    const exportData = exportDataRaw.map(shift => {
+                        const diffVal = shift.difference !== null ? parseFloat(shift.difference).toFixed(2) : '0.00';
+                        return {
+                            "معرف الوردية": shift.id,
+                            "الكاشير": shift.cashierName,
+                            "وقت البدء": shift.startTime,
+                            "وقت الانتهاء": shift.endTime || '-',
+                            "المتوقع بالنظام (ج.م)": parseFloat(shift.expectedAmount).toFixed(2),
+                            "المدخل الفعلي (ج.م)": shift.actualAmount !== null ? parseFloat(shift.actualAmount).toFixed(2) : '0.00',
+                            "الفرق (ج.م)": diffVal,
+                            "الحالة": shift.isActive ? "نشطة" : "مغلقة"
+                        };
+                    });
 
-            // Use SheetJS if available
-            if (typeof XLSX !== 'undefined') {
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Cashier Shifts");
-                XLSX.writeFile(wb, `Cashier_Shifts_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-                showToastAlert("Filtered Cashier shifts exported as Excel.", "success");
-            } else {
-                showToastAlert("Excel export library is currently not available.", "error");
+                    if (typeof XLSX !== 'undefined') {
+                        const ws = XLSX.utils.json_to_sheet(exportData);
+                        const wb = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(wb, ws, "ورديات الكاشير");
+                        XLSX.writeFile(wb, `تقرير_ورديات_الكاشير_${new Date().toISOString().slice(0,10)}.xlsx`);
+                        showToastAlert("تم تصدير تقرير ورديات الكاشير إلى ملف إكسل بنجاح.", "success");
+                    } else {
+                        showToastAlert("مكتبة تصدير إكسل غير متوفرة حالياً.", "error");
+                    }
+                } else {
+                    showToastAlert("فشل تحميل بيانات الورديات للتصدير.", "error");
+                }
+            } catch (err) {
+                console.error("Export failed:", err);
+                showToastAlert("حدث خطأ أثناء التصدير.", "error");
+            } finally {
+                hideLoader();
             }
         }
 
@@ -5037,69 +4953,69 @@
     <!-- MENU ITEM SALES PERFORMANCE DETAIL MODAL -->
     <div id="menu-analytics-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-darkCard rounded-2xl max-w-2xl w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="menu-analytics-modal-content">
-            <button onclick="closeProductAnalyticsModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+            <button onclick="closeProductAnalyticsModal()" class="absolute top-4 left-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
-            <div class="space-y-6">
+            <div class="space-y-6 text-right" dir="rtl">
                 <!-- Header -->
                 <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
-                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest">Performance yield report</span>
-                    <h3 id="prod-modal-name" class="outfit-font text-xl font-extrabold text-slate-800 dark:text-white mt-1">Item Name</h3>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span id="prod-modal-category" class="text-xs text-slate-400 font-medium">Category</span>
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest">تقرير أداء المبيعات</span>
+                    <h3 id="prod-modal-name" class="outfit-font text-xl font-extrabold text-slate-800 dark:text-white mt-1">اسم الصنف</h3>
+                    <div class="flex items-center gap-2 mt-1 justify-start">
+                        <span id="prod-modal-category" class="text-xs text-slate-400 font-medium">القسم</span>
                         <span class="w-1.5 h-1.5 bg-slate-200 dark:bg-darkBorder rounded-full"></span>
-                        <span id="prod-modal-price" class="text-xs font-bold text-slate-700 dark:text-slate-350">L.E.</span>
+                        <span id="prod-modal-price" class="text-xs font-bold text-slate-700 dark:text-slate-350">ج.م</span>
                         <span class="w-1.5 h-1.5 bg-slate-200 dark:bg-darkBorder rounded-full"></span>
-                        <span id="prod-modal-status">Available</span>
+                        <span id="prod-modal-status">متاح</span>
                     </div>
                 </div>
 
                 <!-- KPI Metrics grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Units Sold</span>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner text-center">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">إجمالي الوحدات المباعة</span>
                         <h4 id="prod-modal-qty" class="text-lg font-black text-slate-850 dark:text-white mt-1">0</h4>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Gross Yield</span>
-                        <h4 id="prod-modal-revenue" class="text-lg font-black text-slate-850 dark:text-white mt-1">0.00 L.E.</h4>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner text-center">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">إجمالي الإيرادات</span>
+                        <h4 id="prod-modal-revenue" class="text-lg font-black text-slate-850 dark:text-white mt-1">0.00 ج.م</h4>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner">
-                        <span class="text-[9px] font-bold text-slate-400 tracking-wider text-emerald-500 uppercase">Margin Profit</span>
-                        <h4 id="prod-modal-profit" class="text-lg font-black text-emerald-500 mt-1">0.00 L.E.</h4>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner text-center">
+                        <span class="text-[9px] font-bold text-slate-400 tracking-wider text-emerald-500 uppercase">هامش الربح</span>
+                        <h4 id="prod-modal-profit" class="text-lg font-black text-emerald-500 mt-1">0.00 ج.م</h4>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Order Frequency</span>
-                        <h4 id="prod-modal-orders" class="text-lg font-black text-slate-850 dark:text-white mt-1">0 orders</h4>
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border rounded-xl dark:border-darkBorder shadow-inner text-center">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">تكرار الطلب</span>
+                        <h4 id="prod-modal-orders" class="text-lg font-black text-slate-850 dark:text-white mt-1">0 طلبات</h4>
                     </div>
                 </div>
 
                 <!-- Detail fields -->
                 <div class="bg-slate-50 dark:bg-slate-900/30 p-4 border rounded-xl dark:border-darkBorder space-y-3">
-                    <h4 class="outfit-font text-xs font-bold text-slate-800 dark:text-white uppercase tracking-widest border-b pb-1.5 border-slate-100 dark:border-darkBorder">Guest Basket Analytics</h4>
+                    <h4 class="outfit-font text-xs font-bold text-slate-800 dark:text-white uppercase tracking-widest border-b pb-1.5 border-slate-100 dark:border-darkBorder">تحليلات سلة الضيوف</h4>
                     <div class="grid grid-cols-2 gap-4 text-xs">
                         <div class="flex justify-between">
-                            <span class="text-slate-400 font-medium">Unique Guest Reach:</span>
-                            <span id="prod-modal-guests" class="font-bold text-slate-700 dark:text-slate-350">0 guests</span>
+                            <span class="text-slate-400 font-medium">عدد الضيوف الفريدين:</span>
+                            <span id="prod-modal-guests" class="font-bold text-slate-700 dark:text-slate-350">0 ضيوف</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400 font-medium">Avg Units Per Basket:</span>
+                            <span class="text-slate-400 font-medium">متوسط الوحدات في السلة:</span>
                             <span id="prod-modal-avg-qty" class="font-bold text-slate-700 dark:text-slate-350">1.0</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400 font-medium">Avg Revenue Yield Per Basket:</span>
-                            <span id="prod-modal-avg-rev" class="font-bold text-slate-700 dark:text-slate-350">0.00 L.E.</span>
+                            <span class="text-slate-400 font-medium">متوسط مبيعات السلة:</span>
+                            <span id="prod-modal-avg-rev" class="font-bold text-slate-700 dark:text-slate-350">0.00 ج.م</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400 font-medium">Last Audit Date:</span>
-                            <span id="prod-modal-last-order" class="font-bold text-slate-700 dark:text-slate-350">Never</span>
+                            <span class="text-slate-400 font-medium">تاريخ آخر مراجعة:</span>
+                            <span id="prod-modal-last-order" class="font-bold text-slate-700 dark:text-slate-350">أبداً</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Actions -->
                 <div class="flex justify-end pt-2">
-                    <button onclick="closeProductAnalyticsModal()" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-500/10">Close Analytics Report</button>
+                    <button onclick="closeProductAnalyticsModal()" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-500/10">إغلاق تقرير التحليلات</button>
                 </div>
             </div>
         </div>
@@ -5111,60 +5027,60 @@
             <button onclick="closeDailySalesModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
-            <div class="space-y-6">
+            <div class="space-y-6 text-right" dir="rtl">
                 <!-- Header -->
                 <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
-                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest">Operations Audit Statement</span>
-                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Daily Operations Journal: <span id="audit-modal-date" class="text-brand-500">2026-05-20</span></h3>
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest">بيان مراجعة العمليات</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">دفتر مراجعة العمليات اليومي: <span id="audit-modal-date" class="text-brand-500">2026-05-20</span></h3>
                 </div>
 
                 <!-- Daily Counters grid -->
                 <div class="grid grid-cols-2 md:grid-cols-7 gap-3">
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">Total Orders</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">إجمالي الطلبات</span>
                         <h4 id="audit-modal-orders" class="text-sm font-black text-slate-850 dark:text-white mt-0.5">0</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">Completed</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">مكتملة</span>
                         <h4 id="audit-modal-completed" class="text-sm font-black text-emerald-500 mt-0.5">0</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">Cancelled</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">ملغية</span>
                         <h4 id="audit-modal-cancelled" class="text-sm font-black text-red-500 mt-0.5">0</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">Discounts</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">الخصومات</span>
                         <h4 id="audit-modal-discounts" class="text-sm font-black text-slate-805 dark:text-white mt-0.5">0.00</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">Taxes</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">الضرائب</span>
                         <h4 id="audit-modal-taxes" class="text-sm font-black text-slate-805 dark:text-white mt-0.5">0.00</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center">
-                        <span class="text-[8px] font-bold text-slate-400 uppercase">AOV</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">متوسط الطلب</span>
                         <h4 id="audit-modal-aov" class="text-sm font-black text-slate-805 dark:text-white mt-0.5">0.00</h4>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 border rounded-xl dark:border-darkBorder text-center bg-brand-500/5">
-                        <span class="text-[8px] font-bold text-brand-500 uppercase">Net Yield</span>
+                        <span class="text-[8px] font-bold text-brand-500 uppercase">صافي الإيرادات</span>
                         <h4 id="audit-modal-revenue" class="text-sm font-black text-brand-500 mt-0.5">0.00</h4>
                     </div>
                 </div>
 
                 <!-- Ledger Transactions Table -->
                 <div class="space-y-2">
-                    <h4 class="outfit-font text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">Transaction History Log</h4>
+                    <h4 class="outfit-font text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider">سجل حركات المعاملات</h4>
                     <div class="overflow-y-auto max-h-60 border dark:border-darkBorder rounded-xl">
-                        <table id="table-audit-orders" class="w-full text-left border-collapse text-[11px]">
+                        <table id="table-audit-orders" class="w-full text-right border-collapse text-[11px]" dir="rtl">
                             <thead>
                                 <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 uppercase text-[9px] font-bold sticky top-0">
-                                    <th class="py-2.5 px-3">Order ID</th>
-                                    <th class="py-2.5">Table</th>
-                                    <th class="py-2.5">Waiter</th>
-                                    <th class="py-2.5 text-center">Items Count</th>
-                                    <th class="py-2.5 text-right">Value (L.E.)</th>
-                                    <th class="py-2.5 text-center">Pay Method</th>
-                                    <th class="py-2.5 text-center">Duration</th>
-                                    <th class="py-2.5">Status</th>
+                                    <th class="py-2.5 px-3 text-right">رقم الطلب</th>
+                                    <th class="py-2.5 text-right">الطاولة</th>
+                                    <th class="py-2.5 text-right">الويتر</th>
+                                    <th class="py-2.5 text-center">عدد الأصناف</th>
+                                    <th class="py-2.5 text-left">القيمة (ج.م)</th>
+                                    <th class="py-2.5 text-center">طريقة الدفع</th>
+                                    <th class="py-2.5 text-center">المدة</th>
+                                    <th class="py-2.5 text-right">الحالة</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -5176,8 +5092,8 @@
 
                 <!-- Actions -->
                 <div class="flex items-center justify-between border-t pt-4 dark:border-darkBorder">
-                    <button onclick="printDailyAuditInvoice()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5"><i class="bi bi-printer"></i> Print Statement</button>
-                    <button onclick="closeDailySalesModal()" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-500/10">Close Operations Journal</button>
+                    <button onclick="printDailyAuditInvoice()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5"><i class="bi bi-printer"></i> طباعة البيان</button>
+                    <button onclick="closeDailySalesModal()" class="px-5 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-500/10">إغلاق دفتر العمليات</button>
                 </div>
             </div>
         </div>

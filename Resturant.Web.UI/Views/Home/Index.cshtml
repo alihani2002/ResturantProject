@@ -1,6 +1,6 @@
-﻿@model IEnumerable<Resturant.Core.Entities.MenuCategory>
+@model IEnumerable<Resturant.Core.Entities.MenuCategory>
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "الرئيسية";
 }
 
 <style>
@@ -34,21 +34,21 @@
     }
 </style>
 
-<div class="container py-5">
+<div class="container py-5 text-right" style="direction: rtl;">
     <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-3">Our Menu</h1>
-        <p class="lead text-black-pure">Choose a category to start your order</p>
+        <h1 class="display-4 fw-bold mb-3">قائمة الطعام</h1>
+        <p class="lead text-black-pure">اختر فئة لبدء طلبك</p>
         <div class="mx-auto bg-warning" style="height: 3px; width: 60px;"></div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
         @if (Model != null && Model.Any())
         {
             @foreach (var item in Model)
             {
                 <div class="col-md-4 col-sm-6">
                     <a href="@Url.Action("Index", "Menu", new { categoryId = item.Id })" class="text-decoration-none">
-                        <div class="card card-professional h-100"> <!-- Used card-professional here -->
+                        <div class="card card-professional h-100">
                             @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
                                 <img src="@item.ImageUrl" class="category-img" alt="@item.Name">
@@ -73,8 +73,8 @@
         }
         else
         {
-            <div class="col-12 text-center">
-                <p class="text-muted">No categories available at the moment.</p>
+            <div class="col-12 text-center py-5">
+                <p class="text-muted">لا توجد تصنيفات متاحة في الوقت الحالي.</p>
             </div>
         }
     </div>
@@ -88,12 +88,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             TablePrompt.init();
             
-            // If table number is not set, prompt for it
             const currentTable = TablePrompt.get();
             if (!currentTable) {
                 setTimeout(() => {
                     TablePrompt.prompt();
-                }, 1000); // 1s delay for better UX
+                }, 1000);
             }
         });
     </script>

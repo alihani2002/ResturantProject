@@ -1,25 +1,24 @@
-
 <!-- Table Number Modal -->
-<div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="tableNumberModal" tabindex="-1" aria-labelledby="tableNumberModalLabel" data-bs-backdrop="static" data-bs-keyboard="false" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-white text-dark" style="background-color: #ffffff !important;">
+            <div class="modal-header bg-white text-dark justify-content-between" style="background-color: #ffffff !important; direction: rtl;">
                 <h5 class="modal-title" id="tableNumberModalLabel">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Enter Your Table Number
+                    <i class="bi bi-grid-3x3-gap-fill ms-2"></i>أدخل رقم الطاولة
                 </h5>
             </div>
-            <div class="modal-body">
-                <p class="text-muted mb-3">Please enter your table number to continue.</p>
+            <div class="modal-body text-right" style="direction: rtl;">
+                <p class="text-muted mb-3">الرجاء إدخال رقم الطاولة للمتابعة وتصفح قائمة الطعام.</p>
                 <div class="form-group">
-                    <label for="tableNumberInput" class="form-label fw-bold">Table Number</label>
+                    <label for="tableNumberInput" class="form-label fw-bold">رقم الطاولة</label>
                     <input type="number" class="form-control form-control-lg text-center" id="tableNumberInput"
-                           min="1" placeholder="e.g., 5">
-                    <div class="invalid-feedback" id="tableNumberError">Please enter a valid table number.</div>
+                           min="1" placeholder="مثال: 5">
+                    <div class="invalid-feedback" id="tableNumberError">الرجاء إدخال رقم طاولة صحيح.</div>
                 </div>
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-dark-primary btn-lg w-100" id="confirmTableBtn">
-                    <i class="bi bi-check-lg me-2"></i>Confirm Table
+                    <i class="bi bi-check-lg ms-2"></i>تأكيد رقم الطاولة
                 </button>
             </div>
         </div>

@@ -1,123 +1,123 @@
-﻿            <div id="tab-menu-mgmt" class="tab-content hidden space-y-6">
+            <div id="tab-menu-mgmt" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <!-- Left: Add Form -->
                     <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
                         <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            <i class="bi bi-plus-circle text-rose-500"></i> Add New Menu Item
+                            <i class="bi bi-plus-circle text-rose-500"></i> إضافة صنف منيو جديد
                         </h3>
                         <form id="form-add-menuitem" onsubmit="submitMenuItem(event)" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Item Name</label>
-                                <input type="text" id="menu-name" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="e.g. T-Bone Steak">
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">اسم الصنف</label>
+                                <input type="text" id="menu-name" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="مثال: بيتزا مارجريتا، عصير ليمون...">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Description</label>
-                                <textarea id="menu-desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="Enter item details..."></textarea>
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">الوصف</label>
+                                <textarea id="menu-desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="أدخل تفاصيل ومكونات الصنف..."></textarea>
                             </div>
 
                             <!-- SIZE VARIANTS SECTION (Add Form) -->
                             <div class="border border-amber-200 dark:border-amber-900/40 rounded-xl overflow-hidden">
                                 <div class="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 px-3 py-2">
                                     <span class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                                        <i class="bi bi-stack"></i> Size Variants &amp; Pricing
+                                        <i class="bi bi-stack"></i> أحجام الصنف والأسعار
                                     </span>
                                     <label class="flex items-center gap-2 cursor-pointer">
                                         <input type="checkbox" id="menu-has-sizes" class="w-3.5 h-3.5 text-amber-500 rounded" onchange="toggleSizesSection('menu-sizes-body', 'menu-sizes-list', this.checked)">
-                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Enable Sizes</span>
+                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">تفعيل الأحجام</span>
                                     </label>
                                 </div>
                                 <div id="menu-sizes-body" class="hidden p-3 space-y-2 bg-white dark:bg-darkCard">
-                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Each size has its own selling price and cost. Base Price and Cost stay as default fallback.</p>
+                                    <p class="text-[10px] text-slate-400 dark:text-slate-500">كل حجم له سعر بيع وتكلفة خاصة به. السعر والتكلفة الأساسية ستكون الاحتياطية الافتراضية.</p>
                                     <div class="grid grid-cols-12 gap-1 text-[9px] font-bold text-slate-400 uppercase px-1">
-                                        <div class="col-span-4">Size Name</div>
-                                        <div class="col-span-3">Price</div>
-                                        <div class="col-span-4">Cost</div>
+                                        <div class="col-span-4">اسم الحجم</div>
+                                        <div class="col-span-3">السعر</div>
+                                        <div class="col-span-4">التكلفة</div>
                                         <div class="col-span-1"></div>
                                     </div>
                                     <div id="menu-sizes-list" class="space-y-1.5"></div>
                                     <button type="button" onclick="addAdminSizeRow('menu-sizes-list')" class="text-[10px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 mt-1">
-                                        <i class="bi bi-plus-circle"></i> Add Size
+                                        <i class="bi bi-plus-circle"></i> إضافة حجم
                                     </button>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-4 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Price (L.E.)</label>
-                                    <input type="number" id="menu-price" step="0.01" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="19.99">
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">السعر (ج.م)</label>
+                                    <input type="number" id="menu-price" step="0.01" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="0.00">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Cost (L.E.)</label>
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">التكلفة (ج.م)</label>
                                     <input type="number" id="menu-cost" step="0.01" min="0" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" placeholder="0.00">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Category</label>
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">القسم</label>
                                     <select id="menu-cat-id" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all">
                                         <!-- Loaded dynamically -->
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Order #</label>
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">الترتيب</label>
                                     <input type="number" id="menu-order-number" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200/40 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all" value="0" min="0">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3 mt-2">
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="menu-available" checked class="w-4 h-4 text-rose-600 bg-slate-100 border-slate-300 rounded focus:ring-rose-500">
-                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Is Available</label>
+                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">متاح للطلب</label>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="menu-popular" class="w-4 h-4 text-rose-600 bg-slate-100 border-slate-300 rounded focus:ring-rose-500">
-                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Popular</label>
+                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">شائع (محبوب)</label>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="menu-trending" class="w-4 h-4 text-rose-600 bg-slate-100 border-slate-300 rounded focus:ring-rose-500">
-                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Trending</label>
+                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">رائج</label>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" id="menu-recommended" class="w-4 h-4 text-rose-600 bg-slate-100 border-slate-300 rounded focus:ring-rose-500">
-                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Recommended</label>
+                                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">موصى به</label>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Recommend with this Item</label>
-                                <div id="menu-recommendations-list" class="border border-slate-200 dark:border-darkBorder rounded-xl p-3 max-h-36 overflow-y-auto space-y-2 bg-slate-50 dark:bg-slate-800/30">
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">أصناف ننصح بها مع هذا الصنف</label>
+                                <div id="menu-recommendations-list" class="border border-slate-200 dark:border-darkBorder rounded-xl p-3 max-h-36 overflow-y-auto space-y-2 bg-slate-550/50 dark:bg-slate-800/30">
                                     <!-- Dynamic -->
                                 </div>
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-1">
-                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">Extras / Add-Ons</label>
-                                    <button type="button" onclick="addNewAddonRow('menu-addons-container')" class="text-[10px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-0.5"><i class="bi bi-plus-circle"></i> Add Extra</button>
+                                    <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">الإضافات والخيارات</label>
+                                    <button type="button" onclick="addNewAddonRow('menu-addons-container')" class="text-[10px] font-bold text-rose-500 hover:text-rose-600 flex items-center gap-0.5"><i class="bi bi-plus-circle"></i> إضافة خيار</button>
                                 </div>
                                 <div id="menu-addons-container" class="space-y-2">
                                     <!-- Dynamic -->
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Item Image File</label>
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">صورة الصنف</label>
                                 <input type="file" id="menu-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer">
                             </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm transition-all shadow-md shadow-rose-500/10">Add Menu Item</button>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm transition-all shadow-md shadow-rose-500/10">إضافة الصنف للمنيو</button>
                         </form>
                     </div>
 
                     <!-- Right: List Table -->
                     <div class="xl:col-span-2 bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
                         <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            <i class="bi bi-list-stars text-rose-500"></i> Active Menu Products
+                            <i class="bi bi-list-stars text-rose-500"></i> أصناف المنيو النشطة
                         </h3>
                         <div class="overflow-x-auto font-sans">
-                            <table id="table-menu-list" class="w-full text-left border-collapse text-xs">
+                            <table id="table-menu-list" class="w-full text-right border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                        <th class="py-3">Product Name</th>
-                                        <th class="py-3">Category</th>
-                                        <th class="py-3">Price</th>
-                                        <th class="py-3">Cost</th>
-                                        <th class="py-3">Order #</th>
-                                        <th class="py-3">Image</th>
-                                        <th class="py-3 text-right">Actions</th>
+                                        <th class="py-3">اسم المنتج</th>
+                                        <th class="py-3">القسم</th>
+                                        <th class="py-3">السعر</th>
+                                        <th class="py-3">التكلفة</th>
+                                        <th class="py-3">الترتيب</th>
+                                        <th class="py-3">الصورة</th>
+                                        <th class="py-3 text-left">الإجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">

@@ -2,7 +2,7 @@
 @using Resturant.Core.Common
 
 @{
-    ViewData["Title"] = "Create User";
+    ViewData["Title"] = "إنشاء مستخدم جديد";
     bool isIframe = Context.Request.Query["iframe"] == "true" || (Context.Request.HasFormContentType && Context.Request.Form["iframe"] == "true");
     Layout = isIframe ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
 }
@@ -11,73 +11,73 @@
     <div class="col-lg-8 mx-auto">
         <div class="card border-top border-0 border-4 border-primary">
             <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
-                <h4 class="card-title mb-0 text-primary fw-bold"><i class="feather-user-plus me-2"></i>Create New User</h4>
+                <h4 class="card-title mb-0 text-primary fw-bold"><i class="feather-user-plus me-2"></i>إنشاء مستخدم جديد</h4>
             </div>
             <div class="card-body p-4">
                 <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-start"></div>
                     
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label asp-for="FullName" class="form-label fw-semibold"></label>
+                            <label asp-for="FullName" class="form-label fw-semibold">الاسم الكامل</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="feather-user"></i></span>
-                                <input asp-for="FullName" class="form-control" placeholder="Enter full name" />
+                                <input asp-for="FullName" class="form-control" placeholder="أدخل الاسم الكامل" required />
                             </div>
-                            <span asp-validation-for="FullName" class="text-danger fs-12"></span>
+                            <span asp-validation-for="FullName" class="text-danger fs-12 text-start d-block"></span>
                         </div>
  
                         <div class="col-md-6">
-                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <label asp-for="Email" class="form-label fw-semibold">البريد الإلكتروني</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="feather-mail"></i></span>
-                                <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                                <input asp-for="Email" class="form-control" placeholder="name@example.com" required />
                             </div>
-                            <span asp-validation-for="Email" class="text-danger fs-12"></span>
+                            <span asp-validation-for="Email" class="text-danger fs-12 text-start d-block"></span>
                         </div>
  
                         <div class="col-md-6">
-                            <label asp-for="Password" class="form-label fw-semibold"></label>
+                            <label asp-for="Password" class="form-label fw-semibold">كلمة المرور</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="feather-lock"></i></span>
-                                <input asp-for="Password" class="form-control" placeholder="Enter password" />
+                                <input asp-for="Password" class="form-control text-start" placeholder="أدخل كلمة المرور" required />
                             </div>
-                            <span asp-validation-for="Password" class="text-danger fs-12"></span>
+                            <span asp-validation-for="Password" class="text-danger fs-12 text-start d-block"></span>
                         </div>
  
                         <div class="col-md-6">
-                            <label asp-for="Role" class="form-label fw-semibold"></label>
+                            <label asp-for="Role" class="form-label fw-semibold">الدور / الصلاحية</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="feather-shield"></i></span>
-                                <select asp-for="Role" class="form-select">
-                                    <option value="">Select Role</option>
-                                    <option value="@AppRoles.Admin">@AppRoles.Admin</option>
-                                    <option value="@AppRoles.Manager">@AppRoles.Manager</option>
-                                    <option value="@AppRoles.Chief">@AppRoles.Chief</option>
-                                    <option value="@AppRoles.Waiter">@AppRoles.Waiter</option>
-                                    <option value="@AppRoles.Accountant">@AppRoles.Accountant</option>
-                                    <option value="@AppRoles.User">@AppRoles.User</option>
+                                <select asp-for="Role" class="form-select" required>
+                                    <option value="">اختر الدور / الصلاحية</option>
+                                    <option value="@AppRoles.Admin">مدير النظام (Admin)</option>
+                                    <option value="@AppRoles.Manager">مدير فرع (Manager)</option>
+                                    <option value="@AppRoles.Chief">شيف / مطبخ (Chief)</option>
+                                    <option value="@AppRoles.Waiter">ويتر / نادل (Waiter)</option>
+                                    <option value="@AppRoles.Accountant">محاسب (Accountant)</option>
+                                    <option value="@AppRoles.User">مستخدم عادي (User)</option>
                                 </select>
                             </div>
-                            <span asp-validation-for="Role" class="text-danger fs-12"></span>
+                            <span asp-validation-for="Role" class="text-danger fs-12 text-start d-block"></span>
                         </div>
 
                         <div class="col-md-6" id="branchSelectGroup">
-                            <label asp-for="BranchId" class="form-label fw-semibold">Branch Access</label>
+                            <label asp-for="BranchId" class="form-label fw-semibold">الفرع المتاح</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light"><i class="feather-map-pin"></i></span>
                                 <select asp-for="BranchId" class="form-select" asp-items="@(new SelectList(ViewBag.Branches, "Id", "Name"))">
-                                    <option value="">Select Branch</option>
+                                    <option value="">اختر الفرع</option>
                                 </select>
                             </div>
-                            <span asp-validation-for="BranchId" class="text-danger fs-12"></span>
+                            <span asp-validation-for="BranchId" class="text-danger fs-12 text-start d-block"></span>
                         </div>
                         
-                        <div class="col-12">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" asp-for="IsActive" checked="checked" />
-                                <label class="form-check-label fw-semibold" asp-for="IsActive">
-                                    @Html.DisplayNameFor(model => model.IsActive)
+                        <div class="col-12 text-start">
+                            <div class="form-check form-switch d-inline-block">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" asp-for="IsActive" checked="checked" />
+                                <label class="form-check-label fw-semibold mr-4" asp-for="IsActive">
+                                    تفعيل هذا الحساب والسماح له بالدخول فوراً
                                 </label>
                             </div>
                         </div>
@@ -88,11 +88,11 @@
                     <hr class="my-4 border-dashed" />
  
                     <div class="d-flex justify-content-between align-items-center">
-                        <a asp-action="Index" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-light text-muted">
-                            <i class="feather-arrow-left me-1"></i> Back to List
+                        <a asp-action="Index" asp-route-iframe="@(isIframe ? "true" : "")" class="btn btn-light text-muted rounded-pill px-3">
+                            <i class="feather-arrow-left me-1"></i> العودة للقائمة
                         </a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="feather-plus-circle me-1"></i> Create User
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="feather-plus-circle me-1"></i> إنشاء المستخدم
                         </button>
                     </div>
                 </form>

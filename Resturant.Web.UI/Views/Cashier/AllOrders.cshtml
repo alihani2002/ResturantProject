@@ -1,12 +1,12 @@
 @model IEnumerable<Resturant.Core.Entities.Order>
 
 @{
-    ViewData["Title"] = "All Orders";
+    ViewData["Title"] = "جميع الطلبات";
     var selectedDate = (DateTime)ViewBag.SelectedDate;
 }
 
 <style>
-    .status-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 50px; }
+    .status-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 50px; font-weight: bold; }
     .status-pending    { background: #fef3c7; color: #92400e; }
     .status-confirmed  { background: #dbeafe; color: #1e40af; }
     .status-inprep     { background: #e0e7ff; color: #3730a3; }
@@ -18,36 +18,54 @@
     .summary-bar { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; padding: 1rem 1.5rem; }
     .summary-bar .text-secondary { color: #6c757d !important; }
     .summary-bar .text-warning { color: #ffc107 !important; }
+    
+    /* DataTable RTL adjustments */
+    .dataTables_wrapper .dataTables_paginate {
+        float: left !important;
+        margin-top: 15px;
+    }
+    .dataTables_wrapper .dataTables_info {
+        float: right !important;
+        margin-top: 15px;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        display: none !important; /* Managed by custom search input */
+    }
 </style>
 
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-4" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
-            <h2><i class="bi bi-calendar-range text-primary me-2"></i>All Orders — <span class="text-muted fs-5">@selectedDate.ToString("dddd, MMM dd yyyy")</span></h2>
+            <h2>
+                <i class="bi bi-calendar-range text-primary ms-2"></i>جميع طلبات اليوم — 
+                <span class="text-muted fs-5">@selectedDate.ToString("dddd، dd MMMM yyyy", new System.Globalization.CultureInfo("ar-EG"))</span>
+            </h2>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a href="@Url.Action("Index", "Cashier")" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Back to Active
+            <a href="@Url.Action("Index", "Cashier")" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-right ms-1"></i> العودة للطلبات النشطة
             </a>
             <form method="get" class="d-flex align-items-center gap-2">
                 <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
                 <select name="hour" class="form-select form-select-sm" style="width: auto;">
-                    <option value="">All Hours</option>
+                    <option value="">جميع الساعات</option>
                     @for (int h = 0; h < 24; h++)
                     {
                         var hourSelected = (int?)ViewBag.SelectedHour == h;
                         <option value="@h" selected="@hourSelected">@h:00 - @(h+1):00</option>
                     }
                 </select>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="bi bi-search me-1"></i> Filter
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3" style="background-color: #f97316 !important; border-color: #f97316 !important;">
+                    <i class="bi bi-search ms-1"></i> تصفية
                 </button>
             </form>
-            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(-1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm">
-                <i class="bi bi-chevron-left"></i>
-            </a>
-            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm" @(selectedDate.Date >= DateTime.Today ? "disabled" : "")>
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(-1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                 <i class="bi bi-chevron-right"></i>
+            </a>
+            <a href="@Url.Action("AllOrders", "Cashier", new { date = selectedDate.AddDays(1).ToString("yyyy-MM-dd"), hour = ViewBag.SelectedHour })" class="btn btn-outline-dark btn-sm rounded-circle p-2 d-inline-flex align-items-center justify-content-center @(selectedDate.Date >= DateTime.Today ? "disabled" : "")" style="width: 32px; height: 32px;">
+                <i class="bi bi-chevron-left"></i>
             </a>
         </div>
     </div>
@@ -61,23 +79,23 @@
     }
 
     <!-- Summary Bar -->
-    <div class="summary-bar text-dark mb-4">
+    <div class="summary-bar text-dark mb-4 border shadow-sm">
         <div class="row g-3 text-center">
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 border-start">
                 <div class="fs-2 fw-bold">@totalOrders</div>
-                <div class="small text-secondary">Total Orders</div>
+                <div class="small text-secondary">إجمالي الطلبات</div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 border-start">
                 <div class="fs-2 fw-bold text-success">@completedCount</div>
-                <div class="small text-secondary">Completed</div>
+                <div class="small text-secondary">مكتمل</div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 border-start">
                 <div class="fs-2 fw-bold text-danger">@cancelledCount</div>
-                <div class="small text-secondary">Cancelled</div>
+                <div class="small text-secondary">ملغي</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="fs-2 fw-bold text-warning">$@totalRevenue.ToString("0.00")</div>
-                <div class="small text-secondary">Revenue</div>
+                <div class="fs-2 fw-bold text-warning" style="color: #f97316 !important;">@totalRevenue.ToString("N2") ج.م</div>
+                <div class="small text-secondary">الإيرادات</div>
             </div>
         </div>
     </div>
@@ -86,126 +104,153 @@
     {
         <div class="text-center py-5">
             <i class="bi bi-inbox display-1 text-secondary opacity-25"></i>
-            <h3 class="mt-3 text-muted">No orders on this date</h3>
-            <p class="text-muted">Try selecting a different date above.</p>
+            <h3 class="mt-3 text-muted">لا توجد طلبات في هذا التاريخ</h3>
+            <p class="text-muted">حاول اختيار تاريخ آخر من الأعلى.</p>
         </div>
     }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-list-ul me-2 text-primary"></i>Order List</h5>
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-list-ul ms-2 text-primary"></i>قائمة الطلبات</h5>
                 <div class="d-flex gap-2">
-                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search table, name, item..." style="width: 220px;" oninput="filterTable()" />
-                    <select id="statusFilter" class="form-select form-select-sm" style="width: 140px;" onchange="filterTable()">
-                        <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="InPreparation">In Prep</option>
-                        <option value="Ready">Ready</option>
-                        <option value="Served">Served</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
+                    <input type="text" id="searchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="ابحث عن طاولة، عميل، صنف..." style="width: 220px;" />
+                    <select id="statusFilter" class="form-select form-select-sm rounded-pill" style="width: 140px;">
+                        <option value="">جميع الحالات</option>
+                        <option value="معلق">معلق</option>
+                        <option value="مؤكد">مؤكد</option>
+                        <option value="قيد التحضير">قيد التحضير</option>
+                        <option value="جاهز">جاهز</option>
+                        <option value="تم التقديم">تم التقديم</option>
+                        <option value="مكتمل">مكتمل</option>
+                        <option value="ملغي">ملغي</option>
                     </select>
-                    <button onclick="exportAllOrdersToExcel()" class="btn btn-sm btn-success d-flex align-items-center gap-1">
+                    <button onclick="exportAllOrdersToExcel()" class="btn btn-sm btn-success rounded-pill px-3 d-flex align-items-center gap-1">
                         <i class="bi bi-file-earmark-excel"></i> Excel
                     </button>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="ordersTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="cursor-pointer" onclick="sortTable(0)">Order # <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th onclick="sortTable(1)">Table <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th onclick="sortTable(2)">Customer <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th>Items</th>
-                            <th onclick="sortTable(4)">Amount <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th onclick="sortTable(5)">Status <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th onclick="sortTable(6)">Time <i class="bi bi-arrow-down-up ms-1 small"></i></th>
-                            <th>Note</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody">
-                        @foreach (var order in Model)
-                        {
-                            var isCancelled = order.Status == Resturant.Core.Entities.OrderStatus.Cancelled;
-                            var statusClass = order.Status switch
-                            {
-                                Resturant.Core.Entities.OrderStatus.Pending => "status-pending",
-                                Resturant.Core.Entities.OrderStatus.Confirmed => "status-confirmed",
-                                Resturant.Core.Entities.OrderStatus.InPreparation => "status-inprep",
-                                Resturant.Core.Entities.OrderStatus.Ready => "status-ready",
-                                Resturant.Core.Entities.OrderStatus.Served => "status-served",
-                                Resturant.Core.Entities.OrderStatus.Completed => "status-completed",
-                                Resturant.Core.Entities.OrderStatus.Cancelled => "status-cancelled",
-                                _ => ""
-                            };
-                            <tr class="@(isCancelled ? "row-cancelled" : "")" data-status="@order.Status">
-                                <td class="fw-bold">#@order.Id</td>
-                                <td><span class="badge bg-secondary rounded-pill">T@order.TableNumber</span></td>
-                                <td>
-                                    <div class="fw-semibold">@(order.CustomerName ?? "Guest")</div>
-                                    <div class="small text-muted">@(order.PhoneNumber ?? "")</div>
-                                </td>
-                                <td>
-                                    <div class="small">
-                                        @foreach (var item in order.OrderItems)
-                                        {
-                                            <div class="@(item.IsCancelled ? "text-decoration-line-through text-danger" : "")">
-                                                @item.Quantity × @(item.MenuItem?.Name ?? "?")
-                                                @if (item.IsCancelled) { <span class="badge bg-danger" style="font-size:0.6rem;">Cancelled</span> }
-                                            </div>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="fw-bold @(isCancelled ? "text-danger" : "text-success")">$@order.TotalAmount.ToString("0.00")</td>
-                                <td><span class="status-badge @statusClass">@order.Status</span></td>
-                                <td class="small text-muted">@order.OrderDate.ToString("HH:mm")</td>
-                                <td><small class="fst-italic text-muted">@(order.Note ?? "")</small></td>
+            <div class="p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="ordersTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>الطاولة</th>
+                                <th>العميل</th>
+                                <th>الأصناف</th>
+                                <th>المبلغ الإجمالي</th>
+                                <th>الحالة</th>
+                                <th>الوقت</th>
+                                <th>ملاحظات</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            @foreach (var order in Model)
+                            {
+                                var isCancelled = order.Status == Resturant.Core.Entities.OrderStatus.Cancelled;
+                                var statusClass = order.Status switch
+                                {
+                                    Resturant.Core.Entities.OrderStatus.Pending => "status-pending",
+                                    Resturant.Core.Entities.OrderStatus.Confirmed => "status-confirmed",
+                                    Resturant.Core.Entities.OrderStatus.InPreparation => "status-inprep",
+                                    Resturant.Core.Entities.OrderStatus.Ready => "status-ready",
+                                    Resturant.Core.Entities.OrderStatus.Served => "status-served",
+                                    Resturant.Core.Entities.OrderStatus.Completed => "status-completed",
+                                    Resturant.Core.Entities.OrderStatus.Cancelled => "status-cancelled",
+                                    _ => ""
+                                };
+                                var statusArabic = order.Status switch
+                                {
+                                    Resturant.Core.Entities.OrderStatus.Pending => "معلق",
+                                    Resturant.Core.Entities.OrderStatus.Confirmed => "مؤكد",
+                                    Resturant.Core.Entities.OrderStatus.InPreparation => "قيد التحضير",
+                                    Resturant.Core.Entities.OrderStatus.Ready => "جاهز",
+                                    Resturant.Core.Entities.OrderStatus.Served => "تم التقديم",
+                                    Resturant.Core.Entities.OrderStatus.Completed => "مكتمل",
+                                    Resturant.Core.Entities.OrderStatus.Cancelled => "ملغي",
+                                    _ => order.Status.ToString()
+                                };
+                                <tr class="@(isCancelled ? "row-cancelled" : "")" data-status="@statusArabic">
+                                    <td class="fw-bold">#@order.Id</td>
+                                    <td><span class="badge bg-secondary rounded-pill">طاولة @order.TableNumber</span></td>
+                                    <td>
+                                        <div class="fw-semibold">@(order.CustomerName ?? "عميل زائر")</div>
+                                        <div class="small text-muted">@(order.PhoneNumber ?? "")</div>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            @foreach (var item in order.OrderItems)
+                                            {
+                                                <div class="@(item.IsCancelled ? "text-decoration-line-through text-danger" : "")">
+                                                    @item.Quantity × @(item.MenuItem?.Name ?? "?")
+                                                    @if (item.IsCancelled) { <span class="badge bg-danger" style="font-size:0.6rem; margin-right: 4px;">ملغي</span> }
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold @(isCancelled ? "text-danger" : "text-success")">@order.TotalAmount.ToString("N2") ج.م</td>
+                                    <td><span class="status-badge @statusClass">@statusArabic</span></td>
+                                    <td class="small text-muted">@order.OrderDate.ToString("HH:mm")</td>
+                                    <td><small class="fst-italic text-muted">@(order.Note ?? "")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     }
 </div>
 
 @section Scripts {
+    <!-- DataTables JS & CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/vendors/css/dataTables.bs5.min.css">
+    <script src="/assets/vendors/js/dataTables.min.js"></script>
+    <script src="/assets/vendors/js/dataTables.bs5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <script>
-        let sortDir = {};
-
-        function filterTable() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value;
-            const rows = document.querySelectorAll('#ordersTableBody tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const rowStatus = row.dataset.status;
-                const matchesSearch = !search || text.includes(search);
-                const matchesStatus = !status || rowStatus === status;
-                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-            });
-        }
-
-        function sortTable(colIdx) {
-            const tbody = document.getElementById('ordersTableBody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            sortDir[colIdx] = !sortDir[colIdx];
-            rows.sort((a, b) => {
-                const aText = a.cells[colIdx]?.textContent.trim() || '';
-                const bText = b.cells[colIdx]?.textContent.trim() || '';
-                const aNum = parseFloat(aText.replace(/[^0-9.]/g, ''));
-                const bNum = parseFloat(bText.replace(/[^0-9.]/g, ''));
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    return sortDir[colIdx] ? aNum - bNum : bNum - aNum;
+        $(document).ready(function() {
+            let oTable = $('#ordersTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "البحث في الطلبات:",
+                    "lengthMenu": "عرض _MENU_ طلبات لكل صفحة",
+                    "info": "عرض من _START_ إلى _END_ من إجمالي _TOTAL_ طلب",
+                    "infoEmpty": "عرض 0 إلى 0 من 0 طلب",
+                    "infoFiltered": "(تصفية من إجمالي _MAX_ طلب)",
+                    "emptyTable": "لا توجد طلبات مسجلة بعد",
+                    "paginate": {
+                        "first": "الأول",
+                        "previous": "السابق",
+                        "next": "التالي",
+                        "last": "الأخير"
+                    }
                 }
-                return sortDir[colIdx] ? aText.localeCompare(bText) : bText.localeCompare(aText);
             });
-            rows.forEach(row => tbody.appendChild(row));
-        }
+
+            // Bind custom search input
+            $('#searchInput').on('keyup', function() {
+                oTable.search(this.value).draw();
+            });
+
+            // Bind custom status filter
+            $('#statusFilter').on('change', function() {
+                let selectedVal = this.value;
+                if (selectedVal) {
+                    oTable.column(5).search('^' + selectedVal + '$', true, false).draw();
+                } else {
+                    oTable.column(5).search('').draw();
+                }
+            });
+        });
 
         function exportAllOrdersToExcel() {
             var table = document.getElementById("ordersTable");
@@ -216,13 +261,11 @@
             var tbody = cloneTable.querySelector('tbody');
             var rows = Array.from(tbody.querySelectorAll('tr'));
             
-            // Rebuild tbody only with visible rows
             tbody.innerHTML = '';
             rows.forEach(function(row) {
-                // Check if row was visible in the original table
-                var originalRow = table.rows[row.rowIndex];
+                // Check if row is visible
+                var originalRow = Array.from(table.querySelectorAll('tbody tr')).find(r => r.innerText.includes(row.cells[0].innerText));
                 if (originalRow && originalRow.style.display !== 'none') {
-                    // Clean up text content formatting
                     for(let c=0; c<row.cells.length; c++) {
                         row.cells[c].innerText = row.cells[c].innerText.trim().replace(/\s+/g, ' ');
                     }

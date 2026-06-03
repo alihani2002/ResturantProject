@@ -316,6 +316,16 @@ namespace Resturant.Infrastructure.Data
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
+            // Optimize cashier shift reports and order lookups with composite indexes
+            modelBuilder.Entity<CashierShift>()
+                .HasIndex(s => new { s.BranchId, s.StartTime });
+
+            modelBuilder.Entity<CashierShift>()
+                .HasIndex(s => s.CashierId);
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => new { o.ShiftId, o.BranchId, o.Status });
+
             // Set global precision for decimal properties to avoid warnings and truncation
             foreach (var property in modelBuilder.Model.GetEntityTypes()
                 .SelectMany(t => t.GetProperties())

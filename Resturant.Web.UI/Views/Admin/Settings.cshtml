@@ -1,39 +1,39 @@
 @model Resturant.Core.Entities.RestaurantSetting
 @{
-    ViewData["Title"] = "إعدادات النظام - System Settings";
+    ViewData["Title"] = "إعدادات النظام";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid py-4" style="font-family: 'Inter', 'Outfit', sans-serif;">
+<div class="container-fluid py-4" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
     <div class="row justify-content-center">
         <div class="col-xl-6 col-lg-8">
             <div class="card border-0 shadow-lg" style="background: #ffffff; border-radius: 20px; color: #212529; border: 1px solid rgba(0,0,0,0.05); overflow: hidden;">
-                <!-- Gold Accent Line -->
-                <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);"></div>
+                <!-- Accent Line -->
+                <div style="height: 6px; background: linear-gradient(90deg, #f97316, #fdba74, #f97316);"></div>
                 
                 <div class="card-body p-5">
                     <div class="text-center mb-5">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px; border: 2px solid #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);">
-                            <i class="bi bi-sliders text-warning" style="font-size: 2.2rem;"></i>
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px; border: 2px solid #f97316; box-shadow: 0 0 20px rgba(249, 115, 22, 0.15);">
+                            <i class="bi bi-sliders text-warning" style="font-size: 2.2rem; color: #f97316 !important;"></i>
                         </div>
                         <h3 class="fw-bold text-dark mb-1">إعدادات الضرائب والخدمة</h3>
-                        <p class="text-warning fw-semibold mb-0">System Taxes & Service Charges</p>
+                        <p class="text-muted small mb-0">تعديل نسب الضرائب والخدمة الافتراضية للنظام</p>
                     </div>
 
                     @if (TempData["SuccessMessage"] != null)
                     {
                         <div class="alert alert-success border-0 text-dark p-3 rounded-4 mb-4 text-center" style="background: rgba(40, 167, 69, 0.15); border: 1px solid rgba(40, 167, 69, 0.3) !important;">
-                            <i class="bi bi-check-circle-fill text-success me-2"></i>@TempData["SuccessMessage"]
+                            <i class="bi bi-check-circle-fill text-success ms-2"></i>@TempData["SuccessMessage"]
                         </div>
                     }
 
                     <form asp-action="Settings" method="post">
                         <!-- Tax Percentage Input -->
                         <div class="mb-4">
-                            <label class="form-label text-dark small fw-bold"><i class="bi bi-percent text-warning me-1"></i>نسبة ضريبة القيمة المضافة / Value Added Tax (VAT)</label>
+                            <label class="form-label text-dark small fw-bold"><i class="bi bi-percent text-warning ms-1" style="color: #f97316 !important;"></i>نسبة ضريبة القيمة المضافة (VAT)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; min-width: 45px; justify-content: center; border-color: #ddd;">%</span>
-                                <input type="number" step="0.01" min="0" max="100" asp-for="TaxPercentage" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-right: 0;" placeholder="14" />
+                                <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 0 12px 12px 0; min-width: 45px; justify-content: center; border-color: #ddd;">%</span>
+                                <input type="number" step="0.01" min="0" max="100" asp-for="TaxPercentage" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 12px 0 0 12px; border-color: #ddd; border-left: 0; text-align: left;" placeholder="14" />
                             </div>
                             <span asp-validation-for="TaxPercentage" class="text-danger small mt-1 d-block"></span>
                             <div class="text-muted small mt-1">النسبة المئوية الافتراضية لضريبة القيمة المضافة التي ستضاف للمبيعات.</div>
@@ -41,23 +41,23 @@
 
                         <!-- Service Percentage Input -->
                         <div class="mb-5">
-                            <label class="form-label text-dark small fw-bold"><i class="bi bi-bell text-warning me-1"></i>نسبة صالة الطعام والخدمة / Service Charge</label>
+                            <label class="form-label text-dark small fw-bold"><i class="bi bi-bell text-warning ms-1" style="color: #f97316 !important;"></i>نسبة رسوم الخدمة وصالة الطعام (Service Charge)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; min-width: 45px; justify-content: center; border-color: #ddd;">%</span>
-                                <input type="number" step="0.01" min="0" max="100" asp-for="ServicePercentage" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-right: 0;" placeholder="12" />
+                                <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 0 12px 12px 0; min-width: 45px; justify-content: center; border-color: #ddd;">%</span>
+                                <input type="number" step="0.01" min="0" max="100" asp-for="ServicePercentage" class="form-control bg-white text-dark border-1 py-2.5" style="border-radius: 12px 0 0 12px; border-color: #ddd; border-left: 0; text-align: left;" placeholder="12" />
                             </div>
                             <span asp-validation-for="ServicePercentage" class="text-danger small mt-1 d-block"></span>
                             <div class="text-muted small mt-1">النسبة المئوية الافتراضية لرسوم الخدمة والصالة.</div>
                         </div>
 
                         <!-- Actions -->
-                        <div class="d-flex gap-3 justify-content-end">
-                            <a asp-action="Index" asp-controller="Admin" class="btn btn-outline-secondary rounded-pill px-4 py-2.5 fw-semibold">
-                                إلغاء / Cancel
-                            </a>
-                            <button type="submit" class="btn btn-warning text-dark rounded-pill px-5 py-2.5 fw-bold shadow" style="box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3) !important;">
-                                <i class="bi bi-save-fill me-2"></i> حفظ التعديلات / Save Changes
+                        <div class="d-flex gap-3 justify-content-start">
+                            <button type="submit" class="btn btn-primary text-white rounded-pill px-5 py-2.5 fw-bold shadow" style="background-color: #f97316 !important; border-color: #f97316 !important; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3) !important;">
+                                <i class="bi bi-save-fill ms-2"></i> حفظ التعديلات
                             </button>
+                            <a asp-action="Index" asp-controller="Admin" class="btn btn-outline-secondary rounded-pill px-4 py-2.5 fw-semibold">
+                                إلغاء
+                            </a>
                         </div>
                     </form>
                 </div>

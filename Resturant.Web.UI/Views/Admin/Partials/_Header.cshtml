@@ -1,9 +1,9 @@
-﻿        <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-8 z-10 shrink-0">
+        <header class="h-16 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-8 z-10 shrink-0">
             <!-- Breadcrumbs / Active Tab Title -->
             <div class="flex items-center gap-2">
                 <span class="text-slate-400 text-xs font-medium uppercase tracking-widest">QORE ERP</span>
                 <span class="text-slate-300 dark:text-slate-600">/</span>
-                <h2 id="active-tab-title" class="outfit-font text-slate-800 dark:text-white font-bold text-lg">Operations Hub & Features Map</h2>
+                <h2 id="active-tab-title" class="outfit-font text-slate-800 dark:text-white font-bold text-lg">خريطة النظام الرئيسية ومركز العمليات</h2>
             </div>
 
             <!-- Header Actions -->
@@ -11,7 +11,7 @@
                 <!-- Branch Selector -->
                 <div class="relative flex items-center">
                     <select id="header-branch-selector" onchange="onAdminBranchChanged(this.value)" class="pl-3 pr-8 py-2 border border-slate-200 dark:border-darkBorder rounded-xl text-xs font-semibold bg-slate-50 dark:bg-slate-900 focus:outline-none dark:text-white appearance-none cursor-pointer">
-                        <option value="">Consolidated (All Branches)</option>
+                        <option value="">عرض موحد (جميع الفروع)</option>
                         @if (ViewBag.Branches != null)
                         {
                             foreach (var branch in ViewBag.Branches)
