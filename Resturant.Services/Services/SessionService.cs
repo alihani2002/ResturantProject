@@ -22,13 +22,17 @@ namespace Resturant.Services.Services
             var existingSession = await GetActiveSessionByTableAsync(tableId);
             if (existingSession != null) return existingSession;
 
+            var table = await _unitOfWork.Repository<RestaurantTable>().GetByIdAsync(tableId);
+            int branchId = table?.BranchId ?? 1;
+
             var session = new TableSession
             {
                 TableId = tableId,
                 CustomerName = customerName,
                 PhoneNumber = phoneNumber,
                 StartTime = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                BranchId = branchId
             };
 
             await _unitOfWork.Repository<TableSession>().AddAsync(session);

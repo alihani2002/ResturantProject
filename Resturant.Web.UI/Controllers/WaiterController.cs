@@ -31,12 +31,68 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task<int> GetSelectedBranchIdAsync()
         {
             var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            if (isAdminOrManager)
+            {
+                // Try query string
+                if (Request.Query.TryGetValue("branchId", out var qBranchIdStr) && int.TryParse(qBranchIdStr, out int qBranchId))
+                {
+                    Response.Cookies.Append("WaiterActiveBranchId", qBranchId.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                    return qBranchId;
+                }
+                
+                // Try cookie
+                string cookieBranchIdStr = Request.Cookies["WaiterActiveBranchId"];
+                if (!string.IsNullOrEmpty(cookieBranchIdStr) && int.TryParse(cookieBranchIdStr, out int cookieBranchId))
+                {
+                    return cookieBranchId;
+                }
+            }
+            
+            return dbUser?.BranchId ?? 1;
+        }
+
+        public async Task<IActionResult> SelectBranch()
+        {
+            Response.Cookies.Delete("WaiterActiveBranchId");
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Index(int? branchId = null)
+        {
+            var userId = _userManager.GetUserId(User);
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            
+            if (isAdminOrManager)
+            {
+                if (branchId.HasValue)
+                {
+                    Response.Cookies.Append("WaiterActiveBranchId", branchId.Value.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                }
+                else
+                {
+                    Response.Cookies.Delete("WaiterActiveBranchId");
+                    
+                    // Show branch selector
+                    ViewBag.TerminalName = "Waiter Terminal";
+                    ViewBag.TargetAction = "Index";
+                    ViewBag.TargetController = "Waiter";
+                    var branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+                    return View("_BranchSelector", branches);
+                }
+            }
+
+            int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
+
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
-            var query = _context.RestaurantTables.AsQueryable();
+            var query = _context.RestaurantTables.Where(t => t.BranchId == selectedBranchId);
             if (isWaiter)
             {
                 query = query.Where(t => t.WaiterId == userId);
@@ -44,7 +100,7 @@ namespace Resturant.Web.UI.Controllers
 
             var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive && s.BranchId == selectedBranchId)
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -52,7 +108,7 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.BranchId == selectedBranchId)
                 .ToListAsync();
 
             var viewModels = new List<WaiterTableViewModel>();
@@ -72,7 +128,6 @@ namespace Resturant.Web.UI.Controllers
                     Orders = tableOrders.Select(o => new WaiterOrderViewModel 
                     {
                         OrderId = o.Id,
-                        // Effective amount the customer will pay (excludes cancelled items)
                         TotalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         OrderTime = o.OrderDate,
                         Note = o.Note,
@@ -102,18 +157,20 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTablesData()
         {
-            var userId = _userManager.GetUserId(User);
+            int branchId = await GetSelectedBranchIdAsync();
+
             var isWaiter = User.IsInRole(AppRoles.Waiter);
 
-            var query = _context.RestaurantTables.AsQueryable();
+            var query = _context.RestaurantTables.Where(t => t.BranchId == branchId);
             if (isWaiter)
             {
+                var userId = _userManager.GetUserId(User);
                 query = query.Where(t => t.WaiterId == userId);
             }
 
             var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             var activeSessions = await _context.Set<TableSession>()
-                .Where(s => s.IsActive)
+                .Where(s => s.IsActive && s.BranchId == branchId)
                 .ToListAsync();
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
@@ -121,7 +178,7 @@ namespace Resturant.Web.UI.Controllers
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated)
+                .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Initiated && o.BranchId == branchId)
                 .ToListAsync();
 
             var result = tables.Select(table =>
@@ -145,7 +202,6 @@ namespace Resturant.Web.UI.Controllers
                     orders = tableOrders.Select(o => new 
                     {
                         id = o.Id,
-                        // Effective total for display (excludes cancelled items)
                         totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                         orderTime = o.OrderDate,
                         note = o.Note,
@@ -170,7 +226,9 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost]
         public async Task<IActionResult> StartSession(int tableNumber, string customerName, string phoneNumber)
         {
-            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber);
+            int branchId = await GetSelectedBranchIdAsync();
+
+            var table = await _context.RestaurantTables.FirstOrDefaultAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             if (table == null) return NotFound("Table not found");
 
             var activeSession = await _context.Set<TableSession>().FirstOrDefaultAsync(s => s.TableId == table.Id && s.IsActive);
@@ -185,17 +243,18 @@ namespace Resturant.Web.UI.Controllers
                 CustomerName = string.IsNullOrEmpty(customerName) ? $"Table {tableNumber} Guest" : customerName,
                 PhoneNumber = string.IsNullOrEmpty(phoneNumber) ? "0000000000" : phoneNumber,
                 StartTime = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                BranchId = branchId
             };
 
             _context.Set<TableSession>().Add(newSession);
             await _context.SaveChangesAsync();
 
             // Notify dashboards to refresh
-            var notifyPayload = new { tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
-            await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
+            var notifyPayload = new { branchId = branchId, tableNumber = tableNumber, customerName = newSession.CustomerName, eventType = "GuestSeated" };
+            await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", notifyPayload);
 
             return Ok(new { sessionId = newSession.Id });
         }
@@ -228,9 +287,10 @@ namespace Resturant.Web.UI.Controllers
                 var notifyData = new { tableNumber = session.Table?.TableNumber ?? 0 };
                 
                 // Notify dashboards to refresh
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", notifyData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", notifyData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.Group($"waiter_{session.BranchId}").SendAsync("TableCleared", notifyData);
+                await _hubContext.Clients.Group($"cashier_{session.BranchId}").SendAsync("OrderCompleted", notifyData);
+                await _hubContext.Clients.Group($"admin_{session.BranchId}").SendAsync("OrderStatusChanged", notifyData);
+                await _hubContext.Clients.Group($"guest_{session.BranchId}").SendAsync("TableCleared", notifyData);
                 
                 return Ok();
             }
@@ -261,22 +321,22 @@ namespace Resturant.Web.UI.Controllers
                     orderItems = order.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price),
+                        menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price),
                         quantity = oi.Quantity,
                         price = oi.Price
                     })
                 };
 
                 // Notify all dashboards and guest tracking
-                await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("chef").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderAccepted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderAccepted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events for backward compatibility
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Accepted");
-                await _hubContext.Clients.All.SendAsync("ReceiveChefUpdate", "New Order to Prepare");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Accepted");
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("ReceiveChefUpdate", "New Order to Prepare");
             }
             return Ok();
         }
@@ -300,13 +360,13 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and guest tracking - table is now empty
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
-                await _hubContext.Clients.Group("chef").SendAsync("OrderCancelled", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("TableCleared", orderData);
+                await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderCancelled", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderCompleted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("TableCleared", orderData);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Cancelled");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Cancelled");
             }
             return Ok();
         }
@@ -330,13 +390,13 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and guest tracking
-                await _hubContext.Clients.Group("waiter").SendAsync("TableCleared", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderCompleted", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("TableCleared", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderCompleted", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
                 // Legacy events
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Table Cleared");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Table Cleared");
             }
             return Ok();
         }
@@ -387,7 +447,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled
@@ -395,12 +455,12 @@ namespace Resturant.Web.UI.Controllers
             };
 
             // Notify chef: remove this item from view
-            await _hubContext.Clients.Group("chef").SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"chef_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
             // Notify cashier: show item in red (don't remove)
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
             // Notify all
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", new { tableNumber = order.TableNumber });
-            await _hubContext.Clients.All.SendAsync("OrderItemCancelled", itemCancelledData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", new { tableNumber = order.TableNumber });
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderItemCancelled", itemCancelledData);
 
             return Ok(new { message = $"Item cancelled: {orderItem.MenuItem?.Name}" });
         }
@@ -429,11 +489,11 @@ namespace Resturant.Web.UI.Controllers
                 };
 
                 // Notify all dashboards and clients via SignalR
-                await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-                await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData); // Broadcast directly to guest tracker in real-time
-                await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Served");
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+                await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData); // Broadcast directly to guest tracker in real-time
+                await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Served");
             }
             return Ok();
         }
@@ -441,10 +501,14 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMenuData()
         {
+            int branchId = await GetSelectedBranchIdAsync();
+
             var categories = await _context.MenuCategories
                 .Include(c => c.MenuItems)
+                .ThenInclude(m => m.Sizes)
+                .Include(c => c.MenuItems)
                 .ThenInclude(m => m.AddOns)
-                .Where(c => c.IsActive && c.MenuItems.Any(mi => mi.IsAvailable))
+                .Where(c => c.IsActive && c.BranchId == branchId && c.MenuItems.Any(mi => mi.IsAvailable))
                 .OrderBy(c => c.OrderNumber)
                 .ToListAsync();
 
@@ -452,7 +516,7 @@ namespace Resturant.Web.UI.Controllers
             {
                 categoryId = c.Id,
                 categoryName = c.Name,
-                items = c.MenuItems.Where(mi => mi.IsAvailable).Select(mi => new
+                items = c.MenuItems.Where(mi => mi.IsAvailable && mi.BranchId == branchId).Select(mi => new
                 {
                     id = mi.Id,
                     name = mi.Name,

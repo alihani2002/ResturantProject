@@ -13,7 +13,7 @@ namespace Resturant.Core.Interfaces
         Task<decimal> GetAverageOrderValueAsync(DateTime start, DateTime end);
 
         // Advanced Restaurant Enterprise ERP Reporting APIs
-        Task<DashboardSummaryDto> GetDashboardSummaryAsync();
+        Task<DashboardSummaryDto> GetDashboardSummaryAsync(int? branchId = null);
         Task<SalesAnalyticsDto> GetSalesReportsAsync(ReportFilterParams filters);
         Task<OrderAnalyticsDto> GetOrderReportsAsync(ReportFilterParams filters);
         Task<ProductAnalyticsDto> GetProductReportsAsync(ReportFilterParams filters);

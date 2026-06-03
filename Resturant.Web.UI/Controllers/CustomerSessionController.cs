@@ -24,9 +24,9 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Scan(int tableNumber)
+        public async Task<IActionResult> Scan(int branchId, int tableNumber)
         {
-            // Cache table number for 12 hours in a cookie (HttpOnly so server-only)
+            // Cache table number and branch ID for 12 hours in cookies
             CookieOptions option = new CookieOptions
             {
                 Expires = DateTime.Now.AddHours(12),
@@ -34,15 +34,15 @@ namespace Resturant.Web.UI.Controllers
                 Secure = true
             };
             Response.Cookies.Append("TableNumber", tableNumber.ToString(), option);
+            Response.Cookies.Append("BranchId", branchId.ToString(), option);
 
-            var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber);
+            var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             var table = tables.FirstOrDefault();
             
             if (table == null) return NotFound("Table not found");
 
             // Only auto-allow if the table is OCCUPIED and the current device's server cookies
             // exactly match the person who currently holds the session.
-            // For FREE tables we ALWAYS want to show the form (even if cookies/localStorage exist).
             string guestName = Request.Cookies["GuestName"];
             string guestPhone = Request.Cookies["GuestPhone"];
 
@@ -51,7 +51,6 @@ namespace Resturant.Web.UI.Controllers
             if (activeSession != null)
             {
                 // Table has an active reservation.
-                // If the visitor's cookies prove they are the original guest → let them in directly.
                 if (!string.IsNullOrEmpty(guestName) && !string.IsNullOrEmpty(guestPhone) &&
                     string.Equals(activeSession.CustomerName, guestName, StringComparison.OrdinalIgnoreCase) && 
                     activeSession.PhoneNumber == guestPhone)
@@ -60,10 +59,6 @@ namespace Resturant.Web.UI.Controllers
                 }
             }
 
-            // Free table OR occupied but no matching proof on this device:
-            // → Always show the registration / verification form.
-            // The form (Register.cshtml) will pre-fill from localStorage (client cache on phone)
-            // but will NOT auto-submit, so the user always sees the form.
             return RedirectToAction("Register");
         }
 
@@ -71,14 +66,15 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> Register()
         {
             string tableNumberStr = Request.Cookies["TableNumber"];
-            if (string.IsNullOrEmpty(tableNumberStr))
+            string branchIdStr = Request.Cookies["BranchId"];
+            if (string.IsNullOrEmpty(tableNumberStr) || string.IsNullOrEmpty(branchIdStr))
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            if (int.TryParse(tableNumberStr, out int tableNumber))
+            if (int.TryParse(tableNumberStr, out int tableNumber) && int.TryParse(branchIdStr, out int branchId))
             {
-                var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber);
+                var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
                 var table = tables.FirstOrDefault();
                 if (table != null)
                 {
@@ -104,18 +100,23 @@ namespace Resturant.Web.UI.Controllers
             }
 
             string tableNumberStr = Request.Cookies["TableNumber"];
-            if (string.IsNullOrEmpty(tableNumberStr))
+            string branchIdStr = Request.Cookies["BranchId"];
+            if (string.IsNullOrEmpty(tableNumberStr) || string.IsNullOrEmpty(branchIdStr))
             {
-                return RedirectToAction("Index", "Home"); // Should ideally show an error page
+                return RedirectToAction("Index", "Home");
             }
 
-            if (!int.TryParse(tableNumberStr, out int tableNumber))
+            if (!int.TryParse(tableNumberStr, out int tableNumber) || !int.TryParse(branchIdStr, out int branchId))
             {
                  return RedirectToAction("Index", "Home");
             }
 
-            var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber);
+            var tables = await _unitOfWork.Repository<RestaurantTable>().ListAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId);
             var table = tables.FirstOrDefault();
+            if (table == null)
+            {
+                return NotFound("Table not found");
+            }
             
             var activeSession = await _sessionService.GetActiveSessionByTableAsync(table.Id);
             
@@ -141,12 +142,10 @@ namespace Resturant.Web.UI.Controllers
             SetGuestCookies(customerName, phoneNumber);
 
             // === REAL-TIME UPDATE: Notify Waiter (and Admin) that a new guest has seated ===
-            // This makes the Waiter page refresh its table list automatically without manual refresh.
-            var notifyPayload = new { tableNumber = tableNumber, customerName = customerName, eventType = "GuestSeated" };
-            await _hubContext.Clients.Group("waiter").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            await _hubContext.Clients.Group("admin").SendAsync("ReceiveWaiterUpdate", notifyPayload);
-            // Also broadcast a generic order-status change so other dashboards can react if needed
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", notifyPayload);
+            var notifyPayload = new { branchId = branchId, tableNumber = tableNumber, customerName = customerName, eventType = "GuestSeated" };
+            await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("ReceiveWaiterUpdate", notifyPayload);
+            await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", notifyPayload);
 
             return RedirectToAction("Index", "Menu");
         }

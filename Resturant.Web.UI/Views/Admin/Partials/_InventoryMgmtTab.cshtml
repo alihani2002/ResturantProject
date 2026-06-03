@@ -1,0 +1,86 @@
+﻿            <div id="tab-inventory-mgmt" class="tab-content hidden space-y-6">
+                <!-- KPI metrics cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-amber-500/10 text-amber-500 rounded-xl">
+                            <i class="bi bi-wallet2 text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Stock Valuation</span>
+                            <h3 id="inv-kpi-valuation" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-indigo-500/10 text-indigo-500 rounded-xl">
+                            <i class="bi bi-cart-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Purchases</span>
+                            <h3 id="inv-kpi-purchases" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-red-500/10 text-red-500 rounded-xl">
+                            <i class="bi bi-trash3 text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Wasted Value</span>
+                            <h3 id="inv-kpi-waste" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">0.00 EGP</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                            <i class="bi bi-percent text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Avg Target Food Cost</span>
+                            <h3 id="inv-kpi-foodcost" class="outfit-font text-lg font-black text-slate-800 dark:text-white mt-1">31.8%</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Left: Stock Alerts -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm space-y-4 h-fit">
+                        <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="bi bi-exclamation-triangle text-amber-500"></i> Critical Stock Alerts
+                        </h4>
+                        <div id="inventory-low-stock-list" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Dynamic Stock Alerts -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Main Table -->
+                    <div class="lg:col-span-3 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                        <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Active Branch Inventory Stock</h3>
+                                <p class="text-xs text-slate-400 mt-1">Real-time counts, costs, and levels scoped by your chosen active branch context</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="text" id="search-inventory" oninput="filterInventoryTable()" placeholder="Search ingredients..." class="px-4 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white">
+                                <button onclick="openCreateIngredientModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 flex items-center gap-1.5 transition-all"><i class="bi bi-plus-lg"></i> Add New Material</button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table id="table-inventory-stock" class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[10px]">
+                                        <th class="py-3.5 px-6">Ingredient</th>
+                                        <th class="py-3.5">Supplier</th>
+                                        <th class="py-3.5 text-center">Current Stock</th>
+                                        <th class="py-3.5 text-center">Min Level</th>
+                                        <th class="py-3.5 text-right">Cost Per Unit</th>
+                                        <th class="py-3.5 text-right">Valuation</th>
+                                        <th class="py-3.5 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-darkBorder/40">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>

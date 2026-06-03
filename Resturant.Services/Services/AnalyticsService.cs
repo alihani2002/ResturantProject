@@ -57,7 +57,7 @@ namespace Resturant.Services.Services
 
         #region Live Dashboard Summary (SignalR & Real-Time)
 
-        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync()
+        public async Task<DashboardSummaryDto> GetDashboardSummaryAsync(int? branchId = null)
         {
             var today = DateTime.Today;
             var now = DateTime.Now;
@@ -65,30 +65,36 @@ namespace Resturant.Services.Services
             // Real DB metrics
             var activeTablesCount = await _context.Orders
                 .Where(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Paid)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .Select(o => o.TableNumber)
                 .Distinct()
                 .CountAsync();
 
             var pendingOrdersCount = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync();
 
             var completedOrdersToday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync();
 
             var totalRevenueToday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == today)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var activeSessionsTodayCount = await _context.TableSessions
                 .Where(s => s.IsActive && s.StartTime.Date == today)
+                .Where(s => !branchId.HasValue || s.BranchId == branchId.Value)
                 .CountAsync();
 
             // Calculate growth compared to yesterday
             var yesterday = today.AddDays(-1);
             var totalRevenueYesterday = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value.Date == yesterday)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             decimal revenueGrowthRate = 0;
@@ -102,34 +108,38 @@ namespace Resturant.Services.Services
             }
 
             // --- Extended Dashboard Analytics Counters ---
-            var totalOrdersCount = await _context.Orders.CountAsync();
-            var totalCompletedOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Completed);
-            var totalPendingOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
-            var totalCancelledOrders = await _context.Orders.CountAsync(o => o.Status == OrderStatus.Cancelled);
+            var totalOrdersCount = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync();
+            var totalCompletedOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Completed);
+            var totalPendingOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Pending);
+            var totalCancelledOrders = await _context.Orders.Where(o => !branchId.HasValue || o.BranchId == branchId.Value).CountAsync(o => o.Status == OrderStatus.Cancelled);
             var totalRevenueStarted = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
             var totalRevenueThisWeek = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value >= startOfWeek)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
             var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             var totalRevenueThisMonth = await _context.Orders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate.HasValue && o.CompletedDate.Value >= startOfMonth)
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .SumAsync(o => o.TotalAmount);
 
-            var totalGuestsCount = await _context.TableSessions.Select(s => s.PhoneNumber).Distinct().CountAsync();
+            var totalGuestsCount = await _context.TableSessions.Where(s => !branchId.HasValue || s.BranchId == branchId.Value).Select(s => s.PhoneNumber).Distinct().CountAsync();
             if (totalGuestsCount == 0) totalGuestsCount = 38; // Elegant visual fallback
 
-            var totalTablesCount = await _context.RestaurantTables.CountAsync();
+            var totalTablesCount = await _context.RestaurantTables.Where(t => !branchId.HasValue || t.BranchId == branchId.Value).CountAsync();
             if (totalTablesCount == 0) totalTablesCount = 15; // Standard fallback
 
-            var totalMenuItemsCount = await _context.MenuItems.CountAsync();
-            var totalCategoriesCount = await _context.MenuCategories.CountAsync();
+            var totalMenuItemsCount = await _context.MenuItems.Where(i => !branchId.HasValue || i.BranchId == branchId.Value).CountAsync();
+            var totalCategoriesCount = await _context.MenuCategories.Where(c => !branchId.HasValue || c.BranchId == branchId.Value).CountAsync();
 
             var totalActiveOrders = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .CountAsync(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Ready || o.Status == OrderStatus.Served);
 
             var totalDeliveredOrders = totalCompletedOrders;
@@ -138,12 +148,14 @@ namespace Resturant.Services.Services
 
             var bestSellingItem = await _context.OrderItems
                 .Include(oi => oi.MenuItem)
+                .Where(oi => !branchId.HasValue || oi.Order.BranchId == branchId.Value)
                 .GroupBy(oi => oi.MenuItem.Name)
                 .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                 .Select(g => g.Key)
                 .FirstOrDefaultAsync() ?? "Ribeye Steak Special";
 
             var mostActiveTableObj = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .GroupBy(o => o.TableNumber)
                 .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
@@ -153,6 +165,7 @@ namespace Resturant.Services.Services
             var mostOrderedCategory = await _context.OrderItems
                 .Include(oi => oi.MenuItem)
                 .ThenInclude(mi => mi.MenuCategory)
+                .Where(oi => !branchId.HasValue || oi.Order.BranchId == branchId.Value)
                 .GroupBy(oi => oi.MenuItem.MenuCategory.Name)
                 .OrderByDescending(g => g.Sum(oi => oi.Quantity))
                 .Select(g => g.Key)
@@ -170,6 +183,7 @@ namespace Resturant.Services.Services
 
                 var hourRevenue = await _context.Orders
                     .Where(o => o.Status == OrderStatus.Completed && o.CompletedDate >= startHour && o.CompletedDate < endHour)
+                    .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                     .SumAsync(o => o.TotalAmount);
 
                 liveSalesIntervals.Add(hourRevenue == 0 ? (decimal)(new Random().Next(45, 120)) : hourRevenue); // Inject small visual fallback
@@ -180,6 +194,7 @@ namespace Resturant.Services.Services
             var recentNotifications = new List<LiveNotificationDto>();
 
             var recentOrders = await _context.Orders
+                .Where(o => !branchId.HasValue || o.BranchId == branchId.Value)
                 .OrderByDescending(o => o.OrderDate)
                 .Take(3)
                 .ToListAsync();
@@ -670,6 +685,7 @@ namespace Resturant.Services.Services
             if (filters.EndDate.HasValue) query = query.Where(oi => oi.Order.OrderDate <= filters.EndDate.Value);
             if (filters.MenuCategoryId.HasValue) query = query.Where(oi => oi.MenuItem.MenuCategoryId == filters.MenuCategoryId.Value);
             if (filters.MenuItemId.HasValue) query = query.Where(oi => oi.MenuItemId == filters.MenuItemId.Value);
+            if (filters.BranchId.HasValue) query = query.Where(oi => oi.Order.BranchId == filters.BranchId.Value);
 
             var items = await query.ToListAsync();
 
@@ -796,6 +812,7 @@ namespace Resturant.Services.Services
 
             if (filters.StartDate.HasValue) sessionsQuery = sessionsQuery.Where(s => s.StartTime >= filters.StartDate.Value);
             if (filters.EndDate.HasValue) sessionsQuery = sessionsQuery.Where(s => s.StartTime <= filters.EndDate.Value);
+            if (filters.BranchId.HasValue) sessionsQuery = sessionsQuery.Where(s => s.BranchId == filters.BranchId.Value);
 
             var sessions = await sessionsQuery.ToListAsync();
             if (!sessions.Any()) return new CustomerAnalyticsDto();
@@ -1181,80 +1198,173 @@ namespace Resturant.Services.Services
 
         public async Task<InventoryAnalyticsDto> GetInventoryReportsAsync(ReportFilterParams filters)
         {
-            // Seed a fully realistic, enterprise-grade inventory status
-            // Ingredient valuation, costs, low stock alerts, supplier lead times, and recipe margins
-            var totalInventoryValuation = 8750.40m;
-            var totalPurchasesAmount = 3450.00m;
-            var totalWasteAmount = 145.50m;
-            var avgFoodCost = 31.8;
+            // 1. Resolve branch scoped ingredients
+            var ingredientsQuery = _context.Ingredients
+                .Include(i => i.Supplier)
+                .Include(i => i.Branch)
+                .AsQueryable();
 
-            var lowStock = new List<LowStockItemDto>
+            var adjustmentsQuery = _context.InventoryAdjustments
+                .Include(a => a.Ingredient)
+                .AsQueryable();
+
+            var wasteQuery = _context.WasteLogs
+                .Include(w => w.Ingredient)
+                .AsQueryable();
+
+            var menuItemsQuery = _context.MenuItems
+                .Include(m => m.Branch)
+                .AsQueryable();
+
+            if (filters.BranchId.HasValue)
             {
-                new LowStockItemDto { IngredientId = 101, IngredientName = "Fresh Salmon Fillet", CurrentStock = 2.5, ReorderLevel = 10.0, Unit = "Kg", SupplierName = "SeaFood Co.", StockStatus = "Critical" },
-                new LowStockItemDto { IngredientId = 102, IngredientName = "Ribeye Beef Steak", CurrentStock = 8.0, ReorderLevel = 15.0, Unit = "Kg", SupplierName = "Premium Meats Inc.", StockStatus = "Low" },
-                new LowStockItemDto { IngredientId = 103, IngredientName = "Mozzarella Cheese", CurrentStock = 12.0, ReorderLevel = 20.0, Unit = "Kg", SupplierName = "Bella Dairy", StockStatus = "Reorder" },
-                new LowStockItemDto { IngredientId = 104, IngredientName = "Avocado Hass", CurrentStock = 4.0, ReorderLevel = 8.0, Unit = "Kg", SupplierName = "GreenGrocer Co.", StockStatus = "Low" }
-            };
+                ingredientsQuery = ingredientsQuery.Where(i => i.BranchId == filters.BranchId.Value);
+                adjustmentsQuery = adjustmentsQuery.Where(a => a.BranchId == filters.BranchId.Value);
+                wasteQuery = wasteQuery.Where(w => w.BranchId == filters.BranchId.Value);
+                menuItemsQuery = menuItemsQuery.Where(m => m.BranchId == filters.BranchId.Value);
+            }
 
-            var usage = new List<IngredientUsageDto>
+            var ingredients = await ingredientsQuery.ToListAsync();
+            var adjustments = await adjustmentsQuery.ToListAsync();
+            var waste = await wasteQuery.ToListAsync();
+            var allMenuItems = await menuItemsQuery.ToListAsync();
+
+            // 2. Metrics calculations
+            var totalValuation = ingredients.Sum(i => i.CurrentStock * (double)i.CostPerUnit);
+            
+            var totalPurchases = adjustments
+                .Where(a => a.Type == "Purchase")
+                .Sum(a => a.QuantityAdjusted * (double)(a.Ingredient?.CostPerUnit ?? 0m));
+
+            if (totalPurchases <= 0)
             {
-                new IngredientUsageDto { IngredientName = "Ribeye Beef Steak", QuantityUsed = 45.0, Unit = "Kg", EstimatedCost = 1350m },
-                new IngredientUsageDto { IngredientName = "Fresh Salmon Fillet", QuantityUsed = 28.0, Unit = "Kg", EstimatedCost = 840m },
-                new IngredientUsageDto { IngredientName = "Mozzarella Cheese", QuantityUsed = 62.0, Unit = "Kg", EstimatedCost = 496m },
-                new IngredientUsageDto { IngredientName = "Potato Bun", QuantityUsed = 450, Unit = "Pcs", EstimatedCost = 225m },
-                new IngredientUsageDto { IngredientName = "Fresh Avocado", QuantityUsed = 18.0, Unit = "Kg", EstimatedCost = 108m }
-            };
+                // Fallback to expense entries for Ingredients
+                var expenseQuery = _context.Expenses.Where(e => e.Category == "Ingredients");
+                if (filters.BranchId.HasValue)
+                {
+                    expenseQuery = expenseQuery.Where(e => e.BranchId == filters.BranchId.Value);
+                }
+                totalPurchases = (double)await expenseQuery.SumAsync(e => e.Amount);
+            }
 
-            // Recipe margin calculations on actual database MenuItems
-            var menuItems = await _context.MenuItems.Take(5).ToListAsync();
+            var totalWaste = waste.Sum(w => w.Cost);
+
+            // 3. Low stock alerts
+            var lowStock = ingredients
+                .Where(i => i.CurrentStock <= i.ReorderLevel)
+                .Select(i => new LowStockItemDto
+                {
+                    IngredientId = i.Id,
+                    IngredientName = i.Name,
+                    CurrentStock = i.CurrentStock,
+                    ReorderLevel = i.ReorderLevel,
+                    Unit = i.Unit,
+                    SupplierName = i.Supplier?.Name ?? "General Supplier",
+                    StockStatus = i.CurrentStock == 0 ? "Out of Stock" : (i.CurrentStock <= i.ReorderLevel * 0.4 ? "Critical" : "Low")
+                })
+                .ToList();
+
+            // 4. Ingredient Consumption usage
+            var usage = adjustments
+                .Where(a => a.QuantityAdjusted < 0 && (a.Type == "OrderConsumption" || a.Type == "SalesConsumption" || a.Type == "Transfer"))
+                .GroupBy(a => a.Ingredient?.Name ?? "Unknown")
+                .Select(g => new IngredientUsageDto
+                {
+                    IngredientName = g.Key,
+                    QuantityUsed = Math.Abs(g.Sum(a => a.QuantityAdjusted)),
+                    Unit = g.First().Ingredient?.Unit ?? "Kg",
+                    EstimatedCost = (decimal)Math.Abs(g.Sum(a => a.QuantityAdjusted)) * (g.First().Ingredient?.CostPerUnit ?? 10m)
+                })
+                .OrderByDescending(u => u.QuantityUsed)
+                .Take(5)
+                .ToList();
+
+            // 5. Recipe raw costs analysis
             var recipeCosts = new List<RecipeCostAnalysisDto>();
-
-            foreach (var item in menuItems)
+            foreach (var item in allMenuItems.Take(10))
             {
-                var sellingPrice = item.Price;
-                var rawCost = sellingPrice * 0.32m; // calculated dynamic ingredient cost (32%)
+                var recipes = await _context.Recipes
+                    .Include(r => r.Ingredient)
+                    .Where(r => r.MenuItemId == item.Id)
+                    .ToListAsync();
+
+                decimal rawCost = 0;
+                foreach (var r in recipes)
+                {
+                    rawCost += (decimal)r.QuantityRequired * (r.Ingredient?.CostPerUnit ?? 0m);
+                }
+
+                if (rawCost == 0)
+                {
+                    rawCost = item.Price * 0.30m; // Default simulated food cost ratio (30%) if no recipe
+                }
+
+                var ratio = item.Price > 0 ? (rawCost / item.Price) : 0m;
+                var category = ratio < 0.25m ? "High Margin" : (ratio > 0.45m ? "Low Margin" : "Standard");
+
                 recipeCosts.Add(new RecipeCostAnalysisDto
                 {
                     MenuItemId = item.Id,
                     MenuItemName = item.Name,
-                    SellingPrice = sellingPrice,
+                    SellingPrice = item.Price,
                     RawIngredientCost = rawCost,
-                    ProfitabilityCategory = rawCost < 5m ? "High Margin" : (rawCost > 15m ? "Low Margin" : "Standard")
+                    ProfitabilityCategory = category
                 });
             }
 
-            if (!recipeCosts.Any())
+            var avgFoodCost = recipeCosts.Any() ? (double)recipeCosts.Average(r => r.SellingPrice > 0 ? (r.RawIngredientCost / r.SellingPrice * 100) : 0m) : 0.0;
+
+            // 6. Waste Logs
+            var mappedWaste = waste.Select(w => new WasteLogDto
             {
-                recipeCosts.Add(new RecipeCostAnalysisDto { MenuItemId = 1, MenuItemName = "Ribeye Steak With Veggies", SellingPrice = 45m, RawIngredientCost = 14.50m, ProfitabilityCategory = "High Margin" });
-                recipeCosts.Add(new RecipeCostAnalysisDto { MenuItemId = 2, MenuItemName = "Grilled Salmon fillet", SellingPrice = 38m, RawIngredientCost = 12.16m, ProfitabilityCategory = "Standard" });
-                recipeCosts.Add(new RecipeCostAnalysisDto { MenuItemId = 3, MenuItemName = "Margarita Pizza Extra Large", SellingPrice = 18m, RawIngredientCost = 4.50m, ProfitabilityCategory = "High Margin" });
+                LogId = w.Id,
+                IngredientName = w.Ingredient?.Name ?? "Raw Material",
+                QuantityWasted = w.QuantityWasted,
+                Unit = w.Ingredient?.Unit ?? "Kg",
+                Cost = w.Cost,
+                Reason = w.Reason,
+                WasteDate = w.WasteDate
+            })
+            .OrderByDescending(w => w.WasteDate)
+            .Take(5)
+            .ToList();
+
+            // 7. Supplier lead times & purchase summaries
+            var suppliers = await _context.Suppliers.ToListAsync();
+            var supplierPurchases = new List<SupplierPurchaseDto>();
+
+            foreach (var sup in suppliers)
+            {
+                var supIngredients = ingredients.Where(i => i.SupplierId == sup.Id).ToList();
+                var supIngredientIds = supIngredients.Select(i => i.Id).ToList();
+                
+                var supAdjustments = adjustments
+                    .Where(a => a.Type == "Purchase" && supIngredientIds.Contains(a.IngredientId))
+                    .ToList();
+
+                var count = supAdjustments.Count;
+                var amount = supAdjustments.Sum(a => a.QuantityAdjusted * (double)(a.Ingredient?.CostPerUnit ?? 0m));
+
+                supplierPurchases.Add(new SupplierPurchaseDto
+                {
+                    SupplierName = sup.Name,
+                    PurchaseOrdersCount = count,
+                    TotalPurchaseAmount = (decimal)amount,
+                    LeadTimeDays = sup.LeadTimeDays,
+                    QualityRating = sup.QualityRating
+                });
             }
-
-            var wasteLogs = new List<WasteLogDto>
-            {
-                new WasteLogDto { LogId = 1, IngredientName = "Fresh Salmon Fillet", QuantityWasted = 1.2, Unit = "Kg", Cost = 36.00m, Reason = "Expired", WasteDate = DateTime.Today.AddDays(-1) },
-                new WasteLogDto { LogId = 2, IngredientName = "Mozzarella Cheese", QuantityWasted = 2.0, Unit = "Kg", Cost = 16.00m, Reason = "Spoiled", WasteDate = DateTime.Today.AddDays(-2) },
-                new WasteLogDto { LogId = 3, IngredientName = "T-Bone Steak Portion", QuantityWasted = 1.0, Unit = "Pcs", Cost = 22.00m, Reason = "Burnt/CookError", WasteDate = DateTime.Today.AddDays(-3) }
-            };
-
-            var supplierPurchases = new List<SupplierPurchaseDto>
-            {
-                new SupplierPurchaseDto { SupplierName = "Premium Meats Inc.", PurchaseOrdersCount = 8, TotalPurchaseAmount = 4500m, LeadTimeDays = 2.1, QualityRating = 4.8 },
-                new SupplierPurchaseDto { SupplierName = "Bella Dairy", PurchaseOrdersCount = 12, TotalPurchaseAmount = 1800m, LeadTimeDays = 1.5, QualityRating = 4.7 },
-                new SupplierPurchaseDto { SupplierName = "SeaFood Co.", PurchaseOrdersCount = 4, TotalPurchaseAmount = 2400m, LeadTimeDays = 3.0, QualityRating = 4.5 },
-                new SupplierPurchaseDto { SupplierName = "GreenGrocer Co.", PurchaseOrdersCount = 15, TotalPurchaseAmount = 1250m, LeadTimeDays = 1.0, QualityRating = 4.2 }
-            };
 
             return new InventoryAnalyticsDto
             {
-                TotalInventoryValuation = totalInventoryValuation,
-                TotalPurchasesAmount = totalPurchasesAmount,
-                TotalWasteAmount = totalWasteAmount,
-                AverageFoodCostPercentage = avgFoodCost,
+                TotalInventoryValuation = (decimal)totalValuation,
+                TotalPurchasesAmount = (decimal)totalPurchases,
+                TotalWasteAmount = totalWaste,
+                AverageFoodCostPercentage = Math.Round(avgFoodCost, 1),
                 LowStockAlerts = lowStock,
                 TopIngredientsConsumed = usage,
                 RecipeCosts = recipeCosts,
-                WasteLogs = wasteLogs,
+                WasteLogs = mappedWaste,
                 SupplierPurchases = supplierPurchases
             };
         }
@@ -1266,6 +1376,11 @@ namespace Resturant.Services.Services
         private IQueryable<Order> ApplyOrderFilters(IQueryable<Order> query, ReportFilterParams filters)
         {
             if (filters == null) return query;
+
+            if (filters.BranchId.HasValue)
+            {
+                query = query.Where(o => o.BranchId == filters.BranchId.Value);
+            }
 
             if (filters.StartDate.HasValue)
             {

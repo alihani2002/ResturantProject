@@ -20,5 +20,6 @@ namespace Resturant.Core.Entities
         public decimal ExtraPrice { get; set; }
 
         public bool IsAvailable { get; set; } = true;
+        public bool IsDeleted { get; set; } = false;
     }
 }

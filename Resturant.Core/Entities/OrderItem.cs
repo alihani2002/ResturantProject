@@ -1,4 +1,4 @@
-/* 
+/*
  * NOTE: didn't create migration or database
  */
 using Resturant.Core.Common;
@@ -26,6 +26,10 @@ namespace Resturant.Core.Entities
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
 
+        public int? MenuItemSizeId { get; set; }
+        public string? SizeName { get; set; }
+        public decimal UnitCost { get; set; }
+
         public decimal Total => Quantity * (Price + (AddOns != null ? AddOns.Sum(a => a.Price) : 0));
 
         /// <summary>
@@ -39,4 +43,4 @@ namespace Resturant.Core.Entities
         /// <summary>Waiter can cancel a single item without cancelling the full order.</summary>
         public bool IsCancelled { get; set; } = false;
     }
-}
+}

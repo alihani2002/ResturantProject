@@ -46,6 +46,16 @@ namespace Resturant.Web.UI.Controllers
             _userManager = userManager;
         }
 
+        private int? GetActiveBranchId()
+        {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                return parsedId;
+            }
+            return null;
+        }
+
         // Helper to validate filter parameters
         private IActionResult ValidateFilters(ReportFilterParams filters)
         {
@@ -67,12 +77,13 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Fetching real-time dashboard summary stats.");
-                
-                string cacheKey = "DashboardSummaryLive";
+
+                var activeBranchId = GetActiveBranchId();
+                string cacheKey = $"DashboardSummaryLive_{activeBranchId}";
                 if (!_cache.TryGetValue(cacheKey, out DashboardSummaryDto summary))
                 {
-                    summary = await _analyticsService.GetDashboardSummaryAsync();
-                    
+                    summary = await _analyticsService.GetDashboardSummaryAsync(activeBranchId);
+
                     var cacheEntryOptions = new MemoryCacheEntryOptions()
                         .SetAbsoluteExpiration(TimeSpan.FromSeconds(15)) // Cache live counter for only 15 seconds to keep it fresh
                         .SetSlidingExpiration(TimeSpan.FromSeconds(5));
@@ -99,13 +110,19 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Sales Report with filters.");
-                
-                string cacheKey = $"SalesReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.MenuCategoryId}_{filters.PaymentMethod}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"SalesReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.MenuCategoryId}_{filters.PaymentMethod}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out SalesAnalyticsDto report))
                 {
                     report = await _analyticsService.GetSalesReportsAsync(filters);
-                    
+
                     var cacheEntryOptions = new MemoryCacheEntryOptions()
                         .SetAbsoluteExpiration(TimeSpan.FromMinutes(2)) // Cache complex reports for 2 minutes
                         .SetSlidingExpiration(TimeSpan.FromMinutes(1));
@@ -139,7 +156,14 @@ namespace Resturant.Web.UI.Controllers
                 var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
 
                 // Fetch day's orders
-                var dayOrders = await _context.Orders
+                var query = _context.Orders.AsQueryable();
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    query = query.Where(o => o.BranchId == activeBranchId.Value);
+                }
+
+                var dayOrders = await query
                     .Include(o => o.OrderItems)
                     .Where(o => o.OrderDate >= startOfDay && o.OrderDate <= endOfDay)
                     .ToListAsync();
@@ -210,9 +234,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Orders Report with filters.");
-                
-                string cacheKey = $"OrdersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"OrdersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.TableNumber}_{filters.MenuItemId}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out OrderAnalyticsDto report))
                 {
                     report = await _analyticsService.GetOrderReportsAsync(filters);
@@ -238,9 +268,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Product Performance Report.");
-                
-                string cacheKey = $"ProductsReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.MenuCategoryId}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"ProductsReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.MenuCategoryId}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out ProductAnalyticsDto report))
                 {
                     report = await _analyticsService.GetProductReportsAsync(filters);
@@ -266,9 +302,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Customer Segmentation & Retention Report.");
-                
-                string cacheKey = $"CustomersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"CustomersReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out CustomerAnalyticsDto report))
                 {
                     report = await _analyticsService.GetCustomerReportsAsync(filters);
@@ -294,9 +336,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Waiter & Staff Productivity Report.");
-                
-                string cacheKey = $"StaffReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"StaffReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.WaiterId}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out StaffAnalyticsDto report))
                 {
                     report = await _analyticsService.GetStaffReportsAsync(filters);
@@ -322,9 +370,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Kitchen Efficiency Report.");
-                
-                string cacheKey = $"KitchenReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"KitchenReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out KitchenAnalyticsDto report))
                 {
                     report = await _analyticsService.GetKitchenReportsAsync(filters);
@@ -350,9 +404,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating P&L and Financial Reconciliations.");
-                
-                string cacheKey = $"FinancialReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"FinancialReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out FinancialAnalyticsDto report))
                 {
                     report = await _analyticsService.GetFinancialReportsAsync(filters);
@@ -378,9 +438,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Generating Food Cost and Recipe Cost Valuation Report.");
-                
-                string cacheKey = $"InventoryReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}";
-                
+
+                var activeBranchId = GetActiveBranchId();
+                if (activeBranchId.HasValue)
+                {
+                    filters.BranchId = activeBranchId.Value;
+                }
+
+                string cacheKey = $"InventoryReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
+
                 if (!_cache.TryGetValue(cacheKey, out InventoryAnalyticsDto report))
                 {
                     report = await _analyticsService.GetInventoryReportsAsync(filters);
@@ -406,7 +472,13 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("tables")]
         public async Task<IActionResult> GetTables()
         {
-            var tables = await _context.RestaurantTables.OrderBy(t => t.TableNumber).ToListAsync();
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.RestaurantTables.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(t => t.BranchId == activeBranchId.Value);
+            }
+            var tables = await query.OrderBy(t => t.TableNumber).ToListAsync();
             return Ok(tables);
         }
 
@@ -419,19 +491,22 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Invalid table number. Must be greater than zero." });
             }
 
-            if (await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber))
+            var activeBranchId = GetActiveBranchId();
+            int branchId = activeBranchId ?? 1;
+
+            if (await _context.RestaurantTables.AnyAsync(t => t.TableNumber == tableNumber && t.BranchId == branchId))
             {
-                return BadRequest(new { Message = "Table number already exists in your restaurant." });
+                return BadRequest(new { Message = "Table number already exists in this branch." });
             }
 
-            var table = new RestaurantTable { TableNumber = tableNumber };
+            var table = new RestaurantTable { TableNumber = tableNumber, BranchId = branchId };
 
             // Generate QR code URL using customized domain if provided
-            string baseDomain = string.IsNullOrWhiteSpace(websiteUrl) 
-                ? $"{Request.Scheme}://{Request.Host}" 
+            string baseDomain = string.IsNullOrWhiteSpace(websiteUrl)
+                ? $"{Request.Scheme}://{Request.Host}"
                 : websiteUrl.Trim();
-                
-            string scanUrl = $"{baseDomain.TrimEnd('/')}/CustomerSession/Scan?tableNumber={tableNumber}";
+
+            string scanUrl = $"{baseDomain.TrimEnd('/')}/CustomerSession/Scan?branchId={branchId}&tableNumber={tableNumber}";
 
             using (var qrGenerator = new QRCoder.QRCodeGenerator())
             {
@@ -469,7 +544,13 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
-            var categories = await _context.MenuCategories.OrderBy(c => c.OrderNumber).ThenBy(c => c.Name).ToListAsync();
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.MenuCategories.AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(c => c.BranchId == activeBranchId.Value);
+            }
+            var categories = await query.OrderBy(c => c.OrderNumber).ThenBy(c => c.Name).ToListAsync();
             return Ok(categories);
         }
 
@@ -482,7 +563,10 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest(new { Message = "Category name is required." });
             }
 
-            var category = new MenuCategory { Name = name, Description = description, IsActive = isActive, OrderNumber = orderNumber };
+            var activeBranchId = GetActiveBranchId();
+            int branchId = activeBranchId ?? 1;
+
+            var category = new MenuCategory { Name = name, Description = description, IsActive = isActive, OrderNumber = orderNumber, BranchId = branchId };
             if (imageFile != null && imageFile.Length > 0)
             {
                 category.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
@@ -543,16 +627,24 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet("menu")]
         public async Task<IActionResult> GetMenuItems()
         {
-            var items = await _context.MenuItems
+            var activeBranchId = GetActiveBranchId();
+            var query = _context.MenuItems
                 .Include(m => m.MenuCategory)
+                .Include(m => m.Sizes)
                 .Include(m => m.AddOns)
                 .Include(m => m.Recommendations)
-                .OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
+                .AsQueryable();
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(m => m.BranchId == activeBranchId.Value);
+            }
+            var items = await query.OrderBy(m => m.OrderNumber).ThenBy(m => m.Name).ToListAsync();
             return Ok(items.Select(i => new {
                 i.Id,
                 i.Name,
                 i.Description,
                 i.Price,
+                i.Cost,
                 i.ImageUrl,
                 i.MenuCategoryId,
                 CategoryName = i.MenuCategory?.Name,
@@ -561,6 +653,7 @@ namespace Resturant.Web.UI.Controllers
                 i.IsTrending,
                 i.IsRecommended,
                 i.OrderNumber,
+                Sizes = i.GetParsedSizes().Select(s => new { s.Id, s.Name, s.Price, s.Cost }),
                 AddOns = i.AddOns.Select(a => new { a.Id, a.Name, a.ExtraPrice, a.IsAvailable }),
                 Recommendations = i.Recommendations.Select(r => r.RecommendedMenuItemId)
             }));
@@ -569,31 +662,36 @@ namespace Resturant.Web.UI.Controllers
         // POST: api/analytics/menu/create
         [HttpPost("menu/create")]
         public async Task<IActionResult> CreateMenuItem(
-            [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int menuCategoryId,
+            [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] decimal cost, [FromForm] int menuCategoryId,
             [FromForm] bool isAvailable, [FromForm] bool isPopular, [FromForm] bool isTrending, [FromForm] bool isRecommended,
-            [FromForm] int orderNumber, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
+            [FromForm] int orderNumber, [FromForm] string? sizesJson, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
             [FromForm] Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
-            if (string.IsNullOrWhiteSpace(name) || price <= 0 || menuCategoryId <= 0)
+            if (string.IsNullOrWhiteSpace(name) || price <= 0 || cost < 0 || menuCategoryId <= 0)
             {
-                return BadRequest(new { Message = "Invalid item details. Name, Price, and Category are required." });
+                return BadRequest(new { Message = "Invalid item details. Name, Price, Cost, and Category are required." });
             }
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
+                    var activeBranchId = GetActiveBranchId();
+                    int branchId = activeBranchId ?? 1;
+
                     var item = new MenuItem
                     {
                         Name = name,
                         Description = description,
                         Price = price,
+                        Cost = cost,
                         MenuCategoryId = menuCategoryId,
                         IsAvailable = isAvailable,
                         IsPopular = isPopular,
                         IsTrending = isTrending,
                         IsRecommended = isRecommended,
-                        OrderNumber = orderNumber
+                        OrderNumber = orderNumber,
+                        BranchId = branchId
                     };
 
                     if (imageFile != null && imageFile.Length > 0)
@@ -603,6 +701,8 @@ namespace Resturant.Web.UI.Controllers
 
                     _context.MenuItems.Add(item);
                     await _context.SaveChangesAsync(); // Generates the item.Id
+
+                    UpsertMenuItemSizes(item.Id, sizesJson, cost);
 
                     // Parse and save add-ons
                     if (!string.IsNullOrEmpty(addonsJson))
@@ -647,13 +747,14 @@ namespace Resturant.Web.UI.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    return Ok(new { 
-                        Id = item.Id, 
-                        Name = item.Name, 
-                        Description = item.Description, 
-                        Price = item.Price, 
-                        ImageUrl = item.ImageUrl, 
-                        IsAvailable = item.IsAvailable 
+                    return Ok(new {
+                        Id = item.Id,
+                        Name = item.Name,
+                        Description = item.Description,
+                        Price = item.Price,
+                        Cost = item.Cost,
+                        ImageUrl = item.ImageUrl,
+                        IsAvailable = item.IsAvailable
                     });
                 }
                 catch (Exception ex)
@@ -670,20 +771,36 @@ namespace Resturant.Web.UI.Controllers
         [HttpPost("menu/delete/{id}")]
         public async Task<IActionResult> DeleteMenuItem(int id)
         {
-            var item = await _context.MenuItems.FindAsync(id);
+            var item = await _context.MenuItems
+                .Include(m => m.AddOns)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (item == null)
-            {
                 return NotFound(new { Message = "Menu item not found." });
+
+            // Check if any add‑ons are referenced by orders
+            var addOnIds = item.AddOns.Select(a => a.Id).ToList();
+            bool hasOrders = await _context.OrderItemAddOns
+                .AnyAsync(o => addOnIds.Contains(o.MenuItemAddOnId));
+
+            if (hasOrders)
+            {
+                // Soft‑delete item and its add‑ons, but keep them for history
+                item.IsDeleted = true;
+                foreach (var addOn in item.AddOns)
+                    addOn.IsDeleted = true;
+
+                _context.Update(item);
+                await _context.SaveChangesAsync();
+                return Ok(new { Message = "Menu item soft‑deleted; it is referenced by existing orders." });
             }
 
-            // Clear relationships to avoid foreign key constraints issues
-            var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
-            _context.MenuItemAddOns.RemoveRange(existingAddOns);
+            // No orders reference – soft‑delete safely
+            item.IsDeleted = true;
+            foreach (var addOn in item.AddOns)
+                addOn.IsDeleted = true;
 
-            var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id || r.RecommendedMenuItemId == id).ToListAsync();
-            _context.MenuItemRecommendations.RemoveRange(existingRecs);
-
-            _context.MenuItems.Remove(item);
+            _context.Update(item);
             await _context.SaveChangesAsync();
             return Ok(new { Success = true });
         }
@@ -691,20 +808,20 @@ namespace Resturant.Web.UI.Controllers
         // POST: api/analytics/menu/edit/{id}
         [HttpPost("menu/edit/{id}")]
         public async Task<IActionResult> EditMenuItem(int id,
-            [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] int menuCategoryId,
+            [FromForm] string name, [FromForm] string description, [FromForm] decimal price, [FromForm] decimal cost, [FromForm] int menuCategoryId,
             [FromForm] bool isAvailable, [FromForm] bool isPopular, [FromForm] bool isTrending, [FromForm] bool isRecommended,
-            [FromForm] int orderNumber, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
+            [FromForm] int orderNumber, [FromForm] string? sizesJson, [FromForm] string? addonsJson, [FromForm] string? recommendationsJson,
             [FromForm] Microsoft.AspNetCore.Http.IFormFile? imageFile)
         {
-            var item = await _context.MenuItems.Include(m => m.AddOns).Include(m => m.Recommendations).FirstOrDefaultAsync(m => m.Id == id);
+            var item = await _context.MenuItems.Include(m => m.Sizes).Include(m => m.AddOns).Include(m => m.Recommendations).FirstOrDefaultAsync(m => m.Id == id);
             if (item == null)
             {
                 return NotFound(new { Message = "Menu item not found." });
             }
 
-            if (string.IsNullOrWhiteSpace(name) || price <= 0 || menuCategoryId <= 0)
+            if (string.IsNullOrWhiteSpace(name) || price <= 0 || cost < 0 || menuCategoryId <= 0)
             {
-                return BadRequest(new { Message = "Invalid item details. Name, Price, and Category are required." });
+                return BadRequest(new { Message = "Invalid item details. Name, Price, Cost, and Category are required." });
             }
 
             using (var transaction = await _context.Database.BeginTransactionAsync())
@@ -714,6 +831,7 @@ namespace Resturant.Web.UI.Controllers
                     item.Name = name;
                     item.Description = description;
                     item.Price = price;
+                    item.Cost = cost;
                     item.MenuCategoryId = menuCategoryId;
                     item.IsAvailable = isAvailable;
                     item.IsPopular = isPopular;
@@ -725,22 +843,6 @@ namespace Resturant.Web.UI.Controllers
                     {
                         item.ImageUrl = await _cloudinaryService.UploadImageAsync(imageFile);
                     }
-
-                    // Clear existing child entities from the database context first
-                    var existingAddOns = await _context.MenuItemAddOns.Where(a => a.MenuItemId == id).ToListAsync();
-                    _context.MenuItemAddOns.RemoveRange(existingAddOns);
-
-                    var existingRecs = await _context.MenuItemRecommendations.Where(r => r.PrimaryMenuItemId == id).ToListAsync();
-                    _context.MenuItemRecommendations.RemoveRange(existingRecs);
-
-                    // Clear the local navigation collections so EF doesn't get confused or try to track deleted entities
-                    item.AddOns.Clear();
-                    item.Recommendations.Clear();
-
-                    await _context.SaveChangesAsync(); // Flush deletions to the database first!
-
-                    // Add new add-ons directly to DbContext
-                    if (!string.IsNullOrEmpty(addonsJson))
                     {
                         var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                         var addons = System.Text.Json.JsonSerializer.Deserialize<List<MenuItemAddOnDto>>(addonsJson, options);
@@ -783,13 +885,14 @@ namespace Resturant.Web.UI.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    return Ok(new { 
-                        Id = item.Id, 
-                        Name = item.Name, 
-                        Description = item.Description, 
-                        Price = item.Price, 
-                        ImageUrl = item.ImageUrl, 
-                        IsAvailable = item.IsAvailable 
+                    return Ok(new {
+                        Id = item.Id,
+                        Name = item.Name,
+                        Description = item.Description,
+                        Price = item.Price,
+                        Cost = item.Cost,
+                        ImageUrl = item.ImageUrl,
+                        IsAvailable = item.IsAvailable
                     });
                 }
                 catch (Exception ex)
@@ -848,8 +951,15 @@ namespace Resturant.Web.UI.Controllers
             try
             {
                 _logger.LogInformation("Fetching cashier shift reports for admin.");
-                var shifts = await _context.Set<CashierShift>()
+                var activeBranchId = GetActiveBranchId();
+                var query = _context.Set<CashierShift>()
                     .Include(s => s.Cashier)
+                    .AsQueryable();
+                if (activeBranchId.HasValue)
+                {
+                    query = query.Where(s => s.BranchId == activeBranchId.Value);
+                }
+                var shifts = await query
                     .OrderByDescending(s => s.StartTime)
                     .ToListAsync();
 
@@ -870,6 +980,178 @@ namespace Resturant.Web.UI.Controllers
             {
                 _logger.LogError(ex, "Error fetching cashier shift reports.");
                 return StatusCode(500, new { Message = "An error occurred while fetching shifts.", Details = ex.Message });
+            }
+        }
+
+        [HttpGet("branches")]
+        public async Task<IActionResult> GetBranches()
+        {
+            try
+            {
+                _logger.LogInformation("Fetching branches list for report filters.");
+                var branches = await _context.Set<Branch>()
+                    .OrderBy(b => b.Name)
+                    .Select(b => new { id = b.Id, name = b.Name })
+                    .ToListAsync();
+                return Ok(branches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching branches.");
+                return StatusCode(500, new { Message = "An error occurred while fetching branches.", Details = ex.Message });
+            }
+        }
+
+        [HttpGet("products/sales-report")]
+        public async Task<IActionResult> GetProductSalesReport(
+            [FromQuery] string? productName,
+            [FromQuery] int? categoryId,
+            [FromQuery] int? branchId,
+            [FromQuery] DateTime? dateFrom,
+            [FromQuery] DateTime? dateTo,
+            [FromQuery] int? hourFrom,
+            [FromQuery] int? hourTo
+        )
+        {
+            try
+            {
+                _logger.LogInformation("Generating Product Sales Report with filters.");
+
+                var query = _context.Set<OrderItem>()
+                    .Include(oi => oi.MenuItem)
+                        .ThenInclude(m => m.MenuCategory)
+                    .Include(oi => oi.MenuItem)
+                        .ThenInclude(m => m.Sizes)
+                    .Include(oi => oi.Order)
+                        .ThenInclude(o => o.Branch)
+                    .Include(oi => oi.Order)
+                        .ThenInclude(o => o.OrderItems)
+                    .Where(oi => oi.Order.Status == OrderStatus.Paid || oi.Order.Status == OrderStatus.Completed)
+                    .Where(oi => !oi.IsCancelled)
+                    .AsQueryable();
+
+                // Apply Branch filter
+                if (branchId.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.BranchId == branchId.Value);
+                }
+                else
+                {
+                    var activeBranchId = GetActiveBranchId();
+                    if (activeBranchId.HasValue)
+                    {
+                        query = query.Where(oi => oi.Order.BranchId == activeBranchId.Value);
+                    }
+                }
+
+                // Apply Category filter
+                if (categoryId.HasValue)
+                {
+                    query = query.Where(oi => oi.MenuItem.MenuCategoryId == categoryId.Value);
+                }
+
+                // Apply Date filters
+                if (dateFrom.HasValue)
+                {
+                    var startOfFrom = dateFrom.Value.Date;
+                    query = query.Where(oi => oi.Order.OrderDate >= startOfFrom);
+                }
+                if (dateTo.HasValue)
+                {
+                    var endOfTo = dateTo.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(oi => oi.Order.OrderDate <= endOfTo);
+                }
+
+                // Apply Hour filters
+                if (hourFrom.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.OrderDate.Hour >= hourFrom.Value);
+                }
+                if (hourTo.HasValue)
+                {
+                    query = query.Where(oi => oi.Order.OrderDate.Hour <= hourTo.Value);
+                }
+
+                var items = await query.ToListAsync();
+
+                var reportRows = items.Select(oi =>
+                {
+                    var lineSalesBeforeTax = oi.Price * oi.Quantity;
+                    var orderSubtotal = oi.Order.OrderItems
+                        .Where(item => !item.IsCancelled)
+                        .Sum(item => item.Price * item.Quantity);
+                    var orderShare = orderSubtotal > 0 ? lineSalesBeforeTax / orderSubtotal : 0m;
+                    var size = !string.IsNullOrWhiteSpace(oi.SizeName)
+                        ? oi.SizeName
+                        : oi.MenuItem?.GetParsedSizes().FirstOrDefault(s => s.Price == oi.Price)?.Name ?? "";
+                    var matchedSize = oi.MenuItem?.GetParsedSizes().FirstOrDefault(s => s.Name == size || s.Price == oi.Price);
+                    var unitCost = oi.UnitCost > 0 ? oi.UnitCost : matchedSize?.Cost ?? oi.MenuItem?.Cost ?? 0m;
+
+                    return new
+                    {
+                        ProductName = oi.MenuItem?.Name ?? "Unknown",
+                        Size = size,
+                        Category = oi.MenuItem?.MenuCategory?.Name ?? "Uncategorized",
+                        Branch = oi.Order?.Branch?.Name ?? "Main Branch",
+                        Quantity = oi.Quantity,
+                        UnitPrice = oi.Price,
+                        UnitCost = unitCost,
+                        SalesBeforeTax = lineSalesBeforeTax,
+                        Tax = oi.Order.TaxAmount * orderShare,
+                        Service = oi.Order.ServiceAmount * orderShare,
+                        SoldDate = oi.Order.OrderDate
+                    };
+                }).ToList();
+
+                var grouped = reportRows
+                    .GroupBy(row => new {
+                        row.ProductName,
+                        row.Size,
+                        row.Branch,
+                        row.Category
+                    })
+                    .Select(g =>
+                    {
+                        var quantitySold = g.Sum(row => row.Quantity);
+                        var totalSalesBeforeTax = g.Sum(row => row.SalesBeforeTax);
+                        var totalCost = g.Sum(row => row.UnitCost * row.Quantity);
+                        var totalTax = g.Sum(row => row.Tax);
+                        var totalServiceCharge = g.Sum(row => row.Service);
+                        var totalCustomerPaid = totalSalesBeforeTax + totalTax + totalServiceCharge;
+                        var grossProfit = totalSalesBeforeTax - totalCost;
+                        var netCustomerProfit = totalCustomerPaid - totalCost;
+                        return new {
+                            productName = g.Key.ProductName,
+                            size = string.IsNullOrWhiteSpace(g.Key.Size) ? "Default" : g.Key.Size,
+                            category = g.Key.Category,
+                            quantitySold,
+                            cost = quantitySold > 0 ? totalCost / quantitySold : 0m,
+                            averageSellingPrice = quantitySold > 0 ? totalSalesBeforeTax / quantitySold : 0m,
+                            lowestSellingPrice = g.Min(row => row.UnitPrice),
+                            highestSellingPrice = g.Max(row => row.UnitPrice),
+                            totalSalesBeforeTax,
+                            totalTax,
+                            totalServiceCharge,
+                            totalCustomerPaid,
+                            totalCost,
+                            grossProfit,
+                            totalProfit = grossProfit,
+                            netCustomerProfit,
+                            profitMarginPercentage = totalSalesBeforeTax > 0 ? (grossProfit / totalSalesBeforeTax) * 100m : 0m,
+                            branch = g.Key.Branch,
+                            lastSoldDate = g.Max(row => row.SoldDate).ToString("yyyy-MM-dd hh:mm tt")
+                        };
+                    })
+                    .OrderBy(g => g.productName)
+                    .ThenBy(g => g.size)
+                    .ToList();
+
+                return Ok(grouped);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating product sales report.");
+                return StatusCode(500, new { Message = "An error occurred while generating product sales report.", Details = ex.Message });
             }
         }
 
@@ -894,6 +1176,39 @@ namespace Resturant.Web.UI.Controllers
             }
 
             return Ok(result);
+        }
+
+        private void UpsertMenuItemSizes(int menuItemId, string? sizesJson, decimal defaultCost)
+        {
+            if (string.IsNullOrWhiteSpace(sizesJson))
+            {
+                return;
+            }
+
+            var options = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var sizes = System.Text.Json.JsonSerializer.Deserialize<List<MenuItemSizeDto>>(sizesJson, options);
+            if (sizes == null)
+            {
+                return;
+            }
+
+            foreach (var size in sizes.Where(s => !string.IsNullOrWhiteSpace(s.Name) && s.Price > 0))
+            {
+                _context.MenuItemSizes.Add(new MenuItemSize
+                {
+                    MenuItemId = menuItemId,
+                    Name = size.Name.Trim(),
+                    Price = size.Price,
+                    Cost = size.Cost < 0 ? defaultCost : size.Cost
+                });
+            }
+        }
+
+        public class MenuItemSizeDto
+        {
+            public string Name { get; set; }
+            public decimal Price { get; set; }
+            public decimal Cost { get; set; }
         }
 
         public class MenuItemAddOnDto

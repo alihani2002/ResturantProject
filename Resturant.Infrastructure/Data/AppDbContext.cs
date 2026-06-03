@@ -11,10 +11,12 @@ namespace Resturant.Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<Branch> Branches { get; set; }
         public DbSet<RestaurantTable> RestaurantTables { get; set; }
         public DbSet<QrCode> QrCodes { get; set; }
         public DbSet<MenuCategory> MenuCategories { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<MenuItemSize> MenuItemSizes { get; set; }
         public DbSet<MenuItemAddOn> MenuItemAddOns { get; set; }
         public DbSet<MenuItemRecommendation> MenuItemRecommendations { get; set; }
         public DbSet<TableSession> TableSessions { get; set; }
@@ -30,6 +32,9 @@ namespace Resturant.Infrastructure.Data
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<WasteLog> WasteLogs { get; set; }
+        public DbSet<StockTransfer> StockTransfers { get; set; }
+        public DbSet<StockTransferItem> StockTransferItems { get; set; }
+        public DbSet<InventoryAdjustment> InventoryAdjustments { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -81,13 +86,204 @@ namespace Resturant.Infrastructure.Data
                 .HasForeignKey(o => o.ShiftId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<RestaurantSetting>().HasData(new RestaurantSetting
+            // Configure multi-branch relationships
+            modelBuilder.Entity<ApplicationUser>(entity =>
             {
-                Id = 1,
-                TaxPercentage = 14,
-                ServicePercentage = 12,
-                CreatedOn = new DateTime(2026, 1, 1)
+                entity.HasOne(u => u.Branch)
+                    .WithMany(b => b.Staff)
+                    .HasForeignKey(u => u.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<RestaurantTable>(entity =>
+            {
+                entity.HasOne(t => t.Branch)
+                    .WithMany(b => b.Tables)
+                    .HasForeignKey(t => t.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.HasOne(o => o.Branch)
+                    .WithMany(b => b.Orders)
+                    .HasForeignKey(o => o.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<TableSession>(entity =>
+            {
+                entity.HasOne(s => s.Branch)
+                    .WithMany()
+                    .HasForeignKey(s => s.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuCategory>(entity =>
+            {
+                entity.HasOne(c => c.Branch)
+                    .WithMany(b => b.MenuCategories)
+                    .HasForeignKey(c => c.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuItem>(entity =>
+            {
+                entity.HasOne(m => m.Branch)
+                    .WithMany()
+                    .HasForeignKey(m => m.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuItemSize>(entity =>
+            {
+                entity.HasOne(s => s.MenuItem)
+                    .WithMany(m => m.Sizes)
+                    .HasForeignKey(s => s.MenuItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CashierShift>(entity =>
+            {
+                entity.HasOne(s => s.Branch)
+                    .WithMany()
+                    .HasForeignKey(s => s.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<RestaurantSetting>(entity =>
+            {
+                entity.HasOne(s => s.Branch)
+                    .WithMany()
+                    .HasForeignKey(s => s.BranchId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ERP Configurations to prevent multiple cascade paths in SQL Server
+            modelBuilder.Entity<Expense>(entity =>
+            {
+                entity.HasOne(e => e.Branch)
+                    .WithMany()
+                    .HasForeignKey(e => e.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Supplier>(entity =>
+            {
+                entity.HasOne(s => s.Branch)
+                    .WithMany()
+                    .HasForeignKey(s => s.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Ingredient>(entity =>
+            {
+                entity.HasOne(i => i.Branch)
+                    .WithMany()
+                    .HasForeignKey(i => i.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<WasteLog>(entity =>
+            {
+                entity.HasOne(w => w.Branch)
+                    .WithMany()
+                    .HasForeignKey(w => w.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<StockTransfer>(entity =>
+            {
+                entity.HasOne(s => s.SourceBranch)
+                    .WithMany()
+                    .HasForeignKey(s => s.SourceBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(s => s.DestinationBranch)
+                    .WithMany()
+                    .HasForeignKey(s => s.DestinationBranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<StockTransferItem>(entity =>
+            {
+                entity.HasOne(i => i.StockTransfer)
+                    .WithMany(t => t.Items)
+                    .HasForeignKey(i => i.StockTransferId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<InventoryAdjustment>(entity =>
+            {
+                entity.HasOne(a => a.Branch)
+                    .WithMany()
+                    .HasForeignKey(a => a.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(a => a.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(a => a.IngredientId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Seed Branches
+            modelBuilder.Entity<Branch>().HasData(
+                new Branch
+                {
+                    Id = 1,
+                    Name = "Nasr City Branch",
+                    Address = "Abbas El Akkad, Nasr City",
+                    ContactPhone = "01000000001",
+                    IsActive = true,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new Branch
+                {
+                    Id = 2,
+                    Name = "Maadi Branch",
+                    Address = "Road 9, Maadi",
+                    ContactPhone = "01000000002",
+                    IsActive = true,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new Branch
+                {
+                    Id = 3,
+                    Name = "Central Warehouse",
+                    Address = "Main Supply Depot, Cairo",
+                    ContactPhone = "01000000003",
+                    IsActive = true,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                }
+            );
+
+            // Seed branch settings
+            modelBuilder.Entity<RestaurantSetting>().HasData(
+                new RestaurantSetting
+                {
+                    Id = 1,
+                    BranchId = 1,
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new RestaurantSetting
+                {
+                    Id = 2,
+                    BranchId = 2,
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                },
+                new RestaurantSetting
+                {
+                    Id = 3,
+                    BranchId = 3,
+                    TaxPercentage = 14,
+                    ServicePercentage = 12,
+                    CreatedOn = new DateTime(2026, 1, 1)
+                }
+            );
 
             modelBuilder.Entity<OrderItemAddOn>(entity =>
             {
@@ -113,6 +309,11 @@ namespace Resturant.Infrastructure.Data
                     .WithMany()
                     .HasForeignKey(i => i.MenuItemId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<MenuItemSize>()
+                    .WithMany()
+                    .HasForeignKey(i => i.MenuItemSizeId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // Set global precision for decimal properties to avoid warnings and truncation

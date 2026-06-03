@@ -1,0 +1,119 @@
+﻿    <aside class="w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-darkBorder flex flex-col h-full z-20 transition-all duration-300 shrink-0">
+        <!-- Sidebar Brand Logo -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-darkBorder">
+            <div class="flex items-center gap-3">
+                <div class="p-1 rounded-xl">
+                    <img src="/assets/images/Qore.png" alt="Qore" class="h-8 w-auto">
+                </div>
+                <div>
+                    <h1 class="outfit-font font-black text-lg leading-tight tracking-wide text-slate-900 dark:text-white uppercase">QORE ERP</h1>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Admin Operations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation Tabs -->
+        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('dashboard')" id="btn-tab-dashboard" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10 text-right justify-start" dir="rtl">
+                <i class="bi bi-grid-fill text-base"></i>
+                <span>خريطة النظام الرئيسية</span>
+            </button>
+
+            <button onclick="switchTab('shift-reports')" id="btn-tab-shift-reports" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-clock-history text-base text-warning"></i>
+                <span>تقارير الورديات (الشيفتات)</span>
+            </button>
+
+            <button onclick="switchTab('product-sales-report')" id="btn-tab-product-sales-report" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-bar-chart-line text-base text-success"></i>
+                <span>تقارير مبيعات المنتجات</span>
+            </button>
+
+            <div class="pt-4 pb-2 px-4 text-right" dir="rtl">
+                <p class="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">تهيئة وإعدادات النظام</p>
+            </div>
+
+            <button onclick="switchTab('menu-mgmt')" id="btn-tab-menu-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-journal-plus text-base text-rose-500"></i>
+                <span>إضافة وإدارة المنيو</span>
+            </button>
+
+            <button onclick="switchTab('category-mgmt')" id="btn-tab-category-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-tags text-base text-cyan-500"></i>
+                <span>إضافة وإدارة الأقسام</span>
+            </button>
+
+            <button onclick="switchTab('table-mgmt')" id="btn-tab-table-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-grid text-base text-orange-500"></i>
+                <span>إضافة وإدارة الطاولات</span>
+            </button>
+
+            <button onclick="switchTab('waiter-assignment')" id="btn-tab-waiter-assignment" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-person-lines-fill text-base text-indigo-500"></i>
+                <span>إسناد الطاولات للويتر</span>
+            </button>
+
+            <button onclick="switchTab('settings-mgmt')" id="btn-tab-settings-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-sliders text-base text-emerald-500"></i>
+                <span>إعدادات الضرائب والخدمة</span>
+            </button>
+
+            <button onclick="switchTab('branch-mgmt')" id="btn-tab-branch-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-geo-alt text-base text-brand-500"></i>
+                <span>إدارة الفروع</span>
+            </button>
+
+            <div class="pt-4 pb-2 px-4 text-right" dir="rtl">
+                <p class="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-500 uppercase">المخازن وسلاسل الإمداد</p>
+            </div>
+
+            <button onclick="switchTab('inventory-mgmt')" id="btn-tab-inventory-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-box-seam text-base text-amber-500"></i>
+                <span>مخزون المواد الخام</span>
+            </button>
+
+            <button onclick="switchTab('stock-transfers')" id="btn-tab-stock-transfers" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-arrow-left-right text-base text-indigo-500"></i>
+                <span>تحويلات المخزون</span>
+            </button>
+
+            <button onclick="switchTab('recipe-mgmt')" id="btn-tab-recipe-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-receipt text-base text-rose-500"></i>
+                <span>مكونات الوصفات (الريسبات)</span>
+            </button>
+
+            <button onclick="switchTab('daily-consumption')" id="btn-tab-daily-consumption" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-calendar-check text-base text-emerald-500"></i>
+                <span>تقرير الاستهلاك ومطابقة المخزن</span>
+            </button>
+        </nav>
+
+        <!-- Footer Operations Link -->
+        <div class="p-4 border-t border-slate-100 dark:border-darkBorder bg-slate-50/50 dark:bg-darkCard space-y-2">
+            <a href="/Waiter" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-indigo-200 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all justify-center">
+                <i class="bi bi-person-badge"></i>
+                <span>شاشة الويتر (النادل)</span>
+            </a>
+            <a href="/Cashier" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all justify-center">
+                <i class="bi bi-pc-display-horizontal"></i>
+                <span>كاشير نقاط البيع POS</span>
+            </a>
+            <a href="/Chef" target="_blank" class="flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-rose-200 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all justify-center">
+                <i class="bi bi-fire"></i>
+                <span>شاشة المطبخ (الشيف)</span>
+            </a>
+            <hr class="border-slate-200 dark:border-slate-700 my-2">
+            <button onclick="switchTab('user-mgmt')" id="btn-tab-user-mgmt" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all justify-center">
+                <i class="bi bi-people-fill"></i>
+                <span>إدارة المستخدمين والصلاحيات</span>
+            </button>
+
+            <form action="/Identity/Account/Logout?returnUrl=%2F" method="post" id="logoutForm" class="w-full m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 transition-all justify-center">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </form>
+        </div>
+    </aside>

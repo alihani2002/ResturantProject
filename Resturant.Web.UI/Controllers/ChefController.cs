@@ -8,6 +8,7 @@ using Resturant.Infrastructure.Data;
 using Resturant.Web.UI.Hubs;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace Resturant.Web.UI.Controllers
 {
@@ -16,22 +17,80 @@ namespace Resturant.Web.UI.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IHubContext<OrderHub> _hubContext;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ChefController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public ChefController(AppDbContext context, IHubContext<OrderHub> hubContext, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _hubContext = hubContext;
+            _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        private async Task<int> GetSelectedBranchIdAsync()
         {
+            var userId = _userManager.GetUserId(User);
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            if (isAdminOrManager)
+            {
+                // Try query string
+                if (Request.Query.TryGetValue("branchId", out var qBranchIdStr) && int.TryParse(qBranchIdStr, out int qBranchId))
+                {
+                    Response.Cookies.Append("ChefActiveBranchId", qBranchId.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                    return qBranchId;
+                }
+                
+                // Try cookie
+                string cookieBranchIdStr = Request.Cookies["ChefActiveBranchId"];
+                if (!string.IsNullOrEmpty(cookieBranchIdStr) && int.TryParse(cookieBranchIdStr, out int cookieBranchId))
+                {
+                    return cookieBranchId;
+                }
+            }
+            
+            return dbUser?.BranchId ?? 1;
+        }
+
+        public async Task<IActionResult> SelectBranch()
+        {
+            Response.Cookies.Delete("ChefActiveBranchId");
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Index(int? branchId = null)
+        {
+            var isAdminOrManager = User.IsInRole(AppRoles.Admin) || User.IsInRole(AppRoles.Manager);
+            
+            if (isAdminOrManager)
+            {
+                if (branchId.HasValue)
+                {
+                    Response.Cookies.Append("ChefActiveBranchId", branchId.Value.ToString(), new CookieOptions { HttpOnly = true, Expires = DateTime.Now.AddDays(7) });
+                }
+                else
+                {
+                    Response.Cookies.Delete("ChefActiveBranchId");
+                    
+                    // Show branch selector
+                    ViewBag.TerminalName = "Chef Terminal";
+                    ViewBag.TargetAction = "Index";
+                    ViewBag.TargetController = "Chef";
+                    var branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+                    return View("_BranchSelector", branches);
+                }
+            }
+
+            int selectedBranchId = await GetSelectedBranchIdAsync();
+            ViewBag.ActiveBranchId = selectedBranchId;
+
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation) && o.BranchId == selectedBranchId)
                 .OrderBy(o => o.ConfirmedDate)
                 .ToListAsync();
 
@@ -41,13 +100,15 @@ namespace Resturant.Web.UI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetOrdersData()
         {
+            int branchId = await GetSelectedBranchIdAsync();
+
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.AddOns)
                         .ThenInclude(a => a.AddOn)
-                .Where(o => o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation)
+                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation) && o.BranchId == branchId)
                 .OrderBy(o => o.ConfirmedDate)
                 .Select(o => new
                 {
@@ -55,13 +116,12 @@ namespace Resturant.Web.UI.Controllers
                     tableNumber = o.TableNumber,
                     status = (int)o.Status,
                     note = o.Note,
-                    // Effective total (cancelled items are free)
                     totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
                     orderDate = o.OrderDate,
                     orderItems = o.OrderItems.Select(oi => new
                     {
                         id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithPrice(oi.Price) : "",
+                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithSize(oi.SizeName, oi.Price) : "",
                         quantity = oi.Quantity,
                         price = oi.Price,
                         isCancelled = oi.IsCancelled,
@@ -93,10 +153,10 @@ namespace Resturant.Web.UI.Controllers
 
             var orderData = BuildOrderData(order);
 
-            await _hubContext.Clients.Group("waiter").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
             return Ok();
         }
@@ -120,13 +180,13 @@ namespace Resturant.Web.UI.Controllers
 
             var orderData = BuildOrderData(order);
 
-            await _hubContext.Clients.Group("waiter").SendAsync("OrderReady", orderData);
-            await _hubContext.Clients.Group("cashier").SendAsync("OrderReady", orderData);
-            await _hubContext.Clients.Group("admin").SendAsync("OrderStatusChanged", orderData);
-            await _hubContext.Clients.All.SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group($"cashier_{order.BranchId}").SendAsync("OrderReady", orderData);
+            await _hubContext.Clients.Group($"admin_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
+            await _hubContext.Clients.Group($"guest_{order.BranchId}").SendAsync("OrderStatusChanged", orderData);
 
-            await _hubContext.Clients.All.SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
-            await _hubContext.Clients.All.SendAsync("ReceiveWaiterUpdate", "Order Ready");
+            await _hubContext.Clients.Group($"accountant_{order.BranchId}").SendAsync("ReceiveAccountantUpdate", "New Order Ready for Payment");
+            await _hubContext.Clients.Group($"waiter_{order.BranchId}").SendAsync("ReceiveWaiterUpdate", "Order Ready");
 
             return Ok();
         }
@@ -137,6 +197,7 @@ namespace Resturant.Web.UI.Controllers
             {
                 id = order.Id,
                 tableNumber = order.TableNumber,
+                branchId = order.BranchId,
                 status = (int)order.Status,
                 totalAmount = order.TotalAmount,
                 orderDate = order.OrderDate,
@@ -144,7 +205,7 @@ namespace Resturant.Web.UI.Controllers
                 orderItems = order.OrderItems.Select(oi => new
                 {
                     id = oi.Id,
-                    menuItemName = oi.MenuItem?.GetFormattedNameWithPrice(oi.Price) ?? "",
+                    menuItemName = oi.MenuItem?.GetFormattedNameWithSize(oi.SizeName, oi.Price) ?? "",
                     quantity = oi.Quantity,
                     price = oi.Price,
                     isCancelled = oi.IsCancelled

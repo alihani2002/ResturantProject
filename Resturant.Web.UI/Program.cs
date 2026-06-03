@@ -6,7 +6,7 @@ using Resturant.Core.Entities;
 using Resturant.Web.UI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("ResturantWebUIContextConnection") ?? throw new InvalidOperationException("Connection string 'ResturantWebUIContextConnection' not found.");;
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");;
 
 //builder.Services.AddDbContext<ResturantWebUIContext>(options => options.UseSqlServer(connectionString));
 

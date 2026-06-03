@@ -19,7 +19,13 @@
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-fire text-danger me-2"></i>Kitchen Orders <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center">
+            @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+            {
+                <a href="@Url.Action("SelectBranch", "Chef")" class="btn btn-warning btn-sm fw-bold">
+                    <i class="bi bi-arrow-left-right me-1"></i> Switch Branch
+                </a>
+            }
             <span class="badge bg-warning text-dark fs-6" id="confirmed-count">0 Waiting</span>
             <span class="badge bg-primary fs-6" id="inprep-count">0 In Prep</span>
         </div>
@@ -103,6 +109,7 @@
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
+        const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub")
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
@@ -302,16 +309,23 @@
         async function startConnection() {
             try {
                 await connection.start();
-                await connection.invoke("JoinDashboard", "chef");
+                await connection.invoke("JoinDashboard", "chef", activeBranchId);
                 updateConnectionStatus(true);
                 updateCounts();
             } catch(err) {
+                console.error("SignalR Connection Failure:", err);
                 updateConnectionStatus(false);
                 setTimeout(startConnection, 5000);
             }
         }
         connection.onreconnecting(() => updateConnectionStatus(false));
-        connection.onreconnected(() => { connection.invoke("JoinDashboard", "chef"); updateConnectionStatus(true); fetchAndRefreshOrders(); });
+        connection.onreconnected(async () => {
+            try {
+                await connection.invoke("JoinDashboard", "chef", activeBranchId);
+                updateConnectionStatus(true);
+                fetchAndRefreshOrders();
+            } catch (e) { console.error("SignalR Reconnection error:", e); }
+        });
         connection.onclose(() => updateConnectionStatus(false));
         startConnection();
 
