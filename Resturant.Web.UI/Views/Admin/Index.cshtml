@@ -381,138 +381,16 @@
                         window.location.href = "/Identity/Account/Login?ReturnUrl=" + encodeURIComponent(window.location.pathname);
                     }, 2200);
                 } else {
-                    console.warn("ERP server returned non-ok response. Activating Ledger Demo Sandbox...");
-                    activateDemoSandbox(tabId);
+                    console.error("ERP server returned non-ok response while loading report.", response.status);
+                    reportsData[tabId] = null;
+                    showToastAlert("Live report data could not be loaded from the database.", "error");
                 }
             } catch (err) {
-                console.warn("Could not connect to ERP servers. Activating Ledger Demo Sandbox...", err);
-                activateDemoSandbox(tabId);
+                console.error("Could not connect to ERP servers.", err);
+                reportsData[tabId] = null;
+                showToastAlert("Could not connect to the live database reports API.", "error");
             } finally {
                 hideLoader();
-            }
-        }
-
-        // Helper to load high-fidelity fallback sandbox data
-        function activateDemoSandbox(tabId) {
-            const mockData = generateFallbackData(tabId);
-            reportsData[tabId] = mockData;
-
-            // Set dynamic header badge to sandbox mode
-            const badge = document.getElementById('connection-status');
-            if (badge) {
-                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400 border border-amber-500/30";
-                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span><i class="bi bi-shield-check"></i> Demo Sandbox Mode`;
-            }
-
-            renderTabReport(tabId, mockData);
-        }
-
-        // ==============================================
-        // DYNAMIC HIGH-FIDELITY DEMO SANDBOX FALLBACK GENERATOR
-        // ==============================================
-        function generateFallbackData(tabId) {
-            switch (tabId) {
-                case 'dashboard':
-                    return {
-                        totalRevenueToday: 0,
-                        activeTablesCount: 0,
-                        activeSessionsTodayCount: 0,
-                        pendingOrdersCount: 0,
-                        completedOrdersToday: 0,
-                        revenueGrowthRate: 0,
-                        totalRevenueThisWeek: 0,
-                        totalRevenueThisMonth: 0,
-                        totalRevenueSinceSystemStarted: 0,
-                        totalOrdersCount: 0,
-                        totalGuestsCount: 0,
-                        totalTablesCount: 0,
-                        totalMenuItemsCount: 0,
-                        totalCategoriesCount: 0,
-                        recentNotifications: []
-                    };
-
-                case 'sales':
-                    return {
-                        grossRevenue: 0,
-                        netRevenue: 0,
-                        totalTaxes: 0,
-                        averageOrderValue: 0,
-                        totalDiscounts: 0,
-                        salesTrend: [],
-                        salesByTable: [],
-                        salesByPaymentMethod: [],
-                        salesByWaiter: []
-                    };
-
-                case 'orders':
-                    return {
-                        totalOrders: 0,
-                        averagePreparationTimeMinutes: 0,
-                        averageServingTimeMinutes: 0,
-                        averageTableTurnoverMinutes: 0,
-                        ordersByCategory: [],
-                        mostBusyTables: []
-                    };
-
-                case 'products':
-                    return {
-                        bestSellers: [],
-                        trendingProducts: [],
-                        upsellPerformanceRate: 0,
-                        recommendationConversionRate: 0
-                    };
-
-                case 'customers':
-                    return {
-                        newCustomersCount: 0,
-                        returningCustomersCount: 0,
-                        customerRetentionRate: 0,
-                        averageCustomerSpend: 0,
-                        vipList: []
-                    };
-
-                case 'staff':
-                    return {
-                        waiterRankings: [],
-                        shifts: []
-                    };
-
-                case 'kitchen':
-                    return {
-                        averagePreparationTimeMinutes: 0,
-                        delayedOrdersCount: 0,
-                        kitchenEfficiencyScore: 0,
-                        kitchenLoadByHour: [],
-                        fastestItems: [],
-                        slowestItems: []
-                    };
-
-                case 'financials':
-                    return {
-                        netProfit: 0,
-                        profitMarginPercentage: 0,
-                        totalRevenue: 0,
-                        totalExpenses: 0,
-                        totalTaxAmount: 0,
-                        expensesBreakdown: [],
-                        paymentReconciliations: [],
-                        closingReports: []
-                    };
-
-                case 'inventory':
-                    return {
-                        totalInventoryValuation: 0,
-                        totalPurchasesAmount: 0,
-                        totalWasteAmount: 0,
-                        averageFoodCostPercentage: 0,
-                        lowStockAlerts: [],
-                        supplierPurchases: [],
-                        recipeCosts: [],
-                        wasteLogs: []
-                    };
-
-                default:
-                    return {};
             }
         }
 
@@ -3956,6 +3834,14 @@
         // 1. Inventory Stock Actions
         function loadInventoryStockList() {
             const branchId = $('#header-branch-selector').val();
+            const tbody = document.querySelector('#table-inventory-stock tbody');
+            const alertList = document.getElementById('inventory-low-stock-list');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">Loading live inventory records...</td></tr>`;
+            }
+            if (alertList) {
+                alertList.innerHTML = `<div class="p-4 border border-slate-200 dark:border-darkBorder text-slate-400 text-xs rounded-xl text-center font-bold">Loading stock alerts...</div>`;
+            }
             $.get('/Inventory/GetStockLevels', { branchId: branchId ? parseInt(branchId) : null })
              .done(function(data) {
                  inventoryStockData = data;
@@ -3963,6 +3849,13 @@
                  updateInventoryKPIs();
              })
              .fail(function() {
+                 inventoryStockData = [];
+                 if (tbody) {
+                     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500">Could not load live inventory records from the database.</td></tr>`;
+                 }
+                 if (alertList) {
+                     alertList.innerHTML = `<div class="p-4 border border-red-500/10 bg-red-500/5 text-red-500 text-xs rounded-xl text-center font-bold">Stock alerts unavailable because live inventory data failed to load.</div>`;
+                 }
                  showToastAlert("Failed to load inventory stock levels.", "error");
              });
         }
@@ -3991,7 +3884,7 @@
                     tbody.innerHTML += `
                         <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                             <td class="py-3.5 px-6 font-semibold text-slate-800 dark:text-white">${item.name}</td>
-                            <td class="py-3.5 text-slate-500 dark:text-slate-400">${item.supplierName || 'General Supplier'}</td>
+                            <td class="py-3.5 text-slate-500 dark:text-slate-400">${item.supplierName || 'Unassigned'}</td>
                             <td class="py-3.5 text-center ${stockClass}">${item.currentStock.toFixed(2)} ${item.unit}</td>
                             <td class="py-3.5 text-center">${minBadge}</td>
                             <td class="py-3.5 text-right font-semibold text-slate-600 dark:text-slate-400">${parseFloat(item.costPerUnit).toFixed(2)} EGP</td>
@@ -4044,23 +3937,38 @@
                     document.getElementById('inv-kpi-purchases').textContent = `${parseFloat(data.totalPurchasesAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} EGP`;
                     document.getElementById('inv-kpi-waste').textContent = `${parseFloat(data.totalWasteAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} EGP`;
                     document.getElementById('inv-kpi-foodcost').textContent = `${data.averageFoodCostPercentage}%`;
+                } else {
+                    document.getElementById('inv-kpi-valuation').textContent = '--';
+                    document.getElementById('inv-kpi-purchases').textContent = '--';
+                    document.getElementById('inv-kpi-waste').textContent = '--';
+                    document.getElementById('inv-kpi-foodcost').textContent = '--';
+                    showToastAlert("Failed to load live inventory KPI metrics.", "error");
                 }
             } catch (ex) {
                 console.error("Failed to load inventory KPI valuation reports:", ex);
+                document.getElementById('inv-kpi-valuation').textContent = '--';
+                document.getElementById('inv-kpi-purchases').textContent = '--';
+                document.getElementById('inv-kpi-waste').textContent = '--';
+                document.getElementById('inv-kpi-foodcost').textContent = '--';
+                showToastAlert("Failed to load live inventory KPI metrics.", "error");
             }
         }
 
         // Ingredient CRUD Modal Actions
         let suppliersListCache = [];
+        let suppliersListCacheBranchId = null;
 
         function loadSuppliersList(callback) {
-            if (suppliersListCache.length > 0) {
+            const branchId = $('#header-branch-selector').val();
+            const normalizedBranchId = branchId ? parseInt(branchId) : null;
+            if (suppliersListCacheBranchId === normalizedBranchId && suppliersListCache.length > 0) {
                 if (callback) callback(suppliersListCache);
                 return;
             }
-            $.get('/Inventory/GetSuppliers')
+            $.get('/Inventory/GetSuppliers', { branchId: normalizedBranchId })
              .done(function(suppliers) {
                  suppliersListCache = suppliers;
+                 suppliersListCacheBranchId = normalizedBranchId;
                  const select = document.getElementById('ingredient-crud-supplier');
                  if (select) {
                      select.innerHTML = '<option value="">No Assigned Supplier</option>';

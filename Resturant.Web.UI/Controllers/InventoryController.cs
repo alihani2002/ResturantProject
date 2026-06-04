@@ -37,7 +37,19 @@ namespace Resturant.Web.UI.Controllers
         {
             var activeBranchId = GetActiveBranchId(branchId);
             var stock = await _inventoryService.GetStockLevelsAsync(activeBranchId);
-            return Json(stock);
+            return Json(stock.Select(i => new
+            {
+                i.Id,
+                i.BranchId,
+                BranchName = i.Branch?.Name,
+                i.Name,
+                i.CurrentStock,
+                i.ReorderLevel,
+                i.Unit,
+                i.CostPerUnit,
+                i.SupplierId,
+                SupplierName = i.Supplier?.Name
+            }));
         }
 
         [HttpPost]
@@ -237,10 +249,22 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSuppliers()
+        public async Task<IActionResult> GetSuppliers(int? branchId)
         {
-            var suppliers = await _context.Suppliers.ToListAsync();
-            return Json(suppliers.Select(s => new { s.Id, s.Name }));
+            var activeBranchId = GetActiveBranchId(branchId);
+            var query = _context.Suppliers.AsQueryable();
+
+            if (activeBranchId.HasValue)
+            {
+                query = query.Where(s => s.BranchId == activeBranchId.Value);
+            }
+
+            var suppliers = await query
+                .OrderBy(s => s.Name)
+                .Select(s => new { s.Id, s.Name, s.BranchId })
+                .ToListAsync();
+
+            return Json(suppliers);
         }
 
         [HttpPost]

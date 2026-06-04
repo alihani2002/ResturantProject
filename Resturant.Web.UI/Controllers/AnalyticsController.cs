@@ -472,13 +472,7 @@ namespace Resturant.Web.UI.Controllers
                     filters.BranchId = activeBranchId.Value;
                 }
 
-                string cacheKey = $"InventoryReport_{filters.StartDate:yyyyMMdd}_{filters.EndDate:yyyyMMdd}_{filters.BranchId}";
-
-                if (!_cache.TryGetValue(cacheKey, out InventoryAnalyticsDto report))
-                {
-                    report = await _analyticsService.GetInventoryReportsAsync(filters);
-                    _cache.Set(cacheKey, report, TimeSpan.FromMinutes(5));
-                }
+                var report = await _analyticsService.GetInventoryReportsAsync(filters);
 
                 return Ok(report);
             }
