@@ -131,6 +131,22 @@ namespace Resturant.Web.UI.Hubs
             }
         }
 
+        public async Task CallWaiter(int tableNumber, int branchId)
+        {
+            var notifyData = new { tableNumber = tableNumber };
+            await Clients.Group($"waiter_{branchId}").SendAsync("CallWaiterReceived", notifyData);
+            await Clients.Group($"admin_{branchId}").SendAsync("CallWaiterReceived", notifyData);
+            _logger.LogInformation("CallWaiter invoked for Table={TableNumber}, Branch={BranchId}", tableNumber, branchId);
+        }
+
+        public async Task ClearWaiterCall(int tableNumber, int branchId)
+        {
+            var notifyData = new { tableNumber = tableNumber };
+            await Clients.Group($"waiter_{branchId}").SendAsync("ClearWaiterCallReceived", notifyData);
+            await Clients.Group($"admin_{branchId}").SendAsync("ClearWaiterCallReceived", notifyData);
+            _logger.LogInformation("ClearWaiterCall invoked for Table={TableNumber}, Branch={BranchId}", tableNumber, branchId);
+        }
+
         // New order created - notify waiters
         public async Task NotifyNewOrder(object orderData)
         {

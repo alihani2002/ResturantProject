@@ -45,6 +45,12 @@
                             }
                         </div>
 
+                        <!-- Call Waiter Alert -->
+                        <div id="call-waiter-alert-@table.TableNumber" class="alert alert-danger py-2 px-3 mb-2 rounded-3 text-center call-waiter-alert shadow-sm" style="display: none; font-size: 0.85rem; font-weight: bold; background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">
+                            <i class="bi bi-bell-fill ms-1 text-danger animate-spin"></i> العميل يطلب الويتر!
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2 ms-2 rounded-pill small" onclick="clearWaiterCall(@table.TableNumber)" style="font-size: 0.75rem;">تمت التلبية</button>
+                        </div>
+
                         @if (!string.IsNullOrEmpty(table.CustomerName))
                         {
                             <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded text-right" style="direction: rtl;">
@@ -295,6 +301,7 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
         const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
+        const activeWaiterCalls = new Set(JSON.parse(localStorage.getItem('waiter_calls') || '[]'));
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub", {
                 transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
@@ -344,6 +351,16 @@
                     ` : ''}
                 </div>
             `;
+
+            let callAlertHtml = '';
+            if (activeWaiterCalls.has(tableNumber)) {
+                callAlertHtml = `
+                    <div id="call-waiter-alert-${tableNumber}" class="alert alert-danger py-2 px-3 mb-2 rounded-3 text-center call-waiter-alert shadow-sm" style="font-size: 0.85rem; font-weight: bold; background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">
+                        <i class="bi bi-bell-fill ms-1 text-danger animate-spin"></i> العميل يطلب الويتر!
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 ms-2 rounded-pill small" onclick="clearWaiterCall(${tableNumber})" style="font-size: 0.75rem;">تمت التلبية</button>
+                    </div>
+                `;
+            }
             
             let sessionHtml = '';
             if (tableData.customerName) {
@@ -499,7 +516,7 @@
                 </div>
             `;
 
-            card.querySelector('.card-body').innerHTML = headerHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>` + footerHtml;
+            card.querySelector('.card-body').innerHTML = headerHtml + callAlertHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>` + footerHtml;
 
             cardInner.style.transition = 'transform 0.2s';
             cardInner.style.transform = 'scale(1.02)';
@@ -571,11 +588,15 @@
         connection.on("PaymentProcessed", function (order) {
             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             showNotification(`تم استلام الدفع لطاولة ${order.tableNumber}`, 'success');
+            activeWaiterCalls.delete(order.tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
             fetchAndRefreshTables();
         });
 
         connection.on("TableCleared", function (order) {
             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
+            activeWaiterCalls.delete(order.tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
             fetchAndRefreshTables();
         });
         
@@ -594,6 +615,40 @@
             showNotification(`تم إلغاء صنف: ${data.cancelledItemName} في طاولة ${data.tableNumber}`, 'warning');
             fetchAndRefreshTables();
         });
+
+        connection.on("CallWaiterReceived", function (data) {
+            if (!data || !data.tableNumber) return;
+            const tNum = data.tableNumber;
+            activeWaiterCalls.add(tNum);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            playNotificationSound();
+            showNotification(`نداء من طاولة ${tNum}! العميل يطلب حضورك.`, 'warning');
+            const el = document.getElementById(`call-waiter-alert-${tNum}`);
+            if (el) el.style.display = 'block';
+            fetchAndRefreshTables();
+        });
+
+        connection.on("ClearWaiterCallReceived", function (data) {
+            if (!data || !data.tableNumber) return;
+            const tNum = data.tableNumber;
+            activeWaiterCalls.delete(tNum);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            const el = document.getElementById(`call-waiter-alert-${tNum}`);
+            if (el) el.style.display = 'none';
+            fetchAndRefreshTables();
+        });
+
+        function clearWaiterCall(tableNumber) {
+            activeWaiterCalls.delete(tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            const el = document.getElementById(`call-waiter-alert-${tableNumber}`);
+            if (el) el.style.display = 'none';
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke("ClearWaiterCall", tableNumber, activeBranchId)
+                    .catch(err => console.error(err));
+            }
+            fetchAndRefreshTables();
+        }
 
         async function fetchAndRefreshTables() {
             try {
@@ -643,6 +698,11 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Restore active waiter calls on load
+            activeWaiterCalls.forEach(tNum => {
+                const el = document.getElementById(`call-waiter-alert-${tNum}`);
+                if (el) el.style.display = 'block';
+            });
             fetchAndRefreshTables();
             setTimeout(startConnection, 500);
         });

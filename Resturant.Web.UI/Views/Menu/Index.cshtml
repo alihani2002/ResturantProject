@@ -41,7 +41,7 @@
     <div class="container py-3">
         <!-- Floating Info Bar: Table & Active User -->
         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <span class="rounded-circle bg-secondary text-white p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                         <i class="bi bi-hash"></i>
@@ -51,6 +51,13 @@
                         <strong class="text-dark">طاولة <span class="badge bg-secondary rounded-pill">@ViewData["TableNumber"]</span></strong>
                     </div>
                 </div>
+
+                <!-- Call Waiter Button -->
+                <button id="call-waiter-btn" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm" onclick="callWaiter()" style="font-size: 0.8rem; border-width: 1.5px; transition: all 0.3s ease;">
+                    <i class="bi bi-bell-fill text-danger animate-pulse"></i>
+                    <span>اطلب الويتر</span>
+                </button>
+
                 @if (ViewData["CustomerName"] != null)
                 {
                     <div class="text-left">
@@ -1118,6 +1125,8 @@
                 .withAutomaticReconnect()
                 .build();
 
+            window.guestSignalRConn = connection;
+
             const eventsToRefresh = [
                 "OrderStatusChanged", "NewOrderReceived", "OrderAccepted", 
                 "OrderReady", "OrderCompleted", "PaymentProcessed", 
@@ -1141,6 +1150,60 @@
                     }
                 })
                 .catch(err => console.error("SignalR connection error:", err));
+        }
+
+        let isCallingWaiter = false;
+        function callWaiter() {
+            if (isCallingWaiter) return;
+            isCallingWaiter = true;
+            
+            const btn = document.getElementById('call-waiter-btn');
+            const originalHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span>جاري النداء...';
+            
+            if (window.guestSignalRConn && window.guestSignalRConn.state === signalR.HubConnectionState.Connected) {
+                window.guestSignalRConn.invoke("CallWaiter", tableNumber, branchId)
+                    .then(() => {
+                        btn.innerHTML = '<i class="bi bi-check-circle-fill text-success ms-1"></i> تم النداء!';
+                        btn.className = "btn btn-success btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm";
+                        showCallWaiterToast();
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                            btn.className = "btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm";
+                            isCallingWaiter = false;
+                        }, 5000); // 5 seconds cooldown
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("فشل نداء الويتر. الرجاء المحاولة مرة أخرى.");
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                        isCallingWaiter = false;
+                    });
+            } else {
+                alert("جاري إعادة الاتصال بالخادم، يرجى المحاولة بعد قليل.");
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                isCallingWaiter = false;
+            }
+        }
+        
+        function showCallWaiterToast() {
+            const toastEl = document.getElementById('cartToast');
+            if (toastEl) {
+                const toastBody = toastEl.querySelector('.toast-body');
+                const originalText = toastBody.innerHTML;
+                toastBody.innerHTML = '<i class="bi bi-bell-fill ms-2 text-warning"></i>تم إرسال طلب نداء الويتر، سيصلك النادل فوراً!';
+                const bsRequest = window.bootstrap || bootstrap;
+                const toast = new bsRequest.Toast(toastEl);
+                toast.show();
+                toastEl.addEventListener('hidden.bs.toast', () => {
+                    toastBody.innerHTML = originalText;
+                }, { once: true });
+            }
         }
 
         function selectDefaultCategory() {
