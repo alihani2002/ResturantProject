@@ -94,13 +94,22 @@ namespace Resturant.Web.UI.Controllers
             if (activeShift == null)
             {
                 ViewBag.NoActiveShift = true;
+                
+                var otherActiveShift = await _context.Set<CashierShift>()
+                    .Include(s => s.Cashier)
+                    .FirstOrDefaultAsync(s => s.IsActive && s.BranchId == selectedBranchId);
+                if (otherActiveShift != null)
+                {
+                    ViewBag.OtherActiveShift = otherActiveShift;
+                }
+                
                 return View(new List<Order>());
             }
 
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                .Where(o => !o.IsDeleted && (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
                             o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
                             o.Status == OrderStatus.Cancelled) && o.BranchId == selectedBranchId)
                 .OrderBy(o => o.OrderDate)
@@ -119,7 +128,7 @@ namespace Resturant.Web.UI.Controllers
             int branchId = await GetSelectedBranchIdAsync();
 
             var activeShift = await _context.Set<CashierShift>()
-                .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);
+                .FirstOrDefaultAsync(s => s.IsActive && s.BranchId == branchId);
 
             if (activeShift == null)
             {
@@ -134,6 +143,10 @@ namespace Resturant.Web.UI.Controllers
                 };
                 _context.Set<CashierShift>().Add(shift);
                 await _context.SaveChangesAsync();
+            }
+            else if (activeShift.CashierId != userId)
+            {
+                TempData["ErrorMessage"] = "يوجد وردية نشطة حالياً لكاشير آخر في هذا الفرع.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -226,7 +239,7 @@ namespace Resturant.Web.UI.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                .Where(o => !o.IsDeleted && (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
                             o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
                             o.Status == OrderStatus.Cancelled) && o.BranchId == branchId)
                 .ToListAsync();
@@ -277,6 +290,26 @@ namespace Resturant.Web.UI.Controllers
 
             if (orders.All(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Cancelled))
             {
+                bool anyCancelled = false;
+                foreach (var order in orders)
+                {
+                    if (order.Status == OrderStatus.Cancelled)
+                    {
+                        order.IsDeleted = true;
+                        anyCancelled = true;
+                    }
+                }
+                if (anyCancelled)
+                {
+                    await _context.SaveChangesAsync();
+
+                    int tableNumber = orders.First().TableNumber;
+                    var notifyData = new { tableNumber = tableNumber };
+                    await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("TableCleared", notifyData);
+                    await _hubContext.Clients.Group($"cashier_{branchId}").SendAsync("OrderCompleted", notifyData);
+                    await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("OrderStatusChanged", notifyData);
+                    await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", new { tableNumber = tableNumber });
+                }
                 return Ok(); // Idempotent success
             }
 

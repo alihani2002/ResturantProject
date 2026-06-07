@@ -28,18 +28,47 @@
                         مرحباً بك في لوحة تحكم المبيعات. لدواعي الأمان المالي وضمان مطابقة الحسابات والدرج، يرجى تفعيل بدء الوردية قبل استقبال أو محاسبة أي طلبات.
                     </p>
 
-                    @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+                    @if (TempData["ErrorMessage"] != null)
                     {
-                        <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-2.5 fw-bold rounded-pill mb-3" style="font-size: 1rem; color: #1e1e2d; border-color: #d4af37;">
-                            <i class="bi bi-arrow-left-right ms-1"></i> تغيير الفرع الحالي
-                        </a>
+                        <div class="alert alert-danger py-2 px-3 mb-3 rounded-pill text-center small">
+                            <i class="bi bi-exclamation-octagon ms-1"></i> @TempData["ErrorMessage"]
+                        </div>
                     }
 
-                    <form asp-action="StartShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
-                        <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px; transition: all 0.3s ease;">
-                            <i class="bi bi-play-circle-fill ms-2"></i> بدأ الوردية الآن
-                        </button>
-                    </form>
+                    @if (ViewBag.OtherActiveShift != null)
+                    {
+                        var otherShift = ViewBag.OtherActiveShift as Resturant.Core.Entities.CashierShift;
+                        <div class="alert alert-warning py-3 px-4 mb-4 rounded-4 text-center text-dark" style="border: 1px solid rgba(255, 193, 7, 0.3); background-color: rgba(255, 193, 7, 0.08);">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 mb-2 d-block text-warning"></i>
+                            <strong class="d-block mb-1">يوجد وردية نشطة حالياً!</strong>
+                            هذا الفرع مفتوح فيه وردية نشطة حالياً بواسطة الكاشير:
+                            <strong class="text-danger d-block mt-1">@(otherShift?.Cashier?.FullName ?? otherShift?.Cashier?.UserName)</strong>
+                            بدأت في الساعة: <strong>@otherShift?.StartTime.ToString("hh:mm tt")</strong>
+                            <span class="d-block mt-2 text-muted small">لا يمكن فتح وردية جديدة حتى يقوم الزميل بإنهاء وإغلاق ورديته الحالية.</span>
+                        </div>
+                        
+                        @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+                        {
+                            <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-3 fw-bold rounded-pill mb-3" style="font-size: 1rem; color: #1e1e2d; border-color: #d4af37;">
+                                <i class="bi bi-arrow-left-right ms-1"></i> تغيير الفرع الحالي
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
+                        {
+                            <a href="@Url.Action("SelectBranch", "Cashier")" class="btn btn-outline-warning w-100 py-2.5 fw-bold rounded-pill mb-3" style="font-size: 1rem; color: #1e1e2d; border-color: #d4af37;">
+                                <i class="bi bi-arrow-left-right ms-1"></i> تغيير الفرع الحالي
+                            </a>
+                        }
+
+                        <form asp-action="StartShift" method="post" onsubmit="this.querySelector('button[type=submit]').disabled = true;">
+                            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold rounded-pill shadow-lg" style="font-size: 1.1rem; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                                <i class="bi bi-play-circle-fill ms-2"></i> بدأ الوردية الآن
+                            </button>
+                        </form>
+                    }
                 </div>
             </div>
         </div>

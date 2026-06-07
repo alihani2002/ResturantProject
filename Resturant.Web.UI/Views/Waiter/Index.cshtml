@@ -124,11 +124,8 @@
                                                 }
                                                 else
                                                 {
-                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="إلغاء">
-                                                        <i class="bi bi-x"></i> إلغاء
-                                                     </button>
-                                                     <button class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill" onclick="clearTable(@order.OrderId)" title="تنظيف الطاولة">
-                                                        <i class="bi bi-check-circle"></i> تنظيف
+                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="حذف الطلب">
+                                                        <i class="bi bi-trash"></i> حذف الطلب
                                                      </button>
                                                 }
                                             </div>
@@ -444,11 +441,8 @@
                         `;
                     } else {
                          actionsHtml = `
-                             <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(${order.id}, ${tableNumber})" title="إلغاء">
-                                <i class="bi bi-x"></i> إلغاء
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill" onclick="clearTable(${order.id})" title="تنظيف الطاولة">
-                                <i class="bi bi-check-circle"></i> تنظيف
+                             <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(${order.id}, ${tableNumber})" title="حذف الطلب">
+                                <i class="bi bi-trash"></i> حذف الطلب
                             </button>
                         `;
                     }
@@ -687,7 +681,7 @@
         }
 
         function cancelOrder(orderId, tableNumber) {
-            if (!confirm('هل أنت متأكد من إلغاء هذا الطلب؟')) return;
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
             safeFetch('/Waiter/CancelOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -739,6 +733,13 @@
             document.getElementById('orderNotesInput').value = '';
             document.getElementById('waiterCustomerName').value = '';
             document.getElementById('waiterCustomerPhone').value = '';
+
+            const btn = document.getElementById('btnCartCheckout');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-send-fill ms-2"></i> إرسال الطلب';
+            }
+
             updateCartUI();
 
             waiterOrderModalInstance = new bootstrap.Modal(document.getElementById('waiterOrderModal'));
@@ -982,19 +983,21 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(res => {
+            .then(async res => {
                 if (res.ok) {
                     if (waiterOrderModalInstance) waiterOrderModalInstance.hide();
                     showNotification('تم إرسال الطلب بنجاح!', 'success');
                     fetchAndRefreshTables();
                 } else {
-                    alert('فشل في إرسال الطلب');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    const errMsg = await res.text();
+                    showNotification(errMsg || 'فشل في إرسال الطلب', 'danger');
                 }
             })
             .catch(err => {
                 console.error(err);
+                showNotification(err.message || 'حدث خطأ في الاتصال بالخادم', 'danger');
+            })
+            .finally(() => {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });

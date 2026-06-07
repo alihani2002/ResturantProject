@@ -140,20 +140,21 @@
         }
 
         function createOrderCard(order) {
-            const isInPrep = order.status === 2; // InPreparation
+            const isInPrep = order.status === 2 || order.status === 'InPreparation'; // InPreparation
             const headerClass = isInPrep ? 'card-header-inprep' : 'card-header-confirmed';
             const cardClass = isInPrep ? 'order-card-inprep' : 'order-card-confirmed';
             const statusLabel = isInPrep ? '🔵 قيد التحضير' : '🟡 في الانتظار';
             const orderTime = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
             let itemsHtml = '';
-            (order.orderItems || []).filter(item => !item.isCancelled).forEach(item => {
+            const items = order.orderItems || order.items || [];
+            items.filter(item => !item.isCancelled).forEach(item => {
                 let addonsHtml = '';
                 if (item.addOns && item.addOns.length > 0) {
                     addonsHtml = `<div class="ms-4 mt-1">${item.addOns.map(a => `<span class="badge bg-info text-white me-1 font-monospace" style="font-size:0.75rem;">+ ${a.name}</span>`).join('')}</div>`;
                 }
                 itemsHtml += `
-                    <li class="list-group-item px-0" id="chef-item-${item.id}">
+                    <li class="list-group-item px-0" id="chef-item-${item.id || 0}">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center">
                                 <span class="badge bg-secondary rounded-pill me-2">${item.quantity} x</span>
@@ -216,6 +217,8 @@
             const container = document.getElementById('orders-container');
             if (!container) location.reload();
             else if (!document.getElementById(`order-card-${order.id}`)) {
+                const isInPrep = order.status === 2 || order.status === 'InPreparation';
+                order.status = isInPrep ? 2 : 1;
                 container.insertAdjacentHTML('afterbegin', createOrderCard(order));
                 updateCounts();
                 playSound();
@@ -226,12 +229,14 @@
         connection.on("OrderStatusChanged", function (order) {
             if (!order || !order.id) return;
 
-            // Chef only shows Confirmed (1) and InPreparation (2).
-            const isStillRelevantForChef = (order.status === 1 || order.status === 2);
+            const isInPrep = order.status === 2 || order.status === 'InPreparation';
+            const isConfirmed = order.status === 1 || order.status === 'Confirmed';
+            const isStillRelevantForChef = isConfirmed || isInPrep;
 
             if (!isStillRelevantForChef) {
                 removeOrderCard(order.id);
             } else {
+                order.status = isInPrep ? 2 : 1;
                 updateOrderCard(order);
             }
         });
@@ -333,14 +338,17 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
-            }).then(res => {
+            }).then(async res => {
                 if (res.ok) {
                     showNotification('تم بدء الطلب — قيد التحضير الآن!', 'info');
                     fetchAndRefreshOrders();
                 } else {
+                    const errMsg = await res.text();
+                    showNotification(errMsg || 'فشل في بدء الطلب', 'danger');
                     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-circle ms-1"></i> بدء التحضير'; }
                 }
-            }).catch(() => {
+            }).catch(err => {
+                showNotification(err.message || 'حدث خطأ في الاتصال بالخادم', 'danger');
                 if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-circle ms-1"></i> بدء التحضير'; }
             });
         }
@@ -355,11 +363,18 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderId=${orderId}`
-            }).then(res => {
-                if (res.ok) { removeOrderCard(orderId); showNotification('تم تحديد الطلب كجاهز!', 'success'); }
-                else {
+            }).then(async res => {
+                if (res.ok) { 
+                    removeOrderCard(orderId); 
+                    showNotification('تم تحديد الطلب كجاهز!', 'success'); 
+                } else {
+                    const errMsg = await res.text();
+                    showNotification(errMsg || 'فشل في تحديد الطلب كجاهز', 'danger');
                     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check-lg ms-1"></i> تحديد كجاهز'; }
                 }
+            }).catch(err => {
+                showNotification(err.message || 'حدث خطأ في الاتصال بالخادم', 'danger');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-check-lg ms-1"></i> تحديد كجاهز'; }
             });
         }
 
