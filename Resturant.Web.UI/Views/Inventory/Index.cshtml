@@ -1,0 +1,1367 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Qore ERP - المخازن وسلاسل الإمداد";
+}
+<!DOCTYPE html>
+<html lang="ar" class="h-full" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <!-- Google Fonts Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="~/assets/images/q.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdfbf7',
+                            100: '#fbf7e6',
+                            200: '#f7eec2',
+                            300: '#f1df91',
+                            400: '#eac85c',
+                            500: '#d4af37', // primary gold
+                            600: '#bd992e',
+                            700: '#9e7d24',
+                            800: '#7f641e',
+                            900: '#68511a',
+                        },
+                        darkBg: '#070708', // true luxury obsidian black
+                        darkCard: '#0f0f12', // rich dark grey card
+                        darkBorder: '#1c1c22', // subtle border
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- SheetJS (xlsx) for Excel Exports -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .outfit-font {
+            font-family: 'Outfit', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-200 transition-colors duration-200 overflow-hidden flex">
+
+    <!-- INVENTORY SIDEBAR -->
+    <aside class="w-64 bg-white dark:bg-darkCard border-r border-slate-200 dark:border-darkBorder flex flex-col h-full z-20 transition-all duration-300 shrink-0">
+        <!-- Sidebar Brand Logo -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-darkBorder">
+            <div class="flex items-center gap-3">
+                <div class="p-1 rounded-xl">
+                    <img src="/assets/images/Qore.png" alt="Qore" class="h-8 w-auto">
+                </div>
+                <div>
+                    <h1 class="outfit-font font-black text-lg leading-tight tracking-wide text-slate-900 dark:text-white uppercase">QORE ERP</h1>
+                    <p class="text-[10px] text-amber-500 font-semibold tracking-widest uppercase">المخازن وسلاسل الإمداد</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Navigation Tabs -->
+        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+            <button onclick="switchTab('inventory-mgmt')" id="btn-tab-inventory-mgmt" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10 text-right justify-start" dir="rtl">
+                <i class="bi bi-box-seam text-base"></i>
+                <span>مخزون المواد الخام</span>
+            </button>
+
+            <button onclick="switchTab('stock-transfers')" id="btn-tab-stock-transfers" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-arrow-left-right text-base text-indigo-500"></i>
+                <span>تحويلات المخزون</span>
+            </button>
+
+            <button onclick="switchTab('recipe-mgmt')" id="btn-tab-recipe-mgmt" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-receipt text-base text-rose-500"></i>
+                <span>مكونات الوصفات (الريسبات)</span>
+            </button>
+
+            <button onclick="switchTab('daily-consumption')" id="btn-tab-daily-consumption" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl">
+                <i class="bi bi-calendar-check text-base text-emerald-500"></i>
+                <span>تقرير الاستهلاك ومطابقة المخزن</span>
+            </button>
+        </nav>
+
+        <!-- Footer Operations Link -->
+        <div class="p-4 border-t border-slate-100 dark:border-darkBorder bg-slate-50/50 dark:bg-darkCard space-y-2">
+            <a href="/Admin" class="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold rounded-lg border border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all justify-center">
+                <i class="bi bi-speedometer2"></i>
+                <span>العودة للوحة التحكم الرئيسية</span>
+            </a>
+
+            <form action="/Identity/Account/Logout?returnUrl=%2F" method="post" id="logoutForm" class="w-full m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black rounded-lg bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/30 dark:text-red-400 transition-all justify-center">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>تسجيل الخروج</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- MAIN APP WRAPPER -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+
+        <!-- HEADER -->
+        <partial name="../Admin/Partials/_Header" />
+
+        <!-- CONTAINER FOR SCROLLABLE TABS -->
+        <main class="flex-1 overflow-y-auto p-8 min-h-0 space-y-8 relative">
+
+            <!-- TAB: INVENTORY STOCK MANAGEMENT -->
+            <partial name="../Admin/Partials/_InventoryMgmtTab" />
+
+            <!-- TAB: STOCK TRANSFERS WORKFLOW -->
+            <partial name="../Admin/Partials/_StockTransfersTab" />
+
+            <!-- TAB: MENU ITEM RECIPE MANAGEMENT -->
+            <partial name="../Admin/Partials/_RecipeMgmtTab" />
+
+            <!-- TAB: DAILY INVENTORY CONSUMPTION REPORT -->
+            <partial name="../Admin/Partials/_DailyConsumptionTab" />
+
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <partial name="../Admin/Partials/_Modals" />
+
+    <!-- JQUERY AND SIGNALR -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+    <!-- CORE SCRIPTS -->
+    <script>
+        // State Management
+        let currentTab = 'inventory-mgmt';
+        let inventoryStockData = [];
+        let recipeMenuItemsData = [];
+        let selectedRecipeMenuItemId = null;
+        let branchIngredientsCache = [];
+        let suppliersListCache = [];
+        let suppliersListCacheBranchId = null;
+        let globalAllIngredientsList = [];
+        let sourceBranchIngredientsMap = {};
+
+        // Auto apply theme on load
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.className = 'bi bi-sun-fill text-sm';
+        } else {
+            document.documentElement.classList.remove('dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.className = 'bi bi-moon-fill text-sm';
+        }
+
+        // Dark / Light Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-toggle-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (icon) icon.className = 'bi bi-moon-fill text-sm';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (icon) icon.className = 'bi bi-sun-fill text-sm';
+            }
+        }
+
+        // Switch Branch Context Handler
+        function onAdminBranchChanged(branchId) {
+            $.post('/Admin/SwitchBranch', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function() {
+                 location.reload();
+             })
+             .fail(function() {
+                 alert("فشل تغيير الفرع.");
+             });
+        }
+
+        // Tab Switcher
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+            // Remove active classes from all sidebar buttons
+            document.querySelectorAll('aside nav button').forEach(btn => {
+                btn.className = "w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start";
+            });
+
+            // Show active tab
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+
+            // Apply active class to the button
+            const activeBtn = document.getElementById(`btn-tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all duration-200 bg-brand-500 text-white shadow-md shadow-brand-500/10 text-right justify-start";
+            }
+
+            // Update Breadcrumb/Title
+            const titles = {
+                'inventory-mgmt': 'مخزون المواد الخام في الفروع',
+                'stock-transfers': 'طلبات وتحويلات المخزون بين الفروع',
+                'recipe-mgmt': 'مكونات الوصفات والريسبات للأطباق',
+                'daily-consumption': 'تقرير الاستهلاك اليومي ومطابقة المخزن'
+            };
+            const activeTitleEl = document.getElementById('active-tab-title');
+            if (activeTitleEl) {
+                activeTitleEl.textContent = titles[tabId] || 'إدارة المخازن وسلاسل الإمداد';
+            }
+
+            currentTab = tabId;
+
+            // Fetch tab data
+            if (tabId === 'inventory-mgmt') {
+                loadInventoryStockList();
+            } else if (tabId === 'stock-transfers') {
+                loadStockTransfersList();
+            } else if (tabId === 'recipe-mgmt') {
+                loadRecipeMenuItems();
+                loadRecipeIngredientsDatalist();
+            } else if (tabId === 'daily-consumption') {
+                initDailyConsumptionTab();
+            }
+        }
+
+        // ==============================================
+        // INVENTORY MANAGEMENT SYSTEM CORE JAVASCRIPT
+        // ==============================================
+
+        // Toast alert helper
+        function showToastAlert(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const bgClass = type === 'success' ? 'bg-emerald-500' : (type === 'error' ? 'bg-red-500' : 'bg-brand-500');
+            const icon = type === 'success' ? 'bi-check-circle' : (type === 'error' ? 'bi-exclamation-triangle' : 'bi-info-circle');
+            const toast = document.createElement('div');
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-xs font-bold transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="bi ${icon} text-base"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // 1. Inventory Stock Actions
+        function loadInventoryStockList() {
+            const branchId = $('#header-branch-selector').val();
+            const tbody = document.querySelector('#table-inventory-stock tbody');
+            const alertList = document.getElementById('inventory-low-stock-list');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">جاري تحميل سجلات المخزن الحية...</td></tr>`;
+            }
+            if (alertList) {
+                alertList.innerHTML = `<div class="p-4 border border-slate-200 dark:border-darkBorder text-slate-400 text-xs rounded-xl text-center font-bold">جاري تحميل تنبيهات المخزون...</div>`;
+            }
+            $.get('/Inventory/GetStockLevels', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 inventoryStockData = data;
+                 renderInventoryTable();
+                 updateInventoryKPIs();
+             })
+             .fail(function() {
+                 inventoryStockData = [];
+                 if (tbody) {
+                     tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500">تعذر تحميل سجلات المخزن الحية من قاعدة البيانات.</td></tr>`;
+                 }
+                 if (alertList) {
+                     alertList.innerHTML = `<div class="p-4 border border-red-500/10 bg-red-500/5 text-red-500 text-xs rounded-xl text-center font-bold">تنبيهات المخزون غير متوفرة بسبب فشل تحميل بيانات المخزن الحية.</div>`;
+                 }
+                 showToastAlert("فشل تحميل مستويات مخزون المواد الخام.", "error");
+             });
+        }
+
+        function renderInventoryTable() {
+            const tbody = document.querySelector('#table-inventory-stock tbody');
+            const alertList = document.getElementById('inventory-low-stock-list');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (alertList) alertList.innerHTML = '';
+
+            const searchTerm = $('#search-inventory').val().toLowerCase() || '';
+            const filtered = inventoryStockData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) || 
+                (item.supplierName && item.supplierName.toLowerCase().includes(searchTerm))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 dark:text-slate-500">No inventory materials matched the criteria.</td></tr>`;
+            } else {
+                filtered.forEach(item => {
+                    const isLow = item.currentStock <= item.reorderLevel;
+                    const valuation = item.currentStock * parseFloat(item.costPerUnit);
+                    const stockClass = item.currentStock === 0 ? 'text-red-500 font-bold' : (isLow ? 'text-amber-500 font-semibold' : 'text-slate-700 dark:text-slate-350');
+                    const minBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">حد الطلب: ${item.reorderLevel} ${item.unit}</span>`;
+                    
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                            <td class="py-3.5 px-6 font-semibold text-slate-800 dark:text-white text-right">${item.name}</td>
+                            <td class="py-3.5 text-slate-500 dark:text-slate-400 text-right">${item.supplierName || 'Unassigned'}</td>
+                            <td class="py-3.5 text-center ${stockClass}">${item.currentStock.toFixed(2)} ${item.unit}</td>
+                            <td class="py-3.5 text-center">${minBadge}</td>
+                            <td class="py-3.5 text-center font-semibold text-slate-600 dark:text-slate-400">${parseFloat(item.costPerUnit).toFixed(2)} ج.م</td>
+                            <td class="py-3.5 text-center font-bold text-slate-900 dark:text-white">${valuation.toFixed(2)} ج.م</td>
+                            <td class="py-3.5 text-center">
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <button onclick="openAddStockModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}', ${item.costPerUnit})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-950/40 text-amber-500 border border-amber-500/10 transition-all flex items-center gap-0.5" title="Intake Stock"><i class="bi bi-plus-lg"></i> توريد</button>
+                                    <button onclick="openAdjustStockModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}')" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-500 border border-rose-500/10 transition-all flex items-center gap-0.5" title="Audit/Waste"><i class="bi bi-sliders"></i> جرد/تالف</button>
+                                    <button onclick="openEditIngredientModal(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.unit}', ${item.costPerUnit}, ${item.reorderLevel}, ${item.supplierId || 'null'})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white transition-all" title="Edit Material Details"><i class="bi bi-pencil"></i></button>
+                                    <button onclick="deleteIngredient(${item.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-550 border border-red-500/10 transition-all" title="Delete Material"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+
+                    if (isLow && alertList) {
+                        const statusClass = item.currentStock === 0 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+                        const textStatus = item.currentStock === 0 ? 'نفذ المخزون' : 'مخزون منخفض';
+                        alertList.innerHTML += `
+                            <div class="p-3 border rounded-xl flex justify-between items-center ${statusClass}">
+                                <div>
+                                    <h5 class="font-bold text-xs text-right">${item.name}</h5>
+                                    <span class="text-[9px] font-semibold tracking-wide uppercase opacity-75 text-right block">${textStatus} • الحد: ${item.reorderLevel} ${item.unit}</span>
+                                </div>
+                                <span class="text-xs font-black">${item.currentStock.toFixed(1)} ${item.unit}</span>
+                            </div>`;
+                    }
+                });
+            }
+
+            if (alertList && alertList.innerHTML === '') {
+                alertList.innerHTML = `
+                    <div class="p-4 border border-emerald-500/10 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl text-center font-bold">
+                        <i class="bi bi-shield-check text-2xl block mb-1"></i> جميع مستويات المخزن جيدة! لا توجد تنبيهات.
+                    </div>`;
+            }
+        }
+
+        function filterInventoryTable() {
+            renderInventoryTable();
+        }
+
+        async function updateInventoryKPIs() {
+            try {
+                const branchId = $('#header-branch-selector').val();
+                const response = await fetch(`/api/analytics/inventory?branchId=${branchId || ''}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('inv-kpi-valuation').textContent = `${parseFloat(data.totalInventoryValuation).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ج.م`;
+                    document.getElementById('inv-kpi-purchases').textContent = `${parseFloat(data.totalPurchasesAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ج.م`;
+                    document.getElementById('inv-kpi-waste').textContent = `${parseFloat(data.totalWasteAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ج.م`;
+                    document.getElementById('inv-kpi-foodcost').textContent = `${data.averageFoodCostPercentage}%`;
+                } else {
+                    document.getElementById('inv-kpi-valuation').textContent = '--';
+                    document.getElementById('inv-kpi-purchases').textContent = '--';
+                    document.getElementById('inv-kpi-waste').textContent = '--';
+                    document.getElementById('inv-kpi-foodcost').textContent = '--';
+                    showToastAlert("فشل تحميل مؤشرات الأداء لمخزون الفروع.", "error");
+                }
+            } catch (ex) {
+                console.error("Failed to load inventory KPI valuation reports:", ex);
+                document.getElementById('inv-kpi-valuation').textContent = '--';
+                document.getElementById('inv-kpi-purchases').textContent = '--';
+                document.getElementById('inv-kpi-waste').textContent = '--';
+                document.getElementById('inv-kpi-foodcost').textContent = '--';
+                showToastAlert("فشل تحميل مؤشرات الأداء لمخزون الفروع.", "error");
+            }
+        }
+
+        // Ingredient CRUD Modal Actions
+        function loadSuppliersList(callback) {
+            const branchId = $('#header-branch-selector').val();
+            const normalizedBranchId = branchId ? parseInt(branchId) : null;
+            if (suppliersListCacheBranchId === normalizedBranchId && suppliersListCache.length > 0) {
+                if (callback) callback(suppliersListCache);
+                return;
+            }
+            $.get('/Inventory/GetSuppliers', { branchId: normalizedBranchId })
+             .done(function(suppliers) {
+                 suppliersListCache = suppliers;
+                 suppliersListCacheBranchId = normalizedBranchId;
+                 const select = document.getElementById('ingredient-crud-supplier');
+                 if (select) {
+                     select.innerHTML = '<option value="">No Assigned Supplier</option>';
+                     suppliers.forEach(s => {
+                         select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                     });
+                 }
+                 if (callback) callback(suppliers);
+             })
+             .fail(function() {
+                 console.error("Failed to load suppliers list.");
+             });
+        }
+
+        function openCreateIngredientModal() {
+            document.getElementById('ingredient-modal-title').textContent = "إضافة صنف خام جديد";
+            document.getElementById('ingredient-crud-id').value = "";
+            document.getElementById('ingredient-crud-name').value = "";
+            document.getElementById('ingredient-crud-initial-stock').value = "0";
+            document.getElementById('ingredient-crud-reorder-level').value = "5";
+            document.getElementById('ingredient-crud-unit').value = "Kg";
+            document.getElementById('ingredient-crud-cost').value = "";
+            document.getElementById('ingredient-crud-supplier').value = "";
+            
+            document.getElementById('initial-stock-container').classList.remove('hidden');
+
+            loadSuppliersList();
+
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('ingredient-crud-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function openEditIngredientModal(id, name, unit, cost, reorderLevel, supplierId) {
+            document.getElementById('ingredient-modal-title').textContent = "تعديل تفاصيل الصنف الخام";
+            document.getElementById('ingredient-crud-id').value = id;
+            document.getElementById('ingredient-crud-name').value = name;
+            document.getElementById('ingredient-crud-reorder-level').value = reorderLevel;
+            document.getElementById('ingredient-crud-unit').value = unit;
+            document.getElementById('ingredient-crud-cost').value = cost;
+            
+            document.getElementById('initial-stock-container').classList.add('hidden');
+
+            loadSuppliersList(function() {
+                document.getElementById('ingredient-crud-supplier').value = supplierId || "";
+            });
+
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('ingredient-crud-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeIngredientCrudModal() {
+            const modal = document.getElementById('ingredient-crud-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('ingredient-crud-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitIngredientCrud(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header context first.", "error");
+                return;
+            }
+
+            const idVal = document.getElementById('ingredient-crud-id').value;
+            const isEdit = idVal !== "";
+
+            const url = isEdit ? '/Inventory/UpdateIngredient' : '/Inventory/CreateIngredient';
+            
+            const request = {
+                name: document.getElementById('ingredient-crud-name').value,
+                reorderLevel: parseFloat(document.getElementById('ingredient-crud-reorder-level').value),
+                unit: document.getElementById('ingredient-crud-unit').value,
+                costPerUnit: parseFloat(document.getElementById('ingredient-crud-cost').value),
+                supplierId: document.getElementById('ingredient-crud-supplier').value ? parseInt(document.getElementById('ingredient-crud-supplier').value) : null
+            };
+
+            if (isEdit) {
+                request.id = parseInt(idVal);
+            } else {
+                request.branchId = parseInt(branchId);
+                request.initialStock = parseFloat(document.getElementById('ingredient-crud-initial-stock').value);
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert(isEdit ? "تم تحديث الصنف الخام بنجاح." : "تم إنشاء صنف خام جديد بنجاح.");
+                    closeIngredientCrudModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "فشل حفظ تفاصيل المادة الخام.", "error");
+                }
+            });
+        }
+
+        function deleteIngredient(id) {
+            if (!confirm("هل أنت متأكد من حذف هذه المادة الخام؟ سيتم حذفها نهائياً من مخزون الفرع والريسبات المرتبطة والتحويلات المخزنية. لا يمكن التراجع عن هذا الإجراء!")) return;
+
+            $.post('/Inventory/DeleteIngredient', { id: id })
+             .done(function() {
+                 showToastAlert("تم حذف الصنف الخام وجميع بياناته المرتبطة.");
+                 loadInventoryStockList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "فشل حذف المادة الخام.", "error");
+             });
+        }
+
+        // Add Stock Modal Actions
+        function openAddStockModal(id, name, unit, cost) {
+            document.getElementById('add-stock-ingredient-id').value = id;
+            document.getElementById('add-stock-ingredient-name').value = name;
+            document.getElementById('add-stock-unit-lbl').textContent = unit;
+            document.getElementById('add-stock-quantity').value = '';
+            document.getElementById('add-stock-cost').value = cost || '';
+            document.getElementById('add-stock-notes').value = '';
+
+            const modal = document.getElementById('add-stock-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('add-stock-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeAddStockModal() {
+            const modal = document.getElementById('add-stock-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('add-stock-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitAddStock(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header select context to add stock.", "error");
+                return;
+            }
+
+            const request = {
+                branchId: parseInt(branchId),
+                ingredientId: parseInt(document.getElementById('add-stock-ingredient-id').value),
+                quantity: parseFloat(document.getElementById('add-stock-quantity').value),
+                cost: document.getElementById('add-stock-cost').value ? parseFloat(document.getElementById('add-stock-cost').value) : null,
+                notes: document.getElementById('add-stock-notes').value
+            };
+
+            $.ajax({
+                url: '/Inventory/AddStock',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("تم تسجيل توريد الكمية الخام لمخزن الفرع بنجاح.");
+                    closeAddStockModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to add stock.", "error");
+                }
+            });
+        }
+
+        // Adjust Stock Modal Actions
+        function openAdjustStockModal(id, name, unit) {
+            document.getElementById('adjust-stock-ingredient-id').value = id;
+            document.getElementById('adjust-stock-ingredient-name').value = name;
+            document.getElementById('adjust-stock-unit-lbl').textContent = unit;
+            document.getElementById('adjust-stock-quantity').value = '';
+            document.getElementById('adjust-stock-notes').value = '';
+            document.getElementById('adjust-stock-type').value = 'StockCount';
+
+            const modal = document.getElementById('adjust-stock-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                document.getElementById('adjust-stock-modal-content').classList.remove('scale-95');
+            }, 50);
+        }
+
+        function closeAdjustStockModal() {
+            const modal = document.getElementById('adjust-stock-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('adjust-stock-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function submitAdjustStock(e) {
+            e.preventDefault();
+            const branchId = $('#header-branch-selector').val();
+            if (!branchId) {
+                showToastAlert("Please select an active branch in the header select context to adjust stock.", "error");
+                return;
+            }
+
+            const request = {
+                branchId: parseInt(branchId),
+                ingredientId: parseInt(document.getElementById('adjust-stock-ingredient-id').value),
+                quantityAdjusted: parseFloat(document.getElementById('adjust-stock-quantity').value),
+                type: document.getElementById('adjust-stock-type').value,
+                notes: document.getElementById('adjust-stock-notes').value
+            };
+
+            $.ajax({
+                url: '/Inventory/AdjustStock',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("تم حفظ حركة تسوية وجرد المخزن بنجاح.");
+                    closeAdjustStockModal();
+                    loadInventoryStockList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to book adjustment.", "error");
+                }
+            });
+        }
+
+        // 2. Stock Transfers Actions
+        function loadStockTransfersList() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetTransfers', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(transfers) {
+                 renderTransfersTable(transfers);
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load supply transfers.", "error");
+             });
+        }
+
+        function renderTransfersTable(transfers) {
+            const tbody = document.querySelector('#table-stock-transfers-list tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (transfers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 dark:text-slate-500">لا توجد أي طلبات تحويل مسجلة.</td></tr>`;
+                return;
+            }
+
+            transfers.forEach(t => {
+                let statusBadge = '';
+                let actionHtml = '';
+
+                switch (t.status) {
+                    case 'Pending':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">قيد المراجعة</span>`;
+                        actionHtml = `
+                            <div class="flex gap-1.5 justify-center">
+                                <button onclick="approveTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-all">موافقة وإرسال</button>
+                                <button onclick="cancelTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg border dark:border-darkBorder hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-white transition-all">إلغاء</button>
+                            </div>`;
+                        break;
+                    case 'InTransit':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">في الطريق</span>`;
+                        actionHtml = `
+                            <div class="flex gap-1.5 justify-center">
+                                <button onclick="receiveTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition-all">استلام وتأكيد</button>
+                                <button onclick="cancelTransfer(${t.id})" class="px-2 py-1 text-[10px] font-bold rounded-lg border dark:border-darkBorder hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-white transition-all">إلغاء</button>
+                            </div>`;
+                        break;
+                    case 'Received':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">تم الاستلام</span>`;
+                        actionHtml = `<span class="text-[10px] text-slate-400 font-semibold">تاريخ الاستلام: ${t.receivedDate || '-'}</span>`;
+                        break;
+                    case 'Cancelled':
+                        statusBadge = `<span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">ملغى</span>`;
+                        actionHtml = `<span class="text-[10px] text-slate-400 font-semibold">ملغى</span>`;
+                        break;
+                }
+
+                const itemsList = t.items.map(i => `${i.ingredientName} (${i.quantity} ${i.unit})`).join(', ');
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                        <td class="py-3.5 px-6 font-bold text-slate-800 dark:text-white text-right">#TR-${t.id}</td>
+                        <td class="py-3.5 font-semibold text-slate-750 dark:text-slate-350 text-right">${t.sourceBranchName}</td>
+                        <td class="py-3.5 font-semibold text-slate-750 dark:text-slate-350 text-right">${t.destinationBranchName}</td>
+                        <td class="py-3.5 text-slate-500 dark:text-slate-450 max-w-xs truncate text-right" title="${itemsList}">${itemsList}</td>
+                        <td class="py-3.5 text-center">${statusBadge}</td>
+                        <td class="py-3.5 text-center text-slate-500 dark:text-slate-400">${t.createdBy}</td>
+                        <td class="py-3.5 text-center text-slate-500 dark:text-slate-400">${t.createdOn}</td>
+                        <td class="py-3.5 text-center">${actionHtml}</td>
+                    </tr>`;
+            });
+        }
+
+        function approveTransfer(id) {
+            if (!confirm("هل أنت متأكد من الموافقة على طلب التحويل؟ سيتم خصم الكميات من مخزن الفرع المرسل وتصبح شحنة معلقة في الطريق.")) return;
+            $.post('/Inventory/ApproveTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("تمت الموافقة بنجاح والشحنة الآن قيد النقل.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to approve transfer.", "error");
+             });
+        }
+
+        // Receive Transfer
+        function receiveTransfer(id) {
+            if (!confirm("يرجى التأكد من استلام جميع الأصناف والكميات بالكامل. تأكيد الاستلام سيقوم بإضافتها لمخزون الفرع المستلم.")) return;
+            $.post('/Inventory/ReceiveTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("تم تأكيد استلام الشحنة وتحديث مخزون الفرع المستلم بنجاح.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to receive transfer.", "error");
+             });
+        }
+
+        // Cancel Transfer
+        function cancelTransfer(id) {
+            if (!confirm("هل تريد إلغاء طلب التحويل؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+            $.post('/Inventory/CancelTransfer', { transferId: id })
+             .done(function() {
+                 showToastAlert("تم إلغاء طلب التحويل.");
+                 loadStockTransfersList();
+             })
+             .fail(function(err) {
+                 showToastAlert(err.responseText || "Failed to cancel transfer.", "error");
+             });
+        }
+
+        // New Transfer Request Modal Actions
+        function loadAllSystemIngredients(callback) {
+            $.get('/Inventory/GetStockLevels', { branchId: '' })
+             .done(function(data) {
+                 globalAllIngredientsList = data;
+                 if (callback) callback();
+             })
+             .fail(function() {
+                 console.error("Failed to load global ingredients list.");
+                 if (callback) callback();
+             });
+        }
+
+        function loadSourceBranchIngredients(branchId, callback) {
+            if (!branchId) return;
+            $.get('/Inventory/GetStockLevels', { branchId: parseInt(branchId) })
+             .done(function(data) {
+                 sourceBranchIngredientsMap = {};
+                 data.forEach(item => {
+                     sourceBranchIngredientsMap[item.name.toLowerCase().trim()] = item;
+                 });
+
+                 const rows = document.querySelectorAll('#transfer-items-tbody tr');
+                 if (rows.length === 0) {
+                     addTransferItemRow();
+                 } else {
+                     rows.forEach(row => {
+                         const select = row.querySelector('.transfer-item-select');
+                         if (select) {
+                             const selectedVal = select.value;
+                             populateIngredientDropdown(select, selectedVal);
+                         }
+                     });
+                 }
+                 if (callback) callback();
+             })
+             .fail(function() {
+                 console.error("Failed to load ingredients for source branch " + branchId);
+             });
+        }
+
+        function populateIngredientDropdown(selectElement, selectedValue = "") {
+            selectElement.innerHTML = '<option value="">-- اختر الخامة --</option>';
+            
+            const uniqueIngredients = [];
+            const seenNames = new Set();
+            
+            globalAllIngredientsList.forEach(item => {
+                const nameKey = item.name.trim().toLowerCase();
+                if (!seenNames.has(nameKey)) {
+                    seenNames.add(nameKey);
+                    uniqueIngredients.push({
+                        name: item.name.trim(),
+                        unit: item.unit
+                    });
+                }
+            });
+
+            uniqueIngredients.sort((a, b) => a.name.localeCompare(b.name));
+
+            uniqueIngredients.forEach(item => {
+                const nameKey = item.name.toLowerCase();
+                const sourceItem = sourceBranchIngredientsMap[nameKey];
+                const stock = sourceItem ? sourceItem.currentStock : 0;
+                const unit = sourceItem ? sourceItem.unit : item.unit;
+                
+                const isSelected = item.name === selectedValue ? 'selected' : '';
+                selectElement.innerHTML += `<option value="${item.name}" ${isSelected} data-unit="${unit}">${item.name} (المخزون بالمصدر: ${stock} ${unit})</option>`;
+            });
+        }
+
+        function openRequestTransferModal() {
+            const modal = document.getElementById('transfer-modal');
+            
+            $.get('/Inventory/GetBranches')
+             .done(function(branches) {
+                  const srcSelect = document.getElementById('transfer-source-branch');
+                  const destSelect = document.getElementById('transfer-dest-branch');
+                  srcSelect.innerHTML = '';
+                  destSelect.innerHTML = '';
+
+                  branches.forEach(b => {
+                      srcSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+                      destSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+                  });
+
+                  const activeBranchId = $('#header-branch-selector').val();
+                  if (activeBranchId) {
+                      destSelect.value = activeBranchId;
+                  }
+                  srcSelect.value = "3"; // Seeded Central Warehouse id or default
+
+                  $(srcSelect).off('change').on('change', function() {
+                      document.getElementById('transfer-items-tbody').innerHTML = '';
+                      loadSourceBranchIngredients(this.value, function() {
+                          addTransferItemRow();
+                      });
+                  });
+
+                  document.getElementById('transfer-notes').value = '';
+                  document.getElementById('transfer-items-tbody').innerHTML = '';
+
+                  loadAllSystemIngredients(function() {
+                      loadSourceBranchIngredients(srcSelect.value, function() {
+                          addTransferItemRow();
+                          
+                          modal.classList.remove('hidden');
+                          setTimeout(() => {
+                              modal.classList.add('opacity-100');
+                              document.getElementById('transfer-modal-content').classList.remove('scale-95');
+                          }, 50);
+                      });
+                  });
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load branches for dispatch mapping.", "error");
+             });
+        }
+
+        function closeRequestTransferModal() {
+            const modal = document.getElementById('transfer-modal');
+            modal.classList.remove('opacity-100');
+            document.getElementById('transfer-modal-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function addTransferItemRow() {
+            const tbody = document.getElementById('transfer-items-tbody');
+            if (!tbody) return;
+            const rowId = Date.now() + Math.random().toString(36).substr(2, 5);
+            
+            const tr = document.createElement('tr');
+            tr.id = `tr-item-${rowId}`;
+            tr.className = "border-b border-slate-50 dark:border-darkBorder/30";
+            
+            tr.innerHTML = `
+                <td class="py-2 px-3">
+                    <select required onchange="handleTransferIngredientChange(this)" class="transfer-item-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer text-right" dir="rtl">
+                        <option value="">-- اختر الخامة --</option>
+                    </select>
+                </td>
+                <td class="py-2">
+                    <input type="number" step="0.001" min="0.001" required placeholder="0.000" class="transfer-item-qty w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none text-right">
+                </td>
+                <td class="py-2">
+                    <input type="text" readonly class="transfer-item-unit w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-500 dark:text-slate-400 focus:outline-none text-center" value="جم">
+                </td>
+                <td class="py-2 text-center">
+                    <button type="button" onclick="removeTransferItemRow('${rowId}')" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-550"><i class="bi bi-trash"></i></button>
+                </td>`;
+            
+            tbody.appendChild(tr);
+            
+            const selectElement = tr.querySelector('.transfer-item-select');
+            populateIngredientDropdown(selectElement);
+        }
+
+        function handleTransferIngredientChange(select) {
+            const row = select.closest('tr');
+            if (!row) return;
+            const unitInput = row.querySelector('.transfer-item-unit');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const unit = selectedOption.getAttribute('data-unit');
+                unitInput.value = unit || 'جم';
+            } else {
+                unitInput.value = 'جم';
+            }
+        }
+
+        function removeTransferItemRow(rowId) {
+            const row = document.getElementById(`tr-item-${rowId}`);
+            if (row) row.remove();
+        }
+
+        function submitStockTransfer(e) {
+            e.preventDefault();
+
+            const srcBranch = parseInt(document.getElementById('transfer-source-branch').value);
+            const destBranch = parseInt(document.getElementById('transfer-dest-branch').value);
+
+            if (srcBranch === destBranch) {
+                showToastAlert("لا يمكن أن يكون الفرع المرسل والمستلم متطابقين.", "error");
+                return;
+            }
+
+            const items = [];
+            const rows = document.querySelectorAll('#transfer-items-tbody tr');
+
+            rows.forEach(row => {
+                const select = row.querySelector('.transfer-item-select');
+                const qtyInput = row.querySelector('.transfer-item-qty');
+                const unitInput = row.querySelector('.transfer-item-unit');
+                
+                if (select && select.value) {
+                    items.push({
+                        ingredientName: select.value,
+                        quantity: parseFloat(qtyInput.value),
+                        unit: unitInput.value
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                showToastAlert("يرجى اختيار صنف واحد على الأقل للتحويل.", "error");
+                return;
+            }
+
+            const request = {
+                sourceBranchId: srcBranch,
+                destinationBranchId: destBranch,
+                notes: document.getElementById('transfer-notes').value,
+                items: items
+            };
+
+            $.ajax({
+                url: '/Inventory/RequestTransfer',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("تم إنشاء طلب التحويل المخزني وإرساله بنجاح.");
+                    closeRequestTransferModal();
+                    loadStockTransfersList();
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to dispatch transfer request.", "error");
+                }
+            });
+        }
+
+        // 3. Recipes Config Actions
+        function loadRecipeMenuItems() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetMenuItems', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(items) {
+                 recipeMenuItemsData = items;
+                 filterRecipeMenuItems();
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load branch products.", "error");
+             });
+        }
+
+        function filterRecipeMenuItems() {
+            const container = document.getElementById('recipe-menu-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const searchTerm = $('#search-recipe-menu').val().toLowerCase() || '';
+            const filtered = recipeMenuItemsData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center py-4 text-slate-400 dark:text-slate-500 text-xs">لا توجد أصناف تطابق البحث</p>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const activeClass = selectedRecipeMenuItemId === item.id 
+                    ? 'bg-rose-500/10 text-rose-500 font-bold border border-rose-500/25' 
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent';
+                
+                container.innerHTML += `
+                    <button onclick="selectRecipeMenuItem(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})" class="w-full text-right px-4 py-2.5 text-xs rounded-xl transition-all ${activeClass}">
+                        <div class="flex justify-between items-center">
+                            <span>${item.name}</span>
+                            <span class="text-[10px] font-bold text-slate-450 dark:text-slate-500">${parseFloat(item.price).toFixed(2)} ج.م</span>
+                        </div>
+                    </button>`;
+            });
+        }
+
+        function selectRecipeMenuItem(id, name, price) {
+            selectedRecipeMenuItemId = id;
+            filterRecipeMenuItems(); // Refreshes active sidebar state highlight
+
+            document.getElementById('recipe-editor-empty').classList.add('hidden');
+            const editor = document.getElementById('recipe-editor-container');
+            editor.classList.remove('hidden');
+
+            document.getElementById('recipe-editor-name').textContent = name;
+            document.getElementById('recipe-editor-price').textContent = `سعر المنتج: ${parseFloat(price).toFixed(2)} ج.م`;
+
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-400">جاري تحميل خامات الريسب...</td></tr>';
+
+            $.get('/Inventory/GetRecipes', { menuItemId: id })
+             .done(function(recipes) {
+                 tbody.innerHTML = '';
+                 if (recipes.length === 0) {
+                     tbody.innerHTML = `<tr id="recipe-no-items"><td colspan="4" class="text-center py-8 text-slate-400 dark:text-slate-500"><i class="bi bi-exclamation-circle text-lg d-block mb-1"></i> لا توجد خامات مضافة لوصفة هذا الطبق. أضف سطر لإعداد المكونات.</td></tr>`;
+                 } else {
+                     recipes.forEach(r => {
+                         addRecipeIngredientRow(r.ingredientName, r.quantityRequired, r.unit);
+                     });
+                 }
+             })
+             .fail(function() {
+                 showToastAlert("Failed to load recipe ingredients.", "error");
+             });
+        }
+
+        function loadRecipeIngredientsDatalist() {
+            const branchId = $('#header-branch-selector').val();
+            $.get('/Inventory/GetStockLevels', { branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 branchIngredientsCache = data;
+             })
+             .fail(function() {
+                 console.error("Failed to load branch ingredients.");
+             });
+        }
+
+        function onRecipeIngredientSelectChange(selectElement) {
+            const tr = selectElement.closest('tr');
+            if (!tr) return;
+
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                const unit = selectedOption.getAttribute('data-unit');
+                const unitSelect = tr.querySelector('.recipe-ingredient-unit-select');
+                if (unitSelect && unit) {
+                    let matchUnit = unit;
+                    if (matchUnit === 'Kilograms') matchUnit = 'Kg';
+                    if (matchUnit === 'Liters') matchUnit = 'Ltr';
+                    if (matchUnit === 'Pieces') matchUnit = 'Pcs';
+                    unitSelect.value = matchUnit;
+                }
+            }
+        }
+
+        function addRecipeIngredientRow(name = '', quantity = '', unit = 'Grams') {
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            if (!tbody) return;
+            const noItemsRow = document.getElementById('recipe-no-items');
+            if (noItemsRow) noItemsRow.remove();
+
+            const rowId = Date.now() + Math.random().toString(36).substr(2, 9);
+
+            const tr = document.createElement('tr');
+            tr.id = `tr-rec-${rowId}`;
+            tr.className = "border-b border-slate-50 dark:border-darkBorder/30";
+
+            let ingredientOptions = '<option value="">-- اختر الخامة --</option>';
+            let nameExistsInCache = false;
+
+            branchIngredientsCache.forEach(item => {
+                const isSelected = item.name.trim().toLowerCase() === name.trim().toLowerCase() ? 'selected' : '';
+                if (isSelected) nameExistsInCache = true;
+                ingredientOptions += `<option value="${item.name.replace(/"/g, '&quot;')}" ${isSelected} data-unit="${item.unit}">${item.name} (المخزون: ${item.currentStock.toFixed(2)} ${item.unit})</option>`;
+            });
+
+            if (name && !nameExistsInCache) {
+                ingredientOptions += `<option value="${name.replace(/"/g, '&quot;')}" selected data-unit="${unit}">${name} (غير مدرج بالمخزن حالياً)</option>`;
+            }
+
+            tr.innerHTML = `
+                <td class="py-2.5 px-3">
+                    <select required onchange="onRecipeIngredientSelectChange(this)" class="recipe-ingredient-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
+                        ${ingredientOptions}
+                    </select>
+                </td>
+                <td class="py-2.5 text-center">
+                    <input type="number" step="0.001" min="0.001" required value="${quantity}" placeholder="0.000" class="w-full text-center bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none">
+                </td>
+                <td class="py-2.5">
+                    <select required class="recipe-ingredient-unit-select w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg px-2.5 py-1.5 text-xs text-slate-850 dark:text-white focus:outline-none cursor-pointer">
+                        <option value="Grams" ${unit === 'Grams' ? 'selected' : ''}>Grams</option>
+                        <option value="Kg" ${unit === 'Kg' ? 'selected' : ''}>Kg (Kilograms)</option>
+                        <option value="Ltr" ${unit === 'Ltr' ? 'selected' : ''}>Ltr (Liters)</option>
+                        <option value="Pcs" ${unit === 'Pcs' ? 'selected' : ''}>Pcs (Pieces)</option>
+                        <option value="Box" ${unit === 'Box' ? 'selected' : ''}>Box</option>
+                    </select>
+                </td>
+                <td class="py-2.5 text-center">
+                    <button type="button" onclick="removeRecipeIngredientRow('${rowId}')" class="p-1 rounded bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-550"><i class="bi bi-trash"></i></button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        }
+
+        function removeRecipeIngredientRow(rowId) {
+            const row = document.getElementById(`tr-rec-${rowId}`);
+            if (row) row.remove();
+
+            const tbody = document.getElementById('recipe-ingredients-tbody');
+            if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                tbody.innerHTML = `<tr id="recipe-no-items"><td colspan="4" class="text-center py-8 text-slate-400 dark:text-slate-500"><i class="bi bi-exclamation-circle text-lg d-block mb-1"></i> لا توجد خامات مضافة لوصفة هذا الطبق. أضف سطر لإعداد المكونات.</td></tr>`;
+            }
+        }
+
+        function cancelRecipeEdit() {
+            selectedRecipeMenuItemId = null;
+            filterRecipeMenuItems();
+            document.getElementById('recipe-editor-container').classList.add('hidden');
+            document.getElementById('recipe-editor-empty').classList.remove('hidden');
+        }
+
+        function saveRecipeChanges(e) {
+            e.preventDefault();
+            if (!selectedRecipeMenuItemId) return;
+
+            const items = [];
+            const rows = document.querySelectorAll('#recipe-ingredients-tbody tr');
+
+            if (rows.length === 1 && rows[0].id === 'recipe-no-items') {
+                // Empty recipe
+            } else {
+                rows.forEach(row => {
+                    const selects = row.querySelectorAll('select');
+                    const inputs = row.querySelectorAll('input');
+                    if (selects.length >= 2 && inputs.length >= 1) {
+                        const ingredientName = selects[0].value;
+                        const quantityRequired = parseFloat(inputs[0].value);
+                        const unit = selects[1].value;
+
+                        if (ingredientName) {
+                            items.push({
+                                ingredientName: ingredientName,
+                                quantityRequired: quantityRequired,
+                                unit: unit
+                            });
+                        }
+                    }
+                });
+            }
+
+            const request = {
+                menuItemId: selectedRecipeMenuItemId,
+                items: items
+            };
+
+            $.ajax({
+                url: '/Inventory/SaveRecipe',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(request),
+                success: function() {
+                    showToastAlert("تم حفظ خريطة مكونات وصفة الطبق بنجاح!");
+                },
+                error: function(err) {
+                    showToastAlert(err.responseText || "Failed to save recipe map.", "error");
+                }
+            });
+        }
+
+        // 4. Daily Consumption
+        function initDailyConsumptionTab() {
+            const dateInput = document.getElementById('daily-consumption-date');
+            if (dateInput && !dateInput.value) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                let mm = today.getMonth() + 1;
+                let dd = today.getDate();
+                if (mm < 10) mm = '0' + mm;
+                if (dd < 10) dd = '0' + dd;
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+            loadDailyConsumptionReport();
+        }
+
+        function loadDailyConsumptionReport() {
+            const dateInput = document.getElementById('daily-consumption-date');
+            if (!dateInput) return;
+            const selectedDate = dateInput.value;
+            const branchId = $('#header-branch-selector').val();
+
+            const salesList = document.getElementById('daily-consumption-sales-list');
+            const wasteList = document.getElementById('daily-consumption-waste-list');
+            const tbody = document.getElementById('daily-consumption-tbody');
+
+            if (salesList) salesList.innerHTML = '<div class="text-center py-8 text-slate-400">جاري تحميل المبيعات...</div>';
+            if (wasteList) wasteList.innerHTML = '<div class="text-center py-8 text-slate-400">جاري تحميل التالف...</div>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400">جاري تحميل بيانات استهلاك المخزن...</td></tr>';
+
+            $.get('/Inventory/GetDailyConsumptionReport', { date: selectedDate, branchId: branchId ? parseInt(branchId) : null })
+             .done(function(data) {
+                 // 1. Render Sold Items
+                 if (salesList) {
+                     salesList.innerHTML = '';
+                     if (!data.soldItems || data.soldItems.length === 0) {
+                         salesList.innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
+                                <i class="bi bi-cart-x text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
+                                <p class="text-xs font-semibold">لم يتم بيع أي منتجات في هذا اليوم</p>
+                            </div>`;
+                     } else {
+                         data.soldItems.forEach(item => {
+                             salesList.innerHTML += `
+                                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-darkBorder/40 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.name}</h5>
+                                        <p class="text-[10px] text-slate-450 mt-0.5">الكمية المباعة: <strong class="text-brand-500">${item.quantitySold} حبات</strong></p>
+                                    </div>
+                                    <div class="text-left font-semibold text-xs text-emerald-500">
+                                        ${item.totalRevenue.toFixed(2)} ج.م
+                                    </div>
+                                </div>`;
+                         });
+                     }
+                 }
+
+                 // 2. Render Waste Logs
+                 if (wasteList) {
+                     wasteList.innerHTML = '';
+                     if (!data.waste || data.waste.length === 0) {
+                         wasteList.innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
+                                <i class="bi bi-shield-check text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
+                                <p class="text-xs font-semibold">لا يوجد تالف مسجل لهذا اليوم</p>
+                            </div>`;
+                     } else {
+                         data.waste.forEach(item => {
+                             let typeText = 'تالف';
+                             if (item.type === 'Expired') typeText = 'منتهي الصلاحية';
+                             else if (item.type === 'Damage') typeText = 'ضرر/كسر';
+                             else if (item.type === 'Theft') typeText = 'عجز/سرقة';
+                             else if (item.type === 'Waste') typeText = 'هالك مطبخ';
+
+                             wasteList.innerHTML += `
+                                <div class="flex justify-between items-center bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/10 dark:border-rose-500/20 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
+                                    <div class="text-right">
+                                        <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.ingredientName}</h5>
+                                        <p class="text-[10px] text-slate-450 mt-0.5">الكمية: <strong class="text-rose-500">${item.quantity} ${item.unit}</strong> • ${typeText}</p>
+                                        <p class="text-[9px] text-slate-400 mt-0.5">${item.notes || 'لا توجد ملاحظات'}</p>
+                                    </div>
+                                    <div class="text-left">
+                                        <span class="font-bold text-xs text-rose-500 block text-left">${item.cost.toFixed(2)} ج.م</span>
+                                        <span class="text-[9px] text-slate-400 block text-left">${item.time} • ${item.adjustedBy}</span>
+                                    </div>
+                                </div>`;
+                         });
+                     }
+                 }
+
+                 // 3. Render Consumption & Discrepancies Table
+                 if (tbody) {
+                     tbody.innerHTML = '';
+                     if (!data.consumption || data.consumption.length === 0) {
+                         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 dark:text-slate-500">لا يوجد استهلاك مسجل للمواد الخام في هذا اليوم.</td></tr>';
+                     } else {
+                         data.consumption.forEach(item => {
+                             const variance = item.variance;
+                             let varianceBadge = '';
+                             if (Math.abs(variance) < 0.001) {
+                                 varianceBadge = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">مطابق</span>';
+                             } else if (variance > 0) {
+                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">عجز: ${variance.toFixed(2)} ${item.unit}</span>`;
+                             } else {
+                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500">زيادة: ${Math.abs(variance).toFixed(2)} ${item.unit}</span>`;
+                             }
+
+                             tbody.innerHTML += `
+                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-all border-b border-slate-50 dark:border-darkBorder/30">
+                                    <td class="py-3 px-3 text-right">
+                                        <div class="font-bold text-slate-850 dark:text-white">${item.name}</div>
+                                        <div class="text-[10px] text-slate-450 dark:text-slate-500 mt-0.5">${item.portionReference}</div>
+                                    </td>
+                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                        ${item.theoreticalConsumption.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                        ${item.actualDeducted.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center text-slate-800 dark:text-white font-bold">
+                                        ${item.currentStock.toFixed(2)} ${item.unit}
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        ${varianceBadge}
+                                    </td>
+                                </tr>`;
+                         });
+                     }
+                 }
+             })
+             .fail(function() {
+                 if (salesList) salesList.innerHTML = '<div class="text-center py-8 text-red-500">فشل في تحميل المبيعات.</div>';
+                 if (wasteList) wasteList.innerHTML = '<div class="text-center py-8 text-red-500">فشل في تحميل التالف.</div>';
+                 if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">فشل في تحميل تقرير مطابقة المخزن.</td></tr>';
+             });
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeAddStockModal();
+                closeAdjustStockModal();
+                closeRequestTransferModal();
+                closeIngredientCrudModal();
+            }
+        });
+
+        // Initialize default tab on load
+        $(document).ready(function() {
+            switchTab('inventory-mgmt');
+        });
+    </script>
+</body>
+</html>

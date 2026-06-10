@@ -79,6 +79,18 @@ namespace Resturant.Services.Services
                 throw new KeyNotFoundException($"Ingredient with ID {ingredientId} not found in branch {branchId}.");
             }
 
+            // Automatically treat positive inputs as deductions (negative adjustments) for waste and loss types
+            if (type.Equals("Waste", StringComparison.OrdinalIgnoreCase) || 
+                type.Equals("Expired", StringComparison.OrdinalIgnoreCase) || 
+                type.Equals("Damage", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Theft", StringComparison.OrdinalIgnoreCase))
+            {
+                if (quantityAdjusted > 0)
+                {
+                    quantityAdjusted = -quantityAdjusted;
+                }
+            }
+
             ingredient.CurrentStock += quantityAdjusted;
             if (ingredient.CurrentStock < 0) ingredient.CurrentStock = 0; // Prevent negative stock
 

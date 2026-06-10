@@ -1,27 +1,27 @@
-﻿            <div id="tab-stock-transfers" class="tab-content hidden space-y-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="outfit-font text-xl font-extrabold text-slate-900 dark:text-white">Inter-Branch Supply Transfers</h2>
-                        <p class="text-xs text-slate-500 mt-1">Create transfer requests from Central Warehouse to Branches, track transit statuses, and confirm intakes</p>
+            <div id="tab-stock-transfers" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center" dir="rtl">
+                    <div class="text-right">
+                        <h2 class="outfit-font text-xl font-extrabold text-slate-900 dark:text-white">تحويلات وطلبات المخزون بين الفروع</h2>
+                        <p class="text-xs text-slate-500 mt-1">إنشاء طلبات التحويل وتوريد المواد الخام بين الفروع ومتابعة حركة الشحنات وتأكيد استلامها</p>
                     </div>
                     <button onclick="openRequestTransferModal()" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 flex items-center gap-1.5 transition-all">
-                        <i class="bi bi-plus-lg"></i> Request Stock Transfer
+                        <i class="bi bi-plus-lg"></i> طلب تحويل مخزني جديد
                     </button>
                 </div>
 
                 <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden flex flex-col">
                     <div class="overflow-x-auto">
-                        <table id="table-stock-transfers-list" class="w-full text-left border-collapse text-xs">
+                        <table id="table-stock-transfers-list" class="w-full text-right border-collapse text-xs" dir="rtl">
                             <thead>
                                 <tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-darkBorder text-slate-400 font-bold uppercase text-[10px]">
-                                    <th class="py-3.5 px-6">ID</th>
-                                    <th class="py-3.5">Source</th>
-                                    <th class="py-3.5">Destination</th>
-                                    <th class="py-3.5">Transferred Items</th>
-                                    <th class="py-3.5 text-center">Status</th>
-                                    <th class="py-3.5">Created By</th>
-                                    <th class="py-3.5">Date Created</th>
-                                    <th class="py-3.5 text-center">Action Controls</th>
+                                    <th class="py-3.5 px-6 text-right">رقم الطلب</th>
+                                    <th class="py-3.5 text-right">المصدر (المرسل)</th>
+                                    <th class="py-3.5 text-right">الوجهة (المستلم)</th>
+                                    <th class="py-3.5 text-right">المواد المحولة</th>
+                                    <th class="py-3.5 text-center">حالة الطلب</th>
+                                    <th class="py-3.5 text-center">أنشئ بواسطة</th>
+                                    <th class="py-3.5 text-center">تاريخ الإنشاء</th>
+                                    <th class="py-3.5 text-center">العمليات</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-darkBorder/40">

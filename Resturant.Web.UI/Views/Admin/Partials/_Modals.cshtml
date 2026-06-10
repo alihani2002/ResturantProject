@@ -1,46 +1,46 @@
-﻿
+
     <!-- ADD INVENTORY STOCK INTAKE MODAL -->
     <div id="add-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="add-stock-modal-content">
-            <button onclick="closeAddStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+            <button onclick="closeAddStockModal()" class="absolute top-4 left-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
-            <div class="space-y-6">
-                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
-                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-500 dark:text-amber-400 uppercase tracking-widest">Inventory intake</span>
-                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Purchase / Add Stock Intake</h3>
+            <div class="space-y-6" dir="rtl">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder text-right">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-500 dark:text-amber-400 uppercase tracking-widest text-right block w-fit">توريد بضاعة للمخزن</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">شراء وتوريد كميات للمخزن</h3>
                 </div>
 
                 <form id="form-add-stock" onsubmit="submitAddStock(event)" class="space-y-4">
                     <input type="hidden" id="add-stock-ingredient-id">
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
-                        <input type="text" id="add-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">الصنف / الخامة</label>
+                        <input type="text" id="add-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none text-right">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Quantity Added</label>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">الالكمية الموردة</label>
                             <div class="relative rounded-xl shadow-sm">
-                                <input type="number" step="0.001" min="0.001" id="add-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="add-stock-unit-lbl">Kg</div>
+                                <input type="number" step="0.001" min="0.001" id="add-stock-quantity" required class="w-full pl-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-right" placeholder="0.000">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="add-stock-unit-lbl">كجم</div>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
-                            <input type="number" step="0.01" min="0" id="add-stock-cost" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Optional">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">التكلفة للوحدة (ج.م)</label>
+                            <input type="number" step="0.01" min="0" id="add-stock-cost" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-right" placeholder="اختياري">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Intake / Purchase Notes</label>
-                        <textarea id="add-stock-notes" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Supplier invoice ref, delivery confirmation, batch details..."></textarea>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">ملاحظات التوريد والشراء</label>
+                        <textarea id="add-stock-notes" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-right" placeholder="رقم الفاتورة، تفاصيل الشحنة، المورد..."></textarea>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
-                        <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/10">Confirm Stock Intake</button>
+                    <div class="flex justify-end gap-3 pt-2" dir="rtl">
+                        <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-md shadow-amber-500/10">تأكيد عملية التوريد</button>
+                        <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">إلغاء</button>
                     </div>
                 </form>
             </div>
@@ -50,61 +50,61 @@
     <!-- CREATE / UPDATE INGREDIENT CRUD MODAL -->
     <div id="ingredient-crud-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="ingredient-crud-modal-content">
-            <button onclick="closeIngredientCrudModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+            <button onclick="closeIngredientCrudModal()" class="absolute top-4 left-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
-            <div class="space-y-6">
-                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
-                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest" id="ingredient-modal-badge">Inventory Material</span>
-                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1" id="ingredient-modal-title">Add New Material</h3>
+            <div class="space-y-6" dir="rtl">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder text-right">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-brand-500/10 text-brand-500 dark:text-brand-400 uppercase tracking-widest text-right block w-fit" id="ingredient-modal-badge">خامات المخزن</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1 text-right" id="ingredient-modal-title">إضافة صنف خام جديد</h3>
                 </div>
 
                 <form id="form-ingredient-crud" onsubmit="submitIngredientCrud(event)" class="space-y-4">
                     <input type="hidden" id="ingredient-crud-id">
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Material / Ingredient Name</label>
-                        <input type="text" id="ingredient-crud-name" required placeholder="e.g. Ground Beef, Milk, Espresso Beans" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">اسم المادة الخام / الصنف</label>
+                        <input type="text" id="ingredient-crud-name" required placeholder="مثال: لحم مفروم، حليب، بن قهوة..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-right">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div id="initial-stock-container">
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Initial Stock</label>
-                            <input type="number" step="0.001" min="0" id="ingredient-crud-initial-stock" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="0">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">المخزون الابتدائي</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-initial-stock" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-right" value="0">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Reorder Level (Min)</label>
-                            <input type="number" step="0.001" min="0" id="ingredient-crud-reorder-level" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" value="5">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">حد الطلب (الحد الأدنى)</label>
+                            <input type="number" step="0.001" min="0" id="ingredient-crud-reorder-level" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-right" value="5">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Measurement Unit</label>
-                            <select id="ingredient-crud-unit" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                <option value="Kg">Kg (Kilograms)</option>
-                                <option value="Grams">Grams</option>
-                                <option value="Ltr">Ltr (Liters)</option>
-                                <option value="Pcs">Pcs (Pieces)</option>
-                                <option value="Box">Box</option>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">وحدة القياس</label>
+                            <select id="ingredient-crud-unit" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer text-right" dir="rtl">
+                                <option value="Kg">كجم (كيلوجرام)</option>
+                                <option value="Grams">جرام</option>
+                                <option value="Ltr">لتر</option>
+                                <option value="Pcs">قطعة</option>
+                                <option value="Box">صندوق</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Cost Per Unit (EGP)</label>
-                            <input type="number" step="0.01" min="0.01" id="ingredient-crud-cost" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="e.g. 150.00">
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">تكلفة الوحدة (ج.م)</label>
+                            <input type="number" step="0.01" min="0.01" id="ingredient-crud-cost" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 text-right" placeholder="مثال: 150.00">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Default Supplier</label>
-                        <select id="ingredient-crud-supplier" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                            <option value="">No Assigned Supplier</option>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">المورد الافتراضي</label>
+                        <select id="ingredient-crud-supplier" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-855 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer text-right" dir="rtl">
+                            <option value="">لا يوجد مورد معين</option>
                         </select>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" onclick="closeIngredientCrudModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Material</button>
+                    <div class="flex justify-end gap-3 pt-2" dir="rtl">
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> حفظ الخامة</button>
+                        <button type="button" onclick="closeIngredientCrudModal()" class="px-4 py-2.5 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">إلغاء</button>
                     </div>
                 </form>
             </div>
@@ -114,51 +114,51 @@
     <!-- MANUAL STOCK ADJUSTMENT AUDIT MODAL -->
     <div id="adjust-stock-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-darkCard rounded-2xl max-w-md w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="adjust-stock-modal-content">
-            <button onclick="closeAdjustStockModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+            <button onclick="closeAdjustStockModal()" class="absolute top-4 left-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
-            <div class="space-y-6">
-                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder">
-                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest">Inventory audit</span>
-                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1">Manual Stock Audit / Adjust</h3>
+            <div class="space-y-6" dir="rtl">
+                <div class="border-b pb-3 border-slate-100 dark:border-darkBorder text-right">
+                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest text-right block w-fit">جرد وتسوية المخزن</span>
+                    <h3 class="outfit-font text-lg font-extrabold text-slate-800 dark:text-white mt-1 text-right">جرد وتسوية المخزون يدويًا</h3>
                 </div>
 
                 <form id="form-adjust-stock" onsubmit="submitAdjustStock(event)" class="space-y-4">
                     <input type="hidden" id="adjust-stock-ingredient-id">
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Ingredient Material</label>
-                        <input type="text" id="adjust-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">الصنف / الخامة</label>
+                        <input type="text" id="adjust-stock-ingredient-name" readonly class="w-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-705 dark:text-slate-350 focus:outline-none text-right">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Qty (Diff)</label>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">كمية التسوية (الفارق)</label>
                             <div class="relative rounded-xl shadow-sm">
-                                <input type="number" step="0.001" id="adjust-stock-quantity" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="e.g. -2.50 or 5.00">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="adjust-stock-unit-lbl">Kg</div>
+                                <input type="number" step="0.001" id="adjust-stock-quantity" required class="w-full pl-10 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 text-right" placeholder="مثال: -2.5 أو 5.0">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" id="adjust-stock-unit-lbl">كجم</div>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Type</label>
-                            <select id="adjust-stock-type" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
-                                <option value="StockCount">Stock Count Audit (Correction)</option>
-                                <option value="Waste">Kitchen Waste (Loss)</option>
-                                <option value="Expired">Spoiled / Expired</option>
-                                <option value="Damage">Damaged Goods</option>
-                                <option value="Theft">Unexplained Shrinkage / Theft</option>
+                            <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">نوع التسوية</label>
+                            <select id="adjust-stock-type" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer text-right" dir="rtl">
+                                <option value="StockCount">تسوية جرد (تصحيح رصيد)</option>
+                                <option value="Waste">هالك مطبخ (خسارة)</option>
+                                <option value="Expired">تالف / منتهي الصلاحية</option>
+                                <option value="Damage">بضاعة متضررة</option>
+                                <option value="Theft">عجز غير مبرر / سرقة</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">Adjustment Explanation Reason</label>
-                        <textarea id="adjust-stock-notes" rows="3" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="Specify why this count deviation is being booked..."></textarea>
+                        <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2 text-right">سبب التسوية وتوضيح تفصيلي</label>
+                        <textarea id="adjust-stock-notes" rows="3" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-xs text-slate-850 dark:text-white focus:outline-none focus:ring-2 focus:ring-rose-500 text-right" placeholder="وضح بالتفصيل سبب تسجيل هذا الفارق بالجرام أو الكيلوجرام..."></textarea>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" onclick="closeAdjustStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">Cancel</button>
-                        <button type="submit" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md shadow-rose-500/10">Book Stock Audit</button>
+                    <div class="flex justify-end gap-3 pt-2" dir="rtl">
+                        <button type="submit" class="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md shadow-rose-500/10">تسجيل التسوية والجرد</button>
+                        <button type="button" onclick="closeAdjustStockModal()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white">إلغاء</button>
                     </div>
                 </form>
             </div>
@@ -168,7 +168,7 @@
     <!-- STOCK TRANSFER REQUEST MODAL -->
     <div id="transfer-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-darkCard rounded-2xl max-w-2xl w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder relative scale-95 transition-transform duration-300" id="transfer-modal-content">
-            <button onclick="closeRequestTransferModal()" class="absolute top-4 right-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
+            <button onclick="closeRequestTransferModal()" class="absolute top-4 left-4 p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all">
                 <i class="bi bi-x text-lg"></i>
             </button>
             <div class="space-y-6" dir="rtl">

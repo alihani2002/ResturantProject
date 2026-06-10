@@ -1,4 +1,4 @@
-            <div id="tab-settings-mgmt" class="tab-content hidden space-y-6">
+            <div id="tab-settings-mgmt" class="tab-content hidden space-y-6" dir="rtl">
                 <div class="max-w-2xl mx-auto bg-white dark:bg-darkCard p-8 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-6">
                     <div class="text-center pb-4 border-b border-slate-100 dark:border-darkBorder">
                         <div class="inline-flex items-center justify-center bg-brand-50 dark:bg-brand-950/20 p-4 rounded-full text-brand-500 mb-3">
@@ -15,21 +15,21 @@
                         </div>
 
                         <!-- Tax Percentage Input -->
-                        <div>
+                        <div class="text-right">
                             <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">ضريبة القيمة المضافة (VAT) %</label>
                             <div class="relative rounded-xl shadow-sm">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
-                                <input type="number" step="0.01" min="0" max="100" id="settings-tax" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pr-9 pl-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="14.00">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-tax" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all text-right" placeholder="14.00">
                             </div>
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">نسبة ضريبة القيمة المضافة الافتراضية المضافة إلى الطلبات.</span>
                         </div>
 
                         <!-- Service Percentage Input -->
-                        <div>
+                        <div class="text-right">
                             <label class="block text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-2">رسوم الخدمة %</label>
                             <div class="relative rounded-xl shadow-sm">
-                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
-                                <input type="number" step="0.01" min="0" max="100" id="settings-service" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pr-9 pl-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" placeholder="12.00">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400 font-bold">%</div>
+                                <input type="number" step="0.01" min="0" max="100" id="settings-service" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl pl-9 pr-4 py-3 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all text-right" placeholder="12.00">
                             </div>
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">نسبة رسوم الخدمة الافتراضية المضافة لطلب الصالة.</span>
                         </div>

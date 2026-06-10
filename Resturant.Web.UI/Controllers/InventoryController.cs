@@ -4,6 +4,7 @@ using Resturant.Core.Entities;
 using Resturant.Core.Interfaces;
 using Resturant.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Resturant.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Resturant.Web.UI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin + "," + AppRoles.Manager + "," + AppRoles.Accountant)]
     public class InventoryController : Controller
     {
         private readonly IInventoryService _inventoryService;
@@ -25,8 +26,10 @@ namespace Resturant.Web.UI.Controllers
 
         // --- View Handlers ---
         
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            ViewBag.Branches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+            ViewBag.ActiveBranchId = Request.Cookies["AdminActiveBranchId"];
             return View();
         }
 
@@ -459,10 +462,31 @@ namespace Resturant.Web.UI.Controllers
                 }
             }
 
+            // 6. Get all waste adjustments for this branch and date
+            var dailyWaste = await _context.InventoryAdjustments
+                .Include(a => a.Ingredient)
+                .Where(a => a.BranchId == activeBranchId.Value && 
+                            a.AdjustmentDate.Date == selectedDate.Date &&
+                            (a.Type == "Waste" || a.Type == "Expired" || a.Type == "Damage" || a.Type == "Theft"))
+                .OrderByDescending(a => a.AdjustmentDate)
+                .Select(a => new {
+                    a.Id,
+                    IngredientName = a.Ingredient != null ? a.Ingredient.Name : "Unknown",
+                    Quantity = Math.Abs(a.QuantityAdjusted),
+                    Unit = a.Ingredient != null ? a.Ingredient.Unit : "Kg",
+                    Cost = (decimal)Math.Abs(a.QuantityAdjusted) * (a.Ingredient != null ? a.Ingredient.CostPerUnit : 0m),
+                    Type = a.Type,
+                    Notes = a.Notes,
+                    Time = a.AdjustmentDate.ToString("HH:mm"),
+                    AdjustedBy = a.AdjustedBy
+                })
+                .ToListAsync();
+
             return Json(new {
                 Date = selectedDate.ToString("yyyy-MM-dd"),
                 SoldItems = soldItems,
-                Consumption = consumptionSummary
+                Consumption = consumptionSummary,
+                Waste = dailyWaste
             });
         }
 

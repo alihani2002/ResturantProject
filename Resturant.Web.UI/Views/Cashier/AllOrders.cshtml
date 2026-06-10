@@ -48,7 +48,7 @@
                 <i class="bi bi-arrow-right ms-1"></i> العودة للطلبات النشطة
             </a>
             <form method="get" class="d-flex align-items-center gap-2">
-                <input type="date" name="date" value="@selectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
+                <input type="date" name="date" lang="en" dir="ltr" value="@selectedDate.ToString("yyyy-MM-dd")" class="form-control form-control-sm" style="width: auto;" />
                 <select name="hour" class="form-select form-select-sm" style="width: auto;">
                     <option value="">جميع الساعات</option>
                     @for (int h = 0; h < 24; h++)

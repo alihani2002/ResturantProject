@@ -18,35 +18,35 @@
                     </div>
 
                     <!-- Filters Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 p-4 bg-slate-550/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 p-4 bg-slate-550/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40" dir="rtl">
                         <div class="md:col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">بحث باسم الكاشير / المعرف</label>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">بحث باسم الكاشير / المعرف</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
                                     <i class="bi bi-search text-xs"></i>
                                 </span>
-                                <input type="text" id="adminShiftSearch" onkeyup="loadShiftReportsList(1)" placeholder="اسم الكاشير أو المعرف..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                                <input type="text" id="adminShiftSearch" onkeyup="loadShiftReportsList(1)" placeholder="اسم الكاشير أو المعرف..." class="w-full text-xs pr-8 pl-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">الحالة</label>
-                            <select id="adminShiftStatus" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">الحالة</label>
+                            <select id="adminShiftStatus" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
                                 <option value="">جميع الحالات</option>
                                 <option value="Active">نشط</option>
                                 <option value="Closed">مغلق</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">من تاريخ</label>
-                            <input type="date" id="adminShiftDateFrom" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">من تاريخ</label>
+                            <input type="date" id="adminShiftDateFrom" lang="en" dir="ltr" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">إلى تاريخ</label>
-                            <input type="date" id="adminShiftDateTo" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">إلى تاريخ</label>
+                            <input type="date" id="adminShiftDateTo" lang="en" dir="ltr" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">من ساعة</label>
-                            <select id="adminShiftHourFrom" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">من ساعة</label>
+                            <select id="adminShiftHourFrom" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
                                 <option value="">أي ساعة</option>
                                 <option value="0">12:00 صباحًا (00:00)</option>
                                 <option value="1">01:00 صباحًا (01:00)</option>
@@ -75,8 +75,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">إلى ساعة</label>
-                            <select id="adminShiftHourTo" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">إلى الساعة</label>
+                            <select id="adminShiftHourTo" onchange="loadShiftReportsList(1)" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
                                 <option value="">أي ساعة</option>
                                 <option value="0">12:00 صباحًا (00:00)</option>
                                 <option value="1">01:00 صباحًا (01:00)</option>
@@ -107,18 +107,18 @@
                     </div>
 
                     <div class="overflow-x-auto mt-4">
-                        <table id="table-shifts-list" class="w-full text-right border-collapse text-xs">
+                        <table id="table-shifts-list" class="w-full text-right border-collapse text-xs" dir="rtl">
                             <thead>
                                 <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                    <th class="py-3">معرف الوردية</th>
-                                    <th class="py-3">الكاشير</th>
-                                    <th class="py-3">وقت البدء</th>
-                                    <th class="py-3">وقت الانتهاء</th>
-                                    <th class="py-3 text-left">المتوقع بالنظام</th>
-                                    <th class="py-3 text-left">المدخل الفعلي</th>
+                                    <th class="py-3 text-right">معرف الوردية</th>
+                                    <th class="py-3 text-right">الكاشير</th>
+                                    <th class="py-3 text-center">وقت البدء</th>
+                                    <th class="py-3 text-center">وقت الانتهاء</th>
+                                    <th class="py-3 text-center">المتوقع بالنظام</th>
+                                    <th class="py-3 text-center">المدخل الفعلي</th>
                                     <th class="py-3 text-center">الفرق</th>
                                     <th class="py-3 text-center">الحالة</th>
-                                    <th class="py-3 text-left">الإجراءات</th>
+                                    <th class="py-3 text-center">الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
