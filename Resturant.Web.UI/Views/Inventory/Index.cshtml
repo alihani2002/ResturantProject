@@ -116,12 +116,12 @@
                 <span>تقرير الاستهلاك ومطابقة المخزن</span>
             </button>
 
-            <button onclick="switchTab('purchase-orders')" id="btn-tab-purchase-orders" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-cart-check text-base text-sky-500"></i><span>Purchase Orders</span></button>
-            <button onclick="switchTab('movement-history')" id="btn-tab-movement-history" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clock-history text-base text-cyan-500"></i><span>Movement History</span></button>
-            <button onclick="switchTab('stock-counts')" id="btn-tab-stock-counts" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clipboard-data text-base text-rose-500"></i><span>Stock Counts</span></button>
-            <button onclick="switchTab('waste-management')" id="btn-tab-waste-management" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-trash3 text-base text-red-500"></i><span>Waste Management</span></button>
-            <button onclick="switchTab('inventory-analytics')" id="btn-tab-inventory-analytics" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-bar-chart-line text-base text-emerald-500"></i><span>Analytics</span></button>
-            <button onclick="switchTab('product-pricing')" id="btn-tab-product-pricing" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-tags text-base text-indigo-500"></i><span>Product Pricing</span></button>
+            <button onclick="switchTab('purchase-orders')" id="btn-tab-purchase-orders" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-cart-check text-base text-sky-500"></i><span>طلبات الشراء والتوريد</span></button>
+            <button onclick="switchTab('movement-history')" id="btn-tab-movement-history" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clock-history text-base text-cyan-500"></i><span>سجل حركة المخزن</span></button>
+            <button onclick="switchTab('stock-counts')" id="btn-tab-stock-counts" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clipboard-data text-base text-rose-500"></i><span>جرد المخزون الفعلي</span></button>
+            <button onclick="switchTab('waste-management')" id="btn-tab-waste-management" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-trash3 text-base text-red-500"></i><span>الهالك والتالف بالمخزن</span></button>
+            <button onclick="switchTab('inventory-analytics')" id="btn-tab-inventory-analytics" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-bar-chart-line text-base text-emerald-500"></i><span>تحليلات وتقارير المخزون</span></button>
+            <button onclick="switchTab('product-pricing')" id="btn-tab-product-pricing" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-tags text-base text-indigo-500"></i><span>تسعير المنتجات</span></button>
         </nav>
 
         <!-- Footer Operations Link -->
@@ -180,6 +180,9 @@
         // State Management
         let currentTab = 'inventory-mgmt';
         let inventoryStockData = [];
+        let stockTransfersData = [];
+        let purchaseOrdersData = [];
+        let dailyConsumptionReportData = null;
         let recipeMenuItemsData = [];
         let selectedRecipeMenuItemId = null;
         let branchIngredientsCache = [];
@@ -253,12 +256,12 @@
                 'stock-transfers': 'طلبات وتحويلات المخزون بين الفروع',
                 'recipe-mgmt': 'مكونات الوصفات والريسبات للأطباق',
                 'daily-consumption': 'تقرير الاستهلاك اليومي ومطابقة المخزن',
-                'purchase-orders': 'Purchase Orders & Supplier Management',
-                'movement-history': 'Inventory Movement History',
-                'stock-counts': 'Stock Adjustment & Physical Inventory Count',
-                'waste-management': 'Waste & Expired Items Management',
-                'inventory-analytics': 'Inventory Analytics & Reports',
-                'product-pricing': 'Multi-Level Product Pricing'
+                'purchase-orders': 'طلبات الشراء وإدارة الموردين',
+                'movement-history': 'سجل حركة المخزن بالتفصيل',
+                'stock-counts': 'جرد المخزون والتسوية المخزنية',
+                'waste-management': 'الهالك والتالف والفاقد المالي للمخزن',
+                'inventory-analytics': 'تحليلات وتقارير المخزون',
+                'product-pricing': 'تسعير المنتجات متعدد المستويات للفروع'
             };
             const activeTitleEl = document.getElementById('active-tab-title');
             if (activeTitleEl) {
@@ -691,24 +694,56 @@
             const branchId = $('#header-branch-selector').val();
             $.get('/Inventory/GetTransfers', { branchId: branchId ? parseInt(branchId) : null })
              .done(function(transfers) {
-                 renderTransfersTable(transfers);
+                 stockTransfersData = transfers;
+                 renderTransfersTable();
              })
              .fail(function() {
                  showToastAlert("Failed to load supply transfers.", "error");
              });
         }
 
-        function renderTransfersTable(transfers) {
+        function renderTransfersTable() {
             const tbody = document.querySelector('#table-stock-transfers-list tbody');
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            if (transfers.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 dark:text-slate-500">لا توجد أي طلبات تحويل مسجلة.</td></tr>`;
+            const searchTerm = ($('#search-stock-transfers').val() || '').toLowerCase();
+            const startDateVal = $('#filter-transfer-start-date').val();
+            const endDateVal = $('#filter-transfer-end-date').val();
+
+            const filtered = stockTransfersData.filter(t => {
+                // 1. Search Filter
+                const matchesSearch = t.id.toString().includes(searchTerm) ||
+                    t.sourceBranchName.toLowerCase().includes(searchTerm) ||
+                    t.destinationBranchName.toLowerCase().includes(searchTerm) ||
+                    t.createdBy.toLowerCase().includes(searchTerm) ||
+                    t.items.some(i => i.ingredientName.toLowerCase().includes(searchTerm));
+
+                if (!matchesSearch) return false;
+
+                // 2. Date-Time Filter
+                if (t.createdOn) {
+                    const createdDate = new Date(t.createdOn.replace(' ', 'T'));
+                    
+                    if (startDateVal) {
+                        const startDate = new Date(startDateVal);
+                        if (createdDate < startDate) return false;
+                    }
+                    if (endDateVal) {
+                        const endDate = new Date(endDateVal);
+                        if (createdDate > endDate) return false;
+                    }
+                }
+
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 dark:text-slate-500">لا توجد أي طلبات تحويل مطابقة للبحث.</td></tr>`;
                 return;
             }
 
-            transfers.forEach(t => {
+            filtered.forEach(t => {
                 let statusBadge = '';
                 let actionHtml = '';
 
@@ -744,8 +779,16 @@
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-50 dark:border-darkBorder/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                         <td class="py-3.5 px-6 font-bold text-slate-800 dark:text-white text-right">#TR-${t.id}</td>
-                        <td class="py-3.5 font-semibold text-slate-750 dark:text-slate-350 text-right">${t.sourceBranchName}</td>
-                        <td class="py-3.5 font-semibold text-slate-750 dark:text-slate-350 text-right">${t.destinationBranchName}</td>
+                        <td class="py-3.5 font-semibold text-slate-700 dark:text-slate-350 text-right">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/5 text-rose-600 dark:text-rose-450 border border-rose-500/10 text-[10px] font-bold transfer-branch-source">
+                                <i class="bi bi-box-arrow-up-right ml-1"></i>${t.sourceBranchName}
+                            </span>
+                        </td>
+                        <td class="py-3.5 font-semibold text-slate-700 dark:text-slate-350 text-right">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/5 text-emerald-600 dark:text-emerald-500 border border-emerald-500/10 text-[10px] font-bold transfer-branch-dest">
+                                <i class="bi bi-box-arrow-in-down-left ml-1"></i>${t.destinationBranchName}
+                            </span>
+                        </td>
                         <td class="py-3.5 text-slate-500 dark:text-slate-450 max-w-xs truncate text-right" title="${itemsList}">${itemsList}</td>
                         <td class="py-3.5 text-center">${statusBadge}</td>
                         <td class="py-3.5 text-center text-slate-500 dark:text-slate-400">${t.createdBy}</td>
@@ -1273,109 +1316,125 @@
 
             $.get('/Inventory/GetDailyConsumptionReport', { date: selectedDate, branchId: branchId ? parseInt(branchId) : null })
              .done(function(data) {
-                 // 1. Render Sold Items
-                 if (salesList) {
-                     salesList.innerHTML = '';
-                     if (!data.soldItems || data.soldItems.length === 0) {
-                         salesList.innerHTML = `
-                            <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
-                                <i class="bi bi-cart-x text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
-                                <p class="text-xs font-semibold">لم يتم بيع أي منتجات في هذا اليوم</p>
-                            </div>`;
-                     } else {
-                         data.soldItems.forEach(item => {
-                             salesList.innerHTML += `
-                                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-darkBorder/40 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
-                                    <div class="text-right">
-                                        <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.name}</h5>
-                                        <p class="text-[10px] text-slate-450 mt-0.5">الكمية المباعة: <strong class="text-brand-500">${item.quantitySold} حبات</strong></p>
-                                    </div>
-                                    <div class="text-left font-semibold text-xs text-emerald-500">
-                                        ${item.totalRevenue.toFixed(2)} ج.م
-                                    </div>
-                                </div>`;
-                         });
-                     }
-                 }
-
-                 // 2. Render Waste Logs
-                 if (wasteList) {
-                     wasteList.innerHTML = '';
-                     if (!data.waste || data.waste.length === 0) {
-                         wasteList.innerHTML = `
-                            <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
-                                <i class="bi bi-shield-check text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
-                                <p class="text-xs font-semibold">لا يوجد تالف مسجل لهذا اليوم</p>
-                            </div>`;
-                     } else {
-                         data.waste.forEach(item => {
-                             let typeText = 'تالف';
-                             if (item.type === 'Expired') typeText = 'منتهي الصلاحية';
-                             else if (item.type === 'Damage') typeText = 'ضرر/كسر';
-                             else if (item.type === 'Theft') typeText = 'عجز/سرقة';
-                             else if (item.type === 'Waste') typeText = 'هالك مطبخ';
-
-                             wasteList.innerHTML += `
-                                <div class="flex justify-between items-center bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/10 dark:border-rose-500/20 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
-                                    <div class="text-right">
-                                        <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.ingredientName}</h5>
-                                        <p class="text-[10px] text-slate-450 mt-0.5">الكمية: <strong class="text-rose-500">${item.quantity} ${item.unit}</strong> • ${typeText}</p>
-                                        <p class="text-[9px] text-slate-400 mt-0.5">${item.notes || 'لا توجد ملاحظات'}</p>
-                                    </div>
-                                    <div class="text-left">
-                                        <span class="font-bold text-xs text-rose-500 block text-left">${item.cost.toFixed(2)} ج.م</span>
-                                        <span class="text-[9px] text-slate-400 block text-left">${item.time} • ${item.adjustedBy}</span>
-                                    </div>
-                                </div>`;
-                         });
-                     }
-                 }
-
-                 // 3. Render Consumption & Discrepancies Table
-                 if (tbody) {
-                     tbody.innerHTML = '';
-                     if (!data.consumption || data.consumption.length === 0) {
-                         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 dark:text-slate-500">لا يوجد استهلاك مسجل للمواد الخام في هذا اليوم.</td></tr>';
-                     } else {
-                         data.consumption.forEach(item => {
-                             const variance = item.variance;
-                             let varianceBadge = '';
-                             if (Math.abs(variance) < 0.001) {
-                                 varianceBadge = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">مطابق</span>';
-                             } else if (variance > 0) {
-                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">عجز: ${variance.toFixed(2)} ${item.unit}</span>`;
-                             } else {
-                                 varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500">زيادة: ${Math.abs(variance).toFixed(2)} ${item.unit}</span>`;
-                             }
-
-                             tbody.innerHTML += `
-                                <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-all border-b border-slate-50 dark:border-darkBorder/30">
-                                    <td class="py-3 px-3 text-right">
-                                        <div class="font-bold text-slate-850 dark:text-white">${item.name}</div>
-                                        <div class="text-[10px] text-slate-450 dark:text-slate-500 mt-0.5">${item.portionReference}</div>
-                                    </td>
-                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
-                                        ${item.theoreticalConsumption.toFixed(2)} ${item.unit}
-                                    </td>
-                                    <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
-                                        ${item.actualDeducted.toFixed(2)} ${item.unit}
-                                    </td>
-                                    <td class="py-3 text-center text-slate-800 dark:text-white font-bold">
-                                        ${item.currentStock.toFixed(2)} ${item.unit}
-                                    </td>
-                                    <td class="py-3 text-center">
-                                        ${varianceBadge}
-                                    </td>
-                                </tr>`;
-                         });
-                     }
-                 }
+                 dailyConsumptionReportData = data;
+                 renderDailyConsumptionTables();
              })
              .fail(function() {
                  if (salesList) salesList.innerHTML = '<div class="text-center py-8 text-red-500">فشل في تحميل المبيعات.</div>';
                  if (wasteList) wasteList.innerHTML = '<div class="text-center py-8 text-red-500">فشل في تحميل التالف.</div>';
                  if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-red-500">فشل في تحميل تقرير مطابقة المخزن.</td></tr>';
              });
+        }
+
+        function renderDailyConsumptionTables() {
+            if (!dailyConsumptionReportData) return;
+            const data = dailyConsumptionReportData;
+            const salesList = document.getElementById('daily-consumption-sales-list');
+            const wasteList = document.getElementById('daily-consumption-waste-list');
+            const tbody = document.getElementById('daily-consumption-tbody');
+
+            // 1. Render Sold Items
+            if (salesList) {
+                salesList.innerHTML = '';
+                if (!data.soldItems || data.soldItems.length === 0) {
+                    salesList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
+                            <i class="bi bi-cart-x text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
+                            <p class="text-xs font-semibold">لم يتم بيع أي منتجات في هذا اليوم</p>
+                        </div>`;
+                } else {
+                    data.soldItems.forEach(item => {
+                        salesList.innerHTML += `
+                            <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-darkBorder/40 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
+                                <div class="text-right">
+                                    <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.name}</h5>
+                                    <p class="text-[10px] text-slate-450 mt-0.5">الكمية المباعة: <strong class="text-brand-500">${item.quantitySold} حبات</strong></p>
+                                </div>
+                                <div class="text-left font-semibold text-xs text-emerald-500">
+                                    ${item.totalRevenue.toFixed(2)} ج.م
+                                </div>
+                            </div>`;
+                    });
+                }
+            }
+
+            // 2. Render Waste Logs
+            if (wasteList) {
+                wasteList.innerHTML = '';
+                if (!data.waste || data.waste.length === 0) {
+                    wasteList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center py-12 text-slate-400 dark:text-slate-500">
+                            <i class="bi bi-shield-check text-3xl mb-2 text-slate-350 dark:text-slate-650"></i>
+                            <p class="text-xs font-semibold">لا يوجد تالف مسجل لهذا اليوم</p>
+                        </div>`;
+                } else {
+                    data.waste.forEach(item => {
+                        let typeText = 'تالف';
+                        if (item.type === 'Expired') typeText = 'منتهي الصلاحية';
+                        else if (item.type === 'Damage') typeText = 'ضرر/كسر';
+                        else if (item.type === 'Theft') typeText = 'عجز/سرقة';
+                        else if (item.type === 'Waste') typeText = 'هالك مطبخ';
+
+                        wasteList.innerHTML += `
+                            <div class="flex justify-between items-center bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/10 dark:border-rose-500/20 rounded-xl p-3.5 hover:scale-[1.01] transition-transform">
+                                <div class="text-right">
+                                    <h5 class="text-xs font-bold text-slate-800 dark:text-white">${item.ingredientName}</h5>
+                                    <p class="text-[10px] text-slate-450 mt-0.5">الكمية: <strong class="text-rose-500">${item.quantity} ${item.unit}</strong> • ${typeText}</p>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">${item.notes || 'لا توجد ملاحظات'}</p>
+                                </div>
+                                <div class="text-left">
+                                    <span class="font-bold text-xs text-rose-500 block text-left">${item.cost.toFixed(2)} ج.م</span>
+                                    <span class="text-[9px] text-slate-400 block text-left">${item.time} • ${item.adjustedBy}</span>
+                                </div>
+                            </div>`;
+                    });
+                }
+            }
+
+            // 3. Render Consumption & Discrepancies Table
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (!data.consumption || data.consumption.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-400 dark:text-slate-500">لا يوجد استهلاك مسجل للمواد الخام في هذا اليوم.</td></tr>';
+                } else {
+                    const searchTerm = ($('#search-daily-consumption').val() || '').toLowerCase();
+                    const filtered = (data.consumption || []).filter(item => 
+                        item.name.toLowerCase().includes(searchTerm) ||
+                        (item.portionReference && item.portionReference.toLowerCase().includes(searchTerm))
+                    );
+                    filtered.forEach(item => {
+                        const variance = item.variance;
+                        let varianceBadge = '';
+                        if (Math.abs(variance) < 0.001) {
+                            varianceBadge = '<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500">مطابق</span>';
+                        } else if (variance > 0) {
+                            varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500">عجز: ${variance.toFixed(2)} ${item.unit}</span>`;
+                        } else {
+                            varianceBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500">زيادة: ${Math.abs(variance).toFixed(2)} ${item.unit}</span>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-all border-b border-slate-50 dark:border-darkBorder/30">
+                                <td class="py-3 px-3 text-right">
+                                    <div class="font-bold text-slate-850 dark:text-white">${item.name}</div>
+                                    <div class="text-[10px] text-slate-450 dark:text-slate-500 mt-0.5">${item.portionReference}</div>
+                                </td>
+                                <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                    ${item.theoreticalConsumption.toFixed(2)} ${item.unit}
+                                </td>
+                                <td class="py-3 text-center text-slate-600 dark:text-slate-350 font-semibold">
+                                    ${item.actualDeducted.toFixed(2)} ${item.unit}
+                                </td>
+                                <td class="py-3 text-center text-slate-800 dark:text-white font-bold">
+                                    ${item.currentStock.toFixed(2)} ${item.unit}
+                                </td>
+                                <td class="py-3 text-center">
+                                    ${varianceBadge}
+                                </td>
+                            </tr>`;
+                    });
+                }
+            }
         }
 
         // 5. Inventory Extension Modules
@@ -1773,6 +1832,37 @@
                  .fail(function(e) { showToastAlert(e.responseText || 'Failed to delete product price.', 'error'); });
             });
             openModal('confirm-modal');
+        }
+
+        function exportTableToExcel(tableId, filename = 'report.xlsx') {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+            XLSX.writeFile(wb, filename);
+        }
+
+        function exportTableToPdf(tableId, title, filename = 'report.pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            doc.setFontSize(16);
+            // Since we're in an RTL context, we'll draw the title aligned or simply draw text
+            doc.text(title, 40, 40);
+            doc.autoTable({
+                html: `#${tableId}`,
+                startY: 60,
+                styles: { fontSize: 9, halign: 'right' },
+                headStyles: { fillColor: [14, 165, 233] },
+                useCss: true
+            });
+            doc.save(filename);
+        }
+
+        function filterTable(tableId, searchInputId) {
+            const searchTerm = ($(`#${searchInputId}`).val() || '').toLowerCase();
+            $(`#${tableId} tbody tr`).each(function() {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(searchTerm) > -1);
+            });
         }
 
         // Close on escape key

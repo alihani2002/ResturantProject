@@ -40,14 +40,21 @@
 
                     <!-- Right: Ingredient Consumption / Discrepancy Table -->
                     <div class="lg:col-span-2 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
-                        <div class="pb-4 border-b dark:border-darkBorder text-right" dir="rtl">
-                            <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-500 uppercase tracking-widest">مطابقة واستهلاك المواد الخام</span>
-                            <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base mt-1">جدول مطابقة المخزن المحلي وجرد المواد الخام</h4>
-                            <p class="text-xs text-slate-500 mt-0.5">يقارن بين الاستهلاك النظري المطلوب والمخصوم فعلياً من مخزن الفرع مع توضيح الرصيد المتبقي.</p>
+                        <div class="pb-4 border-b dark:border-darkBorder flex flex-col md:flex-row justify-between items-start md:items-center gap-4" dir="rtl">
+                            <div class="text-right font-medium">
+                                <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-emerald-500/10 text-emerald-500 uppercase tracking-widest">مطابقة واستهلاك المواد الخام</span>
+                                <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base mt-1">جدول مطابقة المخزن المحلي وجرد المواد الخام</h4>
+                                <p class="text-xs text-slate-550 dark:text-slate-400 mt-0.5">يقارن بين الاستهلاك النظري المطلوب والمخصوم فعلياً من مخزن الفرع مع توضيح الرصيد المتبقي.</p>
+                            </div>
+                            <div class="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                                <input type="text" id="search-daily-consumption" oninput="renderDailyConsumptionTables()" placeholder="البحث في المواد..." class="px-4 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white text-right" dir="rtl">
+                                <button onclick="exportTableToExcel('table-daily-consumption', 'تقرير_الاستهلاك_اليومي.xlsx')" class="px-3 py-2 border border-emerald-200 dark:border-emerald-900 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-excel"></i> تصدير إكسيل</button>
+                                <button onclick="exportTableToPdf('table-daily-consumption', 'مطابقة واستهلاك المواد الخام اليومي', 'تقرير_الاستهلاك_اليومي.pdf')" class="px-3 py-2 border border-red-200 dark:border-red-900 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-pdf"></i> تصدير PDF</button>
+                            </div>
                         </div>
 
                         <div class="flex-1 overflow-y-auto mt-4 min-h-0 pr-2">
-                            <table class="w-full text-right border-collapse text-xs" dir="rtl">
+                            <table id="table-daily-consumption" class="w-full text-right border-collapse text-xs" dir="rtl">
                                 <thead>
                                     <tr class="text-slate-450 dark:text-slate-400 font-bold uppercase text-[9px] border-b dark:border-darkBorder/40">
                                         <th class="py-2.5 px-3 text-right">المادة الخام</th>

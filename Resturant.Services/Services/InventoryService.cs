@@ -345,7 +345,8 @@ namespace Resturant.Services.Services
                 DestinationBranchId = destinationBranchId,
                 Status = "Pending",
                 Notes = notes,
-                CreatedBy = user ?? "System"
+                CreatedBy = user ?? "System",
+                CreatedOn = DateTime.Now
             };
 
             _context.StockTransfers.Add(transfer);
@@ -358,7 +359,8 @@ namespace Resturant.Services.Services
                     StockTransferId = transfer.Id,
                     IngredientName = item.IngredientName,
                     Quantity = item.Quantity,
-                    Unit = item.Unit
+                    Unit = item.Unit,
+                    CreatedOn = DateTime.Now
                 };
                 _context.StockTransferItems.Add(transferItem);
             }

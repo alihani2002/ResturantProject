@@ -2,23 +2,34 @@
     <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex flex-col md:flex-row gap-3 justify-between md:items-center">
             <div class="text-right">
-                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Purchase Orders & Suppliers</h3>
-                <p class="text-xs text-slate-400 mt-1">Create suppliers, order raw materials, approve and receive purchases into branch stock.</p>
+                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">طلبات الشراء والموردين</h3>
+                <p class="text-xs text-slate-400 mt-1">إنشاء وإدارة الموردين، طلب المواد الخام، والموافقة على طلبات الشراء واستلامها في المخزن.</p>
             </div>
-            <div class="flex gap-2">
-                <button onclick="openSupplierModal()" class="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs"><i class="bi bi-person-plus"></i> Supplier</button>
-                <button onclick="openPurchaseOrderModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs"><i class="bi bi-cart-plus"></i> Purchase Order</button>
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <input type="text" id="search-purchase-orders" oninput="renderPurchaseOrdersTable()" placeholder="البحث في طلبات الشراء..." class="px-4 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white text-right" dir="rtl">
+                <button onclick="exportTableToExcel('table-purchase-orders-list', 'طلبات_الشراء.xlsx')" class="px-3 py-2 border border-emerald-200 dark:border-emerald-900 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-excel"></i> تصدير إكسيل</button>
+                <button onclick="exportTableToPdf('table-purchase-orders-list', 'طلبات الشراء والتوريد', 'طلبات_الشراء.pdf')" class="px-3 py-2 border border-red-200 dark:border-red-900 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-pdf"></i> تصدير PDF</button>
+                <button onclick="openSupplierModal()" class="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs"><i class="bi bi-person-plus"></i> مورد جديد</button>
+                <button onclick="openPurchaseOrderModal()" class="px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs"><i class="bi bi-cart-plus"></i> طلب شراء جديد</button>
             </div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-0">
             <div class="p-5 border-l border-slate-100 dark:border-darkBorder">
-                <h4 class="text-xs font-black text-slate-500 mb-3">Suppliers</h4>
+                <h4 class="text-xs font-black text-slate-500 mb-3">الموردون</h4>
+                <input type="text" id="search-suppliers" oninput="renderSuppliersList()" placeholder="البحث عن مورد..." class="w-full mb-3 px-3 py-1.5 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-lg text-[11px] focus:outline-none dark:text-white text-right" dir="rtl">
                 <div id="supplier-list" class="space-y-2"></div>
             </div>
             <div class="lg:col-span-2 overflow-x-auto">
-                <table class="w-full text-xs text-right">
+                <table id="table-purchase-orders-list" class="w-full text-xs text-right">
                     <thead class="bg-slate-50 dark:bg-slate-900 text-slate-400">
-                        <tr><th class="p-3">PO</th><th>Supplier</th><th>Status</th><th>Total</th><th>Date</th><th>Actions</th></tr>
+                        <tr>
+                            <th class="p-3">رقم الطلب</th>
+                            <th>المورد</th>
+                            <th>الحالة</th>
+                            <th>الإجمالي</th>
+                            <th>التاريخ</th>
+                            <th>العمليات</th>
+                        </tr>
                     </thead>
                     <tbody id="po-list"></tbody>
                 </table>
@@ -31,30 +42,46 @@
     <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex flex-col lg:flex-row gap-3 justify-between lg:items-center">
             <div class="text-right">
-                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Inventory Movement History</h3>
-                <p class="text-xs text-slate-400 mt-1">Purchases, consumption, transfers, adjustments, waste, returns and manual changes.</p>
+                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">سجل حركة المخزن</h3>
+                <p class="text-xs text-slate-400 mt-1">تتبع عمليات التوريد، استهلاك الوصفات، التحويلات، التسويات الفنية، والتالف بالتفصيل.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <input id="movement-search" oninput="loadMovementHistory(1)" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white" placeholder="Search">
-                <select id="movement-type-filter" onchange="loadMovementHistory(1)" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white">
-                    <option value="">All Types</option><option>Purchase</option><option>RecipeConsumption</option><option>TransferIn</option><option>TransferOut</option><option>Adjustment</option><option>Waste</option>
+                <input id="movement-search" oninput="loadMovementHistory(1)" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right" placeholder="بحث...">
+                <select id="movement-type-filter" onchange="loadMovementHistory(1)" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right">
+                    <option value="">كل الحركات</option>
+                    <option value="Purchase">شراء وتوريد</option>
+                    <option value="RecipeConsumption">استهلاك الوصفات</option>
+                    <option value="TransferIn">تحويل وارد</option>
+                    <option value="TransferOut">تحويل صادر</option>
+                    <option value="Adjustment">تسوية مخزنية</option>
+                    <option value="Waste">تالف وهالك</option>
                 </select>
-                <button onclick="exportMovementHistory('excel')" class="px-3 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold"><i class="bi bi-file-earmark-spreadsheet"></i></button>
-                <button onclick="exportMovementHistory('pdf')" class="px-3 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold"><i class="bi bi-file-earmark-pdf"></i></button>
+                <button onclick="exportTableToExcel('table-movement-history-list', 'سجل_حركة_المخزن.xlsx')" class="px-3 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold flex items-center gap-1"><i class="bi bi-file-earmark-excel"></i> إكسيل</button>
+                <button onclick="exportTableToPdf('table-movement-history-list', 'سجل حركة المخزن', 'سجل_حركة_المخزن.pdf')" class="px-3 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold flex items-center gap-1"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-xs text-right">
+            <table id="table-movement-history-list" class="w-full text-xs text-right">
                 <thead class="bg-slate-50 dark:bg-slate-900 text-slate-400">
-                    <tr><th class="p-3">Type</th><th>Ingredient</th><th>Qty</th><th>Before</th><th>After</th><th>Branch</th><th>User</th><th>Ref</th><th>Date</th></tr>
+                    <tr>
+                        <th class="p-3">نوع الحركة</th>
+                        <th>المادة الخام</th>
+                        <th>الكمية</th>
+                        <th>قبل الحركة</th>
+                        <th>بعد الحركة</th>
+                        <th>الفرع</th>
+                        <th>المستخدم</th>
+                        <th>المرجع</th>
+                        <th>التاريخ</th>
+                    </tr>
                 </thead>
                 <tbody id="movement-list"></tbody>
             </table>
         </div>
-        <div class="p-4 flex justify-between items-center text-xs text-slate-500">
-            <button onclick="loadMovementHistory(Math.max(1, movementPage - 1))" class="px-3 py-2 rounded-lg border dark:border-darkBorder">Prev</button>
-            <span id="movement-page-label">Page 1</span>
-            <button onclick="loadMovementHistory(movementPage + 1)" class="px-3 py-2 rounded-lg border dark:border-darkBorder">Next</button>
+        <div class="p-4 flex justify-between items-center text-xs text-slate-500" dir="rtl">
+            <button onclick="loadMovementHistory(Math.max(1, movementPage - 1))" class="px-3 py-2 rounded-lg border dark:border-darkBorder">السابق</button>
+            <span id="movement-page-label">صفحة 1</span>
+            <button onclick="loadMovementHistory(movementPage + 1)" class="px-3 py-2 rounded-lg border dark:border-darkBorder">التالي</button>
         </div>
     </div>
 </div>
@@ -63,10 +90,10 @@
     <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm">
         <div class="flex flex-col md:flex-row justify-between gap-3 mb-5">
             <div class="text-right">
-                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Physical Inventory Count</h3>
-                <p class="text-xs text-slate-400 mt-1">Compare expected stock with actual quantities and apply audited variances.</p>
+                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">جرد المخزن الفعلي</h3>
+                <p class="text-xs text-slate-400 mt-1">مقارنة المخزن الدفتري المتوقع بالكميات الفعلية وتطبيق فروقات الجرد بعد التدقيق.</p>
             </div>
-            <button onclick="createQuickInventoryCount()" class="px-4 py-2 bg-rose-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-clipboard-check"></i> Apply Count</button>
+            <button onclick="createQuickInventoryCount()" class="px-4 py-2 bg-rose-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-clipboard-check"></i> اعتماد وتطبيق الجرد</button>
         </div>
         <div id="stock-count-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
     </div>
@@ -76,28 +103,28 @@
     <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden">
         <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex justify-between items-center">
             <div class="text-right">
-                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Waste & Expired Items</h3>
-                <p class="text-xs text-slate-400 mt-1">Record damaged, expired, discarded materials and financial loss.</p>
+                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">إدارة الهالك والتالف</h3>
+                <p class="text-xs text-slate-400 mt-1">تسجيل المواد التالفة، منتهية الصلاحية، المهدورة وحساب الخسائر المالية للمطعم.</p>
             </div>
-            <button onclick="openWasteModal()" class="px-4 py-2 bg-red-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-trash3"></i> Record Waste</button>
+            <button onclick="openWasteModal()" class="px-4 py-2 bg-red-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-trash3"></i> تسجيل تالف / هالك</button>
         </div>
-        <div class="p-5 text-sm font-black text-red-500">Loss: <span id="waste-total">0.00</span></div>
+        <div class="p-5 text-sm font-black text-red-500" dir="rtl">إجمالي قيمة الخسائر: <span id="waste-total">0.00</span> ج.م</div>
         <div id="waste-report-list" class="p-5 pt-0 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
     </div>
 </div>
 
 <div id="tab-inventory-analytics" class="tab-content hidden space-y-6" dir="rtl">
     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><span class="text-[10px] text-slate-400">Valuation</span><h4 id="ana-valuation" class="text-lg font-black"></h4></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><span class="text-[10px] text-slate-400">Purchases</span><h4 id="ana-purchases" class="text-lg font-black"></h4></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><span class="text-[10px] text-slate-400">Waste</span><h4 id="ana-waste" class="text-lg font-black"></h4></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><span class="text-[10px] text-slate-400">Movements</span><h4 id="ana-movements" class="text-lg font-black"></h4></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><span class="text-[10px] text-slate-400">Low Stock</span><h4 id="ana-lowstock" class="text-lg font-black"></h4></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><span class="text-[10px] text-slate-400 block mb-1">قيمة المخزن</span><h4 id="ana-valuation" class="text-lg font-black text-slate-800 dark:text-white"></h4></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><span class="text-[10px] text-slate-400 block mb-1">المشتريات</span><h4 id="ana-purchases" class="text-lg font-black text-slate-800 dark:text-white"></h4></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><span class="text-[10px] text-slate-400 block mb-1">التالف والهالك</span><h4 id="ana-waste" class="text-lg font-black text-slate-800 dark:text-white"></h4></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><span class="text-[10px] text-slate-400 block mb-1">الحركات المخزنية</span><h4 id="ana-movements" class="text-lg font-black text-slate-800 dark:text-white"></h4></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><span class="text-[10px] text-slate-400 block mb-1">نواقص المخزن</span><h4 id="ana-lowstock" class="text-lg font-black text-slate-800 dark:text-white"></h4></div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><h4 class="font-bold text-sm mb-3">Low Stock Alerts</h4><div id="ana-low-list" class="space-y-2"></div></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><h4 class="font-bold text-sm mb-3">Purchase History</h4><div id="ana-po-list" class="space-y-2"></div></div>
-        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5"><h4 class="font-bold text-sm mb-3">Waste Analysis</h4><div id="ana-waste-list" class="space-y-2"></div></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><h4 class="font-bold text-sm mb-3">تنبيهات نواقص المخزن</h4><div id="ana-low-list" class="space-y-2"></div></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><h4 class="font-bold text-sm mb-3">سجل المشتريات الأخيرة</h4><div id="ana-po-list" class="space-y-2"></div></div>
+        <div class="bg-white dark:bg-darkCard border dark:border-darkBorder rounded-2xl p-5 text-right"><h4 class="font-bold text-sm mb-3">تحليل الهالك والتالف</h4><div id="ana-waste-list" class="space-y-2"></div></div>
     </div>
 </div>
 
@@ -105,13 +132,13 @@
     <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm">
         <div class="flex flex-col md:flex-row justify-between gap-3 mb-5">
             <div class="text-right">
-                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">Multi-Level Product Pricing</h3>
-                <p class="text-xs text-slate-400 mt-1">Retail, Wholesale, VIP, Delivery and custom future-ready price lists.</p>
+                <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">تسعير المنتجات متعدد المستويات</h3>
+                <p class="text-xs text-slate-400 mt-1">تحديد أسعار مختلفة للمنتج (صالات، سفري، دليفري، جملة) وتخصيص قائمة الأسعار لكل فرع.</p>
             </div>
-            <button onclick="openProductPriceModal()" class="px-4 py-2 bg-indigo-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-tags"></i> Add Price</button>
+            <button onclick="openProductPriceModal()" class="px-4 py-2 bg-indigo-500 text-white rounded-xl font-bold text-xs"><i class="bi bi-tags"></i> إضافة سعر جديد</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select id="pricing-menu-item" onchange="loadProductPrices()" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></select>
+            <select id="pricing-menu-item" onchange="loadProductPrices()" class="px-3 py-2 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></select>
             <div id="pricing-list" class="space-y-2"></div>
         </div>
     </div>
@@ -122,19 +149,19 @@
     <div id="supplier-modal-content" class="bg-white dark:bg-darkCard rounded-2xl max-w-lg w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder scale-95 transition-transform duration-300">
         <div class="flex justify-between items-start border-b border-slate-100 dark:border-darkBorder pb-3 mb-5">
             <button onclick="closeModal('supplier-modal')" class="p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500"><i class="bi bi-x text-lg"></i></button>
-            <div class="text-right"><span class="text-[10px] font-black text-sky-500 uppercase">Supplier</span><h3 class="text-lg font-black text-slate-900 dark:text-white">Supplier Details</h3></div>
+            <div class="text-right"><span class="text-[10px] font-black text-sky-500 uppercase">الموردين</span><h3 class="text-lg font-black text-slate-900 dark:text-white">تفاصيل المورد</h3></div>
         </div>
         <form id="form-supplier" onsubmit="submitSupplierForm(event)" class="space-y-4" dir="rtl">
             <input type="hidden" id="supplier-id">
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Supplier name *</label><input id="supplier-name" required maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">اسم المورد *</label><input id="supplier-name" required maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Contact person</label><input id="supplier-contact" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Phone</label><input id="supplier-phone" maxlength="20" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">الشخص المسؤول</label><input id="supplier-contact" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">رقم الهاتف</label><input id="supplier-phone" maxlength="20" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
             </div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Email</label><input id="supplier-email" type="email" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Address</label><input id="supplier-address" maxlength="160" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Notes</label><textarea id="supplier-notes" rows="3" maxlength="300" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></textarea></div>
-            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('supplier-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold">Save Supplier</button></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">البريد الإلكتروني</label><input id="supplier-email" type="email" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">العنوان</label><input id="supplier-address" maxlength="160" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">ملاحظات</label><textarea id="supplier-notes" rows="3" maxlength="300" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></textarea></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('supplier-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">إلغاء</button><button type="submit" class="px-5 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold">حفظ المورد</button></div>
         </form>
     </div>
 </div>
@@ -144,22 +171,22 @@
     <div id="purchase-order-modal-content" class="bg-white dark:bg-darkCard rounded-2xl max-w-4xl w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder scale-95 transition-transform duration-300">
         <div class="flex justify-between items-start border-b border-slate-100 dark:border-darkBorder pb-3 mb-5">
             <button onclick="closeModal('purchase-order-modal')" class="p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500"><i class="bi bi-x text-lg"></i></button>
-            <div class="text-right"><span class="text-[10px] font-black text-brand-500 uppercase">Purchase Order</span><h3 class="text-lg font-black text-slate-900 dark:text-white">Create Purchase Order</h3></div>
+            <div class="text-right"><span class="text-[10px] font-black text-brand-500 uppercase">طلب الشراء والتوريد</span><h3 class="text-lg font-black text-slate-900 dark:text-white">إنشاء طلب شراء وتوريد</h3></div>
         </div>
         <form id="form-purchase-order" onsubmit="submitPurchaseOrderForm(event)" class="space-y-4" dir="rtl">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">Supplier *</label><select id="po-supplier" required class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></select></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Expected date</label><input id="po-expected-date" type="date" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
+                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">المورد *</label><select id="po-supplier" required class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></select></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">تاريخ التسليم المتوقع</label><input id="po-expected-date" type="date" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
             </div>
             <div class="rounded-xl border dark:border-darkBorder overflow-hidden">
-                <table class="w-full text-xs text-right"><thead class="bg-slate-50 dark:bg-slate-900 text-slate-400"><tr><th class="p-3">Ingredient</th><th>Quantity</th><th>Unit cost</th><th>Total</th><th></th></tr></thead><tbody id="po-items-body"></tbody></table>
+                <table class="w-full text-xs text-right"><thead class="bg-slate-50 dark:bg-slate-900 text-slate-400"><tr><th class="p-3">المادة الخام</th><th>الكمية</th><th>تكلفة الوحدة</th><th>الإجمالي</th><th></th></tr></thead><tbody id="po-items-body"></tbody></table>
             </div>
             <div class="flex justify-between items-center">
-                <button type="button" onclick="addPurchaseOrderItemRow()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"><i class="bi bi-plus-lg"></i> Add item</button>
-                <div class="text-sm font-black text-slate-900 dark:text-white">Total: <span id="po-total">0.00</span></div>
+                <button type="button" onclick="addPurchaseOrderItemRow()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold"><i class="bi bi-plus-lg"></i> إضافة مادة خام</button>
+                <div class="text-sm font-black text-slate-900 dark:text-white">الإجمالي: <span id="po-total">0.00</span> ج.م</div>
             </div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Notes</label><textarea id="po-notes" rows="2" maxlength="500" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></textarea></div>
-            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('purchase-order-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold">Save Purchase Order</button></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">ملاحظات</label><textarea id="po-notes" rows="2" maxlength="500" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></textarea></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('purchase-order-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">إلغاء</button><button type="submit" class="px-5 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold">حفظ طلب الشراء</button></div>
         </form>
     </div>
 </div>
@@ -169,18 +196,18 @@
     <div id="waste-modal-content" class="bg-white dark:bg-darkCard rounded-2xl max-w-lg w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder scale-95 transition-transform duration-300">
         <div class="flex justify-between items-start border-b border-slate-100 dark:border-darkBorder pb-3 mb-5">
             <button onclick="closeModal('waste-modal')" class="p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500"><i class="bi bi-x text-lg"></i></button>
-            <div class="text-right"><span class="text-[10px] font-black text-red-500 uppercase">Waste</span><h3 class="text-lg font-black text-slate-900 dark:text-white">Record Waste</h3></div>
+            <div class="text-right"><span class="text-[10px] font-black text-red-500 uppercase">التالف والهالك</span><h3 class="text-lg font-black text-slate-900 dark:text-white">تسجيل تالف / هالك</h3></div>
         </div>
         <form id="form-waste" onsubmit="submitWasteForm(event)" class="space-y-4" dir="rtl">
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Ingredient *</label><select id="waste-ingredient" required onchange="syncWasteUnit()" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></select></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">المادة الخام *</label><select id="waste-ingredient" required onchange="syncWasteUnit()" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></select></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Quantity *</label><input id="waste-quantity" required type="number" min="0.001" step="0.001" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Unit</label><select id="waste-unit" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"><option>Kg</option><option>Grams</option><option>Ltr</option><option>Pcs</option><option>Box</option></select></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">الكمية *</label><input id="waste-quantity" required type="number" min="0.001" step="0.001" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">الوحدة</label><select id="waste-unit" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"><option value="Kg">كجم</option><option value="Grams">جرام</option><option value="Ltr">لتر</option><option value="Pcs">قطعة</option><option value="Box">صندوق</option></select></div>
             </div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Reason *</label><select id="waste-reason" required class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"><option value="Expired">Expired</option><option value="Damage">Damaged</option><option value="Spoiled">Spoiled</option><option value="Lost">Lost</option><option value="CustomerReturn">Customer Return</option></select></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Date and time</label><input id="waste-date-time" type="datetime-local" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Notes</label><textarea id="waste-notes" rows="3" maxlength="500" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></textarea></div>
-            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('waste-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl bg-red-500 text-white text-xs font-bold">Save Waste</button></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">السبب *</label><select id="waste-reason" required class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"><option value="Expired">منتهي الصلاحية</option><option value="Damage">ضرر/كسر</option><option value="Spoiled">تالف/فاسد</option><option value="Lost">مفقود/عجز</option><option value="CustomerReturn">مرتجع عميل</option></select></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">التاريخ والوقت</label><input id="waste-date-time" type="datetime-local" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">ملاحظات</label><textarea id="waste-notes" rows="3" maxlength="500" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></textarea></div>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('waste-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">إلغاء</button><button type="submit" class="px-5 py-2 rounded-xl bg-red-500 text-white text-xs font-bold">حفظ التعديلات</button></div>
         </form>
     </div>
 </div>
@@ -190,19 +217,19 @@
     <div id="product-price-modal-content" class="bg-white dark:bg-darkCard rounded-2xl max-w-lg w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder scale-95 transition-transform duration-300">
         <div class="flex justify-between items-start border-b border-slate-100 dark:border-darkBorder pb-3 mb-5">
             <button onclick="closeModal('product-price-modal')" class="p-1.5 rounded-xl border border-slate-200 dark:border-darkBorder text-slate-500"><i class="bi bi-x text-lg"></i></button>
-            <div class="text-right"><span class="text-[10px] font-black text-indigo-500 uppercase">Pricing</span><h3 id="price-modal-title" class="text-lg font-black text-slate-900 dark:text-white">Add Product Price</h3></div>
+            <div class="text-right"><span class="text-[10px] font-black text-indigo-500 uppercase">قوائم الأسعار</span><h3 id="price-modal-title" class="text-lg font-black text-slate-900 dark:text-white">إضافة سعر صنف</h3></div>
         </div>
         <form id="form-product-price" onsubmit="submitProductPriceForm(event)" class="space-y-4" dir="rtl">
             <input type="hidden" id="price-id">
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Price type name *</label><input id="price-type" required maxlength="50" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white" placeholder="Retail, VIP, Delivery..."></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">اسم نوع السعر *</label><input id="price-type" required maxlength="50" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right" placeholder="retail، صالة، سفري، دليفري..."></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Price *</label><input id="price-value" required type="number" min="0.01" step="0.01" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-2">Priority *</label><input id="price-priority" required type="number" min="0" step="1" value="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">السعر *</label><input id="price-value" required type="number" min="0.01" step="0.01" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
+                <div><label class="block text-xs font-bold text-slate-500 mb-2">الأولوية *</label><input id="price-priority" required type="number" min="0" step="1" value="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></div>
             </div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Branch</label><select id="price-branch" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"><option value="">All branches</option></select></div>
-            <div><label class="block text-xs font-bold text-slate-500 mb-2">Description</label><textarea id="price-description" rows="3" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></textarea></div>
-            <label class="flex items-center gap-2 text-xs font-bold text-slate-500"><input id="price-allow-override" type="checkbox" checked class="rounded"> Allow authorized override</label>
-            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('product-price-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl bg-indigo-500 text-white text-xs font-bold">Save Price</button></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">الفرع</label><select id="price-branch" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"><option value="">كل الفروع</option></select></div>
+            <div><label class="block text-xs font-bold text-slate-500 mb-2">الوصف</label><textarea id="price-description" rows="3" maxlength="100" class="w-full px-4 py-2.5 rounded-xl border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white text-right"></textarea></div>
+            <label class="flex items-center gap-2 text-xs font-bold text-slate-500"><input id="price-allow-override" type="checkbox" checked class="rounded"> السماح للمخولين بتعديل السعر أثناء الطلب</label>
+            <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="closeModal('product-price-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">إلغاء</button><button type="submit" class="px-5 py-2 rounded-xl bg-indigo-500 text-white text-xs font-bold">حفظ السعر</button></div>
         </form>
     </div>
 </div>
@@ -210,8 +237,8 @@
 <!-- CONFIRM MODAL -->
 <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[4px] z-50 hidden opacity-0 transition-opacity duration-300 flex items-center justify-center">
     <div id="confirm-modal-content" class="bg-white dark:bg-darkCard rounded-2xl max-w-sm w-full mx-4 p-6 shadow-2xl border border-slate-100 dark:border-darkBorder scale-95 transition-transform duration-300 text-right" dir="rtl">
-        <h3 id="confirm-title" class="text-base font-black text-slate-900 dark:text-white mb-2">Confirm action</h3>
-        <p id="confirm-message" class="text-xs text-slate-500 mb-5">Are you sure?</p>
-        <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('confirm-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">Cancel</button><button id="confirm-action-btn" type="button" class="px-5 py-2 rounded-xl bg-red-500 text-white text-xs font-bold">Delete</button></div>
+        <h3 id="confirm-title" class="text-base font-black text-slate-900 dark:text-white mb-2">تأكيد الإجراء</h3>
+        <p id="confirm-message" class="text-xs text-slate-500 mb-5">هل أنت متأكد من رغبتك في الاستمرار؟</p>
+        <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('confirm-modal')" class="px-4 py-2 rounded-xl border dark:border-darkBorder text-xs font-bold">إلغاء</button><button id="confirm-action-btn" type="button" class="px-5 py-2 rounded-xl bg-red-500 text-white text-xs font-bold">حذف</button></div>
     </div>
 </div>

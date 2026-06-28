@@ -1,4 +1,14 @@
             <div id="tab-stock-transfers" class="tab-content hidden space-y-6">
+                <style>
+                    .transfer-branch-source::before {
+                        content: "من: ";
+                        font-weight: 500;
+                    }
+                    .transfer-branch-dest::before {
+                        content: "إلى: ";
+                        font-weight: 500;
+                    }
+                </style>
                 <div class="flex justify-between items-center" dir="rtl">
                     <div class="text-right">
                         <h2 class="outfit-font text-xl font-extrabold text-slate-900 dark:text-white">تحويلات وطلبات المخزون بين الفروع</h2>
@@ -10,6 +20,25 @@
                 </div>
 
                 <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="p-6 border-b border-slate-100 dark:border-darkBorder flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4" dir="rtl">
+                        <div class="text-right">
+                            <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white">قائمة التحويلات الحالية</h3>
+                            <p class="text-xs text-slate-400 mt-1">تصفية وبحث وتصدير سجل التحويلات بين الفروع</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">من تاريخ ووقت:</span>
+                                <input type="datetime-local" id="filter-transfer-start-date" onchange="renderTransfersTable()" class="px-2 py-1.5 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-[11px] focus:outline-none dark:text-white" dir="ltr">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">إلى تاريخ ووقت:</span>
+                                <input type="datetime-local" id="filter-transfer-end-date" onchange="renderTransfersTable()" class="px-2 py-1.5 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-[11px] focus:outline-none dark:text-white" dir="ltr">
+                            </div>
+                            <input type="text" id="search-stock-transfers" oninput="renderTransfersTable()" placeholder="البحث في التحويلات..." class="px-4 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white text-right" dir="rtl">
+                            <button onclick="exportTableToExcel('table-stock-transfers-list', 'طلبات_وتحويلات_المخزون.xlsx')" class="px-3 py-2 border border-emerald-200 dark:border-emerald-900 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-excel"></i> تصدير إكسيل</button>
+                            <button onclick="exportTableToPdf('table-stock-transfers-list', 'طلبات وتحويلات المخزون بين الفروع', 'طلبات_وتحويلات_المخزون.pdf')" class="px-3 py-2 border border-red-200 dark:border-red-900 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all"><i class="bi bi-file-earmark-pdf"></i> تصدير PDF</button>
+                        </div>
+                    </div>
                     <div class="overflow-x-auto">
                         <table id="table-stock-transfers-list" class="w-full text-right border-collapse text-xs" dir="rtl">
                             <thead>

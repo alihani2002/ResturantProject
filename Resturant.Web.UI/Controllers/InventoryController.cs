@@ -103,7 +103,32 @@ namespace Resturant.Web.UI.Controllers
         {
             var activeBranchId = GetActiveBranchId(branchId);
             var transfers = await _inventoryService.GetTransfersAsync(activeBranchId);
-            return Json(transfers.Select(t => new {
+            var transfersList = transfers.ToList();
+
+            bool hasUpdates = false;
+            foreach (var t in transfersList)
+            {
+                if (t.CreatedOn == DateTime.MinValue || t.CreatedOn.Year < 2020)
+                {
+                    var fallbackDate = t.ProcessedDate ?? t.ReceivedDate ?? new DateTime(2026, 6, 1).AddHours(t.Id);
+                    t.CreatedOn = fallbackDate;
+
+                    var dbTransfer = await _context.StockTransfers.FindAsync(t.Id);
+                    if (dbTransfer != null)
+                    {
+                        dbTransfer.CreatedOn = fallbackDate;
+                        _context.StockTransfers.Update(dbTransfer);
+                        hasUpdates = true;
+                    }
+                }
+            }
+
+            if (hasUpdates)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            return Json(transfersList.Select(t => new {
                 t.Id,
                 t.SourceBranchId,
                 SourceBranchName = t.SourceBranch?.Name ?? $"Branch {t.SourceBranchId}",
