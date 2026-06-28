@@ -102,7 +102,7 @@ namespace Resturant.Web.UI.Controllers
         {
             int branchId = await GetSelectedBranchIdAsync();
 
-            var orders = await _context.Orders
+            var ordersList = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.OrderItems)
@@ -110,29 +110,30 @@ namespace Resturant.Web.UI.Controllers
                         .ThenInclude(a => a.AddOn)
                 .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.InPreparation) && o.BranchId == branchId)
                 .OrderBy(o => o.ConfirmedDate)
-                .Select(o => new
-                {
-                    id = o.Id,
-                    tableNumber = o.TableNumber,
-                    status = (int)o.Status,
-                    note = o.Note,
-                    totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
-                    orderDate = o.OrderDate,
-                    orderItems = o.OrderItems.Select(oi => new
-                    {
-                        id = oi.Id,
-                        menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithSize(oi.SizeName, oi.Price) : "",
-                        quantity = oi.Quantity,
-                        price = oi.Price,
-                        isCancelled = oi.IsCancelled,
-                        addOns = oi.AddOns.Select(a => new
-                        {
-                            id = a.Id,
-                            name = a.AddOn != null ? a.AddOn.Name : ""
-                        }).ToList()
-                    })
-                })
                 .ToListAsync();
+
+            var orders = ordersList.Select(o => new
+            {
+                id = o.Id,
+                tableNumber = o.TableNumber,
+                status = (int)o.Status,
+                note = o.Note,
+                totalAmount = o.OrderItems.Where(oi => !oi.IsCancelled).Sum(oi => oi.EffectiveTotal),
+                orderDate = o.OrderDate,
+                orderItems = o.OrderItems.Select(oi => new
+                {
+                    id = oi.Id,
+                    menuItemName = oi.MenuItem != null ? oi.MenuItem.GetFormattedNameWithSize(oi.SizeName, oi.Price) : "",
+                    quantity = oi.Quantity,
+                    price = oi.Price,
+                    isCancelled = oi.IsCancelled,
+                    addOns = oi.AddOns.Select(a => new
+                    {
+                        id = a.Id,
+                        name = a.AddOn != null ? a.AddOn.Name : ""
+                    }).ToList()
+                })
+            }).ToList();
 
             return Json(orders);
         }

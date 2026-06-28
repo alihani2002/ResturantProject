@@ -1259,7 +1259,7 @@ namespace Resturant.Services.Services
                     CurrentStock = i.CurrentStock,
                     ReorderLevel = i.ReorderLevel,
                     Unit = i.Unit,
-                    SupplierName = i.Supplier?.Name ?? "General Supplier",
+                    SupplierName = i.Supplier?.Name ?? "Unassigned",
                     StockStatus = i.CurrentStock == 0 ? "Out of Stock" : (i.CurrentStock <= i.ReorderLevel * 0.4 ? "Critical" : "Low")
                 })
                 .ToList();
@@ -1294,9 +1294,9 @@ namespace Resturant.Services.Services
                     rawCost += (decimal)r.QuantityRequired * (r.Ingredient?.CostPerUnit ?? 0m);
                 }
 
-                if (rawCost == 0)
+                if (rawCost == 0 && item.Cost > 0)
                 {
-                    rawCost = item.Price * 0.30m; // Default simulated food cost ratio (30%) if no recipe
+                    rawCost = item.Cost;
                 }
 
                 var ratio = item.Price > 0 ? (rawCost / item.Price) : 0m;
@@ -1330,7 +1330,13 @@ namespace Resturant.Services.Services
             .ToList();
 
             // 7. Supplier lead times & purchase summaries
-            var suppliers = await _context.Suppliers.ToListAsync();
+            var suppliersQuery = _context.Suppliers.AsQueryable();
+            if (filters.BranchId.HasValue)
+            {
+                suppliersQuery = suppliersQuery.Where(s => s.BranchId == filters.BranchId.Value);
+            }
+
+            var suppliers = await suppliersQuery.OrderBy(s => s.Name).ToListAsync();
             var supplierPurchases = new List<SupplierPurchaseDto>();
 
             foreach (var sup in suppliers)

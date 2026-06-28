@@ -53,8 +53,16 @@ namespace Resturant.Web.UI.Controllers
         }
 
         [HttpPost]
-        public IActionResult SwitchBranch(int? branchId)
+        public async Task<IActionResult> SwitchBranch(int? branchId)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            if (user.BranchId.HasValue)
+            {
+                return BadRequest(new { success = false, message = "You are not authorized to switch branches." });
+            }
+
             CookieOptions option = new CookieOptions
             {
                 Expires = DateTime.Now.AddYears(1),

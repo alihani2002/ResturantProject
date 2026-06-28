@@ -60,6 +60,73 @@ namespace Resturant.Core.Entities
         public double LeadTimeDays { get; set; } = 2.5;
 
         public double QualityRating { get; set; } = 4.5; // 1.0 to 5.0
+
+        public System.Collections.Generic.ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new System.Collections.Generic.List<PurchaseOrder>();
+    }
+
+    // Inventory: Purchase Order header
+    public class PurchaseOrder : BaseEntity
+    {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
+        public int SupplierId { get; set; }
+        public Supplier? Supplier { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        public string OrderNumber { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        public string Status { get; set; } = "Draft"; // Draft, Pending, Approved, Received, Cancelled
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalAmount { get; set; }
+
+        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime? ExpectedDate { get; set; }
+        public DateTime? ReceivedDate { get; set; }
+
+        [MaxLength(100)]
+        public string? CreatedBy { get; set; }
+
+        [MaxLength(100)]
+        public string? ApprovedBy { get; set; }
+
+        [MaxLength(100)]
+        public string? ReceivedBy { get; set; }
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        public System.Collections.Generic.ICollection<PurchaseOrderItem> Items { get; set; } = new System.Collections.Generic.List<PurchaseOrderItem>();
+    }
+
+    // Inventory: Purchase Order line
+    public class PurchaseOrderItem : BaseEntity
+    {
+        [Required]
+        public int PurchaseOrderId { get; set; }
+        public PurchaseOrder? PurchaseOrder { get; set; }
+
+        [Required]
+        public int IngredientId { get; set; }
+        public Ingredient? Ingredient { get; set; }
+
+        [Required]
+        public double QuantityOrdered { get; set; }
+
+        public double QuantityReceived { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal UnitCost { get; set; }
+
+        [NotMapped]
+        public decimal LineTotal => (decimal)QuantityOrdered * UnitCost;
     }
 
     // Inventory: Ingredient Entity (represents raw materials)
@@ -89,6 +156,8 @@ namespace Resturant.Core.Entities
 
         public int? SupplierId { get; set; }
         public Supplier? Supplier { get; set; }
+
+        public System.Collections.Generic.ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; } = new System.Collections.Generic.List<PurchaseOrderItem>();
     }
 
     // Inventory: Recipe Entity (connects MenuItem/Product to Ingredients)
@@ -211,5 +280,142 @@ namespace Resturant.Core.Entities
 
         [MaxLength(100)]
         public string? AdjustedBy { get; set; }
+    }
+
+    // Inventory: Ledger row for every stock mutation.
+    public class InventoryMovement : BaseEntity
+    {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
+        public int IngredientId { get; set; }
+        public Ingredient? Ingredient { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string MovementType { get; set; } // Purchase, RecipeConsumption, TransferOut, TransferIn, Adjustment, Waste, Return
+
+        [Required]
+        public double Quantity { get; set; }
+
+        [Required]
+        public double StockBefore { get; set; }
+
+        [Required]
+        public double StockAfter { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? UnitCost { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? TotalCost { get; set; }
+
+        [MaxLength(100)]
+        public string? ReferenceNumber { get; set; }
+
+        [MaxLength(100)]
+        public string? UserName { get; set; }
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        [Required]
+        public DateTime MovementDate { get; set; } = DateTime.Now;
+    }
+
+    // Inventory: Physical count header
+    public class InventoryCount : BaseEntity
+    {
+        [Required]
+        public int BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        public string CountNumber { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        public string Status { get; set; } = "Draft"; // Draft, PendingApproval, Approved, Applied, Cancelled
+
+        [Required]
+        public DateTime CountDate { get; set; } = DateTime.Now;
+
+        public bool RequiresApproval { get; set; }
+
+        [MaxLength(100)]
+        public string? CountedBy { get; set; }
+
+        [MaxLength(100)]
+        public string? ApprovedBy { get; set; }
+
+        public DateTime? ApprovedDate { get; set; }
+
+        public DateTime? AppliedDate { get; set; }
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        public System.Collections.Generic.ICollection<InventoryCountItem> Items { get; set; } = new System.Collections.Generic.List<InventoryCountItem>();
+    }
+
+    // Inventory: Physical count line
+    public class InventoryCountItem : BaseEntity
+    {
+        [Required]
+        public int InventoryCountId { get; set; }
+        public InventoryCount? InventoryCount { get; set; }
+
+        [Required]
+        public int IngredientId { get; set; }
+        public Ingredient? Ingredient { get; set; }
+
+        [Required]
+        public double ExpectedQuantity { get; set; }
+
+        [Required]
+        public double ActualQuantity { get; set; }
+
+        [Required]
+        public double Variance { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public string Reason { get; set; }
+    }
+
+    // Sales: flexible product pricing levels and future pricing rules.
+    public class MenuItemPrice : BaseEntity
+    {
+        [Required]
+        public int MenuItemId { get; set; }
+        public MenuItem? MenuItem { get; set; }
+
+        public int? BranchId { get; set; }
+        public Branch? Branch { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string PriceType { get; set; } = "Retail"; // Retail, Wholesale, VIP, Delivery, Custom
+
+        [MaxLength(100)]
+        public string? PriceListName { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Price { get; set; }
+
+        public int? MinQuantity { get; set; }
+
+        [MaxLength(100)]
+        public string? CustomerKey { get; set; }
+
+        public DateTime? StartsOn { get; set; }
+        public DateTime? EndsOn { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool AllowOverride { get; set; } = true;
+        public int Priority { get; set; } = 100;
     }
 }

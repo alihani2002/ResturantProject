@@ -1,48 +1,48 @@
-﻿            <div id="tab-recipe-mgmt" class="tab-content hidden space-y-6">
+            <div id="tab-recipe-mgmt" class="tab-content hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Left Menu Item Selector list -->
-                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
-                        <div class="pb-4 border-b dark:border-darkBorder">
-                            <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">Select Menu Product</h4>
-                            <p class="text-[10px] text-slate-400 mt-1">Configure recipes for standard items in the active branch context</p>
-                            <input type="text" id="search-recipe-menu" oninput="filterRecipeMenuItems()" placeholder="Search products..." class="w-full mt-3 px-3 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white">
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]" dir="rtl">
+                        <div class="pb-4 border-b dark:border-darkBorder text-right">
+                            <h4 class="outfit-font text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">اختر صنف المنيو</h4>
+                            <p class="text-[10px] text-slate-400 mt-1">إعداد مكونات ومقادير الأصناف للفرع المحدد حالياً</p>
+                            <input type="text" id="search-recipe-menu" oninput="filterRecipeMenuItems()" placeholder="البحث عن أصناف المنيو..." class="w-full mt-3 px-3 py-2 border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-slate-900 rounded-xl text-xs focus:outline-none dark:text-white text-right" dir="rtl">
                         </div>
-                        <div id="recipe-menu-list" class="flex-1 overflow-y-auto mt-4 space-y-1 pr-2">
+                        <div id="recipe-menu-list" class="flex-1 overflow-y-auto mt-4 space-y-1 pl-2">
                             <!-- Dynamic menu items -->
                         </div>
                     </div>
 
                     <!-- Right Recipe editor -->
                     <div class="lg:col-span-2 bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm flex flex-col h-[600px]">
-                        <div id="recipe-editor-empty" class="flex-1 flex flex-col items-center justify-center text-center text-slate-450 dark:text-slate-500">
+                        <div id="recipe-editor-empty" class="flex-1 flex flex-col items-center justify-center text-center text-slate-450 dark:text-slate-500" dir="rtl">
                             <div class="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-850/50 flex items-center justify-center text-rose-500 mb-4 border dark:border-darkBorder/40">
                                 <i class="bi bi-receipt text-3xl"></i>
                             </div>
-                            <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base">Select a product to view recipe</h4>
-                            <p class="text-xs text-slate-500 mt-1 max-w-xs">Setup ingredients consumption lists in grams, liters, or portions for automated stock count deduction upon cashier ticketing.</p>
+                            <h4 class="outfit-font font-bold text-slate-800 dark:text-white text-base">اختر صنفًا لعرض مكونات الوصفة</h4>
+                            <p class="text-xs text-slate-500 mt-1 max-w-xs">اضبط الخامات المستهلكة بالجرام، اللتر، أو القطعة لكل صنف ليتم خصمها تلقائيًا من مخزون الفرع بمجرد تسجيل الطلب.</p>
                         </div>
 
-                        <div id="recipe-editor-container" class="hidden flex-1 flex flex-col h-full min-h-0">
+                        <div id="recipe-editor-container" class="hidden flex-1 flex flex-col h-full min-h-0" dir="rtl">
                             <div class="pb-4 border-b dark:border-darkBorder flex justify-between items-start">
-                                <div>
-                                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest">Recipe Ingredients Map</span>
-                                    <h3 id="recipe-editor-name" class="outfit-font text-base font-black text-slate-800 dark:text-white mt-1">Product Name</h3>
-                                    <p id="recipe-editor-price" class="text-xs text-brand-500 font-bold mt-0.5">Price: 0.00 EGP</p>
+                                <div class="text-right">
+                                    <span class="px-2 py-0.5 rounded text-[8px] font-bold bg-rose-500/10 text-rose-500 uppercase tracking-widest text-right block w-fit">مكونات ومقادير الصنف</span>
+                                    <h3 id="recipe-editor-name" class="outfit-font text-base font-black text-slate-800 dark:text-white mt-1">اسم الصنف</h3>
+                                    <p id="recipe-editor-price" class="text-xs text-brand-500 font-bold mt-0.5">السعر: 0.00 ج.م</p>
                                 </div>
                                 <button onclick="addRecipeIngredientRow()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1">
-                                    <i class="bi bi-plus-lg"></i> Add Ingredient
+                                    <i class="bi bi-plus-lg"></i> إضافة خامة / مكون
                                 </button>
                             </div>
 
                             <form id="form-recipe-editor" onsubmit="saveRecipeChanges(event)" class="flex-1 flex flex-col min-h-0 justify-between mt-4">
-                                <div class="flex-1 overflow-y-auto space-y-3 pr-2">
-                                    <table class="w-full text-left border-collapse text-xs">
+                                <div class="flex-1 overflow-y-auto space-y-3 pl-2">
+                                    <table class="w-full text-right border-collapse text-xs" dir="rtl">
                                         <thead>
                                             <tr class="text-slate-450 dark:text-slate-400 font-bold uppercase text-[9px] border-b dark:border-darkBorder">
-                                                <th class="py-2 px-3">Ingredient Raw Material Name</th>
-                                                <th class="py-2 text-center" style="width: 150px;">Quantity Required</th>
-                                                <th class="py-2" style="width: 100px;">Unit</th>
-                                                <th class="py-2 text-center" style="width: 60px;">Control</th>
+                                                <th class="py-2 px-3 text-right">اسم الخامة / المادة الخام</th>
+                                                <th class="py-2 text-center" style="width: 150px;">الكمية المستهلكة</th>
+                                                <th class="py-2 text-right" style="width: 100px;">الوحدة</th>
+                                                <th class="py-2 text-center" style="width: 60px;">إجراء</th>
                                             </tr>
                                         </thead>
                                         <tbody id="recipe-ingredients-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder/40">
@@ -52,9 +52,9 @@
                                     <datalist id="branch-ingredients-datalist"></datalist>
                                 </div>
 
-                                <div class="border-t pt-4 dark:border-darkBorder flex justify-end gap-3 shrink-0">
-                                    <button type="button" onclick="cancelRecipeEdit()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">Cancel</button>
-                                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> Save Recipe Map</button>
+                                <div class="border-t pt-4 dark:border-darkBorder flex justify-end gap-3 shrink-0" dir="rtl">
+                                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-xs shadow-md shadow-brand-500/10 transition-all flex items-center gap-1.5"><i class="bi bi-floppy"></i> حفظ مكونات الصنف</button>
+                                    <button type="button" onclick="cancelRecipeEdit()" class="px-4 py-2 border dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-white transition-all">إلغاء</button>
                                 </div>
                             </form>
                         </div>

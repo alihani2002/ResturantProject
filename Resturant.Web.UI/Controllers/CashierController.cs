@@ -94,13 +94,22 @@ namespace Resturant.Web.UI.Controllers
             if (activeShift == null)
             {
                 ViewBag.NoActiveShift = true;
+                
+                var otherActiveShift = await _context.Set<CashierShift>()
+                    .Include(s => s.Cashier)
+                    .FirstOrDefaultAsync(s => s.IsActive && s.BranchId == selectedBranchId);
+                if (otherActiveShift != null)
+                {
+                    ViewBag.OtherActiveShift = otherActiveShift;
+                }
+                
                 return View(new List<Order>());
             }
 
             var activeOrders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                .Where(o => !o.IsDeleted && (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
                             o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
                             o.Status == OrderStatus.Cancelled) && o.BranchId == selectedBranchId)
                 .OrderBy(o => o.OrderDate)
@@ -119,7 +128,7 @@ namespace Resturant.Web.UI.Controllers
             int branchId = await GetSelectedBranchIdAsync();
 
             var activeShift = await _context.Set<CashierShift>()
-                .FirstOrDefaultAsync(s => s.IsActive && s.CashierId == userId && s.BranchId == branchId);
+                .FirstOrDefaultAsync(s => s.IsActive && s.BranchId == branchId);
 
             if (activeShift == null)
             {
@@ -134,6 +143,10 @@ namespace Resturant.Web.UI.Controllers
                 };
                 _context.Set<CashierShift>().Add(shift);
                 await _context.SaveChangesAsync();
+            }
+            else if (activeShift.CashierId != userId)
+            {
+                TempData["ErrorMessage"] = "يوجد وردية نشطة حالياً لكاشير آخر في هذا الفرع.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -155,9 +168,9 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("No active shift found.");
             }
 
-            // Calculate Expected Amount based on completed orders in this branch
+            // Calculate Expected Amount based on completed and paid orders in this branch
             var shiftOrders = await _context.Orders
-                .Where(o => o.ShiftId == activeShift.Id && o.Status == OrderStatus.Completed && o.BranchId == branchId)
+                .Where(o => o.ShiftId == activeShift.Id && (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid) && o.BranchId == branchId)
                 .ToListAsync();
 
             decimal expectedAmount = shiftOrders.Sum(o => o.TotalAmount + (o.Tips ?? 0));
@@ -168,7 +181,7 @@ namespace Resturant.Web.UI.Controllers
             activeShift.IsActive = false;
             activeShift.EndTime = DateTime.Now;
 
-            // Deduct local branch inventory stock based on recipes of all items sold in completed orders during this shift
+            // Deduct local branch inventory stock based on recipes of all items sold in completed/paid orders during this shift
             await _inventoryService.DeductStockForShiftAsync(activeShift.Id);
 
             await _context.SaveChangesAsync();
@@ -184,9 +197,17 @@ namespace Resturant.Web.UI.Controllers
 
             if (shift == null) return NotFound();
 
+            // Branch Security & Isolation check
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (dbUser != null && dbUser.BranchId.HasValue && shift.BranchId != dbUser.BranchId.Value)
+            {
+                return Forbid();
+            }
+
             var shiftOrders = await _context.Orders
                 .Include(o => o.OrderItems)
-                .Where(o => o.ShiftId == id && o.Status == OrderStatus.Completed)
+                .Where(o => o.ShiftId == id && (o.Status == OrderStatus.Completed || o.Status == OrderStatus.Paid))
                 .ToListAsync();
 
             ViewBag.ShiftOrdersCount = shiftOrders.Count;
@@ -218,7 +239,7 @@ namespace Resturant.Web.UI.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.MenuItem)
-                .Where(o => (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
+                .Where(o => !o.IsDeleted && (o.Status == OrderStatus.Confirmed || o.Status == OrderStatus.Ready ||
                             o.Status == OrderStatus.InPreparation || o.Status == OrderStatus.Served ||
                             o.Status == OrderStatus.Cancelled) && o.BranchId == branchId)
                 .ToListAsync();
@@ -269,6 +290,26 @@ namespace Resturant.Web.UI.Controllers
 
             if (orders.All(o => o.Status == OrderStatus.Completed || o.Status == OrderStatus.Cancelled))
             {
+                bool anyCancelled = false;
+                foreach (var order in orders)
+                {
+                    if (order.Status == OrderStatus.Cancelled)
+                    {
+                        order.IsDeleted = true;
+                        anyCancelled = true;
+                    }
+                }
+                if (anyCancelled)
+                {
+                    await _context.SaveChangesAsync();
+
+                    int tableNumber = orders.First().TableNumber;
+                    var notifyData = new { tableNumber = tableNumber };
+                    await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("TableCleared", notifyData);
+                    await _hubContext.Clients.Group($"cashier_{branchId}").SendAsync("OrderCompleted", notifyData);
+                    await _hubContext.Clients.Group($"admin_{branchId}").SendAsync("OrderStatusChanged", notifyData);
+                    await _hubContext.Clients.Group($"guest_{branchId}").SendAsync("OrderStatusChanged", new { tableNumber = tableNumber });
+                }
                 return Ok(); // Idempotent success
             }
 
@@ -485,7 +526,8 @@ namespace Resturant.Web.UI.Controllers
                 ChangeReturned = request.ChangeReturned,
                 Tips = request.Tips,
                 Note = "Takeaway Order",
-                BranchId = branchId
+                BranchId = branchId,
+                PriceCategory = string.IsNullOrWhiteSpace(request.PriceCategory) ? "Retail" : request.PriceCategory
             };
 
             _context.Orders.Add(order);
@@ -497,10 +539,14 @@ namespace Resturant.Web.UI.Controllers
             {
                 var menuItem = await _context.MenuItems
                     .Include(m => m.Sizes)
+                    .Include(m => m.Prices)
                     .FirstOrDefaultAsync(m => m.Id == itemReq.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable) continue;
 
-                var itemPrice = itemReq.Price ?? menuItem.Price;
+                var resolvedPrice = ResolveMenuItemPrice(menuItem, branchId, order.PriceCategory, itemReq.Quantity, order.PhoneNumber);
+                var itemPrice = itemReq.Price.HasValue && CanOverridePrice(menuItem, branchId, order.PriceCategory)
+                    ? itemReq.Price.Value
+                    : resolvedPrice;
                 var selectedSize = menuItem.GetParsedSizes().FirstOrDefault(s =>
                     (!string.IsNullOrWhiteSpace(itemReq.Size) && s.Name == itemReq.Size) ||
                     (string.IsNullOrWhiteSpace(itemReq.Size) && s.Price == itemPrice));
@@ -566,6 +612,39 @@ namespace Resturant.Web.UI.Controllers
 
             return Ok(new { orderId = order.Id });
         }
+
+        private static decimal ResolveMenuItemPrice(MenuItem menuItem, int branchId, string? priceCategory, int quantity, string? customerKey)
+        {
+            var now = DateTime.Now;
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            var price = menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.StartsOn.HasValue || p.StartsOn.Value <= now)
+                .Where(p => !p.EndsOn.HasValue || p.EndsOn.Value >= now)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => !p.MinQuantity.HasValue || quantity >= p.MinQuantity.Value)
+                .Where(p => string.IsNullOrWhiteSpace(p.CustomerKey) || p.CustomerKey == customerKey)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.BranchId.HasValue ? 0 : 1)
+                .ThenBy(p => string.IsNullOrWhiteSpace(p.CustomerKey) ? 1 : 0)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault();
+
+            return price?.Price ?? menuItem.Price;
+        }
+
+        private static bool CanOverridePrice(MenuItem menuItem, int branchId, string? priceCategory)
+        {
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            return menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault()?.AllowOverride ?? true;
+        }
     }
 
     public class CreateTakeawayOrderRequest
@@ -574,6 +653,7 @@ namespace Resturant.Web.UI.Controllers
         public decimal PaidAmount { get; set; }
         public decimal ChangeReturned { get; set; }
         public decimal Tips { get; set; }
+        public string? PriceCategory { get; set; }
     }
 
     public class TakeawayItemRequest

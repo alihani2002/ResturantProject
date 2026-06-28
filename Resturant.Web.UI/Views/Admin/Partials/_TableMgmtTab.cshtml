@@ -1,36 +1,36 @@
-﻿            <div id="tab-table-mgmt" class="tab-content hidden space-y-6">
+            <div id="tab-table-mgmt" class="tab-content hidden space-y-6" dir="rtl">
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <!-- Left: Add Form -->
                     <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
                         <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            <i class="bi bi-plus-circle text-orange-500"></i> Add New Table
+                            <i class="bi bi-plus-circle text-orange-500"></i> إضافة طاولة جديدة
                         </h3>
                         <form id="form-add-table" onsubmit="submitTable(event)" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Table Number</label>
-                                <input type="number" id="tbl-number" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" placeholder="e.g. 5">
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">رقم الطاولة</label>
+                                <input type="number" id="tbl-number" required class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" placeholder="مثال: 5">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Custom Website Domain (Optional)</label>
-                                <input type="url" id="tbl-domain" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" placeholder="e.g. https://myrestaurant.com">
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">Defaults to current domain if empty.</span>
+                                <label class="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">نطاق موقع الويب المخصص (اختياري)</label>
+                                <input type="url" id="tbl-domain" class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-darkBorder rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all" placeholder="مثال: https://myrestaurant.com">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 block">يتم استخدام النطاق الحالي إذا كان فارغاً.</span>
                             </div>
-                            <button type="submit" class="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all shadow-md shadow-orange-500/10">Add Restaurant Table</button>
+                            <button type="submit" class="w-full py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition-all shadow-md shadow-orange-500/10">إضافة الطاولة</button>
                         </form>
                     </div>
 
                     <!-- Right: List Table -->
                     <div class="xl:col-span-2 bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
                         <h3 class="outfit-font text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            <i class="bi bi-grid text-orange-500"></i> Restaurant Tables & QR Codes
+                            <i class="bi bi-grid text-orange-500"></i> طاولات المطعم ورموز الاستجابة السريعة (QR)
                         </h3>
                         <div class="overflow-x-auto">
-                            <table id="table-tbl-list" class="w-full text-left border-collapse text-xs">
+                            <table id="table-tbl-list" class="w-full text-right border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                        <th class="py-3">Table Number</th>
-                                        <th class="py-3">QR Code</th>
-                                        <th class="py-3 text-right">Actions</th>
+                                        <th class="py-3">رقم الطاولة</th>
+                                        <th class="py-3">رمز QR</th>
+                                        <th class="py-3 text-left">الإجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">

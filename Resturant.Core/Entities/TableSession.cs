@@ -25,6 +25,8 @@ namespace Resturant.Core.Entities
         [Required]
         public string PhoneNumber { get; set; }
 
+        public string PriceCategory { get; set; } = "Retail";
+
         public DateTime StartTime { get; set; } = DateTime.Now;
         public DateTime? EndTime { get; set; }
 

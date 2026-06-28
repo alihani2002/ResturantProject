@@ -58,6 +58,7 @@ namespace Resturant.Core.Entities
         public ICollection<MenuItemAddOn> AddOns { get; set; } = new List<MenuItemAddOn>();
         public ICollection<MenuItemRecommendation> Recommendations { get; set; } = new List<MenuItemRecommendation>();
         public ICollection<MenuItemSize> Sizes { get; set; } = new List<MenuItemSize>();
+        public ICollection<MenuItemPrice> Prices { get; set; } = new List<MenuItemPrice>();
 
         public class SizeOption
         {

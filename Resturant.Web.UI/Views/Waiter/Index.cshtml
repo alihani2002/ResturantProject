@@ -4,25 +4,28 @@
 @model IEnumerable<Resturant.Web.UI.ViewModels.WaiterTableViewModel>
 
 @{
-    ViewData["Title"] = "Table Management";
+    ViewData["Title"] = "إدارة الطاولات";
 }
 
-<div class="container-fluid mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-grid-3x3-gap-fill text-warning me-2"></i>Table Management <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> Connecting...</span></h2>
-        <div class="d-flex align-items-center gap-2">
+<div class="container-fluid mt-4" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2>
+            <i class="bi bi-grid-3x3-gap-fill text-warning ms-2"></i>إدارة الطاولات 
+            <span id="connection-status" class="badge bg-secondary ms-2"><i class="bi bi-wifi"></i> جاري الاتصال...</span>
+        </h2>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             @if (User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || User.IsInRole(Resturant.Core.Common.AppRoles.Manager))
             {
-                <a href="@Url.Action("SelectBranch", "Waiter")" class="btn btn-warning btn-sm fw-bold">
-                    <i class="bi bi-arrow-left-right me-1"></i> Switch Branch
+                <a href="@Url.Action("SelectBranch", "Waiter")" class="btn btn-warning btn-sm fw-bold rounded-pill px-3">
+                    <i class="bi bi-arrow-left-right ms-1"></i> تبديل الفرع
                 </a>
             }
-            <button class="btn btn-outline-dark btn-sm" onclick="fetchAndRefreshTables()">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+            <button class="btn btn-outline-dark btn-sm rounded-pill" onclick="fetchAndRefreshTables()">
+                <i class="bi bi-arrow-clockwise"></i> تحديث
             </button>
-           <span class="badge bg-white text-dark border me-2"><i class="bi bi-circle-fill text-secondary me-1"></i> Empty</span>
-           <span class="badge bg-warning text-dark me-2"><i class="bi bi-clock-fill me-1"></i> Pending Order</span>
-           <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Active/Served</span>
+           <span class="badge bg-white text-dark border"><i class="bi bi-circle-fill text-secondary ms-1"></i> فارغة</span>
+           <span class="badge bg-warning text-dark"><i class="bi bi-clock-fill ms-1"></i> طلب معلق</span>
+           <span class="badge bg-success"><i class="bi bi-check-circle-fill ms-1"></i> نشط / تم التقديم</span>
         </div>
     </div>
 
@@ -30,23 +33,29 @@
         @foreach (var table in Model)
         {
             <div class="col-lg-3 col-md-4 col-sm-6" id="table-card-@table.TableNumber">
-                <div class="card h-100 shadow-sm border-0 @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : (table.ActiveSessionId.HasValue ? "bg-info bg-opacity-10 border border-info border-opacity-25" : "bg-white")))">
-                    <div class="card-body text-center d-flex flex-column p-2">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden @(table.AggregateStatus == "Pending" ? "bg-warning bg-opacity-25" : (table.AggregateStatus == "Active" ? "bg-success bg-opacity-25" : (table.ActiveSessionId.HasValue ? "bg-info bg-opacity-10 border border-info border-opacity-25" : "bg-white")))">
+                    <div class="card-body text-center d-flex flex-column p-3">
                         <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
-                            <h3 class="card-title h4 fw-bold mb-0">Table @table.TableNumber</h3>
+                            <h3 class="card-title h4 fw-bold mb-0">طاولة @table.TableNumber</h3>
                             @if (table.ActiveSessionId.HasValue)
                             {
-                                <button class="btn btn-xs btn-outline-danger" onclick="closeSession(@table.ActiveSessionId)" title="Close Session">
+                                <button class="btn btn-xs btn-outline-danger border-0 rounded-circle" onclick="closeSession(@table.ActiveSessionId)" title="إغلاق الجلسة">
                                     <i class="bi bi-x-circle"></i>
                                 </button>
                             }
                         </div>
 
+                        <!-- Call Waiter Alert -->
+                        <div id="call-waiter-alert-@table.TableNumber" class="alert alert-danger py-2 px-3 mb-2 rounded-3 text-center call-waiter-alert shadow-sm" style="display: none; font-size: 0.85rem; font-weight: bold; background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">
+                            <i class="bi bi-bell-fill ms-1 text-danger animate-spin"></i> العميل يطلب الويتر!
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2 ms-2 rounded-pill small" onclick="clearWaiterCall(@table.TableNumber)" style="font-size: 0.75rem;">تمت التلبية</button>
+                        </div>
+
                         @if (!string.IsNullOrEmpty(table.CustomerName))
                         {
-                            <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded">
-                                <div><i class="bi bi-person-fill text-secondary me-1"></i><strong>@table.CustomerName</strong></div>
-                                <div class="text-muted"><i class="bi bi-telephone-fill me-1"></i>@table.PhoneNumber</div>
+                            <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded text-right" style="direction: rtl;">
+                                <div><i class="bi bi-person-fill text-secondary ms-1"></i><strong>@table.CustomerName</strong></div>
+                                <div class="text-muted"><i class="bi bi-telephone-fill ms-1"></i>@table.PhoneNumber</div>
                             </div>
                         }
                         
@@ -55,27 +64,29 @@
                             {
                                 foreach (var order in table.Orders)
                                 {
-                                    <div class="card mb-2 shadow-sm order-card border-@((order.Status == "Pending") ? "warning" : "success")">
+                                    <div class="card mb-2 shadow-sm order-card border-@((order.Status == "Pending") ? "warning" : "success") rounded-3 overflow-hidden">
                                         <div class="card-header py-1 @((order.Status == "Pending") ? "bg-warning text-dark" : (order.Status == "Ready" ? "bg-info text-white" : "bg-success text-white")) d-flex justify-content-between align-items-center">
-                                            <small class="fw-bold">Order #@order.OrderId</small>
+                                            <small class="fw-bold">طلب #@order.OrderId</small>
                                             @if (order.Status == "Ready")
                                             {
-                                                <span class="badge bg-white text-info fw-bold pulse-green">READY</span>
+                                                <span class="badge bg-white text-info fw-bold pulse-green">جاهز</span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-white text-dark small">@order.Status</span>
+                                                <span class="badge bg-white text-dark small">
+                                                    @(order.Status == "Pending" ? "معلق" : (order.Status == "InPreparation" ? "تحضير" : (order.Status == "Confirmed" ? "مؤكد" : order.Status)))
+                                                </span>
                                             }
                                         </div>
-                                        <div class="card-body p-2 text-start">
-                                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-                                                <small class="text-muted">Total:</small>
-                                                 <small class="fw-bold">@(order.OrderItems.Where(i => !i.IsCancelled).Sum(i => i.EffectiveTotal).ToString("0.00")) L.E.</small>
+                                        <div class="card-body p-2 text-right" style="direction: rtl;">
+                                            <div class="d-flex justify-content-between align-items-center mt-1 pb-2 border-bottom">
+                                                <small class="text-muted">الإجمالي:</small>
+                                                <small class="fw-bold text-dark">@(order.OrderItems.Where(i => !i.IsCancelled).Sum(i => i.EffectiveTotal).ToString("N2")) ج.م</small>
                                             </div>
 
                                             @if (order.OrderItems != null && order.OrderItems.Any())
                                             {
-                                                <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                                                <ul class="list-unstyled mb-2 small bg-light p-2 rounded-3 mt-2">
                                                     @foreach (var item in order.OrderItems)
                                                     {
                                                         <li class="d-flex align-items-center justify-content-between gap-1 mb-1" id="waiter-item-@order.OrderId-@item.Name.Replace(" ","-")">
@@ -94,36 +105,33 @@
                                             @if (!string.IsNullOrEmpty(order.Note))
                                             {
                                                 <div class="alert alert-warning py-1 px-2 mb-2">
-                                                    <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>@order.Note</small>
+                                                    <small class="d-block fst-italic"><i class="bi bi-pencil-fill ms-1"></i>@order.Note</small>
                                                 </div>
                                             }
                                             
                                             <div class="d-flex gap-1 mt-2">
                                                 @if (order.Status == "Pending")
                                                 {
-                                                    <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(@order.OrderId)" title="Accept Order">
-                                                        <i class="bi bi-check2"></i> Accept
+                                                    <button class="btn btn-sm btn-success flex-grow-1 rounded-pill" onclick="acceptOrder(@order.OrderId)" title="قبول الطلب">
+                                                        <i class="bi bi-check2"></i> قبول
                                                     </button>
-                                                    <button class="btn btn-sm btn-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                    <button class="btn btn-sm btn-danger rounded-pill" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="إلغاء">
                                                         <i class="bi bi-x"></i> 
                                                     </button>
                                                 }
                                                 else if (order.Status == "Ready")
                                                 {
-                                                    <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(@order.OrderId)" title="Serve Order">
-                                                        <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                                                    <button class="btn btn-sm btn-success flex-grow-1 fw-bold rounded-pill" onclick="serveOrder(@order.OrderId)" title="تقديم الطلب">
+                                                        <i class="bi bi-cup-hot-fill ms-1"></i> تقديم
                                                     </button>
-                                                    <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
+                                                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="إلغاء">
                                                         <i class="bi bi-x"></i> 
                                                     </button>
                                                 }
                                                 else
                                                 {
-                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="Cancel">
-                                                        <i class="bi bi-x"></i> 
-                                                     </button>
-                                                     <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(@order.OrderId)" title="Clear Table">
-                                                        <i class="bi bi-check-circle"></i> Clear
+                                                     <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(@order.OrderId, @table.TableNumber)" title="حذف الطلب">
+                                                        <i class="bi bi-trash"></i> حذف الطلب
                                                      </button>
                                                 }
                                             </div>
@@ -137,14 +145,14 @@
                                 {
                                     <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
                                         <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
-                                        Waiting for Order
+                                        في انتظار الطلب
                                     </div>
                                 }
                                 else
                                 {
                                     <div class="text-muted small mt-4">
                                         <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
-                                        Available
+                                        متاحة
                                     </div>
                                 }
                             }
@@ -154,13 +162,13 @@
                             @if (table.ActiveSessionId.HasValue)
                             {
                                 <button class="btn btn-warning btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(@table.TableNumber, true)">
-                                    <i class="bi bi-cart-plus me-1"></i> Add Order
+                                    <i class="bi bi-cart-plus ms-1"></i> إضافة طلب
                                 </button>
                             }
                             else
                             {
                                 <button class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(@table.TableNumber, false)">
-                                    <i class="bi bi-plus-circle me-1"></i> Open & Order
+                                    <i class="bi bi-plus-circle ms-1"></i> فتح وطلب
                                 </button>
                             }
                         </div>
@@ -174,14 +182,14 @@
 <!-- ================================================================ -->
 <!-- [START] MODAL: WAITER MENU & ORDER CREATOR                        -->
 <!-- ================================================================ -->
-<div class="modal fade modal-xl" id="waiterOrderModal" tabindex="-1" aria-hidden="true" style="font-family: 'Inter', sans-serif;">
+<div class="modal fade modal-xl" id="waiterOrderModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 text-dark" style="background: #ffffff; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.05) !important;">
             <div style="height: 6px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); border-radius: 24px 24px 0 0;"></div>
             
-            <div class="modal-header border-0 pb-0 px-4 pt-4">
-                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cart-plus-fill text-warning me-2"></i>Add Order - Table <span id="waiterOrderModalTitleTable"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 pb-0 px-4 pt-4 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cart-plus-fill text-warning ms-2"></i>إضافة طلب - طاولة <span id="waiterOrderModalTitleTable"></span></h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
             <div class="modal-body px-4 py-3">
@@ -192,21 +200,21 @@
                             <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" style="width: 80px; height: 80px; border: 2px solid #d4af37;">
                                 <i class="bi bi-person-plus text-warning" style="font-size: 2.2rem;"></i>
                             </div>
-                            <h4 class="fw-bold mb-2">Open Table Session</h4>
-                            <p class="text-muted small mb-4">Please register the guest name and phone number to start ordering.</p>
+                            <h4 class="fw-bold mb-2">فتح جلسة للطاولة</h4>
+                            <p class="text-muted small mb-4">يرجى تسجيل اسم الضيف ورقم الهاتف لبدء الطلب.</p>
                             
-                            <div class="text-start mb-3">
-                                <label class="form-label small fw-bold text-dark">Customer Name</label>
-                                <input type="text" id="waiterCustomerName" class="form-control py-2.5 rounded-3 bg-white text-dark" placeholder="e.g. Aly Hani" />
+                            <div class="text-right mb-3" style="direction: rtl;">
+                                <label class="form-label small fw-bold text-dark">اسم العميل</label>
+                                <input type="text" id="waiterCustomerName" class="form-control py-2.5 rounded-3 bg-white text-dark text-right" placeholder="مثال: علي هاني" />
                             </div>
-                            <div class="text-start mb-4">
-                                <label class="form-label small fw-bold text-dark">Phone Number</label>
-                                <input type="tel" id="waiterCustomerPhone" class="form-control py-2.5 rounded-3 bg-white text-dark" placeholder="e.g. 0123456789" />
+                            <div class="text-right mb-4" style="direction: rtl;">
+                                <label class="form-label small fw-bold text-dark">رقم الهاتف</label>
+                                <input type="tel" id="waiterCustomerPhone" class="form-control py-2.5 rounded-3 bg-white text-dark text-right" placeholder="مثال: 0123456789" />
                             </div>
                             
                             <div class="d-flex gap-2">
-                                <button class="btn btn-outline-secondary w-50 py-2.5 rounded-pill fw-bold" onclick="quickStartSession()">Quick Open</button>
-                                <button class="btn btn-warning w-50 py-2.5 rounded-pill fw-bold" onclick="submitStartSession()">Start & Order</button>
+                                <button class="btn btn-outline-secondary w-50 py-2.5 rounded-pill fw-bold" onclick="quickStartSession()">فتح سريع</button>
+                                <button class="btn btn-warning w-50 py-2.5 rounded-pill fw-bold" onclick="submitStartSession()">بدء وطلب</button>
                             </div>
                         </div>
                     </div>
@@ -216,51 +224,51 @@
                 <div id="waiterMenuStep" style="display: none;">
                     <div class="row g-4" style="height: 60vh;">
                         
-                        <!-- Left: Menu Explorer (Categories and Items) -->
-                        <div class="col-lg-8 d-flex flex-column h-100">
-                            <div class="input-group mb-3 shadow-sm">
+                        <!-- Right: Menu Explorer (Categories and Items) -->
+                        <div class="col-lg-8 d-flex flex-column h-100 border-start ps-3">
+                            <div class="input-group mb-3 shadow-sm" style="direction: ltr;">
+                                <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="البحث عن صنف..." oninput="filterMenuItems()" />
                                 <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-search"></i></span>
-                                <input type="text" id="menuSearchInput" class="form-control bg-white text-dark border-1" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0;" placeholder="Search menu item..." oninput="filterMenuItems()" />
                             </div>
                             
                             <!-- Categories slider -->
-                            <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categoriesSlider" style="scrollbar-width: thin;">
+                            <div class="d-flex gap-2 overflow-auto pb-2 mb-3" id="categoriesSlider" style="scrollbar-width: thin; direction: rtl;">
                                 <!-- Dynamically loaded -->
                             </div>
 
                             <!-- Menu items grid -->
-                            <div class="row g-3 overflow-auto flex-grow-1" id="menuItemsGrid" style="scrollbar-width: thin; max-height: calc(60vh - 120px);">
+                            <div class="row g-3 overflow-auto flex-grow-1" id="menuItemsGrid" style="scrollbar-width: thin; max-height: calc(60vh - 120px); direction: rtl;">
                                 <!-- Dynamically loaded -->
                             </div>
                         </div>
                         
-                        <!-- Right: Active Cart Pane -->
-                        <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                            <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 me-2"></i>Order Cart</h5>
+                        <!-- Left: Active Cart Pane -->
+                        <div class="col-lg-4 d-flex flex-column h-100 p-3 rounded-4 bg-light border">
+                            <h5 class="fw-bold text-warning border-bottom pb-2 mb-3"><i class="bi bi-cart3 ms-2"></i>سلة الطلبات</h5>
                             
                             <!-- Cart list -->
-                            <div class="flex-grow-1 overflow-auto mb-3" id="cartItemsList" style="scrollbar-width: thin; max-height: calc(60vh - 240px);">
+                            <div class="flex-grow-1 overflow-auto mb-3" id="cartItemsList" style="scrollbar-width: thin; max-height: calc(60vh - 240px); direction: rtl;">
                                 <div class="text-center py-5 text-muted" id="cartEmptyState">
                                     <i class="bi bi-cart-x display-4 mb-3 d-block text-secondary"></i>
-                                    Cart is Empty
+                                    السلة فارغة
                                 </div>
                             </div>
 
                             <!-- Note field -->
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Special Notes / Kitchen Instructions</label>
-                                <textarea id="orderNotesInput" class="form-control bg-white text-dark small" rows="2" placeholder="e.g. Extra sauce, no onions..."></textarea>
+                            <div class="mb-3 text-right" style="direction: rtl;">
+                                <label class="form-label small fw-bold text-muted">ملاحظات خاصة / تعليمات المطبخ</label>
+                                <textarea id="orderNotesInput" class="form-control bg-white text-dark small text-right" rows="2" placeholder="مثال: صلصة إضافية، بدون بصل..."></textarea>
                             </div>
                             
                             <!-- Summary and Checkout -->
-                            <div class="border-top pt-3" style="border-color: rgba(0,0,0,0.08) !important;">
+                            <div class="border-top pt-3" style="border-color: rgba(0,0,0,0.08) !important; direction: rtl;">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Subtotal:</span>
-                                    <span class="fw-bold text-dark" id="cartSubtotal">0.00 EGP</span>
+                                    <span class="text-muted">المجموع الفرعي:</span>
+                                    <span class="fw-bold text-dark" id="cartSubtotal">0.00 ج.م</span>
                                 </div>
                                 
                                 <button class="btn btn-warning w-100 py-3 fw-bold rounded-pill mt-2 shadow" id="btnCartCheckout" disabled onclick="submitWaiterOrder()">
-                                    <i class="bi bi-send-fill me-2"></i> Place Order
+                                    <i class="bi bi-send-fill ms-2"></i> إرسال الطلب
                                 </button>
                             </div>
                         </div>
@@ -293,29 +301,27 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
         const activeBranchId = @(ViewBag.ActiveBranchId ?? "null");
-        // SignalR Connection with auto-reconnect and fallback
+        const activeWaiterCalls = new Set(JSON.parse(localStorage.getItem('waiter_calls') || '[]'));
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/orderHub", {
                 transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
             })
             .withAutomaticReconnect([0, 1000, 3000, 5000, 10000])
-            .configureLogging(signalR.LogLevel.Information) // Increased logging for debugging
+            .configureLogging(signalR.LogLevel.Information)
             .build();
             
         console.log("SignalR Connection object created");
 
-        // Connection state indicator
         function updateConnectionStatus(connected) {
             const badge = document.getElementById('connection-status');
             if (badge) {
                 badge.className = connected ? 'badge bg-success ms-2 shadow-sm' : 'badge bg-danger ms-2';
                 badge.innerHTML = connected 
-                    ? '<i class="bi bi-wifi"></i> Live' 
-                    : '<i class="bi bi-wifi-off"></i> Out of Connection <button class="btn btn-xs btn-light ms-2 py-0 px-1 text-danger fw-bold" onclick="startConnection()">Try Now</button>';
+                    ? '<i class="bi bi-wifi"></i> مباشر' 
+                    : '<i class="bi bi-wifi-off"></i> غير متصل <button class="btn btn-xs btn-light ms-2 py-0 px-1 text-danger fw-bold" onclick="startConnection()">اتصل الآن</button>';
             }
         }
 
-        // Update table card UI dynamically
         function updateTableCard(tableData) {
             const tableNumber = tableData.tableNumber;
             const card = document.getElementById(`table-card-${tableNumber}`);
@@ -324,8 +330,7 @@
             const cardInner = card.querySelector('.card');
             const ordersContainer = card.querySelector('.orders-container');
 
-            // Update card background based on aggregate status
-            cardInner.className = 'card h-100 shadow-sm border-0'; // Reset
+            cardInner.className = 'card h-100 shadow-sm border-0 rounded-4 overflow-hidden';
             if (tableData.status === 'Pending') {
                 cardInner.classList.add('bg-warning', 'bg-opacity-25');
             } else if (tableData.status === 'Active') {
@@ -336,24 +341,33 @@
                 cardInner.classList.add('bg-white');
             }
 
-            // Update Header with Session Info
             let headerHtml = `
                 <div class="d-flex justify-content-between align-items-start border-bottom pb-2 mb-2">
-                    <h3 class="card-title h4 fw-bold mb-0">Table ${tableNumber}</h3>
+                    <h3 class="card-title h4 fw-bold mb-0">طاولة ${tableNumber}</h3>
                     ${tableData.sessionId ? `
-                        <button class="btn btn-xs btn-outline-danger" onclick="closeSession(${tableData.sessionId})" title="Close Session">
+                        <button class="btn btn-xs btn-outline-danger border-0 rounded-circle" onclick="closeSession(${tableData.sessionId})" title="إغلاق الجلسة">
                             <i class="bi bi-x-circle"></i>
                         </button>
                     ` : ''}
                 </div>
             `;
+
+            let callAlertHtml = '';
+            if (activeWaiterCalls.has(tableNumber)) {
+                callAlertHtml = `
+                    <div id="call-waiter-alert-${tableNumber}" class="alert alert-danger py-2 px-3 mb-2 rounded-3 text-center call-waiter-alert shadow-sm" style="font-size: 0.85rem; font-weight: bold; background-color: #f8d7da; border-color: #f5c2c7; color: #842029;">
+                        <i class="bi bi-bell-fill ms-1 text-danger animate-spin"></i> العميل يطلب الويتر!
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 ms-2 rounded-pill small" onclick="clearWaiterCall(${tableNumber})" style="font-size: 0.75rem;">تمت التلبية</button>
+                    </div>
+                `;
+            }
             
             let sessionHtml = '';
             if (tableData.customerName) {
                 sessionHtml = `
-                    <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded">
-                        <div><i class="bi bi-person-fill text-secondary me-1"></i><strong>${tableData.customerName}</strong></div>
-                        <div class="text-muted"><i class="bi bi-telephone-fill me-1"></i>${tableData.phoneNumber}</div>
+                    <div class="small text-start mb-2 px-2 py-1 bg-white bg-opacity-50 rounded text-right" style="direction: rtl;">
+                        <div><i class="bi bi-person-fill text-secondary ms-1"></i><strong>${tableData.customerName}</strong></div>
+                        <div class="text-muted"><i class="bi bi-telephone-fill ms-1"></i>${tableData.phoneNumber}</div>
                     </div>
                 `;
             }
@@ -366,26 +380,26 @@
                     const isConfirmed = order.status === 'Confirmed' || order.status === 1;
                     const isInPrep = order.status === 'InPreparation' || order.status === 2;
                     
-                    let statusText = 'Active';
+                    let statusText = 'نشط';
                     let themeColor = 'success';
-                    let badgeHtml = `<span class="badge bg-white text-dark small">Active</span>`;
+                    let badgeHtml = `<span class="badge bg-white text-dark small">نشط</span>`;
 
                     if (isPending) {
-                        statusText = 'Pending';
+                        statusText = 'معلق';
                         themeColor = 'warning';
-                        badgeHtml = `<span class="badge bg-white text-dark small">Pending</span>`;
+                        badgeHtml = `<span class="badge bg-white text-dark small">معلق</span>`;
                     } else if (isReady) {
-                        statusText = 'Ready';
+                        statusText = 'جاهز';
                         themeColor = 'info';
-                        badgeHtml = `<span class="badge bg-white text-info fw-bold pulse-green shadow-sm">READY</span>`;
+                        badgeHtml = `<span class="badge bg-white text-info fw-bold pulse-green shadow-sm">جاهز</span>`;
                     } else if (isInPrep) {
-                         statusText = 'Cooking';
+                         statusText = 'تحضير';
                          themeColor = 'primary';
-                         badgeHtml = `<span class="badge bg-white text-primary small">Cooking</span>`;
+                         badgeHtml = `<span class="badge bg-white text-primary small">تحضير</span>`;
                     } else if (isConfirmed) {
-                         statusText = 'Confirmed';
+                         statusText = 'مؤكد';
                          themeColor = 'success';
-                         badgeHtml = `<span class="badge bg-white text-success small">Confirmed</span>`;
+                         badgeHtml = `<span class="badge bg-white text-success small">مؤكد</span>`;
                     }
 
                     const time = order.orderTime ? new Date(order.orderTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
@@ -393,17 +407,17 @@
                     let itemsHtml = '';
                     if (order.items && order.items.length > 0) {
                         itemsHtml = `
-                            <ul class="list-unstyled mb-2 small bg-light p-1 rounded">
+                            <ul class="list-unstyled mb-2 small bg-light p-2 rounded-3 mt-2">
                                 ${order.items.map(i => {
-                                    const itemName = i.name || i.menuItemName || 'Item';
+                                    const itemName = i.name || i.menuItemName || 'صنف';
                                     const isCancelled = i.isCancelled === true;
                                     let addonsList = '';
                                     if (!isCancelled && i.addOns && i.addOns.length > 0) {
                                         addonsList = `<div class="ps-2 text-muted small" style="font-size: 0.75rem; line-height: 1.1;">+ ${i.addOns.map(a => a.name).join(', ')}</div>`;
                                     }
                                     const cancelBtn = !isCancelled && i.id
-                                        ? `<button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1" style="font-size:0.65rem;" onclick="cancelOrderItem(${i.id})" title="Cancel item"><i class="bi bi-x"></i></button>`
-                                        : (isCancelled ? `<span class="badge bg-danger ms-1" style="font-size:0.6rem;">Cancelled</span>` : '');
+                                        ? `<button class="btn btn-xs btn-outline-danger py-0 px-1 ms-1 border-0" style="font-size:0.65rem;" onclick="cancelOrderItem(${i.id})" title="إلغاء الصنف"><i class="bi bi-x"></i></button>`
+                                        : (isCancelled ? `<span class="badge bg-danger ms-1" style="font-size:0.6rem;">ملغي</span>` : '');
                                     const lineStyle = isCancelled ? 'text-decoration: line-through; color: #ef4444; opacity:0.7;' : '';
                                     return `<li class="d-flex align-items-start justify-content-between gap-1 mb-1" style="${lineStyle}">
                                         <div><strong>${i.quantity} x ${itemName}</strong>${addonsList}</div>
@@ -418,7 +432,7 @@
                     if (order.note) {
                         noteHtml = `
                             <div class="alert alert-warning py-1 px-2 mb-2">
-                                <small class="d-block fst-italic"><i class="bi bi-pencil-fill me-1"></i>${order.note}</small>
+                                <small class="d-block fst-italic"><i class="bi bi-pencil-fill ms-1"></i>${order.note}</small>
                             </div>
                         `;
                     }
@@ -426,43 +440,40 @@
                     let actionsHtml = '';
                     if (isPending) {
                         actionsHtml = `
-                             <button class="btn btn-sm btn-success flex-grow-1" onclick="acceptOrder(${order.id})" title="Accept Order">
-                                <i class="bi bi-check2"> Accept</i> 
+                             <button class="btn btn-sm btn-success flex-grow-1 rounded-pill" onclick="acceptOrder(${order.id})" title="قبول الطلب">
+                                <i class="bi bi-check2"> قبول</i> 
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                            <button class="btn btn-sm btn-danger rounded-pill" onclick="cancelOrder(${order.id}, ${tableNumber})" title="إلغاء">
                                 <i class="bi bi-x"></i> 
                             </button>
                         `;
                     } else if (isReady) {
                         actionsHtml = `
-                             <button class="btn btn-sm btn-success flex-grow-1 fw-bold" onclick="serveOrder(${order.id})" title="Serve Order">
-                                <i class="bi bi-cup-hot-fill me-1"></i> Serve
+                             <button class="btn btn-sm btn-success flex-grow-1 fw-bold rounded-pill" onclick="serveOrder(${order.id})" title="تقديم الطلب">
+                                <i class="bi bi-cup-hot-fill ms-1"></i> تقديم
                             </button>
-                             <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
+                             <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="cancelOrder(${order.id}, ${tableNumber})" title="إلغاء">
                                 <i class="bi bi-x"></i> 
                             </button>
                         `;
                     } else {
                          actionsHtml = `
-                             <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="cancelOrder(${order.id}, ${tableNumber})" title="Cancel">
-                                <i class="bi bi-x"></i> 
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary flex-grow-1" onclick="clearTable(${order.id})" title="Clear Table">
-                                <i class="bi bi-check-circle"></i> Clear
+                             <button class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="cancelOrder(${order.id}, ${tableNumber})" title="حذف الطلب">
+                                <i class="bi bi-trash"></i> حذف الطلب
                             </button>
                         `;
                     }
 
                     ordersHtml += `
-                        <div class="card mb-2 shadow-sm order-card border-${themeColor} ${isReady ? 'border-3' : ''}">
+                        <div class="card mb-2 shadow-sm order-card border-${themeColor} ${isReady ? 'border-3' : ''} rounded-3 overflow-hidden">
                             <div class="card-header py-1 bg-${themeColor} ${isPending ? 'text-dark' : 'text-white'} d-flex justify-content-between align-items-center">
-                                <small class="fw-bold">Order #${order.id}</small>
+                                <small class="fw-bold">طلب #${order.id}</small>
                                 ${badgeHtml}
                             </div>
-                            <div class="card-body p-2 text-start">
-                                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                            <div class="card-body p-2 text-right" style="direction: rtl;">
+                                <div class="d-flex justify-content-between align-items-center mt-1 pb-2 border-bottom">
                                     <small class="text-muted">${time}</small>
-                                    <small class="fw-bold">${(order.totalAmount || 0).toFixed(2)} L.E.</small>
+                                    <small class="fw-bold text-dark">${(order.totalAmount || 0).toFixed(2)} ج.م</small>
                                 </div>
                                 ${itemsHtml}
                                 ${noteHtml}
@@ -478,14 +489,14 @@
                     ordersHtml = `
                         <div class="text-primary small mt-4 py-3 bg-light rounded-3 border border-primary border-opacity-10">
                             <i class="bi bi-person-check-fill display-5 d-block mb-2 text-primary opacity-50"></i>
-                            Waiting for Order
+                            في انتظار الطلب
                         </div>
                     `;
                 } else {
                      ordersHtml = `
                         <div class="text-muted small mt-4">
                             <i class="bi bi-cup-hot display-4 d-block mb-2 text-secondary opacity-25"></i>
-                            Available
+                            متاحة
                         </div>
                     `;
                 }
@@ -495,26 +506,23 @@
                 <div class="mt-auto pt-2 border-top">
                     ${tableData.sessionId ? `
                         <button class="btn btn-warning btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(${tableNumber}, true)">
-                            <i class="bi bi-cart-plus me-1"></i> Add Order
+                            <i class="bi bi-cart-plus ms-1"></i> إضافة طلب
                         </button>
                     ` : `
                         <button class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-pill" onclick="openWaiterOrderModal(${tableNumber}, false)">
-                            <i class="bi bi-plus-circle me-1"></i> Open & Order
+                            <i class="bi bi-plus-circle ms-1"></i> فتح وطلب
                         </button>
                     `}
                 </div>
             `;
 
-            // Replace content
-            card.querySelector('.card-body').innerHTML = headerHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>` + footerHtml;
+            card.querySelector('.card-body').innerHTML = headerHtml + callAlertHtml + sessionHtml + `<div class="orders-container flex-grow-1" style="max-height: 400px; overflow-y: auto;">${ordersHtml}</div>` + footerHtml;
 
-            // Flash animation
             cardInner.style.transition = 'transform 0.2s';
             cardInner.style.transform = 'scale(1.02)';
             setTimeout(() => { cardInner.style.transform = 'scale(1)'; }, 200);
         }
 
-        // Play notification sound
         function playNotificationSound() {
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -532,17 +540,16 @@
             } catch (e) { console.error(e); }
         }
 
-        // Show toast notification
         function showNotification(message, type = 'info') {
             const container = document.querySelector('.toast-container') || createToastContainer();
             const toastId = 'toast-' + Date.now();
-            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-info';
+            const bgColor = type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : 'bg-info';
 
             const toastHtml = `
                 <div id="${toastId}" class="toast align-items-center text-white ${bgColor} border-0" role="alert">
                     <div class="d-flex">
                         <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        <button type="button" class="btn-close btn-close-white ms-2 m-auto" data-bs-dismiss="toast"></button>
                     </div>
                 </div>
             `;
@@ -555,16 +562,15 @@
 
         function createToastContainer() {
             const container = document.createElement('div');
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            container.className = 'toast-container position-fixed bottom-0 start-0 p-3';
             document.body.appendChild(container);
             return container;
         }
 
-        // SignalR event handlers
         connection.on("NewOrderReceived", function (order) {
             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
             playNotificationSound();
-            showNotification(`New order on Table ${order.tableNumber}!`, 'warning');
+            showNotification(`طلب جديد لطاولة ${order.tableNumber}!`, 'warning');
             fetchAndRefreshTables();
         });
 
@@ -575,18 +581,22 @@
 
         connection.on("OrderReady", function (order) {
              if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
-             showNotification(`Order for Table ${order.tableNumber} is ready!`, 'success');
+             showNotification(`الطلب الخاص بطاولة ${order.tableNumber} جاهز!`, 'success');
              fetchAndRefreshTables();
         });
 
         connection.on("PaymentProcessed", function (order) {
             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
-            showNotification(`Payment received for Table ${order.tableNumber}`, 'success');
+            showNotification(`تم استلام الدفع لطاولة ${order.tableNumber}`, 'success');
+            activeWaiterCalls.delete(order.tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
             fetchAndRefreshTables();
         });
 
         connection.on("TableCleared", function (order) {
             if (!order || !document.getElementById(`table-card-${order.tableNumber}`)) return;
+            activeWaiterCalls.delete(order.tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
             fetchAndRefreshTables();
         });
         
@@ -602,11 +612,44 @@
 
         connection.on("OrderItemCancelled", function (data) {
             if (!data || !document.getElementById(`table-card-${data.tableNumber}`)) return;
-            showNotification(`Item cancelled: ${data.cancelledItemName} on Table ${data.tableNumber}`, 'warning');
+            showNotification(`تم إلغاء صنف: ${data.cancelledItemName} في طاولة ${data.tableNumber}`, 'warning');
             fetchAndRefreshTables();
         });
 
-        // Fetch and refresh tables data
+        connection.on("CallWaiterReceived", function (data) {
+            if (!data || !data.tableNumber) return;
+            const tNum = data.tableNumber;
+            activeWaiterCalls.add(tNum);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            playNotificationSound();
+            showNotification(`نداء من طاولة ${tNum}! العميل يطلب حضورك.`, 'warning');
+            const el = document.getElementById(`call-waiter-alert-${tNum}`);
+            if (el) el.style.display = 'block';
+            fetchAndRefreshTables();
+        });
+
+        connection.on("ClearWaiterCallReceived", function (data) {
+            if (!data || !data.tableNumber) return;
+            const tNum = data.tableNumber;
+            activeWaiterCalls.delete(tNum);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            const el = document.getElementById(`call-waiter-alert-${tNum}`);
+            if (el) el.style.display = 'none';
+            fetchAndRefreshTables();
+        });
+
+        function clearWaiterCall(tableNumber) {
+            activeWaiterCalls.delete(tableNumber);
+            localStorage.setItem('waiter_calls', JSON.stringify([...activeWaiterCalls]));
+            const el = document.getElementById(`call-waiter-alert-${tableNumber}`);
+            if (el) el.style.display = 'none';
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke("ClearWaiterCall", tableNumber, activeBranchId)
+                    .catch(err => console.error(err));
+            }
+            fetchAndRefreshTables();
+        }
+
         async function fetchAndRefreshTables() {
             try {
                 const response = await fetch('/Waiter/GetTablesData');
@@ -621,7 +664,6 @@
             }
         }
 
-        // Start connection
         let isConnecting = false;
         async function startConnection() {
             if (isConnecting || connection.state === signalR.HubConnectionState.Connected) return;
@@ -655,23 +697,23 @@
             setTimeout(startConnection, 5000);
         });
 
-        // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
-            // Initial fetch to show data even if SignalR is connecting
+            // Restore active waiter calls on load
+            activeWaiterCalls.forEach(tNum => {
+                const el = document.getElementById(`call-waiter-alert-${tNum}`);
+                if (el) el.style.display = 'block';
+            });
             fetchAndRefreshTables();
-            
-            // Start SignalR with a small delay to ensure everything is ready
             setTimeout(startConnection, 500);
         });
 
-        // Client-side idempotency guard to prevent double-clicks/duplicate submissions
         const pendingRequests = new Set();
         function safeFetch(url, options = {}) {
             const method = options.method || 'GET';
             if (method !== 'GET') {
                 const requestKey = `${method}:${url}:${options.body || ''}`;
                 if (pendingRequests.has(requestKey)) {
-                    console.warn("Blocked duplicate request (idempotency guard):", requestKey);
+                    console.warn("Blocked duplicate request:", requestKey);
                     return Promise.reject(new Error("Request is already in progress."));
                 }
                 pendingRequests.add(requestKey);
@@ -699,7 +741,7 @@
         }
 
         function cancelOrder(orderId, tableNumber) {
-            if (!confirm('Are you sure you want to cancel this order?')) return;
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
             safeFetch('/Waiter/CancelOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -708,19 +750,19 @@
         }
 
         function cancelOrderItem(orderItemId) {
-            if (!confirm('Cancel this single item from the order?')) return;
+            if (!confirm('هل أنت متأكد من إلغاء هذا الصنف من الطلب؟')) return;
             safeFetch('/Waiter/CancelOrderItem', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `orderItemId=${orderItemId}`
             }).then(r => {
-                if (r.ok) { showNotification('Item cancelled successfully', 'warning'); fetchAndRefreshTables(); }
-                else alert('Failed to cancel item');
+                if (r.ok) { showNotification('تم إلغاء الصنف بنجاح', 'warning'); fetchAndRefreshTables(); }
+                else alert('فشل إلغاء الصنف');
             });
         }
 
         function clearTable(orderId) {
-            if (!confirm('Is this order/table empty and ready to be cleared?')) return;
+            if (!confirm('هل هذه الطاولة فارغة وجاهزة للتنظيف؟')) return;
             safeFetch('/Waiter/CompleteOrder', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -729,7 +771,7 @@
         }
 
         function closeSession(sessionId) {
-            if (!confirm('Are you sure you want to CLOSE this table session? This will clear guest info.')) return;
+            if (!confirm('هل أنت متأكد من إغلاق جلسة هذه الطاولة؟ سيؤدي ذلك إلى حذف بيانات الضيف.')) return;
             safeFetch('/Waiter/CloseSession', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -737,9 +779,6 @@
             }).then(r => r.ok && fetchAndRefreshTables());
         }
 
-        // ================================================================
-        // WAITER ORDER PLACEMENT JS SYSTEM
-        // ================================================================
         let currentWaiterTable = 0;
         let waiterOrderModalInstance = null;
         let fullMenuData = [];
@@ -750,11 +789,17 @@
             currentWaiterTable = tableNumber;
             document.getElementById('waiterOrderModalTitleTable').textContent = tableNumber;
             
-            // Reset fields
             cart = [];
             document.getElementById('orderNotesInput').value = '';
             document.getElementById('waiterCustomerName').value = '';
             document.getElementById('waiterCustomerPhone').value = '';
+
+            const btn = document.getElementById('btnCartCheckout');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-send-fill ms-2"></i> إرسال الطلب';
+            }
+
             updateCartUI();
 
             waiterOrderModalInstance = new bootstrap.Modal(document.getElementById('waiterOrderModal'));
@@ -790,7 +835,7 @@
 
         function renderCategories() {
             const container = document.getElementById('categoriesSlider');
-            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">All</button>`;
+            let html = `<button class="btn btn-sm ${selectedCategory === 0 ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(0)">الكل</button>`;
             
             fullMenuData.forEach(cat => {
                 html += `<button class="btn btn-sm ${selectedCategory === cat.categoryId ? "btn-warning" : "btn-outline-dark"} rounded-pill px-3" onclick="selectCategory(${cat.categoryId})">${cat.categoryName}</button>`;
@@ -818,14 +863,14 @@
 
                     html += `
                         <div class="col-sm-6 col-md-4">
-                            <div class="card h-100 border-0 shadow-sm p-3 bg-light text-dark">
+                            <div class="card h-100 border-0 shadow-sm p-3 bg-light text-dark text-right" style="direction: rtl;">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="fw-bold" style="font-size: 0.95rem;">${item.name}</div>
-                                    <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} EGP</span>
+                                    <span class="badge bg-warning text-dark fw-bold">${item.price.toFixed(2)} ج.م</span>
                                 </div>
                                 <div class="mt-3">
                                     <button class="btn btn-outline-warning btn-xs w-100 py-1.5 fw-bold rounded-pill text-dark" onclick="handleMenuAddClick(${item.id})">
-                                        <i class="bi bi-plus-circle me-1"></i> Add to Cart
+                                        <i class="bi bi-plus-circle ms-1"></i> إضافة للسلة
                                     </button>
                                 </div>
                             </div>
@@ -834,7 +879,7 @@
                 });
             });
 
-            grid.innerHTML = html || `<div class="text-center py-5 text-muted col-12">No items match your search.</div>`;
+            grid.innerHTML = html || `<div class="text-center py-5 text-muted col-12">لا توجد أصناف تطابق بحثك.</div>`;
         }
 
         function filterMenuItems() {
@@ -897,10 +942,10 @@
                 container.innerHTML = `
                     <div class="text-center py-5 text-muted" id="cartEmptyState">
                         <i class="bi bi-cart-x display-4 mb-3 d-block text-secondary"></i>
-                        Cart is Empty
+                        السلة فارغة
                     </div>
                 `;
-                document.getElementById('cartSubtotal').textContent = "0.00 EGP";
+                document.getElementById('cartSubtotal').textContent = "0.00 ج.م";
                 checkoutBtn.disabled = true;
                 return;
             }
@@ -915,15 +960,15 @@
 
                 let addonsText = '';
                 if (item.addOns && item.addOns.length > 0) {
-                    addonsText = `<div class="text-muted small ps-2 border-start border-2 border-warning mt-1" style="font-size: 0.75rem;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
+                    addonsText = `<div class="text-muted small pr-2 border-right border-2 border-warning mt-1" style="font-size: 0.75rem;">+ ${item.addOns.map(a => a.name).join(', ')}</div>`;
                 }
 
                 html += `
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-white border border-light shadow-sm">
-                        <div class="text-start" style="max-width: 65%;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-white border border-light shadow-sm text-right" style="direction: rtl;">
+                        <div style="max-width: 65%;">
                             <span class="fw-bold d-block text-dark" style="font-size: 0.9rem;">${item.name}</span>
                             ${addonsText}
-                            <span class="text-muted small" style="font-size: 0.8rem;">${(item.price + addonsTotal).toFixed(2)} EGP</span>
+                            <span class="text-muted small" style="font-size: 0.8rem;">${(item.price + addonsTotal).toFixed(2)} ج.م</span>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <button class="btn btn-outline-warning btn-xs rounded-circle" style="width: 26px; height: 26px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="updateQuantity('${item.cartItemId}', -1)"><i class="bi bi-dash"></i></button>
@@ -935,12 +980,12 @@
             });
 
             container.innerHTML = html;
-            document.getElementById('cartSubtotal').textContent = `${subtotal.toFixed(2)} EGP`;
+            document.getElementById('cartSubtotal').textContent = `${subtotal.toFixed(2)} ج.م`;
             checkoutBtn.disabled = false;
         }
 
         function quickStartSession() {
-            document.getElementById('waiterCustomerName').value = `Table ${currentWaiterTable} Guest`;
+            document.getElementById('waiterCustomerName').value = `ضيف طاولة ${currentWaiterTable}`;
             document.getElementById('waiterCustomerPhone').value = '0000000000';
             submitStartSession();
         }
@@ -950,7 +995,7 @@
             const phoneNumber = document.getElementById('waiterCustomerPhone').value.trim();
 
             if (!customerName || !phoneNumber) {
-                alert("Customer Name and Phone Number are required!");
+                alert("اسم العميل ورقم الهاتف مطلوبان!");
                 return;
             }
 
@@ -961,12 +1006,12 @@
             })
             .then(res => {
                 if (res.ok) {
-                    showNotification(`Table ${currentWaiterTable} session started!`, 'success');
+                    showNotification(`تم بدء جلسة طاولة ${currentWaiterTable} بنجاح!`, 'success');
                     document.getElementById('waiterSessionStep').style.display = 'none';
                     document.getElementById('waiterMenuStep').style.display = 'block';
                     loadWaiterMenuData();
                 } else {
-                    alert("Failed to start session.");
+                    alert("فشل في بدء الجلسة.");
                 }
             })
             .catch(err => console.error(err));
@@ -991,32 +1036,33 @@
             const btn = document.getElementById('btnCartCheckout');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-2"></span>جاري إرسال الطلب...';
 
             safeFetch('/Order/Create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(res => {
+            .then(async res => {
                 if (res.ok) {
                     if (waiterOrderModalInstance) waiterOrderModalInstance.hide();
-                    showNotification('Order placed successfully!', 'success');
+                    showNotification('تم إرسال الطلب بنجاح!', 'success');
                     fetchAndRefreshTables();
                 } else {
-                    alert('Error placing order');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    const errMsg = await res.text();
+                    showNotification(errMsg || 'فشل في إرسال الطلب', 'danger');
                 }
             })
             .catch(err => {
                 console.error(err);
+                showNotification(err.message || 'حدث خطأ في الاتصال بالخادم', 'danger');
+            })
+            .finally(() => {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             });
         }
         
-        // --- CUSTOMIZATION FLOW ---
         let activeCustomItem = null;
         let customizationQty = 1;
 
@@ -1035,11 +1081,10 @@
             customizationQty = 1;
             
             document.getElementById('customization-item-name').textContent = item.name;
-            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} EGP`;
+            document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} ج.م`;
             document.getElementById('customization-item-description').textContent = item.description || '';
             document.getElementById('customization-qty-val').textContent = customizationQty;
 
-            // Render Sizes
             const sizesSection = document.getElementById('sizes-section');
             const sizesList = document.getElementById('sizes-list');
             if (item.sizes && item.sizes.length > 0) {
@@ -1049,7 +1094,7 @@
                         <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
                         <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
                             <span class="size-name small text-muted">${size.name}</span>
-                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} EGP</span>
+                            <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} ج.م</span>
                         </label>
                     </div>
                 `).join('');
@@ -1058,7 +1103,6 @@
                 sizesList.innerHTML = '';
             }
 
-            // Render Add-ons
             const addonsSection = document.getElementById('addons-section');
             const addonsList = document.getElementById('addons-list');
             if (item.addOns && item.addOns.length > 0) {
@@ -1070,11 +1114,11 @@
                              onclick="toggleAddonCard(${addon.id})">
                             <div class="form-check m-0" style="pointer-events: none;">
                                 <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.price}" data-name="${addon.name}" onclick="event.stopPropagation()">
-                                <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                <label class="form-check-label fw-bold text-dark mr-2" for="addon-${addon.id}">
                                     ${addon.name}
                                 </label>
                             </div>
-                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} EGP</span>
+                            <span class="fw-bold text-warning small">+ ${addon.price.toFixed(2)} ج.م</span>
                         </div>
                     </div>
                 `).join('');
@@ -1126,7 +1170,7 @@
 
             total = total * customizationQty;
 
-            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} EGP`;
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} ج.م`;
         }
 
         function addCustomizedToCart() {
@@ -1174,24 +1218,24 @@
     </script>
 
     <!-- Customization Modal HTML -->
-    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content shadow-lg border-0 rounded-4 bg-white text-dark">
-                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
-                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 EGP</span>
+                <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1 text-right" style="direction: rtl;">
+                        <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">اسم الصنف</h4>
+                        <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 ج.م</span>
                     </div>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
-                    <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+                <div class="modal-body px-3 py-3 text-right" style="max-height: 50vh; overflow-y: auto; direction: rtl;">
+                    <p class="text-muted small mb-3" id="customization-item-description">الوصف هنا.</p>
                     
                     <!-- Sizes Section -->
                     <div id="sizes-section" class="mb-4" style="display: none;">
                         <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                            <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                            <i class="bi bi-arrows-angle-expand text-warning ms-2"></i>اختر الحجم
                         </h6>
                         <div id="sizes-list" class="d-flex flex-wrap gap-2">
                             <!-- Dynamic sizes -->
@@ -1201,7 +1245,7 @@
                     <!-- Add-Ons Section -->
                     <div id="addons-section" class="mb-4" style="display: none;">
                         <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                            <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order / الإضافات
+                            <i class="bi bi-gear-wide-connected text-warning ms-2"></i>تخصيص الطلب / الإضافات
                         </h6>
                         <div id="addons-list" class="row g-2">
                             <!-- Custom options -->
@@ -1209,7 +1253,7 @@
                     </div>
                 </div>
                 
-                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center" style="direction: rtl;">
                     <!-- Quantity selector -->
                     <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
                         <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="adjustCustomQty(-1)">-</button>
@@ -1219,8 +1263,8 @@
                     
                     <!-- Action Button -->
                     <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark d-flex align-items-center shadow-sm" id="add-customized-to-cart-btn" onclick="addCustomizedToCart()">
-                        <span class="me-2">Add to Cart</span>
-                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 EGP</span>
+                        <span class="ms-2">إضافة للسلة</span>
+                        <span class="badge bg-dark rounded-pill" id="customization-total-price">0.00 ج.م</span>
                     </button>
                 </div>
             </div>

@@ -19,10 +19,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>فاتورة - Receipt Table @Model.TableNumber</title>
+    <title>فاتورة - طاولة @Model.TableNumber</title>
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Cairo', 'Courier New', Courier, monospace;
             width: 76mm;
             margin: 0 auto;
             padding: 8px;
@@ -106,19 +108,19 @@
 </head>
 <body onload="window.print()">
     <div class="header">
-        <h1>فاتورة كافية</h1>
-        <p>الديوان - المنوفية</p>
+        <h1>فاتورة مطعم وديوان</h1>
+        <p>الفرع الرئيسي</p>
     </div>
 
     <div class="details">
         <table>
             <tr>
                 <td><strong>التاريخ:</strong> @DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")</td>
-                <td style="text-align: left;"><strong>طاولة:</strong> @(Model.TableNumber == 0 ? "تيك أواي" : Model.TableNumber.ToString())</td>
+                <td style="text-align: left;"><strong>الطاولة:</strong> @(Model.TableNumber == 0 ? "تيك أواي" : "طاولة " + Model.TableNumber)</td>
             </tr>
             <tr>
-                <td><strong>العميل:</strong> @(Model.CustomerName ?? "عميل")</td>
-                <td style="text-align: left;"><strong>رقم الهاتف:</strong> @(Model.PhoneNumber ?? "N/A")</td>
+                <td><strong>العميل:</strong> @(Model.CustomerName ?? "عميل زائر")</td>
+                <td style="text-align: left;"><strong>الهاتف:</strong> @(Model.PhoneNumber ?? "غير متوفر")</td>
             </tr>
         </table>
     </div>
@@ -126,7 +128,7 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th>الصنف / Item</th>
+                <th>الصنف</th>
                 <th style="width: 15%; text-align: center;">الكمية</th>
                 <th class="price-col" style="width: 30%;">السعر</th>
             </tr>
@@ -152,13 +154,13 @@
                                 <div style="font-size: 0.75rem; padding-right: 6px; color: #555; font-style: italic;">
                                     @foreach (var addon in item.AddOns)
                                     {
-                                        <div>+ @addon.AddOn?.Name (+@addon.Price.ToString("N2") EGP)</div>
+                                        <div>+ @addon.AddOn?.Name (+@addon.Price.ToString("N2") ج.م)</div>
                                     }
                                 </div>
                             }
                         </td>
                         <td style="text-align: center; vertical-align: top;">@item.Quantity</td>
-                        <td class="price-col" style="vertical-align: top;">@displayPrice.ToString("N2") EGP</td>
+                        <td class="price-col" style="vertical-align: top;">@displayPrice.ToString("N2") ج.م</td>
                     </tr>
                 }
             }
@@ -168,20 +170,20 @@
     <div class="totals-block">
         <table>
             <tr>
-                <td>المجموع الفرعي / Subtotal:</td>
-                <td style="text-align: left;">@subtotal.ToString("N2") EGP</td>
+                <td>المجموع الفرعي:</td>
+                <td style="text-align: left;">@subtotal.ToString("N2") ج.م</td>
             </tr>
             <tr>
-                <td>الخدمة / Service Charge (@servicePct.ToString("0")%):</td>
-                <td style="text-align: left;">@serviceAmount.ToString("N2") EGP</td>
+                <td>الخدمة (@servicePct.ToString("0")%):</td>
+                <td style="text-align: left;">@serviceAmount.ToString("N2") ج.م</td>
             </tr>
             <tr>
-                <td>الضريبة / VAT (@taxPct.ToString("0")%):</td>
-                <td style="text-align: left;">@taxAmount.ToString("N2") EGP</td>
+                <td>الضريبة (@taxPct.ToString("0")%):</td>
+                <td style="text-align: left;">@taxAmount.ToString("N2") ج.م</td>
             </tr>
             <tr class="grand-total-row">
-                <td style="padding-top: 6px;">الإجمالي الكلي / Total Due:</td>
-                <td style="text-align: left; padding-top: 6px;">@grandTotal.ToString("N2") EGP</td>
+                <td style="padding-top: 6px;">الإجمالي الكلي:</td>
+                <td style="text-align: left; padding-top: 6px;">@grandTotal.ToString("N2") ج.م</td>
             </tr>
         </table>
         
@@ -197,7 +199,7 @@
     </div>
 
     <div class="no-print" style="margin-top: 20px; text-align: center;">
-        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 8px; border: 1px solid #000; background: #fff;">طباعة الفاتورة / Print Receipt</button>
+        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 8px; border: 1px solid #000; background: #fff; font-family: 'Cairo', sans-serif;">طباعة الفاتورة</button>
     </div>
 </body>
 </html>

@@ -9,11 +9,11 @@
     decimal tips = ViewBag.ShiftTotalTips;
     var shiftOrders = ViewBag.ShiftOrders as List<Resturant.Core.Entities.Order> ?? new List<Resturant.Core.Entities.Order>();
 
-    string diffLabel = "متزن / Balanced";
+    string diffLabel = "متزن";
     if (diff < 0) {
-        diffLabel = "عجز / Deficit";
+        diffLabel = "عجز";
     } else if (diff > 0) {
-        diffLabel = "زيادة / Surplus";
+        diffLabel = "زيادة";
     }
 }
 
@@ -23,19 +23,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ملخص الوردية - #@Model.Id</title>
-    <!-- Google Fonts Outfit & Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap RTL CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="/assets/vendors/css/dataTables.bs5.min.css">
     
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Cairo', sans-serif;
             background-color: #f8f9fa;
             color: #333;
         }
-        .outfit-font { font-family: 'Outfit', sans-serif; }
         .glass-panel {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
@@ -43,9 +44,18 @@
             border: 1px solid rgba(0, 0, 0, 0.05);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
         }
-        .gold-line {
-            height: 6px;
-            background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);
+        .dataTables_wrapper .dataTables_paginate {
+            float: left !important;
+            margin-top: 15px;
+        }
+        .dataTables_wrapper .dataTables_info {
+            float: right !important;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .dataTables_wrapper .dataTables_filter {
+            display: none !important;
         }
         @@media print {
             body, html { background-color: #fff !important; color: #000 !important; }
@@ -60,41 +70,41 @@
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="glass-panel rounded-4 p-4 p-md-5 position-relative overflow-hidden">
-                    <div class="position-absolute top-0 start-50 translate-middle-x" style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #d4af37, transparent); opacity: 0.5;"></div>
+                    <div class="position-absolute top-0 start-50 translate-middle-x" style="width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #f97316, transparent); opacity: 0.5;"></div>
                     
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5 pb-4 border-bottom border-secondary border-opacity-25">
                         <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
-                            <div class="d-flex justify-content-center align-items-center rounded-circle" style="width: 60px; height: 60px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2);">
-                                <i class="bi bi-clock-history fs-3 text-warning"></i>
+                            <div class="d-flex justify-content-center align-items-center rounded-circle" style="width: 60px; height: 60px; background: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.2);">
+                                <i class="bi bi-clock-history fs-3" style="color: #f97316;"></i>
                             </div>
                             <div>
-                                <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.5px;">تقرير وردية الكاشير</h2>
-                                <p class="text-muted mb-0 mt-1">Cashier Shift Summary</p>
+                                <h2 class="fw-bold mb-0 text-dark">تقرير وردية الكاشير</h2>
+                                <p class="text-muted mb-0 mt-1 small">ملخص وتفاصيل تقفيل الوردية الحالية</p>
                             </div>
                         </div>
                         <div class="text-md-end text-center">
-                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">Shift ID: #@Model.Id</span>
-                            <div class="text-muted small">تاريخ التقرير: @DateTime.Now.ToString("dd MMM yyyy, hh:mm tt")</div>
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2" style="background-color: #f97316 !important; color: #fff !important;">رقم الوردية: #@Model.Id</span>
+                            <div class="text-muted small">تاريخ التقرير: @DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")</div>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-5">
                         <div class="col-md-4 col-sm-6">
-                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                            <div class="p-3 rounded-3 bg-light">
                                 <div class="text-muted small mb-1">اسم الكاشير</div>
-                                <div class="fw-bold fs-5 text-dark">@(Model.Cashier?.UserName ?? "N/A")</div>
+                                <div class="fw-bold fs-5 text-dark">@(Model.Cashier?.UserName ?? "غير متوفر")</div>
                             </div>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                            <div class="p-3 rounded-3 bg-light">
                                 <div class="text-muted small mb-1">وقت بدء الوردية</div>
-                                <div class="fw-bold text-dark"><i class="bi bi-play-circle-fill text-success me-2"></i>@Model.StartTime.ToString("hh:mm tt")</div>
+                                <div class="fw-bold text-dark"><i class="bi bi-play-circle-fill text-success ms-2"></i>@Model.StartTime.ToString("yyyy-MM-dd hh:mm tt")</div>
                             </div>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <div class="p-3 rounded-3" style="background: rgba(0, 0, 0, 0.03);">
+                            <div class="p-3 rounded-3 bg-light">
                                 <div class="text-muted small mb-1">وقت إغلاق الوردية</div>
-                                <div class="fw-bold text-dark"><i class="bi bi-stop-circle-fill text-danger me-2"></i>@(Model.EndTime?.ToString("hh:mm tt") ?? "N/A")</div>
+                                <div class="fw-bold text-dark"><i class="bi bi-stop-circle-fill text-danger ms-2"></i>@(Model.EndTime?.ToString("yyyy-MM-dd hh:mm tt") ?? "غير متوفر")</div>
                             </div>
                         </div>
                     </div>
@@ -104,35 +114,43 @@
                             <div class="p-4 rounded-4 h-100 border border-dark border-opacity-10">
                                 <div class="text-muted small fw-semibold text-uppercase tracking-wider mb-2">إجمالي مبيعات الوردية (الطلبات)</div>
                                 <div class="fs-2 fw-bold text-dark mb-0">
-                                    @baseSales.ToString("N2") <span class="fs-5 text-muted">EGP</span>
+                                    @baseSales.ToString("N2") <span class="fs-5 text-muted">ج.م</span>
                                 </div>
-                                <div class="small text-muted mt-2"><i class="bi bi-receipt me-1"></i> لا يشمل البقشيش</div>
+                                <div class="small text-muted mt-2"><i class="bi bi-receipt ms-1"></i> لا يشمل البقشيش</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="p-4 rounded-4 h-100 border border-success border-opacity-25" style="background: linear-gradient(145deg, rgba(40,167,69,0.1) 0%, rgba(40,167,69,0.02) 100%);">
                                 <div class="text-success small fw-semibold text-uppercase tracking-wider mb-2">البقشيش المستلم بالدرج</div>
                                 <div class="fs-2 fw-bold text-success mb-0">
-                                    @tips.ToString("N2") <span class="fs-5 opacity-75">EGP</span>
+                                    @tips.ToString("N2") <span class="fs-5 opacity-75">ج.م</span>
                                 </div>
-                                <div class="small text-success opacity-75 mt-2"><i class="bi bi-heart-fill me-1"></i> إجمالي الإضافيات</div>
+                                <div class="small text-success opacity-75 mt-2"><i class="bi bi-heart-fill ms-1"></i> إجمالي الإضافيات</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="p-4 rounded-4 border border-warning border-opacity-25" style="background: rgba(212, 175, 55, 0.05);">
-                        <h5 class="fw-bold text-dark mb-4 border-bottom border-warning border-opacity-25 pb-2">مطابقة الدرج (Reconciliation)</h5>
+                    <div class="p-4 rounded-4 border border-warning border-opacity-25" style="background: rgba(249, 115, 22, 0.05);">
+                        <h5 class="fw-bold text-dark mb-4 border-bottom border-warning border-opacity-25 pb-2">مطابقة الدرج والتسوية المالية</h5>
                         <div class="row gy-3">
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-white border border-light">
-                                    <span class="text-muted"><i class="bi bi-calculator me-2"></i>المتوقع بالسيستم</span>
-                                    <span class="fw-bold text-dark fs-5">@expected.ToString("N2") EGP</span>
+                                    <span class="text-muted"><i class="bi bi-calculator ms-2"></i>المتوقع بالسيستم</span>
+                                    <span class="fw-bold text-dark fs-5">@expected.ToString("N2") ج.م</span>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-white border border-light">
-                                    <span class="text-muted"><i class="bi bi-cash me-2"></i>الكاش المدخل يدوياً</span>
-                                    <span class="fw-bold text-dark fs-5">@actual.ToString("N2") EGP</span>
+                                    <span class="text-muted"><i class="bi bi-cash ms-2"></i>الكاش المدخل يدوياً</span>
+                                    <span class="fw-bold text-dark fs-5">@actual.ToString("N2") ج.م</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-white border border-light">
+                                    <span class="text-muted"><i class="bi bi-wallet2 ms-2"></i>الفارق والتسوية</span>
+                                    <span class="fw-bold fs-5 @(diff >= 0 ? "text-success" : "text-danger")">
+                                        @(diff >= 0 ? "+" : "")@diff.ToString("N2") ج.م (@diffLabel)
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -140,9 +158,9 @@
 
                     <div class="mt-5">
                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 border-bottom border-secondary border-opacity-25 pb-3 gap-3">
-                            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-list-ul text-warning me-2"></i>تفاصيل طلبات الوردية</h4>
+                            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-list-ul text-warning ms-2" style="color: #f97316 !important;"></i>تفاصيل طلبات الوردية</h4>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <input type="text" id="orderSearchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="بحث بالرقم، الطاولة، العميل..." onkeyup="filterOrdersTable()" style="max-width: 220px;" />
+                                <input type="text" id="orderSearchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="بحث بالرقم، الطاولة، العميل..." style="max-width: 220px;" />
                                 <button onclick="exportOrdersToExcel()" class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-1">
                                     <i class="bi bi-file-earmark-excel"></i> تحميل Excel
                                 </button>
@@ -150,7 +168,7 @@
                         </div>
                         @if (shiftOrders.Any())
                         {
-                            <div class="table-responsive rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.5);">
+                            <div class="table-responsive rounded-4 border border-secondary border-opacity-25 p-3" style="background: rgba(255, 255, 255, 0.5);">
                                 <table class="table table-hover table-borderless align-middle mb-0 text-dark" id="shiftOrdersTable">
                                     <thead style="background: rgba(0, 0, 0, 0.05); border-bottom: 2px solid rgba(0, 0, 0, 0.1);">
                                         <tr>
@@ -166,10 +184,10 @@
                                         {
                                             <tr style="border-bottom: 1px solid rgba(0, 0, 0, 0.05);">
                                                 <td class="py-3 ps-4 fw-bold text-dark">#@order.Id</td>
-                                                <td class="py-3">@(order.TableNumber == 0 ? "تيك أواي" : "T" + order.TableNumber)</td>
-                                                <td class="py-3">@(order.CustomerName ?? "-")</td>
-                                                <td class="py-3 text-center fw-semibold text-primary">@order.TotalAmount.ToString("N2") EGP</td>
-                                                <td class="py-3 text-center fw-semibold text-success">@((order.Tips ?? 0).ToString("N2")) EGP</td>
+                                                <td class="py-3">@(order.TableNumber == 0 ? "تيك أواي" : "طاولة " + order.TableNumber)</td>
+                                                <td class="py-3">@(order.CustomerName ?? "عميل زائر")</td>
+                                                <td class="py-3 text-center fw-semibold text-primary">@order.TotalAmount.ToString("N2") ج.م</td>
+                                                <td class="py-3 text-center fw-semibold text-success">@((order.Tips ?? 0).ToString("N2")) ج.م</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -199,14 +217,11 @@
     </div>
 
     <!-- ================================================================ -->
-    <!-- [START] PRINT-ONLY THERMAL RECEIPT CONTAINER (80MM PORTRAIT)      -->
+    <!-- PRINT-ONLY THERMAL RECEIPT CONTAINER (80MM PORTRAIT)            -->
     <!-- ================================================================ -->
     <div class="d-none d-print-block thermal-receipt" style="width: 76mm; margin: 0 auto; font-family: 'Courier New', monospace; font-size: 12px; color: #000; line-height: 1.4; padding: 2mm 0; direction: rtl; text-align: right;">
         <div style="text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 2px;">
             *** تقرير تقفيل الوردية ***
-        </div>
-        <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 8px;">
-            SHIFT SUMMARY REPORT
         </div>
         
         <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
@@ -222,19 +237,19 @@
         <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
             <tr>
                 <td style="padding: 2px 0;">المبيعات الأساسية:</td>
-                <td style="text-align: left; padding: 2px 0;">@baseSales.ToString("N2") EGP</td>
+                <td style="text-align: left; padding: 2px 0;">@baseSales.ToString("N2") ج.م</td>
             </tr>
             <tr>
                 <td style="padding: 2px 0;">إجمالي البقشيش:</td>
-                <td style="text-align: left; padding: 2px 0;">@tips.ToString("N2") EGP</td>
+                <td style="text-align: left; padding: 2px 0;">@tips.ToString("N2") ج.م</td>
             </tr>
             <tr style="font-weight: bold;">
                 <td style="padding: 4px 0; border-top: 1px dotted #000;">المتوقع بالدرج:</td>
-                <td style="text-align: left; padding: 4px 0; border-top: 1px dotted #000;">@expected.ToString("N2") EGP</td>
+                <td style="text-align: left; padding: 4px 0; border-top: 1px dotted #000;">@expected.ToString("N2") ج.م</td>
             </tr>
             <tr style="font-weight: bold;">
                 <td style="padding: 2px 0;">المدخل الفعلي:</td>
-                <td style="text-align: left; padding: 2px 0;">@actual.ToString("N2") EGP</td>
+                <td style="text-align: left; padding: 2px 0;">@actual.ToString("N2") ج.م</td>
             </tr>
         </table>
         
@@ -243,7 +258,7 @@
         <div style="text-align: center; font-weight: bold; font-size: 13px; padding: 6px; border: 1px solid #000; margin: 5px 0;">
             النتيجة: @diffLabel
             <br />
-            الفارق: @(diff >= 0 ? "+" : "")@diff.ToString("N2") EGP
+            الفارق: @(diff >= 0 ? "+" : "")@diff.ToString("N2") ج.م
         </div>
         
         <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
@@ -253,47 +268,57 @@
             @DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss tt")
         </div>
     </div>
-</body>
-</html>
 
-@section Scripts {
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/assets/vendors/js/dataTables.min.js"></script>
+    <script src="/assets/vendors/js/dataTables.bs5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <script>
-        function filterOrdersTable() {
-            var input = document.getElementById("orderSearchInput").value.toLowerCase();
-            var table = document.getElementById("shiftOrdersTable");
-            if (!table) return;
-            
-            var tr = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-
-            for (var i = 0; i < tr.length; i++) {
-                var rowText = tr[i].textContent.toLowerCase();
-                
-                if (input === "" || rowText.includes(input)) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
+        $(document).ready(function() {
+            let oTable = $('#shiftOrdersTable').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "البحث في الطلبات:",
+                    "lengthMenu": "عرض _MENU_ طلبات لكل صفحة",
+                    "info": "عرض من _START_ إلى _END_ من إجمالي _TOTAL_ طلب",
+                    "infoEmpty": "عرض 0 إلى 0 من 0 طلب",
+                    "infoFiltered": "(تصفية من إجمالي _MAX_ طلب)",
+                    "emptyTable": "لا توجد طلبات مسجلة بعد",
+                    "paginate": {
+                        "first": "الأول",
+                        "previous": "السابق",
+                        "next": "التالي",
+                        "last": "الأخير"
+                    }
                 }
-            }
-        }
+            });
+
+            // Bind custom search input
+            $('#orderSearchInput').on('keyup', function() {
+                oTable.search(this.value).draw();
+            });
+        });
 
         function exportOrdersToExcel() {
             var table = document.getElementById("shiftOrdersTable");
             if (!table) return;
             
-            // Clone table to manipulate for export
             var cloneTable = table.cloneNode(true);
-            
             var tbody = cloneTable.querySelector('tbody');
             var rows = Array.from(tbody.querySelectorAll('tr'));
             
-            // Rebuild tbody only with visible rows
             tbody.innerHTML = '';
             rows.forEach(function(row) {
-                // Check if row was visible in the original table
-                var originalRow = table.rows[row.rowIndex];
+                var originalRow = Array.from(table.querySelectorAll('tbody tr')).find(r => r.innerText.includes(row.cells[0].innerText));
                 if (originalRow && originalRow.style.display !== 'none') {
-                    // Clean up text content formatting
                     for(let c=0; c<row.cells.length; c++) {
                         row.cells[c].innerText = row.cells[c].innerText.trim().replace(/\s+/g, ' ');
                     }
@@ -307,4 +332,5 @@
             XLSX.writeFile(wb, "Shift_" + shiftId + "_Orders_" + today + ".xlsx");
         }
     </script>
-}
+</body>
+</html>

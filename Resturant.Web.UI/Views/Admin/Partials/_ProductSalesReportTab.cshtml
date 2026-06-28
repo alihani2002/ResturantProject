@@ -1,141 +1,141 @@
-﻿            <div id="tab-product-sales-report" class="tab-content hidden space-y-6">
+            <div id="tab-product-sales-report" class="tab-content hidden space-y-6">
                 <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
-                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder">
-                        <div>
+                    <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-darkBorder" dir="rtl">
+                        <div class="text-right">
                             <h3 class="outfit-font text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-bar-chart-line text-success"></i> Product Sales Report
+                                <i class="bi bi-bar-chart-line text-success"></i> تقرير مبيعات المنتجات التفصيلي
                             </h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Historical report of sold products grouped by variant sizes and actual selling price from paid/completed orders.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">تقرير مبيعات المنتجات مجمعة بحسب الحجم وسعر البيع الفعلي من الطلبات المدفوعة والمكتملة.</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="resetProductSalesFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
-                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                <i class="bi bi-arrow-counterclockwise"></i> إعادة ضبط
                             </button>
                             <button onclick="exportProductSalesToExcel()" class="text-xs bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-colors">
-                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                                <i class="bi bi-file-earmark-excel"></i> تصدير إكسل
                             </button>
                         </div>
                     </div>
-
+ 
                     <!-- Filters Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3 p-4 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-darkBorder/40" dir="rtl">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Product Name (Search)</label>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">اسم المنتج (بحث)</label>
                             <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-450 dark:text-slate-400">
                                     <i class="bi bi-search text-xs"></i>
                                 </span>
-                                <input type="text" id="prodSalesSearch" onkeyup="renderProductSalesTable(1)" placeholder="e.g. Burger, Pizza..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                                <input type="text" id="prodSalesSearch" onkeyup="renderProductSalesTable(1)" placeholder="مثال: برجر، بيتزا..." class="w-full text-xs pr-8 pl-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Category</label>
-                            <select id="prodSalesCategory" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">All Categories</option>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">القسم / التصنيف</label>
+                            <select id="prodSalesCategory" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
+                                <option value="">جميع الأقسام</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Branch</label>
-                            <select id="prodSalesBranch" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">All Branches</option>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">الفرع</label>
+                            <select id="prodSalesBranch" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
+                                <option value="">جميع الفروع</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date From</label>
-                            <input type="date" id="prodSalesDateFrom" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">من تاريخ</label>
+                            <input type="date" id="prodSalesDateFrom" lang="en" dir="ltr" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Date To</label>
-                            <input type="date" id="prodSalesDateTo" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">إلى تاريخ</label>
+                            <input type="date" id="prodSalesDateTo" lang="en" dir="ltr" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour From</label>
-                            <select id="prodSalesHourFrom" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">Any Hour</option>
-                                <option value="0">12:00 AM (00:00)</option>
-                                <option value="1">01:00 AM (01:00)</option>
-                                <option value="2">02:00 AM (02:00)</option>
-                                <option value="3">03:00 AM (03:00)</option>
-                                <option value="4">04:00 AM (04:00)</option>
-                                <option value="5">05:00 AM (05:00)</option>
-                                <option value="6">06:00 AM (06:00)</option>
-                                <option value="7">07:00 AM (07:00)</option>
-                                <option value="8">08:00 AM (08:00)</option>
-                                <option value="9">09:00 AM (09:00)</option>
-                                <option value="10">10:00 AM (10:00)</option>
-                                <option value="11">11:00 AM (11:00)</option>
-                                <option value="12">12:00 PM (12:00)</option>
-                                <option value="13">01:00 PM (13:00)</option>
-                                <option value="14">02:00 PM (14:00)</option>
-                                <option value="15">03:00 PM (15:00)</option>
-                                <option value="16">04:00 PM (16:00)</option>
-                                <option value="17">05:00 PM (17:00)</option>
-                                <option value="18">06:00 PM (18:00)</option>
-                                <option value="19">07:00 PM (19:00)</option>
-                                <option value="20">08:00 PM (20:00)</option>
-                                <option value="21">09:00 PM (21:00)</option>
-                                <option value="22">10:00 PM (22:00)</option>
-                                <option value="23">11:00 PM (23:00)</option>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">من الساعة</label>
+                            <select id="prodSalesHourFrom" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
+                                <option value="">أي ساعة</option>
+                                <option value="0">12:00 ص (00:00)</option>
+                                <option value="1">01:00 ص (01:00)</option>
+                                <option value="2">02:00 ص (02:00)</option>
+                                <option value="3">03:00 ص (03:00)</option>
+                                <option value="4">04:00 ص (04:00)</option>
+                                <option value="5">05:00 ص (05:00)</option>
+                                <option value="6">06:00 ص (06:00)</option>
+                                <option value="7">07:00 ص (07:00)</option>
+                                <option value="8">08:00 ص (08:00)</option>
+                                <option value="9">09:00 ص (09:00)</option>
+                                <option value="10">10:00 ص (10:00)</option>
+                                <option value="11">11:00 ص (11:00)</option>
+                                <option value="12">12:00 م (12:00)</option>
+                                <option value="13">01:00 م (13:00)</option>
+                                <option value="14">02:00 م (14:00)</option>
+                                <option value="15">03:00 م (15:00)</option>
+                                <option value="16">04:00 م (16:00)</option>
+                                <option value="17">05:00 م (17:00)</option>
+                                <option value="18">06:00 م (18:00)</option>
+                                <option value="19">07:00 م (19:00)</option>
+                                <option value="20">08:00 م (20:00)</option>
+                                <option value="21">09:00 م (21:00)</option>
+                                <option value="22">10:00 م (22:00)</option>
+                                <option value="23">11:00 م (23:00)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1">Hour To</label>
-                            <select id="prodSalesHourTo" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all">
-                                <option value="">Any Hour</option>
-                                <option value="0">12:00 AM (00:00)</option>
-                                <option value="1">01:00 AM (01:00)</option>
-                                <option value="2">02:00 AM (02:00)</option>
-                                <option value="3">03:00 AM (03:00)</option>
-                                <option value="4">04:00 AM (04:00)</option>
-                                <option value="5">05:00 AM (05:00)</option>
-                                <option value="6">06:00 AM (06:00)</option>
-                                <option value="7">07:00 AM (07:00)</option>
-                                <option value="8">08:00 AM (08:00)</option>
-                                <option value="9">09:00 AM (09:00)</option>
-                                <option value="10">10:00 AM (10:00)</option>
-                                <option value="11">11:00 AM (11:00)</option>
-                                <option value="12">12:00 PM (12:00)</option>
-                                <option value="13">01:00 PM (13:00)</option>
-                                <option value="14">02:00 PM (14:00)</option>
-                                <option value="15">03:00 PM (15:00)</option>
-                                <option value="16">04:00 PM (16:00)</option>
-                                <option value="17">05:00 PM (17:00)</option>
-                                <option value="18">06:00 PM (18:00)</option>
-                                <option value="19">07:00 PM (19:00)</option>
-                                <option value="20">08:00 PM (20:00)</option>
-                                <option value="21">09:00 PM (21:00)</option>
-                                <option value="22">10:00 PM (22:00)</option>
-                                <option value="23">11:00 PM (23:00)</option>
+                            <label class="block text-[10px] font-bold text-slate-450 dark:text-slate-500 uppercase mb-1 text-right">إلى الساعة</label>
+                            <select id="prodSalesHourTo" onchange="loadProductSalesReportList()" class="w-full text-xs px-3 py-2 border border-slate-200 dark:border-darkBorder rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500 dark:bg-darkCard dark:text-white transition-all text-right" dir="rtl">
+                                <option value="">أي ساعة</option>
+                                <option value="0">12:00 ص (00:00)</option>
+                                <option value="1">01:00 ص (01:00)</option>
+                                <option value="2">02:00 ص (02:00)</option>
+                                <option value="3">03:00 ص (03:00)</option>
+                                <option value="4">04:00 ص (04:00)</option>
+                                <option value="5">05:00 ص (05:00)</option>
+                                <option value="6">06:00 ص (06:00)</option>
+                                <option value="7">07:00 ص (07:00)</option>
+                                <option value="8">08:00 ص (08:00)</option>
+                                <option value="9">09:00 ص (09:00)</option>
+                                <option value="10">10:00 ص (10:00)</option>
+                                <option value="11">11:00 ص (11:00)</option>
+                                <option value="12">12:00 م (12:00)</option>
+                                <option value="13">01:00 م (13:00)</option>
+                                <option value="14">02:00 م (14:00)</option>
+                                <option value="15">03:00 م (15:00)</option>
+                                <option value="16">04:00 م (16:00)</option>
+                                <option value="17">05:00 م (17:00)</option>
+                                <option value="18">06:00 م (18:00)</option>
+                                <option value="19">07:00 م (19:00)</option>
+                                <option value="20">08:00 م (20:00)</option>
+                                <option value="21">09:00 م (21:00)</option>
+                                <option value="22">10:00 م (22:00)</option>
+                                <option value="23">11:00 م (23:00)</option>
                             </select>
                         </div>
                     </div>
-
+ 
                     <div id="productSalesSummaryCards" class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <!-- Dynamic summary cards -->
                     </div>
-
+ 
                     <div class="overflow-x-auto mt-4">
-                        <table id="table-productsales-list" class="w-full text-left border-collapse text-xs">
+                        <table id="table-productsales-list" class="w-full text-right border-collapse text-xs" dir="rtl">
                             <thead>
                                 <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                    <th class="py-3 px-2">Product Name</th>
-                                    <th class="py-3 px-2">Size</th>
-                                    <th class="py-3 px-2">Category</th>
-                                    <th class="py-3 px-2 text-right">Quantity Sold</th>
-                                    <th class="py-3 px-2 text-right">Cost</th>
-                                    <th class="py-3 px-2 text-right">Avg Price</th>
-                                    <th class="py-3 px-2 text-right">Low Price</th>
-                                    <th class="py-3 px-2 text-right">High Price</th>
-                                    <th class="py-3 px-2 text-right">Sales Before Tax</th>
-                                    <th class="py-3 px-2 text-right">Tax</th>
-                                    <th class="py-3 px-2 text-right">Service</th>
-                                    <th class="py-3 px-2 text-right">Customer Paid</th>
-                                    <th class="py-3 px-2 text-right">Total Cost</th>
-                                    <th class="py-3 px-2 text-right">Gross Profit</th>
-                                    <th class="py-3 px-2 text-right">Net Customer Profit</th>
-                                    <th class="py-3 px-2 text-right">Margin</th>
-                                    <th class="py-3 px-2">Branch</th>
-                                    <th class="py-3 px-2">Last Sold Date</th>
+                                    <th class="py-3 px-2 text-right">اسم المنتج</th>
+                                    <th class="py-3 px-2 text-right">الحجم</th>
+                                    <th class="py-3 px-2 text-right">القسم</th>
+                                    <th class="py-3 px-2 text-center">الكمية المباعة</th>
+                                    <th class="py-3 px-2 text-center">التكلفة</th>
+                                    <th class="py-3 px-2 text-center">متوسط السعر</th>
+                                    <th class="py-3 px-2 text-center">أقل سعر</th>
+                                    <th class="py-3 px-2 text-center">أعلى سعر</th>
+                                    <th class="py-3 px-2 text-center">المبيعات قبل الضريبة</th>
+                                    <th class="py-3 px-2 text-center">الضريبة</th>
+                                    <th class="py-3 px-2 text-center">الخدمة</th>
+                                    <th class="py-3 px-2 text-center">مدفوعات العملاء</th>
+                                    <th class="py-3 px-2 text-center">إجمالي التكلفة</th>
+                                    <th class="py-3 px-2 text-center">إجمالي الربح</th>
+                                    <th class="py-3 px-2 text-center">صافي الربح</th>
+                                    <th class="py-3 px-2 text-center">هامش الربح</th>
+                                    <th class="py-3 px-2 text-right">الفرع</th>
+                                    <th class="py-3 px-2 text-center">تاريخ آخر بيع</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-darkBorder">
@@ -143,7 +143,7 @@
                             </tbody>
                         </table>
                     </div>
-
+ 
                     <!-- Pagination Controls -->
                     <div id="productSalesPagination" class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-darkBorder">
                     </div>

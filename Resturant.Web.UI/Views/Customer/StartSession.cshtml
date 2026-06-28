@@ -1,42 +1,39 @@
-@* 
- * NOTE: didn't create migration or database
- *@
 @{
-    ViewData["Title"] = "Welcome to Our Restaurant";
+    ViewData["Title"] = "أهلاً بكم في مطعمنا";
 }
 
-<div class="container mt-5">
+<div class="container mt-5 text-right" style="direction: rtl; font-family: 'Cairo', sans-serif;">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-lg border-0 rounded-lg">
                 <div class="card-header bg-white text-dark text-center py-4">
-                    <h3 class="font-weight-light mb-0">Table @ViewBag.TableNumber</h3>
-                    <p class="mb-0">Please enter your details to start ordering</p>
+                    <h3 class="font-weight-light mb-0">طاولة @ViewBag.TableNumber</h3>
+                    <p class="mb-0 text-muted">الرجاء إدخال بياناتك لبدء طلب الطعام</p>
                 </div>
                 <div class="card-body p-5">
                     <form asp-action="StartSession" method="post">
                         <input type="hidden" name="tableId" value="@ViewBag.TableId" />
                         
-                        <div class="form-group mb-4">
-                            <label class="small mb-1 text-muted" for="name">Your Name</label>
-                            <input class="form-control py-4 rounded-pill" id="name" name="name" type="text" placeholder="Enter your name" required />
+                        <div class="form-group mb-4 text-right">
+                            <label class="small mb-1 text-muted" for="name">الاسم بالكامل</label>
+                            <input class="form-control py-4 rounded-pill text-right" id="name" name="name" type="text" placeholder="أدخل اسمك" required />
                         </div>
                         
-                        <div class="form-group mb-4">
-                            <label class="small mb-1 text-muted" for="phone">Phone Number</label>
-                            <input class="form-control py-4 rounded-pill" id="phone" name="phone" type="tel" placeholder="Enter your phone number" required />
-                            <small class="form-text text-muted">We use this to help you track your order.</small>
+                        <div class="form-group mb-4 text-right">
+                            <label class="small mb-1 text-muted" for="phone">رقم الهاتف</label>
+                            <input class="form-control py-4 rounded-pill text-right" id="phone" name="phone" type="tel" placeholder="أدخل رقم هاتفك" required />
+                            <small class="form-text text-muted">نستخدم هذا لمساعدتك في تتبع طلباتك.</small>
                         </div>
                         
                         <div class="form-group mt-5">
-                            <button class="btn btn-warning btn-block btn-lg rounded-pill shadow-sm" type="submit">
-                                Start Ordering <i class="fas fa-arrow-right ml-2"></i>
+                            <button class="btn btn-warning btn-block btn-lg rounded-pill shadow-sm w-100 fw-bold" type="submit">
+                                ابدأ الطلب الآن <i class="fas fa-arrow-left mr-2"></i>
                             </button>
                         </div>
                     </form>
                 </div>
                 <div class="card-footer text-center py-3 bg-light border-0">
-                    <div class="small">Already have an active order? <a asp-action="Track">Track it here</a></div>
+                    <div class="small">لديك طلب نشط بالفعل؟ <a asp-action="Track" class="text-warning fw-bold">تتبعه من هنا</a></div>
                 </div>
             </div>
         </div>
@@ -44,6 +41,5 @@
 </div>
 
 <style>
-    .text-gold { color: #d4af37; }
     .card { border: none; }
 </style>

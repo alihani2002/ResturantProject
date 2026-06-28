@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="IE=edge" />
@@ -16,6 +16,98 @@
         body {
             background-color: transparent !important;
             padding: 20px;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: right;
+            direction: rtl;
+        }
+        /* RTL corrections for bootstrap elements */
+        .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+        .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+        .me-3 { margin-left: 1rem !important; margin-right: 0 !important; }
+        .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+        .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+        .ms-3 { margin-right: 1rem !important; margin-left: 0 !important; }
+        .text-end { text-align: left !important; }
+        .text-start { text-align: right !important; }
+        .float-end { float: left !important; }
+        .float-start { float: right !important; }
+        
+        /* Table and Card Enhancements for Premium Look */
+        .card {
+            border: 1px solid rgba(226, 232, 240, 0.8) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.025) !important;
+        }
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .table {
+            margin-bottom: 0 !important;
+        }
+        .table thead th {
+            background-color: #f8fafc !important;
+            color: #64748b !important;
+            font-weight: 700 !important;
+            font-size: 0.75rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 14px 16px !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+        .table tbody td {
+            padding: 16px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            color: #334155;
+        }
+        .table tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+        .table tbody tr:hover {
+            background-color: #f8fafc !important;
+        }
+        /* Buttons and inputs */
+        .btn-primary {
+            background-color: #f97316 !important;
+            border-color: #f97316 !important;
+            box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2) !important;
+        }
+        .btn-primary:hover {
+            background-color: #ea580c !important;
+            border-color: #ea580c !important;
+        }
+        /* Custom styles for DataTables Pagination alignment */
+        .dataTables_wrapper .dataTables_paginate {
+            float: left !important;
+            margin-top: 15px;
+        }
+        .dataTables_wrapper .dataTables_info {
+            float: right !important;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .dataTables_wrapper .dataTables_filter {
+            float: left !important;
+            margin-bottom: 15px;
+        }
+        .dataTables_wrapper .dataTables_length {
+            float: right !important;
+            margin-bottom: 15px;
+        }
+        .dataTables_filter input {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            padding: 6px 12px !important;
+            margin-right: 8px !important;
+            outline: none !important;
+        }
+        .dataTables_length select {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            padding: 6px 8px !important;
+            margin-left: 8px !important;
+            outline: none !important;
         }
     </style>
     @RenderSection("Styles", required: false)

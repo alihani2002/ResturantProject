@@ -114,46 +114,49 @@ namespace Resturant.Web.UI.Controllers
                 return BadRequest("No active session found for this table. Please scan the QR code again.");
             }
 
-            // Prevent duplicate customer orders in rapid succession (within 5 seconds)
-            var recentOrder = await _context.Orders
-                .Where(o => o.TableSessionId == activeSession.Id && o.OrderDate >= DateTime.Now.AddSeconds(-5))
-                .OrderByDescending(o => o.OrderDate)
-                .FirstOrDefaultAsync();
-
-            if (recentOrder != null && recentOrder.Note == request.Note)
-            {
-                var recentItems = await _context.OrderItems
-                    .Where(oi => oi.OrderId == recentOrder.Id)
-                    .OrderBy(oi => oi.MenuItemId)
-                    .ToListAsync();
-
-                var newItems = request.OrderItems.OrderBy(oi => oi.MenuItemId).ToList();
-
-                if (recentItems.Count == newItems.Count)
-                {
-                    bool isIdentical = true;
-                    for (int i = 0; i < recentItems.Count; i++)
-                    {
-                        if (recentItems[i].MenuItemId != newItems[i].MenuItemId || 
-                            recentItems[i].Quantity != newItems[i].Quantity)
-                        {
-                            isIdentical = false;
-                            break;
-                        }
-                    }
-
-                    if (isIdentical)
-                    {
-                        _logger.LogInformation("Identical order detected within 5 seconds for order ID {OrderId}. Rejecting duplicate.", recentOrder.Id);
-                        return Ok(new { OrderId = recentOrder.Id, TotalAmount = recentOrder.TotalAmount });
-                    }
-                }
-            }
-
             bool isStaff = User?.Identity != null && User.Identity.IsAuthenticated && 
                            (User.IsInRole(Resturant.Core.Common.AppRoles.Waiter) || 
                             User.IsInRole(Resturant.Core.Common.AppRoles.Admin) || 
                             User.IsInRole(Resturant.Core.Common.AppRoles.Manager));
+
+            // Prevent duplicate customer orders in rapid succession (within 5 seconds)
+            if (!isStaff)
+            {
+                var recentOrder = await _context.Orders
+                    .Where(o => o.TableSessionId == activeSession.Id && o.OrderDate >= DateTime.Now.AddSeconds(-5))
+                    .OrderByDescending(o => o.OrderDate)
+                    .FirstOrDefaultAsync();
+
+                if (recentOrder != null && recentOrder.Note == request.Note)
+                {
+                    var recentItems = await _context.OrderItems
+                        .Where(oi => oi.OrderId == recentOrder.Id)
+                        .OrderBy(oi => oi.MenuItemId)
+                        .ToListAsync();
+
+                    var newItems = request.OrderItems.OrderBy(oi => oi.MenuItemId).ToList();
+
+                    if (recentItems.Count == newItems.Count)
+                    {
+                        bool isIdentical = true;
+                        for (int i = 0; i < recentItems.Count; i++)
+                        {
+                            if (recentItems[i].MenuItemId != newItems[i].MenuItemId || 
+                                recentItems[i].Quantity != newItems[i].Quantity)
+                            {
+                                isIdentical = false;
+                                break;
+                            }
+                        }
+
+                        if (isIdentical)
+                        {
+                            _logger.LogInformation("Identical order detected within 5 seconds for order ID {OrderId}. Rejecting duplicate.", recentOrder.Id);
+                            return Ok(new { OrderId = recentOrder.Id, TotalAmount = recentOrder.TotalAmount });
+                        }
+                    }
+                }
+            }
 
             Order order = new Order
             {
@@ -165,6 +168,7 @@ namespace Resturant.Web.UI.Controllers
                 Note = request.Note,
                 CustomerName = activeSession.CustomerName,
                 PhoneNumber = activeSession.PhoneNumber,
+                PriceCategory = string.IsNullOrWhiteSpace(request.PriceCategory) ? activeSession.PriceCategory : request.PriceCategory,
                 BranchId = table.BranchId // Treat the table as the source of truth!
             };
 
@@ -192,13 +196,17 @@ namespace Resturant.Web.UI.Controllers
             {
                 var menuItem = await _context.MenuItems
                     .Include(m => m.Sizes)
+                    .Include(m => m.Prices)
                     .FirstOrDefaultAsync(m => m.Id == itemRequest.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable)
                 {
                     continue; // Or handle error
                 }
 
-                var itemPrice = itemRequest.Price ?? menuItem.Price;
+                var resolvedPrice = ResolveMenuItemPrice(menuItem, order.BranchId, order.PriceCategory, itemRequest.Quantity, activeSession.PhoneNumber);
+                var itemPrice = itemRequest.Price.HasValue && isStaff && CanOverridePrice(menuItem, order.BranchId, order.PriceCategory)
+                    ? itemRequest.Price.Value
+                    : resolvedPrice;
                 var selectedSize = menuItem.GetParsedSizes().FirstOrDefault(s =>
                     (!string.IsNullOrWhiteSpace(itemRequest.Size) && s.Name == itemRequest.Size) ||
                     (string.IsNullOrWhiteSpace(itemRequest.Size) && s.Price == itemPrice));
@@ -297,6 +305,39 @@ namespace Resturant.Web.UI.Controllers
             }
 
             return Ok(new { OrderId = order.Id, TotalAmount = totalAmount });
+        }
+
+        private static decimal ResolveMenuItemPrice(MenuItem menuItem, int branchId, string? priceCategory, int quantity, string? customerKey)
+        {
+            var now = DateTime.Now;
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            var price = menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.StartsOn.HasValue || p.StartsOn.Value <= now)
+                .Where(p => !p.EndsOn.HasValue || p.EndsOn.Value >= now)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => !p.MinQuantity.HasValue || quantity >= p.MinQuantity.Value)
+                .Where(p => string.IsNullOrWhiteSpace(p.CustomerKey) || p.CustomerKey == customerKey)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.BranchId.HasValue ? 0 : 1)
+                .ThenBy(p => string.IsNullOrWhiteSpace(p.CustomerKey) ? 1 : 0)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault();
+
+            return price?.Price ?? menuItem.Price;
+        }
+
+        private static bool CanOverridePrice(MenuItem menuItem, int branchId, string? priceCategory)
+        {
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            return menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault()?.AllowOverride ?? true;
         }
 
         // GET: Order/CheckTable - Check if table exists and is available
@@ -535,6 +576,7 @@ namespace Resturant.Web.UI.Controllers
         public string? Note { get; set; }
         public List<OrderItemRequest> OrderItems { get; set; }
         public int? BranchId { get; set; }
+        public string? PriceCategory { get; set; }
     }
 
     public class OrderItemRequest

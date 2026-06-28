@@ -1,10 +1,10 @@
 @model IEnumerable<Resturant.Core.Entities.MenuCategory>
 
 @{
-    ViewData["Title"] = "Qore Menu";
+    ViewData["Title"] = "منيو الديوان";
 }
 
-<div class="menu-app-container bg-light min-vh-100 pb-5">
+<div class="menu-app-container bg-light min-vh-100 pb-5 text-right" style="font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
 
     <!-- Main Header Banner -->
     <div class="brand-banner-section text-center py-4 position-relative overflow-hidden"
@@ -23,20 +23,16 @@
                 <img src="/assets/images/q.png"
                      class="w-100 h-100 rounded-circle"
                      style="object-fit: cover;"
-                     onerror="this.src='https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=200'">
+                     onerror="this.src='/assets/images/logo-abbr.png'">
             </div>
 
             <!-- Dynamic Brand Header -->
-            <h4 class="fw-bold mb-1 tracking-wide outfit-font"
-                style="color: #1c1917;">
-                ELDEWAN MENU
+            <h4 class="fw-bold mb-1 tracking-wide" style="color: #1c1917;">
+                منيو الديوان
             </h4>
 
-            <small class="fw-semibold"
-                   style="letter-spacing: 2px;
-                font-size: 0.72rem;
-                color: #d97706;">
-                Premium Experience
+            <small class="fw-semibold text-warning" style="font-size: 0.72rem; letter-spacing: 1px;">
+                تجربة مميزة وفريدة
             </small>
         </div>
     </div>
@@ -45,21 +41,28 @@
     <div class="container py-3">
         <!-- Floating Info Bar: Table & Active User -->
         <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <span class="rounded-circle bg-secondary text-white p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
                         <i class="bi bi-hash"></i>
                     </span>
                     <div>
-                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">Your Table</small>
-                        <strong class="text-dark">Table <span class="badge bg-secondary rounded-pill">@ViewData["TableNumber"]</span></strong>
+                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">طاولتك</small>
+                        <strong class="text-dark">طاولة <span class="badge bg-secondary rounded-pill">@ViewData["TableNumber"]</span></strong>
                     </div>
                 </div>
+
+                <!-- Call Waiter Button -->
+                <button id="call-waiter-btn" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm" onclick="callWaiter()" style="font-size: 0.8rem; border-width: 1.5px; transition: all 0.3s ease;">
+                    <i class="bi bi-bell-fill text-danger animate-pulse"></i>
+                    <span>اطلب الويتر</span>
+                </button>
+
                 @if (ViewData["CustomerName"] != null)
                 {
-                    <div class="text-end">
-                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">Welcome</small>
-                        <span class="fw-bold text-dark"><i class="bi bi-person-fill text-warning me-1"></i>@ViewData["CustomerName"]</span>
+                    <div class="text-left">
+                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">مرحباً بك</small>
+                        <span class="fw-bold text-dark"><i class="bi bi-person-fill text-warning ms-1"></i>@ViewData["CustomerName"]</span>
                     </div>
                 }
             </div>
@@ -68,8 +71,8 @@
         <!-- Search Bar Card -->
         <div class="search-section mb-4">
             <div class="position-relative">
-                <input type="text" id="menu-search-input" class="form-control border-0 shadow-sm rounded-pill py-3 px-4" placeholder="ابحث هنا عن وجبتك المفضلة... (Search food...)" style="padding-right: 50px;">
-                <span class="position-absolute end-0 top-50 translate-middle-y me-3 text-muted fs-5">
+                <input type="text" id="menu-search-input" class="form-control border-0 shadow-sm rounded-pill py-3 px-4 text-right" placeholder="ابحث هنا عن وجبتك المفضلة..." style="padding-left: 50px; direction: rtl;">
+                <span class="position-absolute start-0 top-50 translate-middle-y ms-3 text-muted fs-5">
                     <i class="bi bi-search text-warning"></i>
                 </span>
             </div>
@@ -77,8 +80,8 @@
 
         <!-- Instagram Stories Category Navigator -->
         <div class="category-stories-section mb-4">
-            <h6 class="fw-bold text-dark mb-3 px-1 outfit-font text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">Categories / التصنيفات</h6>
-            <div class="d-flex overflow-auto flex-nowrap scrollbar-none gap-3 pb-2 px-1" id="category-stories-container">
+            <h6 class="fw-bold text-dark mb-3 px-1" style="font-size: 0.85rem;">التصنيفات</h6>
+            <div class="d-flex overflow-auto flex-nowrap scrollbar-none gap-3 pb-2 px-1" id="category-stories-container" style="direction: rtl;">
                 @foreach (var category in Model)
                 {
                     var isActive = ViewData["SelectedCategoryId"] != null && (int)ViewData["SelectedCategoryId"] == category.Id;
@@ -116,14 +119,14 @@
             <div class="col-12">
                 <!-- My Orders Tracking Card -->
                 <div id="my-orders-card" class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white" style="display: none;">
-                    <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center py-3" style="background-color: #ffffff !important;">
-                        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-warning me-2"></i>طلباتي النشطة (Active Orders)</h6>
+                    <div class="card-header bg-white text-dark d-flex justify-content-between align-items-center py-3" style="background-color: #ffffff !important; direction: rtl;">
+                        <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-warning ms-2"></i>طلباتي النشطة</h6>
                         <button class="btn btn-outline-dark btn-sm rounded-pill px-3 py-1" onclick="fetchAndRefreshMyOrders()">
-                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                            <i class="bi bi-arrow-clockwise ms-1"></i> تحديث
                         </button>
                     </div>
                     <div class="card-body p-3">
-                        <div id="my-orders-list" class="d-flex flex-column gap-3" style="max-height: 400px; overflow-y: auto;">
+                        <div id="my-orders-list" class="d-flex flex-column gap-3" style="max-height: 400px; overflow-y: auto; direction: rtl;">
                             <!-- Active order cards -->
                         </div>
                     </div>
@@ -136,22 +139,22 @@
                         @if (category.MenuItems.Any(i => i.IsAvailable))
                         {
                             <div class="category-section mb-5" id="category-section-@category.Id">
-                                <h4 class="fw-black outfit-font text-slate-800 mb-3 px-1 d-flex align-items-center justify-content-between border-bottom pb-2">
+                                <h4 class="fw-black text-slate-800 mb-3 px-1 d-flex align-items-center justify-content-between border-bottom pb-2" style="direction: rtl;">
                                     <span>@category.Name</span>
                                     <span class="badge bg-warning-subtle text-warning rounded-pill border border-warning-subtle px-2.5 py-1" style="font-size: 0.72rem; font-weight: 700;">
-                                        @category.MenuItems.Count(i => i.IsAvailable) Items
+                                        @category.MenuItems.Count(i => i.IsAvailable) صنف
                                     </span>
                                 </h4>
                                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-3" id="menu-items-grid-container-@category.Id">
                                     @foreach (var item in category.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
                                     {
                                         var badges = "";
-                                        if (item.IsPopular) { badges = "<span class=\"badge bg-danger position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Best Seller</span>"; }
-                                        else if (item.IsTrending) { badges = "<span class=\"badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Trending</span>"; }
-                                        else if (item.IsRecommended) { badges = "<span class=\"badge bg-info text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">Recommended</span>"; }
+                                        if (item.IsPopular) { badges = "<span class=\"badge bg-danger position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">الأكثر مبيعاً</span>"; }
+                                        else if (item.IsTrending) { badges = "<span class=\"badge bg-warning text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">رائج</span>"; }
+                                        else if (item.IsRecommended) { badges = "<span class=\"badge bg-info text-dark position-absolute top-0 start-0 m-2 z-2\" style=\"font-size: 0.65rem;\">موصى به</span>"; }
 
                                         <div class="col menu-item-card-col" data-item-id="@item.Id" data-name="@item.Name.ToLower()" data-description="@(item.Description?.ToLower() ?? "")">
-                                            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift bg-white">
+                                            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift bg-white text-right">
                                                 @Html.Raw(badges)
                                                 <!-- Image Container -->
                                                 <div class="position-relative" style="height: 135px; overflow: hidden; background-color: #f8fafc;">
@@ -175,12 +178,12 @@
                                                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                                                     <div>
                                                         <h6 class="fw-bold text-dark mb-1 line-clamp-1" title="@item.Name">@item.Name</h6>
-                                                        <p class="text-muted mb-0 small line-clamp-2" style="font-size: 0.75rem; min-height: 32px;">@(item.Description ?? "Freshly prepared high-quality restaurant item.")</p>
+                                                        <p class="text-muted mb-0 small line-clamp-2" style="font-size: 0.75rem; min-height: 32px;">@(item.Description ?? "صنف مطعم طازج ومميز مُعد بجودة عالية.")</p>
                                                     </div>
                                                     <div class="d-flex align-items-center justify-content-between mt-3">
-                                                        <div>
+                                                        <div class="text-right">
                                                             <span class="fw-extrabold text-slate-800" style="font-size: 0.95rem;">@item.Price.ToString("F2")</span>
-                                                            <small class="text-muted d-block" style="font-size: 0.65rem; font-weight: bold; margin-top: -3px;">L.E. / ج.م</small>
+                                                            <small class="text-muted d-block" style="font-size: 0.65rem; font-weight: bold; margin-top: -3px;">ج.م</small>
                                                         </div>
                                                         <button class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm" 
                                                                 onclick="openCustomizationModal(@item.Id)"
@@ -197,60 +200,61 @@
                         }
                     }
                 </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Sticky Floating Action Cart Bar for Mobile & Tablet -->
-    <!-- Unified Talabat-Style Floating Cart Bar (Universal for Mobile & Desktop) -->
+    <!-- Sticky Floating Action Cart Bar -->
     <div class="floating-talabat-cart-bar fixed-bottom py-2.5 px-3 shadow animate-slide-up" id="universal-cart-bar" 
          style="display: none; z-index: 1040; bottom: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 500px; border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 1.5px solid rgba(255, 193, 7, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;">
-        <div class="d-flex justify-content-between align-items-center">
-            <!-- Left Info Panel -->
+        <div class="d-flex justify-content-between align-items-center" style="direction: rtl;">
+            <!-- Right Info Panel (Swapped for RTL) -->
             <div class="d-flex align-items-center gap-2.5 cursor-pointer" onclick="checkout()">
                 <div class="position-relative bg-warning text-black rounded-circle p-2 d-flex align-items-center justify-content-center shadow" style="width: 38px; height: 38px; min-width: 38px;">
                     <i class="bi bi-bag-fill fs-6"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.65rem; padding: 3px 5px;">0</span>
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="universal-cart-badge" style="font-size: 0.65rem; padding: 3px 5px;">0</span>
                 </div>
-                <div>
-                    <span class="text-muted d-block outfit-font" style="font-size: 0.62rem; letter-spacing: 0.8px; text-transform: uppercase;">Total Basket</span>
-                    <strong class="text-warning outfit-font fw-extrabold" id="universal-cart-total-text" style="font-size: 1.05rem !important;">0.00 L.E.</strong>
+                <div class="text-right">
+                    <span class="text-muted d-block" style="font-size: 0.62rem; text-transform: uppercase;">إجمالي السلة</span>
+                    <strong class="text-warning fw-extrabold" id="universal-cart-total-text" style="font-size: 1.05rem !important;">0.00 ج.م</strong>
                 </div>
             </div>
-            <!-- Right CTA Button -->
-            <button class="btn btn-warning rounded-pill px-3.5 py-2 fw-bold outfit-font d-flex align-items-center gap-1.5 shadow" style="font-size: 0.8rem; font-weight: 800 !important; color: #000; transition: all 0.3s;" onclick="checkout()">
-                <span>Checkout</span>
-                <i class="bi bi-arrow-right-short fs-6 fw-bold"></i>
+            <!-- Left CTA Button -->
+            <button class="btn btn-warning rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-1.5 shadow" style="font-size: 0.8rem; font-weight: 800 !important; color: #000; transition: all 0.3s;" onclick="checkout()">
+                <span>عرض السلة</span>
+                <i class="bi bi-arrow-left-short fs-6 fw-bold"></i>
             </button>
         </div>
     </div>
 </div>
 
 <!-- Customization & Recommendation Modal -->
-<div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true">
+<div class="modal fade" id="customizationModal" tabindex="-1" aria-labelledby="customizationModalLabel" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white text-dark">
             <!-- Image Header -->
             <div class="position-relative bg-light text-center" id="customization-image-container" style="height: 220px; overflow: hidden; display: none;">
                 <img id="customization-item-image" src="" class="w-100 h-100" style="object-fit: cover;" alt="Product Image">
-                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-end p-3" style="background: linear-gradient(0deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);">
+                <div class="position-absolute bottom-0 end-0 w-100 h-100 d-flex flex-column justify-content-end p-3 text-right" style="background: linear-gradient(0deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%); direction: rtl;">
                     <h4 class="text-dark fw-bold mb-0" id="customization-item-name-header"></h4>
                 </div>
             </div>
             
-            <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center" id="customization-header-standard">
-                <div class="flex-grow-1">
-                    <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">Item Name</h4>
-                    <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 L.E.</span>
+            <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center justify-content-between" id="customization-header-standard" style="direction: rtl;">
+                <div class="text-right flex-grow-1">
+                    <h4 class="modal-title fw-bold text-dark mb-0" id="customization-item-name">اسم الصنف</h4>
+                    <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="customization-item-price">0.00 ج.م</span>
                 </div>
-                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close shadow-none ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <div class="modal-body px-3 py-3" style="max-height: 50vh; overflow-y: auto;">
-                <p class="text-muted small mb-3" id="customization-item-description">Description goes here.</p>
+            <div class="modal-body px-3 py-3 text-right" style="max-height: 50vh; overflow-y: auto; direction: rtl;">
+                <p class="text-muted small mb-3" id="customization-item-description">الوصف غير متوفر.</p>
                 
                 <!-- Sizes Section -->
                 <div id="sizes-section" class="mb-4" style="display: none;">
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                        <i class="bi bi-arrows-angle-expand text-warning me-2"></i>Select Size / اختر الحجم
+                        <i class="bi bi-arrows-angle-expand text-warning ms-2"></i>اختر الحجم
                     </h6>
                     <div id="sizes-list" class="d-flex flex-wrap gap-2">
                         <!-- Dynamic sizes -->
@@ -260,7 +264,7 @@
                 <!-- Add-Ons Section -->
                 <div id="addons-section" class="mb-4" style="display: none;">
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                        <i class="bi bi-gear-wide-connected text-warning me-2"></i>Customize Your Order
+                        <i class="bi bi-gear-wide-connected text-warning ms-2"></i>تخصيص الطلب والإضافات
                     </h6>
                     <div id="addons-list" class="row g-2">
                         <!-- Custom options -->
@@ -270,7 +274,7 @@
                 <!-- Recommendations Section -->
                 <div id="recommendations-section" class="mb-2" style="display: none;">
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-                        <i class="bi bi-star-fill text-warning me-2"></i>Frequently Ordered Together
+                        <i class="bi bi-star-fill text-warning ms-2"></i>يقدم غالباً مع هذا الصنف
                     </h6>
                     <div id="recommendations-list" class="d-flex flex-column gap-2">
                         <!-- Recommendations -->
@@ -279,7 +283,7 @@
             </div>
             
             <!-- Sticky bottom bar -->
-            <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+            <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center" style="direction: rtl;">
                 <!-- Quantity selector -->
                 <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
                     <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" id="customization-qty-minus">-</button>
@@ -288,8 +292,8 @@
                 </div>
                 
                 <!-- Action Button -->
-                <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-bold flex-grow-1 ms-3" id="add-customized-to-cart-btn" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
-                    Add to Cart - <span id="customization-total-price">0.00 L.E.</span>
+                <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold flex-grow-1 mr-3 text-dark shadow-sm" id="add-customized-to-cart-btn">
+                    إضافة للسلة - <span id="customization-total-price">0.00 ج.م</span>
                 </button>
             </div>
         </div>
@@ -297,28 +301,28 @@
 </div>
 
 <!-- Checkout Modal -->
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white">
-            <div class="modal-header bg-white text-dark py-3 px-4" style="background-color: #ffffff !important;">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden bg-white text-dark">
+            <div class="modal-header bg-white text-dark py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #ffffff !important; direction: rtl;">
                 <h5 class="modal-title fw-bold" id="checkoutModalLabel">
-                    <i class="bi bi-cart-check-fill text-warning me-2"></i>Confirm Order
+                    <i class="bi bi-cart-check-fill text-warning ms-2"></i>تأكيد وإرسال الطلب
                 </h5>
-                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4 text-right" style="direction: rtl;">
                 <div id="checkout-summary" class="mb-3">
                     <!-- Summary -->
                 </div>
                 <div class="form-group mt-3">
-                    <label for="orderNote" class="form-label fw-bold">Note to Chef (Optional) / ملاحظات للمطبخ</label>
-                    <textarea class="form-control" id="orderNote" rows="2" placeholder="e.g., No onions, extra spicy..."></textarea>
+                    <label for="orderNote" class="form-label fw-bold">ملاحظات للمطبخ (اختياري)</label>
+                    <textarea class="form-control" id="orderNote" rows="2" placeholder="مثال: بدون بصل، حار إضافي..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer border-0 p-3 bg-light d-flex">
-                <button type="button" class="btn btn-outline-dark rounded-pill px-4 flex-grow-1" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1" id="confirmCheckoutBtn" style="background-color: #f8f9fa; border: 1px solid #dee2e6;">
-                    <i class="bi bi-check-lg me-2"></i>Place Order
+            <div class="modal-footer border-0 p-3 bg-light d-flex" style="direction: rtl;">
+                <button type="button" class="btn btn-outline-dark rounded-pill px-4 flex-grow-1" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold text-dark shadow-sm" id="confirmCheckoutBtn">
+                    <i class="bi bi-check-lg ms-2"></i>إرسال الطلب الآن
                 </button>
             </div>
         </div>
@@ -338,13 +342,13 @@
 </div>
 
 <!-- Toast Notification -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+<div class="toast-container position-fixed bottom-0 start-0 p-3" style="z-index: 2000;">
     <div id="cartToast" class="toast align-items-center text-white bg-success border-0 rounded-3 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body">
-                <i class="bi bi-check-circle-fill me-2"></i> Item added to cart!
+            <div class="toast-body text-right" style="direction: rtl;">
+                <i class="bi bi-check-circle-fill ms-2"></i>تم إضافة الصنف إلى السلة بنجاح!
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white ms-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 </div>
@@ -377,11 +381,6 @@
         .floating-talabat-cart-bar #universal-cart-badge {
             font-size: 0.58rem !important;
             padding: 2px 4px !important;
-        }
-
-        .floating-talabat-cart-bar .text-white-50 {
-            font-size: 0.55rem !important;
-            letter-spacing: 0.5px !important;
         }
 
         .floating-talabat-cart-bar #universal-cart-total-text {
@@ -493,8 +492,7 @@
         color: #e2e8f0 !important;
     }
     .dark-theme .card,
-    .dark-theme .modal-content,
-    .dark-theme #cart-summary {
+    .dark-theme .modal-content {
         background-color: #1e1e1e !important;
         color: #f1f5f9 !important;
         border-color: #2d2d2d !important;
@@ -525,14 +523,6 @@
         color: #e2e8f0 !important;
         border-color: #2d2d2d !important;
     }
-    .dark-theme .sidebar-category-link:not(.active) {
-        color: #e2e8f0 !important;
-        background-color: transparent !important;
-    }
-    .dark-theme .sidebar-category-link.active {
-        background-color: #f59e0b !important;
-        color: #000000 !important;
-    }
     .dark-theme .border,
     .dark-theme .border-top,
     .dark-theme .border-bottom {
@@ -550,10 +540,6 @@
         background-color: #1a1a1a !important;
         border-color: #2d2d2d !important;
     }
-    .dark-theme .mobile-floating-cart-bar {
-        background-color: #1e1e1e !important;
-        border-top: 1px solid #2d2d2d !important;
-    }
     .dark-theme .btn-outline-dark {
         color: #ffffff !important;
         border-color: #e2e8f0 !important;
@@ -567,12 +553,10 @@
 @section Scripts {
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script>
-        // Table parameters
         let tableNumber = @(ViewData["TableNumber"] ?? "null");
         let branchId = @(ViewData["BranchId"] ?? "null");
         let selectedCategoryId = @(ViewData["SelectedCategoryId"] ?? "null");
         
-        // Static category mapping from Razor models
         const categoriesList = [
             @foreach (var cat in Model)
             {
@@ -580,13 +564,11 @@
             }
         ];
 
-        // --- CART MAPPINGS ---
         let cart = [];
         let activeCustomItem = null;
         let selectedAddOns = [];
         let customizationQty = 1;
 
-        // Load cart
         function loadCart() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
@@ -595,12 +577,10 @@
             }
         }
 
-        // Save cart
         function saveCart() {
             localStorage.setItem('cart', JSON.stringify(cart));
         }
 
-        // Open customization modal
         function openCustomizationModal(menuItemId) {
             fetch(`/Menu/GetMenuItemCustomizationDetails?id=${menuItemId}`)
                 .then(response => {
@@ -613,11 +593,10 @@
                     customizationQty = 1;
                     
                     document.getElementById('customization-item-name').textContent = item.name;
-                    document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} L.E.`;
+                    document.getElementById('customization-item-price').textContent = `${item.price.toFixed(2)} ج.م`;
                     document.getElementById('customization-item-description').textContent = item.description || '';
                     document.getElementById('customization-qty-val').textContent = customizationQty;
 
-                    // Image handling
                     const imgContainer = document.getElementById('customization-image-container');
                     const imgEl = document.getElementById('customization-item-image');
                     const standardHeader = document.getElementById('customization-header-standard');
@@ -633,7 +612,6 @@
                         standardHeader.style.display = 'flex';
                     }
 
-                    // Render Sizes
                     const sizesSection = document.getElementById('sizes-section');
                     const sizesList = document.getElementById('sizes-list');
                     if (item.sizes && item.sizes.length > 0) {
@@ -643,7 +621,7 @@
                                 <input type="radio" class="btn-check" name="size-option" id="size-${idx}" value="${size.name}" data-price="${size.price}" ${idx === 0 ? 'checked' : ''} onchange="updateCustomizationTotal()">
                                 <label class="btn btn-outline-warning w-100 py-2.5 rounded-3 fw-bold text-dark d-flex flex-column align-items-center justify-content-center size-card cursor-pointer" for="size-${idx}">
                                     <span class="size-name small text-muted">${size.name}</span>
-                                    <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} L.E.</span>
+                                    <span class="size-price fw-extrabold text-dark mt-1" style="font-size: 0.95rem;">${size.price.toFixed(2)} ج.م</span>
                                 </label>
                             </div>
                         `).join('');
@@ -652,23 +630,22 @@
                         sizesList.innerHTML = '';
                     }
 
-                    // Render Add-ons
                     const addonsSection = document.getElementById('addons-section');
                     const addonsList = document.getElementById('addons-list');
                     if (item.addOns && item.addOns.length > 0) {
                         addonsSection.style.display = 'block';
                         addonsList.innerHTML = item.addOns.map(addon => `
-                            <div class="col-12">
-                                <div class="card border p-2.5 px-3 rounded-3 d-flex flex-row align-items-center justify-content-between cursor-pointer addon-card" 
+                            <div class="col-12 text-right" style="direction: rtl;">
+                                <div class="card border p-2.5 px-3 rounded-3 d-flex flex-row align-items-center justify-content-between cursor-pointer addon-card mb-2" 
                                      id="addon-card-${addon.id}"
                                      onclick="toggleAddonCard(${addon.id})">
-                                    <div class="form-check m-0" style="pointer-events: none;">
-                                        <input class="form-check-input" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.extraPrice}" data-name="${addon.name}" onclick="event.stopPropagation()">
-                                        <label class="form-check-label fw-bold text-dark ms-2" for="addon-${addon.id}">
+                                    <div class="form-check m-0 p-0" style="pointer-events: none; padding-right: 1.5em !important;">
+                                        <input class="form-check-input ms-2" type="checkbox" id="addon-${addon.id}" value="${addon.id}" data-price="${addon.extraPrice}" data-name="${addon.name}" onclick="event.stopPropagation()" style="float: right;">
+                                        <label class="form-check-label fw-bold text-dark me-4" for="addon-${addon.id}">
                                             ${addon.name}
                                         </label>
                                     </div>
-                                    <span class="fw-bold text-warning small">+ ${addon.extraPrice.toFixed(2)} L.E.</span>
+                                    <span class="fw-bold text-warning small">+ ${addon.extraPrice.toFixed(2)} ج.م</span>
                                 </div>
                             </div>
                         `).join('');
@@ -677,22 +654,23 @@
                         addonsList.innerHTML = '';
                     }
 
-                    // Render Recommendations
                     const recSection = document.getElementById('recommendations-section');
                     const recList = document.getElementById('recommendations-list');
                     if (item.recommendations && item.recommendations.length > 0) {
                         recSection.style.display = 'block';
                         recList.innerHTML = item.recommendations.map(rec => `
-                            <div class="card border rounded-3 overflow-hidden bg-white p-2 mb-1" style="box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <div class="d-flex align-items-center gap-3">
-                                    ${rec.imageUrl ? `<img src="${rec.imageUrl}" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">` : ''}
-                                    <div class="flex-grow-1">
-                                        <h6 class="fw-bold text-dark mb-0 small">${rec.name}</h6>
-                                        <div class="fw-bold text-dark small">${rec.price.toFixed(2)} L.E.</div>
+                            <div class="card border rounded-3 overflow-hidden bg-white p-2 mb-1" style="box-shadow: 0 2px 4px rgba(0,0,0,0.02); direction: rtl; text-align: right;">
+                                <div class="d-flex align-items-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        ${rec.imageUrl ? `<img src="${rec.imageUrl}" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">` : ''}
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-0 small">${rec.name}</h6>
+                                            <div class="fw-bold text-dark small">${rec.price.toFixed(2)} ج.م</div>
+                                        </div>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 fw-bold text-uppercase" 
+                                    <button class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 fw-bold text-dark" 
                                             onclick="addRecommendedDirect(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
-                                        + Add
+                                        + إضافة
                                     </button>
                                 </div>
                             </div>
@@ -704,18 +682,16 @@
 
                     updateCustomizationTotal();
 
-                    // Open bootstrap modal
                     const bsRequest = window.bootstrap || bootstrap;
                     const customModal = new bsRequest.Modal(document.getElementById('customizationModal'));
                     customModal.show();
                 })
                 .catch(err => {
                     console.error("Error opening customization:", err);
-                    alert("Unable to fetch item details.");
+                    alert("عذراً، فشل تحميل تفاصيل الصنف.");
                 });
         }
 
-        // Toggle addon card
         function toggleAddonCard(addonId) {
             const checkbox = document.getElementById(`addon-${addonId}`);
             if (checkbox) {
@@ -730,7 +706,6 @@
             }
         }
 
-        // Update customization total
         function updateCustomizationTotal() {
             if (!activeCustomItem) return;
             
@@ -745,10 +720,9 @@
 
             total = total * customizationQty;
 
-            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} L.E.`;
+            document.getElementById('customization-total-price').textContent = `${total.toFixed(2)} ج.م`;
         }
 
-        // Add recommended direct
         function addRecommendedDirect(recItem) {
             const cartItemId = `${recItem.id}_`;
             const existingItem = cart.find(item => item.cartItemId === cartItemId);
@@ -769,7 +743,6 @@
             showToast();
         }
 
-        // Show Toast
         function showToast() {
             const toastEl = document.getElementById('cartToast');
             const bsRequest = window.bootstrap || bootstrap;
@@ -777,7 +750,6 @@
             toast.show();
         }
 
-        // Image preview
         function openImagePreview(imageUrl) {
             const bsRequest = window.bootstrap || bootstrap;
             const modal = new bsRequest.Modal(document.getElementById('imagePreviewModal'));
@@ -785,14 +757,12 @@
             modal.show();
         }
 
-        // Remove from cart
         function removeFromCart(cartItemId) {
             cart = cart.filter(item => item.cartItemId !== cartItemId);
             saveCart();
             updateCartUI();
         }
 
-        // Update quantity
         function updateQuantity(cartItemId, change) {
             const item = cart.find(item => item.cartItemId === cartItemId);
             if (item) {
@@ -806,7 +776,6 @@
             }
         }
 
-        // Update cart UI
         function updateCartUI() {
             const universalBar = document.getElementById('universal-cart-bar');
             const universalBadge = document.getElementById('universal-cart-badge');
@@ -815,7 +784,6 @@
             if (cart.length === 0) {
                 if (universalBar) universalBar.style.display = 'none';
                 
-                // If cart is empty and checkout modal is open, hide it
                 const checkoutModalEl = document.getElementById('checkoutModal');
                 if (checkoutModalEl) {
                     const bsRequest = window.bootstrap || bootstrap;
@@ -834,10 +802,9 @@
                 });
                 
                 if (universalBadge) universalBadge.textContent = totalQty;
-                if (universalTotalText) universalTotalText.textContent = total.toFixed(2) + ' L.E.';
+                if (universalTotalText) universalTotalText.textContent = total.toFixed(2) + ' ج.م';
                 if (universalBar) universalBar.style.display = 'block';
 
-                // If checkout modal is open, refresh its content dynamically!
                 const checkoutModalEl = document.getElementById('checkoutModal');
                 if (checkoutModalEl && checkoutModalEl.classList.contains('show')) {
                     renderCheckoutSummary();
@@ -845,7 +812,6 @@
             }
         }
 
-        // Highlight category bubbles (Instagram Stories) & hide all sections except the active one
         function highlightCategoryBubble(categoryId) {
             document.querySelectorAll('.category-story-item').forEach(item => {
                 item.classList.remove('active');
@@ -867,7 +833,6 @@
 
             selectedCategoryId = categoryId;
 
-            // Show ONLY the active category section in normal mode (if no search query is active)
             const query = document.getElementById('menu-search-input')?.value.toLowerCase().trim() || '';
             if (!query) {
                 document.querySelectorAll('.category-section').forEach(section => {
@@ -877,7 +842,6 @@
             }
         }
 
-        // Category selection handler (Stories navigation with smooth scrolling to top)
         function selectCategory(categoryId, element) {
             highlightCategoryBubble(categoryId);
             
@@ -891,9 +855,8 @@
             }
         }
 
-        // Render cart items inside Checkout Modal dynamically with +/- quantity controls
         function renderCheckoutSummary() {
-            let summaryHtml = '<ul class="list-group list-group-flush mb-2 bg-transparent">';
+            let summaryHtml = '<ul class="list-group list-group-flush mb-2 bg-transparent" style="direction: rtl; text-align: right; padding-right: 0;">';
             let total = 0;
             
             cart.forEach(item => {
@@ -904,23 +867,23 @@
                 
                 let addonsText = '';
                 if (item.addOns && item.addOns.length > 0) {
-                    addonsText = `<div class="text-muted small ps-2">${item.addOns.map(a => `+ ${a.name} (+${a.price.toFixed(2)} L.E.)`).join('<br>')}</div>`;
+                    addonsText = `<div class="text-muted small pr-2 border-right border-2 border-warning mt-1" style="font-size:0.75rem;">+ ${item.addOns.map(a => `${a.name} (+${a.price.toFixed(2)} ج.م)`).join('<br>')}</div>`;
                 }
 
                 summaryHtml += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 bg-transparent" style="border-bottom: 1px solid rgba(0,0,0,0.08);">
-                        <div style="max-width: 60%;">
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 bg-transparent" style="border-bottom: 1px solid rgba(0,0,0,0.08); direction: rtl;">
+                        <div style="max-width: 60%; text-align: right;">
                             <h6 class="my-0 fw-bold text-dark">${item.name}</h6>
                             ${addonsText}
-                            <small class="text-muted mt-1 d-block">${itemPrice.toFixed(2)} L.E. x ${item.quantity}</small>
+                            <small class="text-muted mt-1 d-block">${itemPrice.toFixed(2)} ج.م × ${item.quantity}</small>
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-sm btn-outline-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', -1)">-</button>
+                                <button class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', -1)">-</button>
                                 <span class="fw-bold text-dark px-1" style="font-size: 0.9rem;">${item.quantity}</span>
-                                <button class="btn btn-sm btn-outline-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', 1)">+</button>
+                                <button class="btn btn-sm btn-outline-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 25px; height: 25px; font-weight: bold; line-height: 1;" onclick="updateQuantity('${item.cartItemId}', 1)">+</button>
                             </div>
-                            <button class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none fs-5" onclick="removeFromCart('${item.cartItemId}')">
+                            <button class="btn btn-sm btn-link text-danger p-0 border-0 shadow-none fs-5 ms-2" onclick="removeFromCart('${item.cartItemId}')">
                                 <i class="bi bi-trash3-fill"></i>
                             </button>
                         </div>
@@ -929,19 +892,18 @@
             });
             
             summaryHtml += `
-                <li class="list-group-item d-flex justify-content-between bg-light py-3 px-3 rounded-3 mt-3 border-0 shadow-sm">
-                    <span class="fw-bold text-dark">Order Total (إجمالي الطلب)</span>
-                    <strong class="text-dark fs-5 fw-extrabold">${total.toFixed(2)} L.E.</strong>
+                <li class="list-group-item d-flex justify-content-between bg-light py-3 px-3 rounded-3 mt-3 border-0 shadow-sm" style="direction: rtl;">
+                    <span class="fw-bold text-dark">إجمالي الطلب</span>
+                    <strong class="text-dark fs-5 fw-extrabold">${total.toFixed(2)} ج.م</strong>
                 </li>
             </ul>`;
             
             document.getElementById('checkout-summary').innerHTML = summaryHtml;
         }
 
-        // Open checkout modal
         function checkout() {
             if (cart.length === 0) {
-                alert('Your cart is empty');
+                alert('سلة المشتريات فارغة!');
                 return;
             }
 
@@ -954,7 +916,6 @@
         }
 
         let isPlacingOrder = false;
-        // Confirm placing order
         async function confirmCheckout() {
             if (isPlacingOrder) return;
             isPlacingOrder = true;
@@ -965,7 +926,7 @@
             const checkoutModal = bsRequest.Modal.getInstance(document.getElementById('checkoutModal'));
 
             confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing Order...';
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm ms-2"></span>جاري إرسال الطلب...';
 
             const orderItems = cart.map(item => ({
                 menuItemId: item.id,
@@ -992,18 +953,17 @@
                     return response.json();
                 } else {
                     const errorText = await response.text();
-                    throw new Error(errorText || 'Failed to place order');
+                    throw new Error(errorText || 'فشل في إرسال الطلب');
                 }
             })
             .then(data => {
                 checkoutModal.hide();
                 
-                alert(`Order placed successfully! Order ID: ${data.orderId}`);
+                alert(`تم إرسال الطلب بنجاح! رقم الطلب: ${data.orderId}`);
                 cart = [];
                 saveCart();
                 updateCartUI();
 
-                // Instantly update tracking active list
                 fetchAndRefreshMyOrders();
             })
             .catch(error => {
@@ -1016,47 +976,46 @@
             })
             .finally(() => {
                 confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Place Order';
+                confirmBtn.innerHTML = '<i class="bi bi-check-lg ms-2"></i>إرسال الطلب الآن';
                 isPlacingOrder = false;
             });
         }
 
-        // --- CLIENT REAL-TIME ORDER TRACKING ---
         function renderOrderTrackingCard(order) {
-            let statusText = 'Pending';
+            let statusText = 'قيد الانتظار';
             let statusBadgeClass = 'bg-warning text-dark';
             let progressPercent = 20;
             let pulseClass = '';
 
             switch (order.status) {
                 case 'Pending':
-                    statusText = 'Pending (قيد الانتظار)';
+                    statusText = 'قيد الانتظار';
                     statusBadgeClass = 'bg-warning text-dark';
                     progressPercent = 20;
                     break;
                 case 'Confirmed':
-                    statusText = 'Confirmed (مؤكد)';
+                    statusText = 'مؤكد';
                     statusBadgeClass = 'bg-primary text-white';
                     progressPercent = 40;
                     break;
                 case 'InPreparation':
-                    statusText = 'Preparing (تحت التحضير)';
+                    statusText = 'تحت التحضير';
                     statusBadgeClass = 'bg-info text-white';
                     progressPercent = 70;
                     break;
                 case 'Ready':
-                    statusText = 'READY (جاهز للاستلام)';
+                    statusText = 'جاهز';
                     statusBadgeClass = 'bg-success text-white';
                     progressPercent = 90;
                     pulseClass = 'pulse-ready-glow';
                     break;
                 case 'Served':
-                    statusText = 'Served (تم التقديم)';
+                    statusText = 'تم التقديم';
                     statusBadgeClass = 'bg-dark text-white';
                     progressPercent = 100;
                     break;
                 case 'Paid':
-                    statusText = 'Paid (تم الدفع)';
+                    statusText = 'تم الدفع';
                     statusBadgeClass = 'bg-secondary text-white';
                     progressPercent = 100;
                     break;
@@ -1074,7 +1033,7 @@
             let itemsHtml = '';
             if (order.items && order.items.length > 0) {
                 itemsHtml = `
-                    <ul class="list-unstyled mb-2 small text-muted ps-2 border-start border-2 ms-1" style="font-size: 0.82rem;">
+                    <ul class="list-unstyled mb-2 small text-muted pr-2 border-right border-2 mr-1 text-right" style="font-size: 0.82rem; direction: rtl;">
                         ${order.items.map(i => {
                             let addonsText = '';
                             if (i.addOns && i.addOns.length > 0) {
@@ -1089,11 +1048,11 @@
             const time = order.orderDate ? new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
 
             return `
-                <div class="card border rounded-3 mb-3 shadow-sm ${pulseClass}" style="transition: all 0.3s; border-color: ${order.status === 'Ready' ? '#198754' : '#e2e8f0'} !important;">
+                <div class="card border rounded-3 mb-3 shadow-sm ${pulseClass}" style="transition: all 0.3s; border-color: ${order.status === 'Ready' ? '#198754' : '#e2e8f0'} !important; text-align: right; direction: rtl;">
                     <div class="card-body p-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
-                                <span class="fw-bold text-dark" style="font-size: 0.95rem;">Order #${order.id}</span>
+                                <span class="fw-bold text-dark" style="font-size: 0.95rem;">طلب رقم #${order.id}</span>
                                 <small class="text-muted ms-2">${time}</small>
                             </div>
                             <span class="badge ${statusBadgeClass} rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">${statusText}</span>
@@ -1102,13 +1061,13 @@
                         ${itemsHtml}
  
                         ${order.note ? `
-                            <div class="bg-light p-2 rounded mb-2 border-start border-3 border-warning small" style="font-size: 0.8rem;">
-                                <i class="bi bi-pencil-fill me-1 text-warning"></i> <em>Note: ${order.note}</em>
+                            <div class="bg-light p-2 rounded mb-2 border-right border-3 border-warning small text-right" style="font-size: 0.8rem; direction: rtl;">
+                                <i class="bi bi-pencil-fill ms-1 text-warning"></i> <em>ملاحظة: ${order.note}</em>
                             </div>
                         ` : ''}
  
                         <div class="mt-2">
-                            <div class="progress rounded-pill shadow-inner" style="height: 8px; background-color: #f1f5f9;">
+                            <div class="progress rounded-pill shadow-inner" style="height: 8px; background-color: #f1f5f9; direction: ltr;">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated" 
                                      role="progressbar" 
                                      style="width: ${progressPercent}%; background-color: ${barColor} !important;" 
@@ -1117,18 +1076,18 @@
                                      aria-valuemax="100">
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-between mt-1 text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">
-                                <span>Placed</span>
-                                <span>Cooking</span>
-                                <span>Ready</span>
-                                <span>Served</span>
+                            <div class="d-flex justify-content-between mt-1 text-muted fw-bold" style="font-size: 0.68rem; direction: rtl;">
+                                <span>أُرسل</span>
+                                <span>يُحضّر</span>
+                                <span>جاهز</span>
+                                <span>قُدّم</span>
                             </div>
                         </div>
-
+ 
                         ${order.status === 'Ready' ? `
                             <div class="alert alert-success py-2 px-3 mb-0 mt-3 d-flex align-items-center rounded-3 border-0 pulse-ready-text">
-                                <i class="bi bi-check-circle-fill me-2 fs-5 text-success"></i>
-                                <div class="fw-bold small text-success">وجبتك جاهزة الآن! سيسلمها النادل إليك فوراً. (Your meal is ready! Waiter will serve it shortly.)</div>
+                                <i class="bi bi-check-circle-fill ms-2 fs-5 text-success"></i>
+                                <div class="fw-bold small text-success text-right" style="direction: rtl;">وجبتك جاهزة الآن! سيسلمها النادل إليك فوراً.</div>
                             </div>
                         ` : ''}
                     </div>
@@ -1136,7 +1095,6 @@
             `;
         }
 
-        // Fetch active orders
         function fetchAndRefreshMyOrders() {
             if (!tableNumber) return;
             
@@ -1145,13 +1103,13 @@
                 .then(orders => {
                     const myOrdersCard = document.getElementById('my-orders-card');
                     const myOrdersList = document.getElementById('my-orders-list');
-
+ 
                     if (orders && orders.length > 0) {
                         myOrdersCard.style.display = 'block';
                         myOrdersList.innerHTML = orders.map(order => renderOrderTrackingCard(order)).join('');
                     } else {
                         myOrdersCard.style.display = 'none';
-                        myOrdersList.innerHTML = '<p class="text-muted small mb-0">No active orders yet.</p>';
+                        myOrdersList.innerHTML = '<p class="text-muted small mb-0">لا توجد طلبات نشطة حالياً.</p>';
                     }
                 })
                 .catch(err => {
@@ -1159,7 +1117,6 @@
                 });
         }
 
-        // Establish SignalR hub
         function setupGuestSignalR() {
             if (typeof signalR === 'undefined') return;
 
@@ -1167,6 +1124,8 @@
                 .withUrl("/orderHub")
                 .withAutomaticReconnect()
                 .build();
+
+            window.guestSignalRConn = connection;
 
             const eventsToRefresh = [
                 "OrderStatusChanged", "NewOrderReceived", "OrderAccepted", 
@@ -1193,7 +1152,60 @@
                 .catch(err => console.error("SignalR connection error:", err));
         }
 
-        // Default category fallback
+        let isCallingWaiter = false;
+        function callWaiter() {
+            if (isCallingWaiter) return;
+            isCallingWaiter = true;
+            
+            const btn = document.getElementById('call-waiter-btn');
+            const originalHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span>جاري النداء...';
+            
+            if (window.guestSignalRConn && window.guestSignalRConn.state === signalR.HubConnectionState.Connected) {
+                window.guestSignalRConn.invoke("CallWaiter", tableNumber, branchId)
+                    .then(() => {
+                        btn.innerHTML = '<i class="bi bi-check-circle-fill text-success ms-1"></i> تم النداء!';
+                        btn.className = "btn btn-success btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm";
+                        showCallWaiterToast();
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                            btn.className = "btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1 shadow-sm";
+                            isCallingWaiter = false;
+                        }, 5000); // 5 seconds cooldown
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert("فشل نداء الويتر. الرجاء المحاولة مرة أخرى.");
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                        isCallingWaiter = false;
+                    });
+            } else {
+                alert("جاري إعادة الاتصال بالخادم، يرجى المحاولة بعد قليل.");
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                isCallingWaiter = false;
+            }
+        }
+        
+        function showCallWaiterToast() {
+            const toastEl = document.getElementById('cartToast');
+            if (toastEl) {
+                const toastBody = toastEl.querySelector('.toast-body');
+                const originalText = toastBody.innerHTML;
+                toastBody.innerHTML = '<i class="bi bi-bell-fill ms-2 text-warning"></i>تم إرسال طلب نداء الويتر، سيصلك النادل فوراً!';
+                const bsRequest = window.bootstrap || bootstrap;
+                const toast = new bsRequest.Toast(toastEl);
+                toast.show();
+                toastEl.addEventListener('hidden.bs.toast', () => {
+                    toastBody.innerHTML = originalText;
+                }, { once: true });
+            }
+        }
+
         function selectDefaultCategory() {
             const firstStory = document.querySelector('.category-story-item');
             if (firstStory) {
@@ -1202,11 +1214,9 @@
             }
         }
 
-        // Bind layout events on DOM Load
         document.addEventListener('DOMContentLoaded', function() {
             loadCart();
 
-            // Initialize theme switcher
             const themeBtn = document.getElementById('theme-accent-btn');
             if (themeBtn) {
                 const currentTheme = localStorage.getItem('theme') || 'light';
@@ -1233,7 +1243,6 @@
                 });
             }
 
-            // Initial active category detection
             if (typeof selectedCategoryId !== 'undefined' && selectedCategoryId !== null) {
                 const activeStory = document.querySelector(`.category-story-item[data-category-id="${selectedCategoryId}"]`);
                 if (activeStory) {
@@ -1245,7 +1254,6 @@
                 selectDefaultCategory();
             }
 
-            // Real-time local search handler across all categories (with tab fallback)
             document.getElementById('menu-search-input').addEventListener('input', function() {
                 const query = this.value.toLowerCase().trim();
                 const sections = document.querySelectorAll('.category-section');
@@ -1266,17 +1274,14 @@
                     });
 
                     if (query) {
-                        // Search mode: show the section only if it has matching items
                         section.style.display = sectionHasVisibleItems ? 'block' : 'none';
                     } else {
-                        // Normal mode: show only the active category
                         const sectionId = parseInt(section.getAttribute('id').replace('category-section-', ''));
                         section.style.display = (sectionId === selectedCategoryId) ? 'block' : 'none';
                     }
                 });
             });
 
-            // Bind triggers
             document.getElementById('confirmCheckoutBtn').addEventListener('click', confirmCheckout);
 
             document.getElementById('customization-qty-minus').addEventListener('click', function(e) {
@@ -1341,7 +1346,6 @@
                 showToast();
             });
 
-            // Initial guest updates & polling schedules
             fetchAndRefreshMyOrders();
             setupGuestSignalR();
             setInterval(fetchAndRefreshMyOrders, 10000);

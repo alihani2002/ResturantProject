@@ -1,40 +1,39 @@
-﻿            <div id="tab-financials" class="tab-content hidden space-y-6">
+            <div id="tab-financials" class="tab-content hidden space-y-6" dir="rtl">
                 <!-- Financial Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-right">
                     <div class="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 p-5 rounded-2xl">
-                        <p class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase">Net Profit Margin</p>
-                        <h4 id="fin-net-profit" class="outfit-font text-2xl font-black text-emerald-700 dark:text-white">0.00 L.E.</h4>
-                        <p id="fin-net-margin" class="text-xs text-slate-400 mt-1">Margin: 0%</p>
+                        <p class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase">هامش صافي الأرباح</p>
+                        <h4 id="fin-net-profit" class="outfit-font text-2xl font-black text-emerald-700 dark:text-white">0.00 ج.م</h4>
+                        <p id="fin-net-margin" class="text-xs text-slate-400 mt-1">الهامش: 0%</p>
                     </div>
 
-                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Total Revenue Generated</p>
-                        <h4 id="fin-revenue" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 L.E.</h4>
+                    <div class="bg-white dark:bg-darkCard p-5 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">إجمالي الإيرادات المحققة</p>
+                        <h4 id="fin-revenue" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 ج.م</h4>
                     </div>
 
-                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Total Operating Expenses</p>
-                        <h4 id="fin-expenses" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 L.E.</h4>
+                    <div class="bg-white dark:bg-darkCard p-5 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">إجمالي المصروفات التشغيلية</p>
+                        <h4 id="fin-expenses" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 ج.م</h4>
                     </div>
 
-                    <div class="bg-white dark:bg-darkCard p-5 border rounded-2xl shadow-sm">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Taxes & VAT Ledger</p>
-                        <h4 id="fin-taxes" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 L.E.</h4>
+                    <div class="bg-white dark:bg-darkCard p-5 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">الضرائب وضريبة القيمة المضافة</p>
+                        <h4 id="fin-taxes" class="outfit-font text-2xl font-black text-slate-800 dark:text-white">0.00 ج.م</h4>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 text-right">
                     <!-- Expenses Breakdown -->
-                    <!-- Financial Expenses Breakdown Ledger -->
-                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
-                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Operating Expenses Breakdown</h3>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">تفصيل المصروفات التشغيلية</h3>
                         <div class="overflow-x-auto">
-                            <table id="table-fin-expenses" class="w-full text-left border-collapse text-xs">
+                            <table id="table-fin-expenses" class="w-full text-right border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase text-[9px] tracking-wider">
-                                        <th class="py-2.5">Expense Category</th>
-                                        <th class="py-2.5 text-right">Value (L.E.)</th>
-                                        <th class="py-2.5 text-right">Share %</th>
+                                        <th class="py-2.5">فئة المصروفات</th>
+                                        <th class="py-2.5 text-left font-sans">القيمة (ج.م)</th>
+                                        <th class="py-2.5 text-left font-sans">النسبة %</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -45,18 +44,18 @@
                     </div>
 
                     <!-- Payment reconciliation -->
-                    <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm lg:col-span-2 space-y-4">
-                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Cash Drawer Payment Reconciliations (Real-time Audit)</h3>
+                    <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm lg:col-span-2 space-y-4">
+                        <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">تسوية مدفوعات درج النقدية (تدقيق فوري)</h3>
                         <div class="overflow-x-auto">
-                            <table id="table-fin-reconciliation" class="w-full text-left border-collapse text-xs">
+                            <table id="table-fin-reconciliation" class="w-full text-right border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                        <th class="py-2.5">Payment Method</th>
-                                        <th class="py-2.5">System Orders</th>
-                                        <th class="py-2.5">System Revenue</th>
-                                        <th class="py-2.5">Physical Audit Count</th>
-                                        <th class="py-2.5">Physical Audit Value</th>
-                                        <th class="py-2.5">Discrepancy (Variance)</th>
+                                        <th class="py-2.5 text-right">طريقة الدفع</th>
+                                        <th class="py-2.5 text-center">طلبات النظام</th>
+                                        <th class="py-2.5 text-left">إيرادات النظام</th>
+                                        <th class="py-2.5 text-center">العدد الفعلي</th>
+                                        <th class="py-2.5 text-left">القيمة الفعلية</th>
+                                        <th class="py-2.5 text-left">الفارق (العجز/الزيادة)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,21 +67,21 @@
                 </div>
 
                 <!-- Daily Shift Closing Audit Logs -->
-                <div class="bg-white dark:bg-darkCard p-6 border rounded-2xl shadow-sm space-y-4">
-                    <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">Daily & Shift Closing Accounts Audit Ledger</h3>
+                <div class="bg-white dark:bg-darkCard p-6 border border-slate-200 dark:border-darkBorder rounded-2xl shadow-sm space-y-4 text-right">
+                    <h3 class="outfit-font text-sm font-bold text-slate-900 dark:text-white">دفتر تدقيق الحسابات وإغلاق الورديات اليومي</h3>
                     <div class="overflow-x-auto">
-                        <table id="table-fin-closings" class="w-full text-left border-collapse text-xs">
+                        <table id="table-fin-closings" class="w-full text-right border-collapse text-xs">
                             <thead>
                                 <tr class="border-b border-slate-100 dark:border-darkBorder text-slate-400 font-bold uppercase">
-                                    <th class="py-2.5">Date</th>
-                                    <th class="py-2.5">Audited By</th>
-                                    <th class="py-2.5">Expected Cash Drawer</th>
-                                    <th class="py-2.5">Actual Cash Collected</th>
-                                    <th class="py-2.5">Cash Discrepancy</th>
-                                    <th class="py-2.5">Card Revenue</th>
-                                    <th class="py-2.5">Online Revenue</th>
-                                    <th class="py-2.5">Total Revenue Closed</th>
-                                    <th class="py-2.5">Status</th>
+                                    <th class="py-2.5 text-right">التاريخ</th>
+                                    <th class="py-2.5 text-right">المدقق</th>
+                                    <th class="py-2.5 text-left">درج النقدية المتوقع</th>
+                                    <th class="py-2.5 text-left">النقدية الفعلية المجمعة</th>
+                                    <th class="py-2.5 text-left">فارق النقدية</th>
+                                    <th class="py-2.5 text-left">إيرادات الفيزا/الماستر</th>
+                                    <th class="py-2.5 text-left">الإيرادات عبر الإنترنت</th>
+                                    <th class="py-2.5 text-left">إجمالي الإيرادات المغلقة</th>
+                                    <th class="py-2.5 text-right">الحالة</th>
                                 </tr>
                             </thead>
                             <tbody>
