@@ -115,6 +115,13 @@
                 <i class="bi bi-calendar-check text-base text-emerald-500"></i>
                 <span>تقرير الاستهلاك ومطابقة المخزن</span>
             </button>
+
+            <button onclick="switchTab('purchase-orders')" id="btn-tab-purchase-orders" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-cart-check text-base text-sky-500"></i><span>Purchase Orders</span></button>
+            <button onclick="switchTab('movement-history')" id="btn-tab-movement-history" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clock-history text-base text-cyan-500"></i><span>Movement History</span></button>
+            <button onclick="switchTab('stock-counts')" id="btn-tab-stock-counts" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-clipboard-data text-base text-rose-500"></i><span>Stock Counts</span></button>
+            <button onclick="switchTab('waste-management')" id="btn-tab-waste-management" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-trash3 text-base text-red-500"></i><span>Waste Management</span></button>
+            <button onclick="switchTab('inventory-analytics')" id="btn-tab-inventory-analytics" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-bar-chart-line text-base text-emerald-500"></i><span>Analytics</span></button>
+            <button onclick="switchTab('product-pricing')" id="btn-tab-product-pricing" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-right justify-start" dir="rtl"><i class="bi bi-tags text-base text-indigo-500"></i><span>Product Pricing</span></button>
         </nav>
 
         <!-- Footer Operations Link -->
@@ -154,6 +161,9 @@
 
             <!-- TAB: DAILY INVENTORY CONSUMPTION REPORT -->
             <partial name="../Admin/Partials/_DailyConsumptionTab" />
+
+            <!-- TAB: INVENTORY EXTENSIONS -->
+            <partial name="../Admin/Partials/_InventoryEnhancementsTab" />
 
         </main>
     </div>
@@ -242,7 +252,13 @@
                 'inventory-mgmt': 'مخزون المواد الخام في الفروع',
                 'stock-transfers': 'طلبات وتحويلات المخزون بين الفروع',
                 'recipe-mgmt': 'مكونات الوصفات والريسبات للأطباق',
-                'daily-consumption': 'تقرير الاستهلاك اليومي ومطابقة المخزن'
+                'daily-consumption': 'تقرير الاستهلاك اليومي ومطابقة المخزن',
+                'purchase-orders': 'Purchase Orders & Supplier Management',
+                'movement-history': 'Inventory Movement History',
+                'stock-counts': 'Stock Adjustment & Physical Inventory Count',
+                'waste-management': 'Waste & Expired Items Management',
+                'inventory-analytics': 'Inventory Analytics & Reports',
+                'product-pricing': 'Multi-Level Product Pricing'
             };
             const activeTitleEl = document.getElementById('active-tab-title');
             if (activeTitleEl) {
@@ -261,6 +277,19 @@
                 loadRecipeIngredientsDatalist();
             } else if (tabId === 'daily-consumption') {
                 initDailyConsumptionTab();
+            } else if (tabId === 'purchase-orders') {
+                loadPurchaseOrders();
+                loadSuppliersPanel();
+            } else if (tabId === 'movement-history') {
+                loadMovementHistory(1);
+            } else if (tabId === 'stock-counts') {
+                loadStockCountGrid();
+            } else if (tabId === 'waste-management') {
+                loadWasteReport();
+            } else if (tabId === 'inventory-analytics') {
+                loadInventoryAnalyticsDashboard();
+            } else if (tabId === 'product-pricing') {
+                loadPricingMenuItems();
             }
         }
 
@@ -1349,6 +1378,403 @@
              });
         }
 
+        // 5. Inventory Extension Modules
+        let movementPage = 1;
+        let suppliersPanelCache = [];
+        let productPriceCache = [];
+
+        function activeBranchIdValue() {
+            const branchId = $('#header-branch-selector').val();
+            return branchId ? parseInt(branchId) : null;
+        }
+
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('opacity-100');
+                const content = document.getElementById(`${modalId}-content`);
+                if (content) content.classList.remove('scale-95');
+            }, 20);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            modal.classList.remove('opacity-100');
+            const content = document.getElementById(`${modalId}-content`);
+            if (content) content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 220);
+        }
+
+        function formatLocalDateTime(date) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function populateBranchSelect(selectId, includeAllOption = false) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            $.get('/Inventory/GetBranches')
+             .done(function(branches) {
+                 select.innerHTML = includeAllOption ? '<option value="">All branches</option>' : '';
+                 branches.forEach(b => select.innerHTML += `<option value="${b.id}">${b.name}</option>`);
+                 const activeBranch = activeBranchIdValue();
+                 if (activeBranch && !includeAllOption) select.value = activeBranch;
+             });
+        }
+
+        function loadSuppliersPanel() {
+            const branchId = activeBranchIdValue();
+            $.get('/Inventory/GetSuppliers', { branchId })
+             .done(function(data) {
+                 suppliersPanelCache = data;
+                 const list = document.getElementById('supplier-list');
+                 if (!list) return;
+                 list.innerHTML = data.length ? '' : '<div class="text-xs text-slate-400">No suppliers yet.</div>';
+                 data.forEach(s => {
+                     list.innerHTML += `<div class="p-3 rounded-xl border dark:border-darkBorder text-right">
+                        <div class="flex justify-between gap-2"><button onclick="openSupplierModal(${s.id})" class="text-[10px] text-sky-500 font-bold"><i class="bi bi-pencil"></i> Edit</button><div class="font-bold text-xs">${s.name}</div></div>
+                        <div class="text-[10px] text-slate-400">${s.phone || ''} ${s.email || ''}</div>
+                        <div class="text-[10px] text-amber-500">Lead ${s.leadTimeDays}d / Rating ${s.qualityRating}</div>
+                    </div>`;
+                 });
+             });
+        }
+
+        function openSupplierModal(id) {
+            const branchId = activeBranchIdValue();
+            if (!branchId) return showToastAlert('Select a branch first.', 'error');
+            const supplier = id ? suppliersPanelCache.find(s => s.id === id) : null;
+            $('#supplier-id').val(supplier?.id || '');
+            $('#supplier-name').val(supplier?.name || '');
+            $('#supplier-phone').val(supplier?.phone || '');
+            $('#supplier-email').val(supplier?.email || '');
+            $('#supplier-contact').val('');
+            $('#supplier-notes').val('');
+            $('#supplier-address').val(supplier?.address || '');
+            openModal('supplier-modal');
+        }
+
+        function submitSupplierForm(event) {
+            event.preventDefault();
+            const branchId = activeBranchIdValue();
+            if (!branchId) return showToastAlert('Select a branch first.', 'error');
+            const contact = $('#supplier-contact').val().trim();
+            const notes = $('#supplier-notes').val().trim();
+            const addressParts = [$('#supplier-address').val().trim()];
+            if (contact) addressParts.push(`Contact: ${contact}`);
+            if (notes) addressParts.push(`Notes: ${notes}`);
+            const payload = {
+                id: parseInt($('#supplier-id').val() || '0'),
+                branchId,
+                name: $('#supplier-name').val().trim(),
+                phone: $('#supplier-phone').val().trim(),
+                email: $('#supplier-email').val().trim(),
+                address: addressParts.filter(Boolean).join(' | '),
+                leadTimeDays: 2.5,
+                qualityRating: 4.5
+            };
+            if (!payload.name) return showToastAlert('Supplier name is required.', 'error');
+            $.ajax({ url: '/Inventory/SaveSupplier', type: 'POST', contentType: 'application/json', data: JSON.stringify(payload) })
+             .done(function() { showToastAlert('Supplier saved.'); loadSuppliersPanel(); loadSuppliersList(); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to save supplier.', 'error'); });
+            closeModal('supplier-modal');
+        }
+
+        function loadPurchaseOrders() {
+            const branchId = activeBranchIdValue();
+            $.get('/Inventory/GetPurchaseOrders', { branchId })
+             .done(function(data) {
+                 const tbody = document.getElementById('po-list');
+                 if (!tbody) return;
+                 tbody.innerHTML = data.length ? '' : '<tr><td colspan="6" class="p-6 text-center text-slate-400">No purchase orders.</td></tr>';
+                 data.forEach(po => {
+                     const actions = po.status === 'Received' || po.status === 'Cancelled'
+                         ? ''
+                         : `<button onclick="setPurchaseOrderStatus(${po.id}, 'Pending')" class="px-2 py-1 rounded bg-slate-100 text-[10px]">Pending</button>
+                            <button onclick="setPurchaseOrderStatus(${po.id}, 'Approved')" class="px-2 py-1 rounded bg-sky-500 text-white text-[10px]">Approve</button>
+                            <button onclick="receivePurchaseOrder(${po.id})" class="px-2 py-1 rounded bg-emerald-500 text-white text-[10px]">Receive</button>
+                            <button onclick="setPurchaseOrderStatus(${po.id}, 'Cancelled')" class="px-2 py-1 rounded bg-red-500 text-white text-[10px]">Cancel</button>`;
+                     tbody.innerHTML += `<tr class="border-b dark:border-darkBorder"><td class="p-3 font-bold">${po.orderNumber}</td><td>${po.supplierName || ''}</td><td>${po.status}</td><td>${parseFloat(po.totalAmount).toFixed(2)}</td><td>${po.orderDate}</td><td class="flex gap-1 py-2">${actions}</td></tr>`;
+                 });
+             });
+        }
+
+        function openPurchaseOrderModal() {
+            const branchId = activeBranchIdValue();
+            if (!branchId) return showToastAlert('Select a branch first.', 'error');
+            if (!inventoryStockData.length) loadInventoryStockList();
+            $.get('/Inventory/GetSuppliers', { branchId }).done(function(suppliers) {
+                const select = document.getElementById('po-supplier');
+                select.innerHTML = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                $('#po-expected-date').val('');
+                $('#po-notes').val('');
+                $('#po-items-body').html('');
+                addPurchaseOrderItemRow();
+                calculatePurchaseOrderTotal();
+                openModal('purchase-order-modal');
+            });
+        }
+
+        function ingredientOptions(selectedId) {
+            return inventoryStockData.map(i => `<option value="${i.id}" data-cost="${i.costPerUnit}" ${selectedId === i.id ? 'selected' : ''}>${i.name} (${i.unit})</option>`).join('');
+        }
+
+        function addPurchaseOrderItemRow() {
+            const tbody = document.getElementById('po-items-body');
+            if (!tbody) return;
+            const rowId = Date.now();
+            tbody.insertAdjacentHTML('beforeend', `<tr class="border-b dark:border-darkBorder" data-po-row="${rowId}">
+                <td class="p-2"><select onchange="syncPoItemCost(this); calculatePurchaseOrderTotal()" class="po-ingredient w-full px-3 py-2 rounded-lg border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 dark:text-white">${ingredientOptions()}</select></td>
+                <td class="p-2"><input oninput="calculatePurchaseOrderTotal()" type="number" min="0.001" step="0.001" required class="po-quantity w-full px-3 py-2 rounded-lg border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 dark:text-white"></td>
+                <td class="p-2"><input oninput="calculatePurchaseOrderTotal()" type="number" min="0.01" step="0.01" required class="po-unit-cost w-full px-3 py-2 rounded-lg border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 dark:text-white"></td>
+                <td class="p-2 font-bold po-line-total">0.00</td>
+                <td class="p-2"><button type="button" onclick="this.closest('tr').remove(); calculatePurchaseOrderTotal()" class="px-2 py-1 rounded bg-red-500/10 text-red-500"><i class="bi bi-trash"></i></button></td>
+            </tr>`);
+            const lastSelect = tbody.querySelector(`[data-po-row="${rowId}"] .po-ingredient`);
+            syncPoItemCost(lastSelect);
+        }
+
+        function syncPoItemCost(select) {
+            const option = select.options[select.selectedIndex];
+            const costInput = select.closest('tr').querySelector('.po-unit-cost');
+            if (option && costInput && !costInput.value) costInput.value = parseFloat(option.dataset.cost || '0').toFixed(2);
+        }
+
+        function calculatePurchaseOrderTotal() {
+            let total = 0;
+            document.querySelectorAll('#po-items-body tr').forEach(row => {
+                const quantity = parseFloat(row.querySelector('.po-quantity')?.value || '0');
+                const cost = parseFloat(row.querySelector('.po-unit-cost')?.value || '0');
+                const lineTotal = quantity * cost;
+                total += lineTotal;
+                const lineEl = row.querySelector('.po-line-total');
+                if (lineEl) lineEl.textContent = Number.isFinite(lineTotal) ? lineTotal.toFixed(2) : '0.00';
+            });
+            $('#po-total').text(total.toFixed(2));
+        }
+
+        function submitPurchaseOrderForm(event) {
+            event.preventDefault();
+            const branchId = activeBranchIdValue();
+            const supplierId = parseInt($('#po-supplier').val());
+            const items = Array.from(document.querySelectorAll('#po-items-body tr')).map(row => ({
+                ingredientId: parseInt(row.querySelector('.po-ingredient').value),
+                quantity: parseFloat(row.querySelector('.po-quantity').value),
+                unitCost: parseFloat(row.querySelector('.po-unit-cost').value)
+            })).filter(i => i.ingredientId && i.quantity > 0 && i.unitCost > 0);
+            if (!branchId || !supplierId || items.length === 0) return showToastAlert('Supplier and at least one valid item are required.', 'error');
+            $.ajax({ url: '/Inventory/CreatePurchaseOrder', type: 'POST', contentType: 'application/json', data: JSON.stringify({ branchId, supplierId, expectedDate: $('#po-expected-date').val() || null, notes: $('#po-notes').val(), items }) })
+             .done(function() { showToastAlert('Purchase order created.'); loadPurchaseOrders(); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to create purchase order.', 'error'); });
+            closeModal('purchase-order-modal');
+        }
+
+        function setPurchaseOrderStatus(id, status) {
+            $.post('/Inventory/UpdatePurchaseOrderStatus', { id, status })
+             .done(function() { showToastAlert('Purchase order updated.'); loadPurchaseOrders(); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to update PO.', 'error'); });
+        }
+
+        function receivePurchaseOrder(id) {
+            $.ajax({ url: '/Inventory/ReceivePurchaseOrder', type: 'POST', contentType: 'application/json', data: JSON.stringify({ id }) })
+             .done(function() { showToastAlert('Purchase received and stock increased.'); loadPurchaseOrders(); loadInventoryStockList(); loadMovementHistory(1); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to receive PO.', 'error'); });
+        }
+
+        function loadMovementHistory(page) {
+            movementPage = page || 1;
+            const branchId = activeBranchIdValue();
+            const movementType = $('#movement-type-filter').val();
+            const search = $('#movement-search').val();
+            $.get('/Inventory/GetMovements', { branchId, movementType, search, page: movementPage, pageSize: 25 })
+             .done(function(data) {
+                 const tbody = document.getElementById('movement-list');
+                 if (!tbody) return;
+                 tbody.innerHTML = data.items.length ? '' : '<tr><td colspan="9" class="p-6 text-center text-slate-400">No movements found.</td></tr>';
+                 data.items.forEach(m => {
+                     tbody.innerHTML += `<tr class="border-b dark:border-darkBorder"><td class="p-3 font-bold">${m.movementType}</td><td>${m.ingredientName || ''}</td><td>${Number(m.quantity).toFixed(3)} ${m.unit || ''}</td><td>${Number(m.stockBefore).toFixed(3)}</td><td>${Number(m.stockAfter).toFixed(3)}</td><td>${m.branchName || ''}</td><td>${m.userName || ''}</td><td>${m.referenceNumber || ''}</td><td>${m.movementDate}</td></tr>`;
+                 });
+                 $('#movement-page-label').text(`Page ${data.page} / ${Math.max(1, Math.ceil(data.totalCount / data.pageSize))}`);
+             });
+        }
+
+        function exportMovementHistory(kind) {
+            const branchId = activeBranchIdValue() || '';
+            const movementType = $('#movement-type-filter').val() || '';
+            const search = encodeURIComponent($('#movement-search').val() || '');
+            const action = kind === 'pdf' ? 'ExportMovementsPdf' : 'ExportMovementsExcel';
+            window.location.href = `/Inventory/${action}?branchId=${branchId}&movementType=${movementType}&search=${search}`;
+        }
+
+        function loadStockCountGrid() {
+            const grid = document.getElementById('stock-count-grid');
+            if (!grid) return;
+            if (!inventoryStockData.length) loadInventoryStockList();
+            setTimeout(function() {
+                grid.innerHTML = inventoryStockData.map(i => `<label class="p-3 rounded-xl border dark:border-darkBorder text-right"><span class="block text-xs font-bold">${i.name}</span><span class="text-[10px] text-slate-400">Expected ${Number(i.currentStock).toFixed(3)} ${i.unit}</span><input data-ingredient-id="${i.id}" data-current="${i.currentStock}" type="number" step="0.001" value="${i.currentStock}" class="count-actual mt-2 w-full px-3 py-2 rounded-lg border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"><input data-reason-for="${i.id}" value="Physical count variance" class="count-reason mt-2 w-full px-3 py-2 rounded-lg border dark:border-darkBorder bg-slate-50 dark:bg-slate-900 text-xs dark:text-white"></label>`).join('');
+            }, 300);
+        }
+
+        function createQuickInventoryCount() {
+            const branchId = activeBranchIdValue();
+            if (!branchId) return showToastAlert('Select a branch first.', 'error');
+            const items = Array.from(document.querySelectorAll('.count-actual')).map(input => ({
+                ingredientId: parseInt(input.dataset.ingredientId),
+                actualQuantity: parseFloat(input.value),
+                reason: document.querySelector(`[data-reason-for="${input.dataset.ingredientId}"]`).value || 'Physical count variance'
+            })).filter(i => Number.isFinite(i.actualQuantity));
+            $.ajax({ url: '/Inventory/CreateInventoryCount', type: 'POST', contentType: 'application/json', data: JSON.stringify({ branchId, requiresApproval: false, notes: 'Physical count', items }) })
+             .done(function() { showToastAlert('Inventory count applied.'); loadInventoryStockList(); loadMovementHistory(1); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to apply count.', 'error'); });
+        }
+
+        function openWasteModal() {
+            const branchId = activeBranchIdValue();
+            if (!branchId) return showToastAlert('Select a branch first.', 'error');
+            if (!inventoryStockData.length) loadInventoryStockList();
+            setTimeout(function() {
+                $('#waste-ingredient').html(inventoryStockData.map(i => `<option value="${i.id}" data-unit="${i.unit}">${i.name}</option>`).join(''));
+                $('#waste-quantity').val('');
+                $('#waste-reason').val('Expired');
+                $('#waste-notes').val('');
+                $('#waste-date-time').val(formatLocalDateTime(new Date()));
+                syncWasteUnit();
+                openModal('waste-modal');
+            }, 200);
+        }
+
+        function syncWasteUnit() {
+            const selected = $('#waste-ingredient option:selected');
+            const unit = selected.data('unit');
+            if (unit) $('#waste-unit').val(unit);
+        }
+
+        function submitWasteForm(event) {
+            event.preventDefault();
+            const branchId = activeBranchIdValue();
+            const ingredientId = parseInt($('#waste-ingredient').val());
+            const quantity = parseFloat($('#waste-quantity').val());
+            const reason = $('#waste-reason').val();
+            const notes = [$('#waste-notes').val(), $('#waste-date-time').val() ? `Recorded time: ${$('#waste-date-time').val()}` : ''].filter(Boolean).join(' | ');
+            if (!branchId || !ingredientId || !quantity || quantity <= 0 || !reason) return showToastAlert('Ingredient, quantity and reason are required.', 'error');
+            $.ajax({ url: '/Inventory/RecordWaste', type: 'POST', contentType: 'application/json', data: JSON.stringify({ branchId, ingredientId, quantity, reason, notes }) })
+             .done(function() { showToastAlert('Waste recorded and stock deducted.'); loadWasteReport(); loadInventoryStockList(); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to record waste.', 'error'); });
+            closeModal('waste-modal');
+        }
+
+        function loadWasteReport() {
+            const branchId = activeBranchIdValue();
+            $.get('/Inventory/GetWasteReport', { branchId })
+             .done(function(data) {
+                 $('#waste-total').text(parseFloat(data.totalLoss).toFixed(2));
+                 const list = document.getElementById('waste-report-list');
+                 if (!list) return;
+                 list.innerHTML = data.items.length ? '' : '<div class="text-xs text-slate-400">No waste records.</div>';
+                 data.items.forEach(w => list.innerHTML += `<div class="p-3 rounded-xl border border-red-500/20 bg-red-500/5"><div class="font-bold text-xs">${w.ingredientName}</div><div class="text-[10px] text-slate-400">${w.quantityWasted} ${w.unit} / ${w.reason}</div><div class="text-xs font-black text-red-500">${parseFloat(w.cost).toFixed(2)}</div><div class="text-[10px] text-slate-400">${w.wasteDate}</div></div>`);
+             });
+        }
+
+        function loadInventoryAnalyticsDashboard() {
+            const branchId = activeBranchIdValue();
+            $.get('/Inventory/GetInventoryAnalytics', { branchId })
+             .done(function(data) {
+                 $('#ana-valuation').text(parseFloat(data.totalInventoryValuation).toFixed(2));
+                 $('#ana-purchases').text(parseFloat(data.totalPurchaseAmount).toFixed(2));
+                 $('#ana-waste').text(parseFloat(data.totalWasteAmount).toFixed(2));
+                 $('#ana-movements').text(data.movementCount);
+                 $('#ana-lowstock').text(data.lowStockCount);
+                 $('#ana-low-list').html(data.lowStock.map(i => `<div class="text-xs p-2 rounded-lg bg-amber-500/10">${i.name}: ${i.currentStock} / ${i.reorderLevel} ${i.unit}</div>`).join('') || '<div class="text-xs text-slate-400">No alerts.</div>');
+                 $('#ana-po-list').html(data.purchaseHistory.map(p => `<div class="text-xs p-2 rounded-lg border dark:border-darkBorder">${p.orderNumber} - ${p.supplierName || ''} - ${parseFloat(p.totalAmount).toFixed(2)}</div>`).join('') || '<div class="text-xs text-slate-400">No purchases.</div>');
+                 $('#ana-waste-list').html(data.wasteAnalysis.map(w => `<div class="text-xs p-2 rounded-lg bg-red-500/10">${w.reason}: ${parseFloat(w.loss).toFixed(2)}</div>`).join('') || '<div class="text-xs text-slate-400">No waste.</div>');
+             });
+        }
+
+        function loadPricingMenuItems() {
+            const branchId = activeBranchIdValue();
+            $.get('/Inventory/GetMenuItems', { branchId })
+             .done(function(items) {
+                 const select = document.getElementById('pricing-menu-item');
+                 if (!select) return;
+                 select.innerHTML = items.map(i => `<option value="${i.id}">${i.name} - ${parseFloat(i.price).toFixed(2)}</option>`).join('');
+                 loadProductPrices();
+             });
+        }
+
+        function loadProductPrices() {
+            const menuItemId = parseInt($('#pricing-menu-item').val());
+            if (!menuItemId) return;
+            $.get('/Inventory/GetProductPrices', { menuItemId })
+             .done(function(data) {
+                 productPriceCache = data;
+                 const list = document.getElementById('pricing-list');
+                 if (!list) return;
+                 list.innerHTML = data.length ? '' : '<div class="text-xs text-slate-400">No configured price levels.</div>';
+                 data.forEach(p => list.innerHTML += `<div class="p-3 rounded-xl border dark:border-darkBorder text-xs">
+                    <div class="flex justify-between gap-3">
+                        <div class="flex gap-1">
+                            <button onclick="openProductPriceModal(${p.id})" class="px-2 py-1 rounded bg-indigo-500/10 text-indigo-500 font-bold"><i class="bi bi-pencil"></i> Edit</button>
+                            <button onclick="confirmDeleteProductPrice(${p.id})" class="px-2 py-1 rounded bg-red-500/10 text-red-500 font-bold"><i class="bi bi-trash"></i> Delete</button>
+                        </div>
+                        <div class="text-right"><strong>${p.priceType}</strong> ${p.priceListName || ''}</div>
+                    </div>
+                    <span class="block text-left font-black text-base">${parseFloat(p.price).toFixed(2)}</span>
+                    <div class="text-[10px] text-slate-400">${p.branchName || 'All branches'} / Priority ${p.priority} / ${p.allowOverride ? 'Override allowed' : 'Override locked'}</div>
+                </div>`);
+             });
+        }
+
+        function openProductPriceModal(id) {
+            const menuItemId = parseInt($('#pricing-menu-item').val());
+            if (!menuItemId) return showToastAlert('Select a product first.', 'error');
+            populateBranchSelect('price-branch', true);
+            const price = id ? productPriceCache.find(p => p.id === id) : null;
+            $('#price-modal-title').text(price ? 'Edit Product Price' : 'Add Product Price');
+            $('#price-id').val(price?.id || '');
+            $('#price-type').val(price?.priceType || '');
+            $('#price-value').val(price?.price || '');
+            $('#price-priority').val(price?.priority ?? 100);
+            $('#price-description').val(price?.priceListName || '');
+            $('#price-allow-override').prop('checked', price?.allowOverride ?? true);
+            setTimeout(() => $('#price-branch').val(price?.branchId || ''), 150);
+            openModal('product-price-modal');
+        }
+
+        function submitProductPriceForm(event) {
+            event.preventDefault();
+            const menuItemId = parseInt($('#pricing-menu-item').val());
+            const payload = {
+                id: parseInt($('#price-id').val() || '0'),
+                menuItemId,
+                branchId: $('#price-branch').val() ? parseInt($('#price-branch').val()) : null,
+                priceType: $('#price-type').val().trim(),
+                priceListName: $('#price-description').val().trim(),
+                price: parseFloat($('#price-value').val()),
+                priority: parseInt($('#price-priority').val() || '100'),
+                isActive: true,
+                allowOverride: $('#price-allow-override').is(':checked')
+            };
+            if (!payload.menuItemId || !payload.priceType || !payload.price || payload.price <= 0) return showToastAlert('Price type and valid price are required.', 'error');
+            $.ajax({ url: '/Inventory/SaveProductPrice', type: 'POST', contentType: 'application/json', data: JSON.stringify(payload) })
+             .done(function() { showToastAlert('Product price saved.'); loadProductPrices(); })
+             .fail(function(e) { showToastAlert(e.responseText || 'Failed to save product price.', 'error'); });
+            closeModal('product-price-modal');
+        }
+
+        function confirmDeleteProductPrice(id) {
+            $('#confirm-title').text('Delete price type');
+            $('#confirm-message').text('This price type will be removed from active product pricing. Continue?');
+            $('#confirm-action-btn').off('click').on('click', function() {
+                $.post('/Inventory/DeleteProductPrice', { id })
+                 .done(function() { showToastAlert('Product price deleted.'); closeModal('confirm-modal'); loadProductPrices(); })
+                 .fail(function(e) { showToastAlert(e.responseText || 'Failed to delete product price.', 'error'); });
+            });
+            openModal('confirm-modal');
+        }
+
         // Close on escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
@@ -1356,11 +1782,16 @@
                 closeAdjustStockModal();
                 closeRequestTransferModal();
                 closeIngredientCrudModal();
+                closeModal('supplier-modal');
+                closeModal('purchase-order-modal');
+                closeModal('waste-modal');
+                closeModal('product-price-modal');
+                closeModal('confirm-modal');
             }
         });
 
-        // Initialize default tab on load
-        $(document).ready(function() {
+        // Initialize default tab without depending on jQuery/CDN availability.
+        document.addEventListener('DOMContentLoaded', function() {
             switchTab('inventory-mgmt');
         });
     </script>

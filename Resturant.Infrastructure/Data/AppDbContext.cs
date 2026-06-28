@@ -29,12 +29,18 @@ namespace Resturant.Infrastructure.Data
         // Enterprise ERP Tables
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<WasteLog> WasteLogs { get; set; }
         public DbSet<StockTransfer> StockTransfers { get; set; }
         public DbSet<StockTransferItem> StockTransferItems { get; set; }
         public DbSet<InventoryAdjustment> InventoryAdjustments { get; set; }
+        public DbSet<InventoryMovement> InventoryMovements { get; set; }
+        public DbSet<InventoryCount> InventoryCounts { get; set; }
+        public DbSet<InventoryCountItem> InventoryCountItems { get; set; }
+        public DbSet<MenuItemPrice> MenuItemPrices { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -105,6 +111,9 @@ namespace Resturant.Infrastructure.Data
 
             modelBuilder.Entity<Order>(entity =>
             {
+                entity.Property(o => o.PriceCategory)
+                    .HasDefaultValue("Retail");
+
                 entity.HasOne(o => o.Branch)
                     .WithMany(b => b.Orders)
                     .HasForeignKey(o => o.BranchId)
@@ -113,6 +122,9 @@ namespace Resturant.Infrastructure.Data
 
             modelBuilder.Entity<TableSession>(entity =>
             {
+                entity.Property(s => s.PriceCategory)
+                    .HasDefaultValue("Retail");
+
                 entity.HasOne(s => s.Branch)
                     .WithMany()
                     .HasForeignKey(s => s.BranchId)
@@ -184,6 +196,34 @@ namespace Resturant.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<PurchaseOrder>(entity =>
+            {
+                entity.HasIndex(p => p.OrderNumber).IsUnique();
+
+                entity.HasOne(p => p.Branch)
+                    .WithMany()
+                    .HasForeignKey(p => p.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Supplier)
+                    .WithMany(s => s.PurchaseOrders)
+                    .HasForeignKey(p => p.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<PurchaseOrderItem>(entity =>
+            {
+                entity.HasOne(i => i.PurchaseOrder)
+                    .WithMany(p => p.Items)
+                    .HasForeignKey(i => i.PurchaseOrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(i => i.Ingredient)
+                    .WithMany(g => g.PurchaseOrderItems)
+                    .HasForeignKey(i => i.IngredientId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<WasteLog>(entity =>
             {
                 entity.HasOne(w => w.Branch)
@@ -224,6 +264,60 @@ namespace Resturant.Infrastructure.Data
                     .WithMany()
                     .HasForeignKey(a => a.IngredientId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<InventoryMovement>(entity =>
+            {
+                entity.HasIndex(m => new { m.BranchId, m.MovementDate });
+                entity.HasIndex(m => new { m.IngredientId, m.MovementDate });
+
+                entity.HasOne(m => m.Branch)
+                    .WithMany()
+                    .HasForeignKey(m => m.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(m => m.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(m => m.IngredientId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<InventoryCount>(entity =>
+            {
+                entity.HasIndex(c => c.CountNumber).IsUnique();
+
+                entity.HasOne(c => c.Branch)
+                    .WithMany()
+                    .HasForeignKey(c => c.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<InventoryCountItem>(entity =>
+            {
+                entity.HasOne(i => i.InventoryCount)
+                    .WithMany(c => c.Items)
+                    .HasForeignKey(i => i.InventoryCountId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(i => i.Ingredient)
+                    .WithMany()
+                    .HasForeignKey(i => i.IngredientId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MenuItemPrice>(entity =>
+            {
+                entity.HasIndex(p => new { p.MenuItemId, p.PriceType, p.BranchId, p.IsActive });
+
+                entity.HasOne(p => p.MenuItem)
+                    .WithMany(m => m.Prices)
+                    .HasForeignKey(p => p.MenuItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(p => p.Branch)
+                    .WithMany()
+                    .HasForeignKey(p => p.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Seed Branches

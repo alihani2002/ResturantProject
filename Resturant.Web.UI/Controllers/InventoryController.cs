@@ -8,6 +8,7 @@ using Resturant.Core.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Resturant.Web.UI.Controllers
@@ -255,19 +256,464 @@ namespace Resturant.Web.UI.Controllers
         public async Task<IActionResult> GetSuppliers(int? branchId)
         {
             var activeBranchId = GetActiveBranchId(branchId);
-            var query = _context.Suppliers.AsQueryable();
+            var suppliers = await _inventoryService.GetSuppliersAsync(activeBranchId);
+
+            return Json(suppliers.Select(s => new {
+                s.Id,
+                s.Name,
+                s.BranchId,
+                BranchName = s.Branch?.Name,
+                s.Phone,
+                s.Email,
+                s.Address,
+                s.LeadTimeDays,
+                s.QualityRating
+            }));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveSupplier([FromBody] SaveSupplierRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Name) || request.BranchId <= 0)
+            {
+                return BadRequest("Invalid supplier data.");
+            }
+
+            var supplier = new Supplier
+            {
+                Id = request.Id,
+                BranchId = request.BranchId,
+                Name = request.Name.Trim(),
+                Phone = request.Phone,
+                Email = request.Email,
+                Address = request.Address,
+                LeadTimeDays = request.LeadTimeDays,
+                QualityRating = request.QualityRating
+            };
+
+            var saved = await _inventoryService.SaveSupplierAsync(supplier);
+            return Ok(saved);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPurchaseOrders(int? branchId, string? status)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var orders = await _inventoryService.GetPurchaseOrdersAsync(activeBranchId, status);
+            return Json(orders.Select(p => new {
+                p.Id,
+                p.OrderNumber,
+                p.BranchId,
+                BranchName = p.Branch?.Name,
+                p.SupplierId,
+                SupplierName = p.Supplier?.Name,
+                p.Status,
+                p.TotalAmount,
+                OrderDate = p.OrderDate.ToString("yyyy-MM-dd HH:mm"),
+                ExpectedDate = p.ExpectedDate?.ToString("yyyy-MM-dd"),
+                ReceivedDate = p.ReceivedDate?.ToString("yyyy-MM-dd HH:mm"),
+                p.CreatedBy,
+                p.ApprovedBy,
+                p.ReceivedBy,
+                p.Notes,
+                Items = p.Items.Select(i => new {
+                    i.Id,
+                    i.IngredientId,
+                    IngredientName = i.Ingredient?.Name,
+                    Unit = i.Ingredient?.Unit,
+                    i.QuantityOrdered,
+                    i.QuantityReceived,
+                    i.UnitCost,
+                    LineTotal = i.QuantityOrdered * (double)i.UnitCost
+                })
+            }));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePurchaseOrder([FromBody] CreatePurchaseOrderRequest request)
+        {
+            if (request == null || request.BranchId <= 0 || request.SupplierId <= 0 || request.Items == null || !request.Items.Any())
+            {
+                return BadRequest("Invalid purchase order data.");
+            }
+
+            try
+            {
+                var user = User.Identity?.Name ?? "Admin";
+                var items = request.Items.Select(i => new PurchaseOrderItemDto
+                {
+                    IngredientId = i.IngredientId,
+                    Quantity = i.Quantity,
+                    UnitCost = i.UnitCost
+                }).ToList();
+                var po = await _inventoryService.CreatePurchaseOrderAsync(request.BranchId, request.SupplierId, items, request.ExpectedDate, request.Notes, user);
+                return Ok(new { success = true, id = po.Id, po.OrderNumber });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePurchaseOrderStatus(int id, string status)
+        {
+            try
+            {
+                var po = await _inventoryService.UpdatePurchaseOrderStatusAsync(id, status, User.Identity?.Name ?? "Admin");
+                return Ok(new { success = true, po.Id, po.Status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReceivePurchaseOrder([FromBody] ReceivePurchaseOrderRequest request)
+        {
+            if (request == null || request.Id <= 0) return BadRequest("Invalid receiving request.");
+
+            try
+            {
+                var items = request.Items?.Select(i => new PurchaseOrderReceiveItemDto
+                {
+                    PurchaseOrderItemId = i.PurchaseOrderItemId,
+                    QuantityReceived = i.QuantityReceived
+                }).ToList();
+                var po = await _inventoryService.ReceivePurchaseOrderAsync(request.Id, items, User.Identity?.Name ?? "Admin");
+                return Ok(new { success = true, po.Id, po.Status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMovements(int? branchId, int? ingredientId, string? movementType, string? search, DateTime? startDate, DateTime? endDate, int page = 1, int pageSize = 25)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var result = await _inventoryService.GetMovementsAsync(new InventoryMovementFilter
+            {
+                BranchId = activeBranchId,
+                IngredientId = ingredientId,
+                MovementType = movementType,
+                Search = search,
+                StartDate = startDate,
+                EndDate = endDate,
+                Page = page,
+                PageSize = pageSize
+            });
+
+            return Json(new {
+                totalCount = result.TotalCount,
+                page,
+                pageSize,
+                items = result.Items.Select(m => new {
+                    m.Id,
+                    m.MovementType,
+                    m.IngredientId,
+                    IngredientName = m.Ingredient?.Name,
+                    Unit = m.Ingredient?.Unit,
+                    m.Quantity,
+                    m.StockBefore,
+                    m.StockAfter,
+                    m.BranchId,
+                    BranchName = m.Branch?.Name,
+                    m.UserName,
+                    m.ReferenceNumber,
+                    m.Notes,
+                    m.UnitCost,
+                    m.TotalCost,
+                    MovementDate = m.MovementDate.ToString("yyyy-MM-dd HH:mm")
+                })
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportMovementsExcel(int? branchId, string? movementType, string? search, DateTime? startDate, DateTime? endDate)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var result = await _inventoryService.GetMovementsAsync(new InventoryMovementFilter
+            {
+                BranchId = activeBranchId,
+                MovementType = movementType,
+                Search = search,
+                StartDate = startDate,
+                EndDate = endDate,
+                Page = 1,
+                PageSize = 2000
+            });
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Date,Type,Ingredient,Quantity,Stock Before,Stock After,Branch,User,Reference,Notes");
+            foreach (var m in result.Items)
+            {
+                sb.AppendLine($"{m.MovementDate:yyyy-MM-dd HH:mm},{m.MovementType},{Csv(m.Ingredient?.Name)},{m.Quantity},{m.StockBefore},{m.StockAfter},{Csv(m.Branch?.Name)},{Csv(m.UserName)},{Csv(m.ReferenceNumber)},{Csv(m.Notes)}");
+            }
+
+            return File(Encoding.UTF8.GetBytes(sb.ToString()), "application/vnd.ms-excel", "inventory-movements.csv");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportMovementsPdf(int? branchId, string? movementType, string? search, DateTime? startDate, DateTime? endDate)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var result = await _inventoryService.GetMovementsAsync(new InventoryMovementFilter
+            {
+                BranchId = activeBranchId,
+                MovementType = movementType,
+                Search = search,
+                StartDate = startDate,
+                EndDate = endDate,
+                Page = 1,
+                PageSize = 2000
+            });
+
+            var text = "Inventory Movement History\n\n" + string.Join("\n", result.Items.Select(m =>
+                $"{m.MovementDate:yyyy-MM-dd HH:mm} | {m.MovementType} | {m.Ingredient?.Name} | {m.Quantity} | {m.StockBefore}->{m.StockAfter} | {m.ReferenceNumber}"));
+            return File(CreateSimplePdf(text), "application/pdf", "inventory-movements.pdf");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateInventoryCount([FromBody] CreateInventoryCountRequest request)
+        {
+            if (request == null || request.BranchId <= 0 || request.Items == null || !request.Items.Any())
+            {
+                return BadRequest("Invalid inventory count data.");
+            }
+
+            try
+            {
+                var items = request.Items.Select(i => new InventoryCountItemDto
+                {
+                    IngredientId = i.IngredientId,
+                    ActualQuantity = i.ActualQuantity,
+                    Reason = i.Reason
+                }).ToList();
+                var count = await _inventoryService.CreateInventoryCountAsync(request.BranchId, items, request.RequiresApproval, request.Notes, User.Identity?.Name ?? "Admin");
+                if (!request.RequiresApproval)
+                {
+                    await _inventoryService.ApplyInventoryCountAsync(count.Id, User.Identity?.Name ?? "Admin");
+                }
+                return Ok(new { success = true, id = count.Id, count.CountNumber, count.Status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveInventoryCount(int id)
+        {
+            try
+            {
+                var count = await _inventoryService.ApproveInventoryCountAsync(id, User.Identity?.Name ?? "Admin");
+                return Ok(new { success = true, count.Id, count.Status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyInventoryCount(int id)
+        {
+            try
+            {
+                var count = await _inventoryService.ApplyInventoryCountAsync(id, User.Identity?.Name ?? "Admin");
+                return Ok(new { success = true, count.Id, count.Status });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecordWaste([FromBody] RecordWasteRequest request)
+        {
+            if (request == null || request.BranchId <= 0 || request.IngredientId <= 0 || request.Quantity <= 0 || string.IsNullOrWhiteSpace(request.Reason))
+            {
+                return BadRequest("Invalid waste record data.");
+            }
+
+            try
+            {
+                var waste = await _inventoryService.RecordWasteAsync(request.BranchId, request.IngredientId, request.Quantity, request.Reason, request.Notes, User.Identity?.Name ?? "Admin");
+                return Ok(new { success = true, waste.Id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWasteReport(int? branchId, int? ingredientId, DateTime? startDate, DateTime? endDate, string? employee)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var query = _context.WasteLogs
+                .Include(w => w.Branch)
+                .Include(w => w.Ingredient)
+                .AsQueryable();
+
+            if (activeBranchId.HasValue) query = query.Where(w => w.BranchId == activeBranchId.Value);
+            if (ingredientId.HasValue) query = query.Where(w => w.IngredientId == ingredientId.Value);
+            if (startDate.HasValue) query = query.Where(w => w.WasteDate >= startDate.Value.Date);
+            if (endDate.HasValue) query = query.Where(w => w.WasteDate < endDate.Value.Date.AddDays(1));
+
+            var rows = await query.OrderByDescending(w => w.WasteDate).Take(500).ToListAsync();
+            return Json(new {
+                totalLoss = rows.Sum(w => w.Cost),
+                items = rows.Select(w => new {
+                    w.Id,
+                    IngredientName = w.Ingredient?.Name,
+                    Unit = w.Ingredient?.Unit,
+                    BranchName = w.Branch?.Name,
+                    w.QuantityWasted,
+                    w.Cost,
+                    w.Reason,
+                    WasteDate = w.WasteDate.ToString("yyyy-MM-dd HH:mm")
+                })
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInventoryAnalytics(int? branchId, DateTime? startDate, DateTime? endDate, string? search)
+        {
+            var activeBranchId = GetActiveBranchId(branchId);
+            var ingredients = _context.Ingredients.Include(i => i.Branch).AsQueryable();
+            var movements = _context.InventoryMovements.Include(m => m.Ingredient).AsQueryable();
+            var purchases = _context.PurchaseOrders.Include(p => p.Supplier).AsQueryable();
+            var waste = _context.WasteLogs.Include(w => w.Ingredient).AsQueryable();
 
             if (activeBranchId.HasValue)
             {
-                query = query.Where(s => s.BranchId == activeBranchId.Value);
+                ingredients = ingredients.Where(i => i.BranchId == activeBranchId.Value);
+                movements = movements.Where(m => m.BranchId == activeBranchId.Value);
+                purchases = purchases.Where(p => p.BranchId == activeBranchId.Value);
+                waste = waste.Where(w => w.BranchId == activeBranchId.Value);
+            }
+            if (startDate.HasValue)
+            {
+                movements = movements.Where(m => m.MovementDate >= startDate.Value.Date);
+                purchases = purchases.Where(p => p.OrderDate >= startDate.Value.Date);
+                waste = waste.Where(w => w.WasteDate >= startDate.Value.Date);
+            }
+            if (endDate.HasValue)
+            {
+                movements = movements.Where(m => m.MovementDate < endDate.Value.Date.AddDays(1));
+                purchases = purchases.Where(p => p.OrderDate < endDate.Value.Date.AddDays(1));
+                waste = waste.Where(w => w.WasteDate < endDate.Value.Date.AddDays(1));
+            }
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                ingredients = ingredients.Where(i => i.Name.Contains(search));
             }
 
-            var suppliers = await query
-                .OrderBy(s => s.Name)
-                .Select(s => new { s.Id, s.Name, s.BranchId })
-                .ToListAsync();
+            var stockRows = await ingredients.ToListAsync();
+            var lowStock = stockRows.Where(i => i.CurrentStock <= i.ReorderLevel).ToList();
+            var movementRows = await movements.ToListAsync();
+            var purchaseRows = await purchases.ToListAsync();
+            var wasteRows = await waste.ToListAsync();
 
-            return Json(suppliers);
+            return Json(new {
+                totalInventoryValuation = stockRows.Sum(i => (decimal)i.CurrentStock * i.CostPerUnit),
+                lowStockCount = lowStock.Count,
+                totalPurchaseAmount = purchaseRows.Sum(p => p.TotalAmount),
+                totalWasteAmount = wasteRows.Sum(w => w.Cost),
+                movementCount = movementRows.Count,
+                consumptionCost = movementRows.Where(m => m.MovementType == "RecipeConsumption").Sum(m => m.TotalCost ?? 0m),
+                kpis = new {
+                    averageUnitCost = stockRows.Any() ? stockRows.Average(i => i.CostPerUnit) : 0m,
+                    stockoutItems = stockRows.Count(i => i.CurrentStock <= 0),
+                    receivedOrders = purchaseRows.Count(p => p.Status == "Received")
+                },
+                lowStock = lowStock.Select(i => new { i.Id, i.Name, i.CurrentStock, i.ReorderLevel, i.Unit }),
+                purchaseHistory = purchaseRows.OrderByDescending(p => p.OrderDate).Take(10).Select(p => new { p.OrderNumber, SupplierName = p.Supplier?.Name, p.Status, p.TotalAmount, Date = p.OrderDate.ToString("yyyy-MM-dd") }),
+                wasteAnalysis = wasteRows.GroupBy(w => w.Reason).Select(g => new { reason = g.Key, quantity = g.Sum(w => w.QuantityWasted), loss = g.Sum(w => w.Cost) }),
+                movementSummary = movementRows.GroupBy(m => m.MovementType).Select(g => new { type = g.Key, count = g.Count(), quantity = g.Sum(m => Math.Abs(m.Quantity)) })
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetProductPrices(int menuItemId)
+        {
+            var prices = await _context.MenuItemPrices
+                .Include(p => p.Branch)
+                .Where(p => p.MenuItemId == menuItemId && !p.IsDeleted)
+                .OrderBy(p => p.Priority)
+                .ThenBy(p => p.PriceType)
+                .ToListAsync();
+            return Json(prices.Select(p => new {
+                p.Id,
+                p.MenuItemId,
+                p.BranchId,
+                BranchName = p.Branch?.Name,
+                p.PriceType,
+                p.PriceListName,
+                p.Price,
+                p.MinQuantity,
+                p.CustomerKey,
+                StartsOn = p.StartsOn?.ToString("yyyy-MM-dd"),
+                EndsOn = p.EndsOn?.ToString("yyyy-MM-dd"),
+                p.IsActive,
+                p.AllowOverride,
+                p.Priority
+            }));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveProductPrice([FromBody] SaveProductPriceRequest request)
+        {
+            if (request == null || request.MenuItemId <= 0 || string.IsNullOrWhiteSpace(request.PriceType) || request.Price <= 0)
+            {
+                return BadRequest("Invalid product price data.");
+            }
+
+            var price = request.Id > 0
+                ? await _context.MenuItemPrices.FindAsync(request.Id)
+                : new MenuItemPrice { CreatedOn = DateTime.Now };
+
+            if (price == null) return NotFound("Product price not found.");
+
+            price.MenuItemId = request.MenuItemId;
+            price.BranchId = request.BranchId;
+            price.PriceType = request.PriceType;
+            price.PriceListName = request.PriceListName;
+            price.Price = request.Price;
+            price.MinQuantity = request.MinQuantity;
+            price.CustomerKey = request.CustomerKey;
+            price.StartsOn = request.StartsOn;
+            price.EndsOn = request.EndsOn;
+            price.IsActive = request.IsActive;
+            price.AllowOverride = request.AllowOverride;
+            price.Priority = request.Priority;
+            price.LastUpdatedOn = DateTime.Now;
+
+            if (request.Id <= 0) _context.MenuItemPrices.Add(price);
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, price.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteProductPrice(int id)
+        {
+            var price = await _context.MenuItemPrices.FindAsync(id);
+            if (price == null)
+            {
+                return NotFound("Product price not found.");
+            }
+
+            price.IsDeleted = true;
+            price.IsActive = false;
+            price.LastUpdatedOn = DateTime.Now;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
         }
 
         [HttpPost]
@@ -492,6 +938,51 @@ namespace Resturant.Web.UI.Controllers
 
         // --- Helper Methods ---
 
+        private static string Csv(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
+        }
+
+        private static byte[] CreateSimplePdf(string text)
+        {
+            var safeText = text.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
+            var lines = safeText.Split('\n').Take(45).ToList();
+            var content = new StringBuilder();
+            content.AppendLine("BT /F1 10 Tf 40 780 Td");
+            foreach (var line in lines)
+            {
+                content.Append("(").Append(line).AppendLine(") Tj 0 -14 Td");
+            }
+            content.AppendLine("ET");
+
+            var stream = content.ToString();
+            var objects = new List<string>
+            {
+                "<< /Type /Catalog /Pages 2 0 R >>",
+                "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+                "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+                "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+                $"<< /Length {Encoding.ASCII.GetByteCount(stream)} >>\nstream\n{stream}\nendstream"
+            };
+
+            var pdf = new StringBuilder("%PDF-1.4\n");
+            var offsets = new List<int> { 0 };
+            foreach (var obj in objects)
+            {
+                offsets.Add(Encoding.ASCII.GetByteCount(pdf.ToString()));
+                pdf.Append(offsets.Count - 1).Append(" 0 obj\n").Append(obj).Append("\nendobj\n");
+            }
+            var xref = Encoding.ASCII.GetByteCount(pdf.ToString());
+            pdf.Append("xref\n0 ").Append(objects.Count + 1).Append("\n0000000000 65535 f \n");
+            foreach (var offset in offsets.Skip(1))
+            {
+                pdf.Append(offset.ToString("0000000000")).Append(" 00000 n \n");
+            }
+            pdf.Append("trailer << /Size ").Append(objects.Count + 1).Append(" /Root 1 0 R >>\nstartxref\n").Append(xref).Append("\n%%EOF");
+            return Encoding.ASCII.GetBytes(pdf.ToString());
+        }
+
         private int? GetActiveBranchId(int? queryBranchId)
         {
             if (queryBranchId.HasValue) return queryBranchId.Value;
@@ -584,5 +1075,86 @@ namespace Resturant.Web.UI.Controllers
         public string Unit { get; set; }
         public decimal CostPerUnit { get; set; }
         public int? SupplierId { get; set; }
+    }
+
+    public class SaveSupplierRequest
+    {
+        public int Id { get; set; }
+        public int BranchId { get; set; }
+        public string Name { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
+        public double LeadTimeDays { get; set; } = 2.5;
+        public double QualityRating { get; set; } = 4.5;
+    }
+
+    public class CreatePurchaseOrderRequest
+    {
+        public int BranchId { get; set; }
+        public int SupplierId { get; set; }
+        public DateTime? ExpectedDate { get; set; }
+        public string? Notes { get; set; }
+        public List<CreatePurchaseOrderItemRequest> Items { get; set; } = new List<CreatePurchaseOrderItemRequest>();
+    }
+
+    public class CreatePurchaseOrderItemRequest
+    {
+        public int IngredientId { get; set; }
+        public double Quantity { get; set; }
+        public decimal UnitCost { get; set; }
+    }
+
+    public class ReceivePurchaseOrderRequest
+    {
+        public int Id { get; set; }
+        public List<ReceivePurchaseOrderItemRequest>? Items { get; set; }
+    }
+
+    public class ReceivePurchaseOrderItemRequest
+    {
+        public int PurchaseOrderItemId { get; set; }
+        public double QuantityReceived { get; set; }
+    }
+
+    public class CreateInventoryCountRequest
+    {
+        public int BranchId { get; set; }
+        public bool RequiresApproval { get; set; }
+        public string? Notes { get; set; }
+        public List<CreateInventoryCountItemRequest> Items { get; set; } = new List<CreateInventoryCountItemRequest>();
+    }
+
+    public class CreateInventoryCountItemRequest
+    {
+        public int IngredientId { get; set; }
+        public double ActualQuantity { get; set; }
+        public string Reason { get; set; }
+    }
+
+    public class RecordWasteRequest
+    {
+        public int BranchId { get; set; }
+        public int IngredientId { get; set; }
+        public double Quantity { get; set; }
+        public string Reason { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    public class SaveProductPriceRequest
+    {
+        public int Id { get; set; }
+        public int MenuItemId { get; set; }
+        public int? BranchId { get; set; }
+        public string PriceType { get; set; }
+        public string? PriceListName { get; set; }
+        public decimal Price { get; set; }
+        public int? MinQuantity { get; set; }
+        public string? CustomerKey { get; set; }
+        public DateTime? StartsOn { get; set; }
+        public DateTime? EndsOn { get; set; }
+        public bool IsActive { get; set; } = true;
+        public bool AllowOverride { get; set; } = true;
+        public int Priority { get; set; } = 100;
     }
 }
