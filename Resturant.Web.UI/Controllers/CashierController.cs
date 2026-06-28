@@ -526,7 +526,8 @@ namespace Resturant.Web.UI.Controllers
                 ChangeReturned = request.ChangeReturned,
                 Tips = request.Tips,
                 Note = "Takeaway Order",
-                BranchId = branchId
+                BranchId = branchId,
+                PriceCategory = string.IsNullOrWhiteSpace(request.PriceCategory) ? "Retail" : request.PriceCategory
             };
 
             _context.Orders.Add(order);
@@ -538,10 +539,14 @@ namespace Resturant.Web.UI.Controllers
             {
                 var menuItem = await _context.MenuItems
                     .Include(m => m.Sizes)
+                    .Include(m => m.Prices)
                     .FirstOrDefaultAsync(m => m.Id == itemReq.MenuItemId);
                 if (menuItem == null || !menuItem.IsAvailable) continue;
 
-                var itemPrice = itemReq.Price ?? menuItem.Price;
+                var resolvedPrice = ResolveMenuItemPrice(menuItem, branchId, order.PriceCategory, itemReq.Quantity, order.PhoneNumber);
+                var itemPrice = itemReq.Price.HasValue && CanOverridePrice(menuItem, branchId, order.PriceCategory)
+                    ? itemReq.Price.Value
+                    : resolvedPrice;
                 var selectedSize = menuItem.GetParsedSizes().FirstOrDefault(s =>
                     (!string.IsNullOrWhiteSpace(itemReq.Size) && s.Name == itemReq.Size) ||
                     (string.IsNullOrWhiteSpace(itemReq.Size) && s.Price == itemPrice));
@@ -607,6 +612,39 @@ namespace Resturant.Web.UI.Controllers
 
             return Ok(new { orderId = order.Id });
         }
+
+        private static decimal ResolveMenuItemPrice(MenuItem menuItem, int branchId, string? priceCategory, int quantity, string? customerKey)
+        {
+            var now = DateTime.Now;
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            var price = menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.StartsOn.HasValue || p.StartsOn.Value <= now)
+                .Where(p => !p.EndsOn.HasValue || p.EndsOn.Value >= now)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => !p.MinQuantity.HasValue || quantity >= p.MinQuantity.Value)
+                .Where(p => string.IsNullOrWhiteSpace(p.CustomerKey) || p.CustomerKey == customerKey)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.BranchId.HasValue ? 0 : 1)
+                .ThenBy(p => string.IsNullOrWhiteSpace(p.CustomerKey) ? 1 : 0)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault();
+
+            return price?.Price ?? menuItem.Price;
+        }
+
+        private static bool CanOverridePrice(MenuItem menuItem, int branchId, string? priceCategory)
+        {
+            var category = string.IsNullOrWhiteSpace(priceCategory) ? "Retail" : priceCategory;
+            return menuItem.Prices
+                .Where(p => p.IsActive && !p.IsDeleted)
+                .Where(p => !p.BranchId.HasValue || p.BranchId.Value == branchId)
+                .Where(p => p.PriceType == category || p.PriceType == "Retail")
+                .OrderBy(p => p.PriceType == category ? 0 : 1)
+                .ThenBy(p => p.Priority)
+                .FirstOrDefault()?.AllowOverride ?? true;
+        }
     }
 
     public class CreateTakeawayOrderRequest
@@ -615,6 +653,7 @@ namespace Resturant.Web.UI.Controllers
         public decimal PaidAmount { get; set; }
         public decimal ChangeReturned { get; set; }
         public decimal Tips { get; set; }
+        public string? PriceCategory { get; set; }
     }
 
     public class TakeawayItemRequest

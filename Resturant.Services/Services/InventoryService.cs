@@ -37,6 +37,8 @@ namespace Resturant.Services.Services
 
         public async Task<Ingredient> AddStockAsync(int branchId, int ingredientId, double quantity, decimal? cost, string? notes, string? user)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             var ingredient = await _context.Ingredients
                 .FirstOrDefaultAsync(i => i.Id == ingredientId && i.BranchId == branchId);
 
@@ -45,6 +47,7 @@ namespace Resturant.Services.Services
                 throw new KeyNotFoundException($"Ingredient with ID {ingredientId} not found in branch {branchId}.");
             }
 
+            var stockBefore = ingredient.CurrentStock;
             ingredient.CurrentStock += quantity;
             if (cost.HasValue && cost.Value > 0)
             {
@@ -63,14 +66,18 @@ namespace Resturant.Services.Services
             };
 
             _context.InventoryAdjustments.Add(adjustment);
+            AddMovement(branchId, ingredient, "Purchase", quantity, stockBefore, ingredient.CurrentStock, cost ?? ingredient.CostPerUnit, null, user, adjustment.Notes);
             _context.Ingredients.Update(ingredient);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return ingredient;
         }
 
         public async Task<Ingredient> AdjustStockAsync(int branchId, int ingredientId, double quantityAdjusted, string type, string? notes, string? user)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             var ingredient = await _context.Ingredients
                 .FirstOrDefaultAsync(i => i.Id == ingredientId && i.BranchId == branchId);
 
@@ -83,6 +90,9 @@ namespace Resturant.Services.Services
             if (type.Equals("Waste", StringComparison.OrdinalIgnoreCase) || 
                 type.Equals("Expired", StringComparison.OrdinalIgnoreCase) || 
                 type.Equals("Damage", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Spoiled", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Lost", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("CustomerReturn", StringComparison.OrdinalIgnoreCase) ||
                 type.Equals("Theft", StringComparison.OrdinalIgnoreCase))
             {
                 if (quantityAdjusted > 0)
@@ -91,6 +101,7 @@ namespace Resturant.Services.Services
                 }
             }
 
+            var stockBefore = ingredient.CurrentStock;
             ingredient.CurrentStock += quantityAdjusted;
             if (ingredient.CurrentStock < 0) ingredient.CurrentStock = 0; // Prevent negative stock
 
@@ -106,11 +117,16 @@ namespace Resturant.Services.Services
                 AdjustedBy = user ?? "System"
             };
             _context.InventoryAdjustments.Add(adjustment);
+            var movementType = GetMovementType(type);
+            AddMovement(branchId, ingredient, movementType, quantityAdjusted, stockBefore, ingredient.CurrentStock, ingredient.CostPerUnit, null, user, adjustment.Notes);
 
             // Special handling: if type is Waste, Spoilage, Damage, etc., also log in legacy WasteLog
             if (quantityAdjusted < 0 && (type.Equals("Waste", StringComparison.OrdinalIgnoreCase) || 
                                           type.Equals("Expired", StringComparison.OrdinalIgnoreCase) || 
-                                          type.Equals("Damage", StringComparison.OrdinalIgnoreCase)))
+                                          type.Equals("Damage", StringComparison.OrdinalIgnoreCase) ||
+                                          type.Equals("Spoiled", StringComparison.OrdinalIgnoreCase) ||
+                                          type.Equals("Lost", StringComparison.OrdinalIgnoreCase) ||
+                                          type.Equals("CustomerReturn", StringComparison.OrdinalIgnoreCase)))
             {
                 var wasteQty = Math.Abs(quantityAdjusted);
                 var waste = new WasteLog
@@ -141,6 +157,7 @@ namespace Resturant.Services.Services
 
             _context.Ingredients.Update(ingredient);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return ingredient;
         }
@@ -166,6 +183,8 @@ namespace Resturant.Services.Services
 
                 foreach (var recipe in recipes)
                 {
+                    if (recipe.Ingredient == null) continue;
+
                     // Find the ingredient in the order's specific branch (by matching name)
                     var branchIngredient = await _context.Ingredients
                         .FirstOrDefaultAsync(i => i.BranchId == order.BranchId && i.Name == recipe.Ingredient.Name);
@@ -173,6 +192,7 @@ namespace Resturant.Services.Services
                     if (branchIngredient != null)
                     {
                         double quantityNeeded = recipe.QuantityRequired * item.Quantity;
+                        var stockBefore = branchIngredient.CurrentStock;
                         branchIngredient.CurrentStock -= quantityNeeded;
                         if (branchIngredient.CurrentStock < 0) branchIngredient.CurrentStock = 0;
 
@@ -188,6 +208,7 @@ namespace Resturant.Services.Services
                             AdjustedBy = "Order System"
                         };
                         _context.InventoryAdjustments.Add(adjustment);
+                        AddMovement(order.BranchId, branchIngredient, "RecipeConsumption", -quantityNeeded, stockBefore, branchIngredient.CurrentStock, branchIngredient.CostPerUnit, $"ORD-{order.Id}", "Order System", adjustment.Notes);
                         _context.Ingredients.Update(branchIngredient);
                     }
                 }
@@ -269,6 +290,7 @@ namespace Resturant.Services.Services
 
                 if (branchIngredient != null && cons.Value > 0)
                 {
+                    var stockBefore = branchIngredient.CurrentStock;
                     branchIngredient.CurrentStock -= cons.Value;
                     if (branchIngredient.CurrentStock < 0) branchIngredient.CurrentStock = 0;
 
@@ -284,6 +306,7 @@ namespace Resturant.Services.Services
                         AdjustedBy = "Shift Closing System"
                     };
                     _context.InventoryAdjustments.Add(adjustment);
+                    AddMovement(shift.BranchId, branchIngredient, "RecipeConsumption", -cons.Value, stockBefore, branchIngredient.CurrentStock, branchIngredient.CostPerUnit, $"SHIFT-{shiftId}", "Shift Closing System", adjustment.Notes);
                     _context.Ingredients.Update(branchIngredient);
                 }
             }
@@ -346,6 +369,8 @@ namespace Resturant.Services.Services
 
         public async Task<StockTransfer> ApproveTransferAsync(int transferId, string? user)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             var transfer = await _context.StockTransfers
                 .Include(t => t.Items)
                 .FirstOrDefaultAsync(t => t.Id == transferId);
@@ -390,6 +415,7 @@ namespace Resturant.Services.Services
                     // Allow negative/forced approval but log/warn
                 }
 
+                var stockBefore = sourceIngredient.CurrentStock;
                 sourceIngredient.CurrentStock -= item.Quantity;
                 if (sourceIngredient.CurrentStock < 0) sourceIngredient.CurrentStock = 0;
 
@@ -405,6 +431,7 @@ namespace Resturant.Services.Services
                 };
 
                 _context.InventoryAdjustments.Add(adjustment);
+                AddMovement(transfer.SourceBranchId, sourceIngredient, "TransferOut", -item.Quantity, stockBefore, sourceIngredient.CurrentStock, sourceIngredient.CostPerUnit, $"TR-{transfer.Id}", user, adjustment.Notes);
                 _context.Ingredients.Update(sourceIngredient);
             }
 
@@ -414,11 +441,14 @@ namespace Resturant.Services.Services
 
             _context.StockTransfers.Update(transfer);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
             return transfer;
         }
 
         public async Task<StockTransfer> ReceiveTransferAsync(int transferId, string? user)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             var transfer = await _context.StockTransfers
                 .Include(t => t.Items)
                 .FirstOrDefaultAsync(t => t.Id == transferId);
@@ -443,6 +473,7 @@ namespace Resturant.Services.Services
                 var sourceIngredient = await _context.Ingredients
                     .FirstOrDefaultAsync(i => i.BranchId == transfer.SourceBranchId && i.Name == item.IngredientName);
 
+                double stockBefore;
                 if (destIngredient == null)
                 {
                     // Create ingredient in destination branch automatically
@@ -458,9 +489,11 @@ namespace Resturant.Services.Services
                     };
                     _context.Ingredients.Add(destIngredient);
                     await _context.SaveChangesAsync(); // Generate ID for adjustment
+                    stockBefore = 0;
                 }
                 else
                 {
+                    stockBefore = destIngredient.CurrentStock;
                     destIngredient.CurrentStock += item.Quantity;
                     _context.Ingredients.Update(destIngredient);
                 }
@@ -477,6 +510,7 @@ namespace Resturant.Services.Services
                 };
 
                 _context.InventoryAdjustments.Add(adjustment);
+                AddMovement(transfer.DestinationBranchId, destIngredient, "TransferIn", item.Quantity, stockBefore, destIngredient.CurrentStock, destIngredient.CostPerUnit, $"TR-{transfer.Id}", user, adjustment.Notes);
             }
 
             transfer.Status = "Received";
@@ -485,11 +519,14 @@ namespace Resturant.Services.Services
 
             _context.StockTransfers.Update(transfer);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
             return transfer;
         }
 
         public async Task<StockTransfer> CancelTransferAsync(int transferId, string? user)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
             var transfer = await _context.StockTransfers
                 .Include(t => t.Items)
                 .FirstOrDefaultAsync(t => t.Id == transferId);
@@ -514,6 +551,7 @@ namespace Resturant.Services.Services
 
                     if (sourceIngredient != null)
                     {
+                        var stockBefore = sourceIngredient.CurrentStock;
                         sourceIngredient.CurrentStock += item.Quantity;
 
                         var adjustment = new InventoryAdjustment
@@ -528,6 +566,7 @@ namespace Resturant.Services.Services
                         };
 
                         _context.InventoryAdjustments.Add(adjustment);
+                        AddMovement(transfer.SourceBranchId, sourceIngredient, "TransferCancel", item.Quantity, stockBefore, sourceIngredient.CurrentStock, sourceIngredient.CostPerUnit, $"TR-{transfer.Id}", user, adjustment.Notes);
                         _context.Ingredients.Update(sourceIngredient);
                     }
                 }
@@ -539,7 +578,292 @@ namespace Resturant.Services.Services
 
             _context.StockTransfers.Update(transfer);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
             return transfer;
+        }
+
+        // --- Purchase Orders, Movement History, Counts and Waste ---
+
+        public async Task<IEnumerable<Supplier>> GetSuppliersAsync(int? branchId)
+        {
+            var query = _context.Suppliers.Include(s => s.Branch).AsQueryable();
+            if (branchId.HasValue)
+            {
+                query = query.Where(s => s.BranchId == branchId.Value);
+            }
+            return await query.OrderBy(s => s.Name).ToListAsync();
+        }
+
+        public async Task<Supplier> SaveSupplierAsync(Supplier supplier)
+        {
+            if (supplier.Id > 0)
+            {
+                var existing = await _context.Suppliers.FindAsync(supplier.Id);
+                if (existing == null) throw new KeyNotFoundException("Supplier not found.");
+
+                existing.Name = supplier.Name;
+                existing.Phone = supplier.Phone;
+                existing.Email = supplier.Email;
+                existing.Address = supplier.Address;
+                existing.LeadTimeDays = supplier.LeadTimeDays;
+                existing.QualityRating = supplier.QualityRating;
+                existing.BranchId = supplier.BranchId;
+                existing.LastUpdatedOn = DateTime.Now;
+            }
+            else
+            {
+                supplier.CreatedOn = DateTime.Now;
+                _context.Suppliers.Add(supplier);
+            }
+
+            await _context.SaveChangesAsync();
+            return supplier;
+        }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersAsync(int? branchId, string? status)
+        {
+            var query = _context.PurchaseOrders
+                .Include(p => p.Branch)
+                .Include(p => p.Supplier)
+                .Include(p => p.Items)
+                    .ThenInclude(i => i.Ingredient)
+                .AsQueryable();
+
+            if (branchId.HasValue) query = query.Where(p => p.BranchId == branchId.Value);
+            if (!string.IsNullOrWhiteSpace(status)) query = query.Where(p => p.Status == status);
+
+            return await query.OrderByDescending(p => p.OrderDate).ToListAsync();
+        }
+
+        public async Task<PurchaseOrder> CreatePurchaseOrderAsync(int branchId, int supplierId, List<PurchaseOrderItemDto> items, DateTime? expectedDate, string? notes, string? user)
+        {
+            if (items == null || items.Count == 0) throw new ArgumentException("Purchase order must include at least one item.");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            var order = new PurchaseOrder
+            {
+                BranchId = branchId,
+                SupplierId = supplierId,
+                OrderNumber = await GenerateNumberAsync("PO", _context.PurchaseOrders),
+                Status = "Draft",
+                OrderDate = DateTime.Now,
+                ExpectedDate = expectedDate,
+                CreatedBy = user ?? "System",
+                Notes = notes,
+                CreatedOn = DateTime.Now
+            };
+
+            _context.PurchaseOrders.Add(order);
+            await _context.SaveChangesAsync();
+
+            foreach (var item in items.Where(i => i.IngredientId > 0 && i.Quantity > 0))
+            {
+                _context.PurchaseOrderItems.Add(new PurchaseOrderItem
+                {
+                    PurchaseOrderId = order.Id,
+                    IngredientId = item.IngredientId,
+                    QuantityOrdered = item.Quantity,
+                    UnitCost = item.UnitCost,
+                    CreatedOn = DateTime.Now
+                });
+                order.TotalAmount += (decimal)item.Quantity * item.UnitCost;
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return order;
+        }
+
+        public async Task<PurchaseOrder> UpdatePurchaseOrderStatusAsync(int purchaseOrderId, string status, string? user)
+        {
+            var order = await _context.PurchaseOrders.FindAsync(purchaseOrderId);
+            if (order == null) throw new KeyNotFoundException("Purchase order not found.");
+
+            var validStatuses = new[] { "Draft", "Pending", "Approved", "Received", "Cancelled" };
+            if (!validStatuses.Contains(status)) throw new ArgumentException("Invalid purchase order status.");
+            if (order.Status == "Received" && status != "Received") throw new InvalidOperationException("Received purchase orders cannot be moved backward.");
+
+            order.Status = status;
+            order.LastUpdatedOn = DateTime.Now;
+            if (status == "Approved") order.ApprovedBy = user ?? "System";
+            await _context.SaveChangesAsync();
+            return order;
+        }
+
+        public async Task<PurchaseOrder> ReceivePurchaseOrderAsync(int purchaseOrderId, List<PurchaseOrderReceiveItemDto>? items, string? user)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var order = await _context.PurchaseOrders
+                .Include(p => p.Items)
+                    .ThenInclude(i => i.Ingredient)
+                .FirstOrDefaultAsync(p => p.Id == purchaseOrderId);
+            if (order == null) throw new KeyNotFoundException("Purchase order not found.");
+            if (order.Status == "Cancelled" || order.Status == "Received") throw new InvalidOperationException($"Cannot receive a purchase order in '{order.Status}' status.");
+
+            foreach (var poItem in order.Items)
+            {
+                var received = items?.FirstOrDefault(i => i.PurchaseOrderItemId == poItem.Id)?.QuantityReceived ?? poItem.QuantityOrdered;
+                if (received <= 0) continue;
+
+                var ingredient = poItem.Ingredient ?? await _context.Ingredients.FindAsync(poItem.IngredientId);
+                if (ingredient == null) continue;
+
+                var stockBefore = ingredient.CurrentStock;
+                ingredient.CurrentStock += received;
+                ingredient.CostPerUnit = poItem.UnitCost;
+                poItem.QuantityReceived += received;
+
+                _context.InventoryAdjustments.Add(new InventoryAdjustment
+                {
+                    BranchId = order.BranchId,
+                    IngredientId = ingredient.Id,
+                    QuantityAdjusted = received,
+                    Type = "Purchase",
+                    Notes = $"Received purchase order {order.OrderNumber}",
+                    AdjustmentDate = DateTime.Now,
+                    AdjustedBy = user ?? "System"
+                });
+                AddMovement(order.BranchId, ingredient, "Purchase", received, stockBefore, ingredient.CurrentStock, poItem.UnitCost, order.OrderNumber, user, $"Received purchase order {order.OrderNumber}");
+            }
+
+            order.Status = "Received";
+            order.ReceivedBy = user ?? "System";
+            order.ReceivedDate = DateTime.Now;
+            order.LastUpdatedOn = DateTime.Now;
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return order;
+        }
+
+        public async Task<(IEnumerable<InventoryMovement> Items, int TotalCount)> GetMovementsAsync(InventoryMovementFilter filter)
+        {
+            var page = filter.Page <= 0 ? 1 : filter.Page;
+            var pageSize = filter.PageSize <= 0 ? 25 : Math.Min(filter.PageSize, 200);
+            var query = _context.InventoryMovements
+                .Include(m => m.Branch)
+                .Include(m => m.Ingredient)
+                .AsQueryable();
+
+            if (filter.BranchId.HasValue) query = query.Where(m => m.BranchId == filter.BranchId.Value);
+            if (filter.IngredientId.HasValue) query = query.Where(m => m.IngredientId == filter.IngredientId.Value);
+            if (!string.IsNullOrWhiteSpace(filter.MovementType)) query = query.Where(m => m.MovementType == filter.MovementType);
+            if (filter.StartDate.HasValue) query = query.Where(m => m.MovementDate >= filter.StartDate.Value.Date);
+            if (filter.EndDate.HasValue) query = query.Where(m => m.MovementDate < filter.EndDate.Value.Date.AddDays(1));
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                var search = filter.Search.Trim();
+                query = query.Where(m =>
+                    (m.Ingredient != null && m.Ingredient.Name.Contains(search)) ||
+                    (m.ReferenceNumber != null && m.ReferenceNumber.Contains(search)) ||
+                    (m.Notes != null && m.Notes.Contains(search)));
+            }
+
+            var count = await query.CountAsync();
+            var rows = await query.OrderByDescending(m => m.MovementDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (rows, count);
+        }
+
+        public async Task<InventoryCount> CreateInventoryCountAsync(int branchId, List<InventoryCountItemDto> items, bool requiresApproval, string? notes, string? user)
+        {
+            if (items == null || items.Count == 0) throw new ArgumentException("Inventory count must include at least one item.");
+
+            var ingredients = await _context.Ingredients.Where(i => i.BranchId == branchId).ToListAsync();
+            var count = new InventoryCount
+            {
+                BranchId = branchId,
+                CountNumber = await GenerateNumberAsync("CNT", _context.InventoryCounts),
+                Status = requiresApproval ? "PendingApproval" : "Approved",
+                CountDate = DateTime.Now,
+                RequiresApproval = requiresApproval,
+                CountedBy = user ?? "System",
+                Notes = notes,
+                CreatedOn = DateTime.Now
+            };
+            _context.InventoryCounts.Add(count);
+            await _context.SaveChangesAsync();
+
+            foreach (var item in items)
+            {
+                var ingredient = ingredients.FirstOrDefault(i => i.Id == item.IngredientId);
+                if (ingredient == null) continue;
+                var variance = item.ActualQuantity - ingredient.CurrentStock;
+                _context.InventoryCountItems.Add(new InventoryCountItem
+                {
+                    InventoryCountId = count.Id,
+                    IngredientId = ingredient.Id,
+                    ExpectedQuantity = ingredient.CurrentStock,
+                    ActualQuantity = item.ActualQuantity,
+                    Variance = variance,
+                    Reason = item.Reason,
+                    CreatedOn = DateTime.Now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return count;
+        }
+
+        public async Task<InventoryCount> ApproveInventoryCountAsync(int countId, string? user)
+        {
+            var count = await _context.InventoryCounts.FindAsync(countId);
+            if (count == null) throw new KeyNotFoundException("Inventory count not found.");
+            count.Status = "Approved";
+            count.ApprovedBy = user ?? "System";
+            count.ApprovedDate = DateTime.Now;
+            await _context.SaveChangesAsync();
+            return count;
+        }
+
+        public async Task<InventoryCount> ApplyInventoryCountAsync(int countId, string? user)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            var count = await _context.InventoryCounts
+                .Include(c => c.Items)
+                    .ThenInclude(i => i.Ingredient)
+                .FirstOrDefaultAsync(c => c.Id == countId);
+            if (count == null) throw new KeyNotFoundException("Inventory count not found.");
+            if (count.Status != "Approved") throw new InvalidOperationException("Inventory count must be approved before applying.");
+
+            foreach (var item in count.Items.Where(i => Math.Abs(i.Variance) > 0.0001))
+            {
+                var ingredient = item.Ingredient ?? await _context.Ingredients.FindAsync(item.IngredientId);
+                if (ingredient == null) continue;
+                var stockBefore = ingredient.CurrentStock;
+                ingredient.CurrentStock = item.ActualQuantity;
+
+                _context.InventoryAdjustments.Add(new InventoryAdjustment
+                {
+                    BranchId = count.BranchId,
+                    IngredientId = ingredient.Id,
+                    QuantityAdjusted = item.Variance,
+                    Type = "StockCount",
+                    Notes = item.Reason,
+                    AdjustmentDate = DateTime.Now,
+                    AdjustedBy = user ?? "System"
+                });
+                AddMovement(count.BranchId, ingredient, "Adjustment", item.Variance, stockBefore, ingredient.CurrentStock, ingredient.CostPerUnit, count.CountNumber, user, item.Reason);
+            }
+
+            count.Status = "Applied";
+            count.AppliedDate = DateTime.Now;
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return count;
+        }
+
+        public async Task<WasteLog> RecordWasteAsync(int branchId, int ingredientId, double quantity, string reason, string? notes, string? user)
+        {
+            await AdjustStockAsync(branchId, ingredientId, -Math.Abs(quantity), reason, notes, user);
+            return await _context.WasteLogs
+                .Include(w => w.Ingredient)
+                .Where(w => w.BranchId == branchId && w.IngredientId == ingredientId)
+                .OrderByDescending(w => w.WasteDate)
+                .FirstAsync();
         }
 
         // --- Recipe Management ---
@@ -597,6 +921,54 @@ namespace Resturant.Services.Services
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        private void AddMovement(int branchId, Ingredient ingredient, string movementType, double quantity, double stockBefore, double stockAfter, decimal? unitCost, string? referenceNumber, string? user, string? notes)
+        {
+            _context.InventoryMovements.Add(new InventoryMovement
+            {
+                BranchId = branchId,
+                IngredientId = ingredient.Id,
+                MovementType = movementType,
+                Quantity = quantity,
+                StockBefore = stockBefore,
+                StockAfter = stockAfter,
+                UnitCost = unitCost,
+                TotalCost = unitCost.HasValue ? (decimal)Math.Abs(quantity) * unitCost.Value : null,
+                ReferenceNumber = referenceNumber,
+                UserName = user ?? "System",
+                Notes = notes,
+                MovementDate = DateTime.Now,
+                CreatedOn = DateTime.Now
+            });
+        }
+
+        private static string GetMovementType(string type)
+        {
+            if (type.Equals("Waste", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Expired", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Damage", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Spoiled", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Lost", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("CustomerReturn", StringComparison.OrdinalIgnoreCase) ||
+                type.Equals("Theft", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Waste";
+            }
+
+            if (type.Equals("StockCount", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Adjustment";
+            }
+
+            return type;
+        }
+
+        private async Task<string> GenerateNumberAsync<T>(string prefix, DbSet<T> set) where T : class
+        {
+            var today = DateTime.Now.ToString("yyyyMMdd");
+            var count = await set.CountAsync();
+            return $"{prefix}-{today}-{count + 1:0000}";
         }
     }
 }

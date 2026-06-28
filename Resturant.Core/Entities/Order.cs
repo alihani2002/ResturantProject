@@ -47,6 +47,9 @@ namespace Resturant.Core.Entities
         [Display(Name = "Phone Number")]
         public string? PhoneNumber { get; set; }
 
+        [Display(Name = "Price Category")]
+        public string PriceCategory { get; set; } = "Retail";
+
         [Display(Name = "Table Session Id")]
         public int? TableSessionId { get; set; }
 
@@ -107,4 +110,4 @@ namespace Resturant.Core.Entities
 
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
-}
+}
