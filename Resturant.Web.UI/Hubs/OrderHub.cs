@@ -216,5 +216,21 @@ namespace Resturant.Web.UI.Hubs
         {
             await Clients.All.SendAsync("ReceiveOrderDetails", order);
         }
+
+        public async Task JoinOrderTracker(int orderId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"order_{orderId}");
+            _logger.LogInformation("SignalR Customer joined tracker for Order={OrderId}", orderId);
+        }
+
+        public async Task NotifyOrderStatusChanged(int orderId, string status)
+        {
+            await Clients.Group($"order_{orderId}").SendAsync("OrderStatusChanged", new { orderId = orderId, status = status });
+        }
+
+        public async Task NotifyDriverLocation(int orderId, double latitude, double longitude)
+        {
+            await Clients.Group($"order_{orderId}").SendAsync("DriverLocationChanged", new { orderId = orderId, latitude = latitude, longitude = longitude });
+        }
     }
 }

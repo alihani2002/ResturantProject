@@ -20,6 +20,11 @@ namespace Resturant.Web.UI.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
+                if (User.IsInRole(AppRoles.Driver))
+                {
+                    return RedirectToAction("Index", "Driver");
+                }
+
                 if (User.IsInRole(AppRoles.Admin) || 
                     User.IsInRole(AppRoles.Chief) || 
                     User.IsInRole(AppRoles.Manager) || 

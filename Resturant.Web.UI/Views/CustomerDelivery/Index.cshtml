@@ -1,0 +1,652 @@
+@model IEnumerable<Resturant.Core.Entities.MenuCategory>
+@{
+    ViewData["Title"] = "طلب دليفري - منيو الديوان";
+    var branches = ViewBag.Branches as List<Resturant.Core.Entities.Branch>;
+    var selectedBranchId = (int)ViewBag.SelectedBranchId;
+    var zones = ViewBag.DeliveryZones as List<Resturant.Core.Entities.DeliveryZone>;
+}
+
+<div class="menu-app-container bg-light min-vh-100 pb-5 text-right" style="font-family: 'Cairo', sans-serif; direction: rtl; text-align: right;">
+
+    <!-- Premium Header Banner -->
+    <div class="brand-banner-section text-center py-4 position-relative overflow-hidden"
+         style="background: linear-gradient(135deg, #fffdf8 0%, #fef3c7 100%) !important; border-bottom: 1px solid rgba(0,0,0,0.05);">
+        <div class="d-flex flex-column align-items-center">
+            <div class="circular-logo-container rounded-circle shadow bg-warning p-1 mb-2" style="width: 90px; height: 90px; border: 3px solid #ffffff; overflow: hidden;">
+                <img src="/assets/images/q.png" class="w-100 h-100 rounded-circle" style="object-fit: cover;" onerror="this.src='/assets/images/logo-abbr.png'">
+            </div>
+            <h4 class="fw-bold mb-1" style="color: #1c1917;">خدمة التوصيل المنزلي</h4>
+            <p class="text-muted small mb-0">اطلب وجبتك المفضلة لتصلك حتى باب البيت</p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container py-3">
+        
+        <!-- Branch Selector & Track Link -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle bg-warning-subtle text-warning p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </span>
+                    <div>
+                        <small class="text-muted d-block" style="font-size: 0.7rem; line-height: 1.1;">الفرع الحالي</small>
+                        <select class="form-select form-select-sm border-0 fw-bold p-0 pe-4 bg-transparent text-dark" style="box-shadow: none;" onchange="changeBranch(this.value)">
+                            @foreach (var branch in branches)
+                            {
+                                <option value="@branch.Id" selected="@(branch.Id == selectedBranchId)">@branch.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <a asp-action="Track" class="btn btn-outline-warning btn-sm rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm text-dark" style="font-size: 0.8rem; border-width: 1.5px;">
+                    <i class="bi bi-compass"></i>
+                    <span>تتبع طلباتك</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-section mb-4">
+            <div class="position-relative">
+                <input type="text" id="menu-search-input" class="form-control border-0 shadow-sm rounded-pill py-3 px-4 text-right" placeholder="ابحث هنا عن وجبتك المفضلة..." style="padding-left: 50px; direction: rtl;">
+                <span class="position-absolute start-0 top-50 translate-middle-y ms-3 text-muted fs-5">
+                    <i class="bi bi-search text-warning"></i>
+                </span>
+            </div>
+        </div>
+
+        <!-- Categories Stories -->
+        <div class="category-stories-section mb-4">
+            <h6 class="fw-bold text-dark mb-3 px-1" style="font-size: 0.85rem;">التصنيفات</h6>
+            <div class="d-flex overflow-auto flex-nowrap scrollbar-none gap-3 pb-2 px-1" id="category-stories-container">
+                @foreach (var category in Model)
+                {
+                    <div class="category-story-item text-center cursor-pointer" onclick="selectCategory(@category.Id, this)" data-category-id="@category.Id" style="flex: 0 0 auto; width: 80px;">
+                        <div class="story-circle-ring rounded-circle p-[3px] mb-1" style="width: 72px; height: 72px; transition: all 0.3s; background: linear-gradient(45deg, #e2e8f0, #cbd5e1);">
+                            <div class="story-inner-circle bg-white rounded-circle p-[2px] w-100 h-100">
+                                <div class="rounded-circle overflow-hidden w-100 h-100">
+                                    @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                    {
+                                        <img src="@category.ImageUrl" class="w-100 h-100" style="object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 bg-warning-subtle d-flex align-items-center justify-content-center text-warning fw-bold fs-4">
+                                            @category.Name.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <small class="story-label fw-bold d-block text-truncate text-muted" style="font-size: 0.72rem;">@category.Name</small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Menu Grid -->
+        <div class="row">
+            <div class="col-12">
+                <div class="menu-items-grid-wrapper">
+                    @foreach (var category in Model)
+                    {
+                        <div class="category-section mb-5" id="category-section-@category.Id">
+                            <h4 class="fw-bold text-dark mb-3 px-1 d-flex align-items-center justify-content-between border-bottom pb-2">
+                                <span>@category.Name</span>
+                                <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1" style="font-size: 0.72rem; font-weight: 700;">
+                                    @category.MenuItems.Count(i => i.IsAvailable) صنف
+                                </span>
+                            </h4>
+                            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-3">
+                                @foreach (var item in category.MenuItems.Where(i => i.IsAvailable).OrderBy(i => i.OrderNumber).ThenBy(i => i.Name))
+                                {
+                                    var badgeText = "";
+                                    var badgeBg = "";
+                                    if (item.IsPopular) { badgeText = "الأكثر مبيعاً"; badgeBg = "bg-danger"; }
+                                    else if (item.IsTrending) { badgeText = "رائج"; badgeBg = "bg-warning text-dark"; }
+                                    else if (item.IsRecommended) { badgeText = "موصى به"; badgeBg = "bg-info text-dark"; }
+
+                                    <div class="col menu-item-card-col" data-item-id="@item.Id" data-name="@item.Name.ToLower()" data-description="@(item.Description?.ToLower() ?? "")">
+                                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative hover-lift bg-white">
+                                            @if (!string.IsNullOrEmpty(badgeText))
+                                            {
+                                                <span class="badge @badgeBg position-absolute top-0 start-0 m-2 z-2" style="font-size: 0.65rem;">@badgeText</span>
+                                            }
+                                            <div style="height: 135px; overflow: hidden; background-color: #f8fafc;">
+                                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                {
+                                                    <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover;" alt="@item.Name">
+                                                }
+                                                else
+                                                {
+                                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+                                                        <i class="bi bi-egg-fried fs-1 opacity-20"></i>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                                <div>
+                                                    <h6 class="fw-bold text-dark mb-1 line-clamp-1">@item.Name</h6>
+                                                    <p class="text-muted mb-0 small line-clamp-2" style="font-size: 0.75rem; min-height: 32px;">@(item.Description ?? "صنف طازج ولذيذ معد بعناية.")</p>
+                                                </div>
+                                                <div class="d-flex align-items-center justify-content-between mt-3">
+                                                    <div class="text-right">
+                                                        <span class="fw-bold text-dark" style="font-size: 0.95rem;">@item.Price.ToString("F2")</span>
+                                                        <small class="text-muted d-block" style="font-size: 0.65rem; margin-top: -3px;">ج.م</small>
+                                                    </div>
+                                                    <button class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm"
+                                                            onclick="openCustomization(@item.Id)" style="width: 32px; height: 32px; background-color: #ffffff; border: 1px solid #dee2e6;">
+                                                        <i class="bi bi-plus-lg text-dark"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Bar -->
+    <div class="floating-talabat-cart-bar fixed-bottom py-2.5 px-3 shadow animate-slide-up" id="delivery-cart-bar" style="display: none; z-index: 1040; bottom: 15px; left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 500px; border-radius: 16px; background: #ffffff; border: 1.5px solid rgba(255, 193, 7, 0.35);">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2.5 cursor-pointer" onclick="openCheckoutModal()">
+                <div class="position-relative bg-warning text-black rounded-circle p-2 d-flex align-items-center justify-content-center shadow" style="width: 38px; height: 38px;">
+                    <i class="bi bi-bag-fill fs-6"></i>
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger border border-2 border-dark" id="cart-badge" style="font-size: 0.65rem; padding: 3px 5px;">0</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-muted d-block" style="font-size: 0.62rem;">إجمالي السلة</span>
+                    <strong class="text-warning fw-extrabold" id="cart-total-text" style="font-size: 1.05rem;">0.00 ج.م</strong>
+                </div>
+            </div>
+            <button class="btn btn-warning rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-1.5 shadow" onclick="openCheckoutModal()">
+                <span>طلب دليفري</span>
+                <i class="bi bi-arrow-left-short fs-6"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Customization Modal -->
+<div class="modal fade" id="customizationModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden bg-white text-dark">
+            <div class="modal-header border-0 pb-0 pt-3 px-3 d-flex align-items-center justify-content-between">
+                <div class="text-right flex-grow-1">
+                    <h4 class="modal-title fw-bold text-dark mb-0" id="custom-item-name">اسم الصنف</h4>
+                    <span class="badge bg-secondary rounded-pill fs-6 mt-1" id="custom-item-price">0.00 ج.م</span>
+                </div>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body px-3 py-3 text-right" style="max-height: 50vh; overflow-y: auto;">
+                <p class="text-muted small mb-3" id="custom-item-description"></p>
+                
+                <div id="sizes-section" class="mb-4" style="display: none;">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-arrows-angle-expand text-warning ms-2"></i>اختر الحجم</h6>
+                    <div id="sizes-list" class="d-flex flex-wrap gap-2"></div>
+                </div>
+
+                <div id="addons-section" class="mb-4" style="display: none;">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-gear-wide-connected text-warning ms-2"></i>الإضافات</h6>
+                    <div id="addons-list" class="row g-2"></div>
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-light border-0 py-3 px-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center border border-2 border-dark rounded-pill bg-white px-2 py-1 shadow-sm">
+                    <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="updateCustomQty(-1)">-</button>
+                    <span class="px-2 fw-bold text-dark fs-5" id="custom-qty-val">1</span>
+                    <button class="btn btn-link btn-sm text-dark p-0 px-2 fw-bold" style="text-decoration: none;" onclick="updateCustomQty(1)">+</button>
+                </div>
+                <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold flex-grow-1 mr-3 text-dark" id="add-to-cart-btn" onclick="addActiveItemToCart()">
+                    إضافة للسلة - <span id="custom-total-price">0.00 ج.م</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 bg-white text-dark">
+            <div class="modal-header py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold"><i class="bi bi-truck text-warning ms-2"></i>بيانات شحن طلب الدليفري</h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-right">
+                <div class="row">
+                    <div class="col-md-6 border-start">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">الفرع الذي تود الطلب منه</label>
+                            <select id="checkoutBranch" class="form-select rounded-pill text-right" required>
+                                @foreach (var branch in branches)
+                                {
+                                    <option value="@branch.Id" selected="@(branch.Id == selectedBranchId)">@branch.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">الاسم بالكامل</label>
+                            <input type="text" id="custName" class="form-control rounded-pill text-right" placeholder="أدخل اسمك بالكامل" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">رقم الهاتف</label>
+                            <input type="tel" id="custPhone" class="form-control rounded-pill text-right" placeholder="رقم الموبايل للتواصل" required style="direction: ltr;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">ملاحظات الطلب (اختياري)</label>
+                            <textarea id="orderNote" class="form-control rounded-4 text-right" rows="2" placeholder="مثال: بدون فلفل، الكاتشب خارجي..."></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold mb-3 text-warning">عنوان التوصيل</h6>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label text-muted small">المحافظة</label>
+                                <input type="text" id="addrGov" class="form-control rounded-pill text-right" value="القاهرة" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label text-muted small">المنطقة / الحي</label>
+                                <input type="text" id="addrArea" class="form-control rounded-pill text-right" placeholder="مثال: المعادي" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">الشارع</label>
+                            <input type="text" id="addrStreet" class="form-control rounded-pill text-right" placeholder="اسم الشارع" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 mb-3">
+                                <label class="form-label text-muted small">العقار</label>
+                                <input type="text" id="addrBld" class="form-control rounded-pill text-right" placeholder="رقم العمارة" required>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label class="form-label text-muted small">الدور</label>
+                                <input type="text" id="addrFloor" class="form-control rounded-pill text-right" placeholder="الدور">
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label class="form-label text-muted small">الشقة</label>
+                                <input type="text" id="addrApt" class="form-control rounded-pill text-right" placeholder="رقم الشقة">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">منطقة التوصيل (لتحديد التكلفة)</label>
+                            <select id="addrZone" class="form-select rounded-pill text-right" onchange="updateDeliveryFeeDisplay()" required>
+                                <option value="" disabled selected>اختر منطقة التوصيل...</option>
+                                @foreach (var zone in zones)
+                                {
+                                    <option value="@zone.Id" data-fee="@zone.DeliveryFee">@zone.Name (+ @zone.DeliveryFee.ToString("0.00") ج.م توصيل)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 bg-light rounded-4 mt-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">إجمالي الوجبات:</span>
+                            <span class="fw-bold" id="checkout-subtotal">0.00 ج.م</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">تكلفة خدمة التوصيل:</span>
+                            <span class="fw-bold text-success" id="checkout-shipping">0.00 ج.م</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">الإجمالي الكلي للدفع:</span>
+                            <span class="fw-bold text-warning fs-5" id="checkout-grandtotal">0.00 ج.م</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 bg-light d-flex">
+                <button type="button" class="btn btn-outline-dark rounded-pill px-4 flex-grow-1" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold text-dark" onclick="submitCheckout()">تأكيد وإرسال الطلب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let branchId = @selectedBranchId;
+        let cart = [];
+        let activeItem = null;
+        let customizationQty = 1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCart();
+            // Highlight the first category by default if available
+            const firstCategory = document.querySelector('.category-story-item');
+            if (firstCategory) {
+                firstCategory.classList.add('active');
+                firstCategory.querySelector('.story-circle-ring').style.background = 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%)';
+            }
+
+            // Search filtering logic
+            document.getElementById('menu-search-input').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('.menu-item-card-col');
+                cards.forEach(card => {
+                    const name = card.getAttribute('data-name');
+                    const desc = card.getAttribute('data-description');
+                    if (name.includes(query) || desc.includes(query)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        function changeBranch(newBranchId) {
+            window.location.href = `/CustomerDelivery?branchId=${newBranchId}`;
+        }
+
+        function selectCategory(catId, element) {
+            document.querySelectorAll('.category-story-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.story-circle-ring').style.background = 'linear-gradient(45deg, #e2e8f0, #cbd5e1)';
+            });
+            element.classList.add('active');
+            element.querySelector('.story-circle-ring').style.background = 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%)';
+
+            const targetSection = document.getElementById(`category-section-${catId}`);
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function loadCart() {
+            const saved = localStorage.getItem('delivery_cart');
+            if (saved) {
+                cart = JSON.parse(saved);
+                updateCartUI();
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem('delivery_cart', JSON.stringify(cart));
+        }
+
+        function openCustomization(itemId) {
+            fetch(`/Menu/GetMenuItemCustomizationDetails?id=${itemId}`)
+                .then(r => r.json())
+                .then(item => {
+                    activeItem = item;
+                    customizationQty = 1;
+                    document.getElementById('custom-item-name').textContent = item.name;
+                    document.getElementById('custom-item-price').textContent = `${item.price.toFixed(2)} ج.م`;
+                    document.getElementById('custom-item-description').textContent = item.description || 'لا يوجد وصف متاح.';
+                    document.getElementById('custom-qty-val').textContent = customizationQty;
+
+                    // Sizes
+                    const sizesSection = document.getElementById('sizes-section');
+                    const sizesList = document.getElementById('sizes-list');
+                    if (item.sizes && item.sizes.length > 0) {
+                        sizesSection.style.display = 'block';
+                        sizesList.innerHTML = item.sizes.map((s, idx) => `
+                            <div class="flex-grow-1" style="min-width: 120px;">
+                                <input type="radio" class="btn-check" name="size-opt" id="sz-${idx}" value="${s.name}" data-price="${s.price}" ${idx===0 ? 'checked' : ''} onchange="updateCustomTotal()">
+                                <label class="btn btn-outline-warning w-100 py-2 rounded-3 text-dark fw-bold" for="sz-${idx}">
+                                    <span class="small d-block text-muted">${s.name}</span>
+                                    <span>${s.price.toFixed(2)} ج.م</span>
+                                </label>
+                            </div>
+                        `).join('');
+                    } else {
+                        sizesSection.style.display = 'none';
+                        sizesList.innerHTML = '';
+                    }
+
+                    // Addons
+                    const addonsSection = document.getElementById('addons-section');
+                    const addonsList = document.getElementById('addons-list');
+                    if (item.addOns && item.addOns.length > 0) {
+                        addonsSection.style.display = 'block';
+                        addonsList.innerHTML = item.addOns.map(a => `
+                            <div class="col-12">
+                                <div class="card border p-2 rounded-3 d-flex flex-row align-items-center justify-content-between mb-1" id="addon-lbl-${a.id}" onclick="toggleAddon(${a.id})">
+                                    <div class="form-check m-0 p-0" style="pointer-events: none; padding-right: 1.5em !important;">
+                                        <input class="form-check-input ms-2" type="checkbox" id="add-${a.id}" value="${a.id}" data-price="${a.extraPrice}" data-name="${a.name}" onclick="event.stopPropagation()" style="float: right;">
+                                        <label class="form-check-label fw-bold text-dark me-4">${a.name}</label>
+                                    </div>
+                                    <span class="fw-bold text-warning small">+ ${a.extraPrice.toFixed(2)} ج.م</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        addonsSection.style.display = 'none';
+                        addonsList.innerHTML = '';
+                    }
+
+                    updateCustomTotal();
+                    const modal = new bootstrap.Modal(document.getElementById('customizationModal'));
+                    modal.show();
+                });
+        }
+
+        function toggleAddon(id) {
+            const cb = document.getElementById(`add-${id}`);
+            if (cb) {
+                cb.checked = !cb.checked;
+                const card = document.getElementById(`addon-lbl-${id}`);
+                if (cb.checked) {
+                    card.classList.add('border-warning', 'bg-warning-subtle');
+                } else {
+                    card.classList.remove('border-warning', 'bg-warning-subtle');
+                }
+                updateCustomTotal();
+            }
+        }
+
+        function updateCustomQty(change) {
+            customizationQty += change;
+            if (customizationQty < 1) customizationQty = 1;
+            document.getElementById('custom-qty-val').textContent = customizationQty;
+            updateCustomTotal();
+        }
+
+        function updateCustomTotal() {
+            if (!activeItem) return;
+            const sizeRadio = document.querySelector('input[name="size-opt"]:checked');
+            const basePrice = sizeRadio ? parseFloat(sizeRadio.getAttribute('data-price')) : activeItem.price;
+            let total = basePrice;
+
+            document.querySelectorAll('#addons-list input[type="checkbox"]:checked').forEach(cb => {
+                total += parseFloat(cb.getAttribute('data-price'));
+            });
+
+            total *= customizationQty;
+            document.getElementById('custom-total-price').textContent = `${total.toFixed(2)} ج.م`;
+        }
+
+        function addActiveItemToCart() {
+            const sizeRadio = document.querySelector('input[name="size-opt"]:checked');
+            const sizeName = sizeRadio ? sizeRadio.value : null;
+            const basePrice = sizeRadio ? parseFloat(sizeRadio.getAttribute('data-price')) : activeItem.price;
+
+            const selectedAddOns = [];
+            document.querySelectorAll('#addons-list input[type="checkbox"]:checked').forEach(cb => {
+                selectedAddOns.push({
+                    id: parseInt(cb.value),
+                    name: cb.getAttribute('data-name'),
+                    price: parseFloat(cb.getAttribute('data-price'))
+                });
+            });
+
+            const cartItemId = `${activeItem.id}_${sizeName || ''}_${selectedAddOns.map(a => a.id).join('-')}`;
+            const existing = cart.find(i => i.cartItemId === cartItemId);
+            
+            if (existing) {
+                existing.quantity += customizationQty;
+            } else {
+                cart.push({
+                    cartItemId: cartItemId,
+                    id: activeItem.id,
+                    name: activeItem.name,
+                    size: sizeName,
+                    price: basePrice,
+                    quantity: customizationQty,
+                    addOns: selectedAddOns
+                });
+            }
+
+            saveCart();
+            updateCartUI();
+
+            const modalEl = document.getElementById('customizationModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        }
+
+        function updateCartUI() {
+            const bar = document.getElementById('delivery-cart-bar');
+            const badge = document.getElementById('cart-badge');
+            const totalText = document.getElementById('cart-total-text');
+
+            if (cart.length === 0) {
+                bar.style.display = 'none';
+            } else {
+                let total = 0;
+                let qty = 0;
+                cart.forEach(item => {
+                    const addonPrice = item.addOns ? item.addOns.reduce((s, a) => s + a.price, 0) : 0;
+                    total += (item.price + addonPrice) * item.quantity;
+                    qty += item.quantity;
+                });
+                badge.textContent = qty;
+                totalText.textContent = `${total.toFixed(2)} ج.م`;
+                bar.style.display = 'block';
+            }
+        }
+
+        function openCheckoutModal() {
+            let total = 0;
+            cart.forEach(item => {
+                const addonPrice = item.addOns ? item.addOns.reduce((s, a) => s + a.price, 0) : 0;
+                total += (item.price + addonPrice) * item.quantity;
+            });
+
+            document.getElementById('checkout-subtotal').textContent = `${total.toFixed(2)} ج.م`;
+            updateDeliveryFeeDisplay();
+
+            const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+            modal.show();
+        }
+
+        function updateDeliveryFeeDisplay() {
+            const zoneSelect = document.getElementById('addrZone');
+            const selectedOpt = zoneSelect.options[zoneSelect.selectedIndex];
+            const fee = selectedOpt && selectedOpt.value ? parseFloat(selectedOpt.getAttribute('data-fee')) : 0;
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                const addonPrice = item.addOns ? item.addOns.reduce((s, a) => s + a.price, 0) : 0;
+                subtotal += (item.price + addonPrice) * item.quantity;
+            });
+
+            const grand = subtotal + fee;
+            document.getElementById('checkout-shipping').textContent = `${fee.toFixed(2)} ج.م`;
+            document.getElementById('checkout-grandtotal').textContent = `${grand.toFixed(2)} ج.m`;
+        }
+
+        function submitCheckout() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const note = document.getElementById('orderNote').value.trim();
+            
+            const gov = document.getElementById('addrGov').value.trim();
+            const area = document.getElementById('addrArea').value.trim();
+            const street = document.getElementById('addrStreet').value.trim();
+            const bld = document.getElementById('addrBld').value.trim();
+            const floor = document.getElementById('addrFloor').value.trim();
+            const apt = document.getElementById('addrApt').value.trim();
+            const zoneSelect = document.getElementById('addrZone');
+            const zoneId = zoneSelect.value;
+
+            if (!name || !phone || !gov || !area || !street || !bld || !zoneId) {
+                alert("الرجاء ملء كافة الحقول الأساسية المطلوبة.");
+                return;
+            }
+
+            const itemsPayload = cart.map(item => ({
+                menuItemId: item.id,
+                quantity: item.quantity,
+                addOnIds: item.addOns ? item.addOns.map(a => a.id) : [],
+                size: item.size
+            }));
+
+            const selBranch = parseInt(document.getElementById('checkoutBranch').value);
+
+            const payload = {
+                branchId: selBranch,
+                customerName: name,
+                phoneNumber: phone,
+                note: note,
+                address: {
+                    governorate: gov,
+                    area: area,
+                    street: street,
+                    building: bld,
+                    floor: floor,
+                    apartmentNumber: apt,
+                    deliveryZoneId: parseInt(zoneId)
+                },
+                items: itemsPayload
+            };
+
+            fetch('/api/delivery/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Checkout failed");
+                return res.json();
+            })
+            .then(data => {
+                // Clear cart
+                cart = [];
+                saveCart();
+                updateCartUI();
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
+                modal.hide();
+
+                // Redirect to Track page
+                window.location.href = `/CustomerDelivery/Track?phone=${phone}`;
+            })
+            .catch(err => {
+                console.error(err);
+                alert("حدث خطأ أثناء إتمام الطلب. يرجى المحاولة مرة أخرى.");
+            });
+        }
+    </script>
+
+    <style>
+        .rounded-pill { border-radius: 50rem !important; }
+        .story-circle-ring { border-radius: 50% !important; padding: 3px !important; }
+        .story-inner-circle { border-radius: 50% !important; padding: 2px !important; }
+        .story-inner-circle img, .story-inner-circle div { border-radius: 50% !important; }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+        .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; }
+        .category-stories-section { position: sticky; top: 0; z-index: 1020; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+}

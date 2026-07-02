@@ -89,5 +89,74 @@ namespace Resturant.Services.Services
                 await _unitOfWork.CompleteAsync();
             }
         }
+
+        public async Task<IEnumerable<Order>> GetPendingDeliveryOrdersAsync(int branchId)
+        {
+            return await _unitOfWork.Repository<Order>()
+                .ListAsync(o => o.BranchId == branchId && o.OrderType == OrderType.Delivery && o.Status == OrderStatus.Pending);
+        }
+
+        public async Task<IEnumerable<Driver>> GetAvailableDriversAsync(int branchId)
+        {
+            return await _unitOfWork.Repository<Driver>()
+                .ListAsync(d => d.BranchId == branchId && d.Status == DriverStatus.Idle);
+        }
+
+        public async Task AssignDriverAsync(int orderId, int driverId)
+        {
+            var order = await _unitOfWork.Repository<Order>().GetByIdAsync(orderId);
+            if (order == null) throw new Exception("Order not found");
+
+            var driver = await _unitOfWork.Repository<Driver>().GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found");
+
+            order.DriverId = driverId;
+            order.Status = OrderStatus.OutForDelivery;
+            
+            driver.Status = DriverStatus.OnDelivery;
+
+            _unitOfWork.Repository<Order>().Update(order);
+            _unitOfWork.Repository<Driver>().Update(driver);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task SettleDriverTripAsync(int driverId, int orderId, decimal collectedCash, string cashierId, string? notes)
+        {
+            var order = await _unitOfWork.Repository<Order>().GetByIdAsync(orderId);
+            if (order == null) throw new Exception("Order not found");
+
+            var driver = await _unitOfWork.Repository<Driver>().GetByIdAsync(driverId);
+            if (driver == null) throw new Exception("Driver not found");
+
+            if (order.Status != OrderStatus.Delivered && order.Status != OrderStatus.FailedDelivery)
+            {
+                throw new Exception("لا يمكن إجراء تسوية لطلب لم يقم الطيار بتسليمه بعد أو تسجيل فشله.");
+            }
+
+            order.Status = OrderStatus.Completed;
+            order.PaidAmount = collectedCash;
+            order.ChangeReturned = collectedCash - (order.TotalAmount + order.DeliveryFee);
+
+            driver.Status = DriverStatus.Idle;
+
+            var settlement = new DriverSettlement
+            {
+                DriverId = driverId,
+                OrderId = orderId,
+                ExpectedCash = order.TotalAmount + order.DeliveryFee,
+                CollectedCash = collectedCash,
+                Status = Math.Abs(collectedCash - (order.TotalAmount + order.DeliveryFee)) < 0.01m 
+                    ? SettlementStatus.Settled 
+                    : SettlementStatus.Discrepancy,
+                SettledById = cashierId,
+                SettledAt = DateTime.Now,
+                Notes = notes
+            };
+
+            _unitOfWork.Repository<Order>().Update(order);
+            _unitOfWork.Repository<Driver>().Update(driver);
+            await _unitOfWork.Repository<DriverSettlement>().AddAsync(settlement);
+            await _unitOfWork.CompleteAsync();
+        }
     }
 }

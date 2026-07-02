@@ -8,6 +8,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Resturant.Core.Entities
 {
+    public enum OrderType
+    {
+        DineIn = 1,
+        Takeaway = 2,
+        Delivery = 3
+    }
+
     public enum OrderStatus
     {
         [Display(Name = "Initiated")]
@@ -27,14 +34,23 @@ namespace Resturant.Core.Entities
         [Display(Name = "Cancelled")]
         Cancelled,
         [Display(Name = "Paid")]
-        Paid
+        Paid,
+        [Display(Name = "Out for Delivery")]
+        OutForDelivery = 10,
+        [Display(Name = "Delivered")]
+        Delivered = 11,
+        [Display(Name = "Failed Delivery")]
+        FailedDelivery = 12
     }
 
     public class Order : BaseEntity
     {
-        [Required]
         [Display(Name = "Table Number")]
-        public int TableNumber { get; set; }
+        public int? TableNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Order Type")]
+        public OrderType OrderType { get; set; } = OrderType.DineIn;
 
         [Required]
         [Display(Name = "Branch")]
@@ -55,6 +71,21 @@ namespace Resturant.Core.Entities
 
         [Display(Name = "Note")]
         public string? Note { get; set; }
+
+        [Display(Name = "Delivery Address Id")]
+        public int? DeliveryAddressId { get; set; }
+        public DeliveryAddress? DeliveryAddress { get; set; }
+
+        [Display(Name = "Delivery Zone Id")]
+        public int? DeliveryZoneId { get; set; }
+        public DeliveryZone? DeliveryZone { get; set; }
+
+        [Display(Name = "Delivery Fee")]
+        public decimal DeliveryFee { get; set; }
+
+        [Display(Name = "Driver Id")]
+        public int? DriverId { get; set; }
+        public Driver? Driver { get; set; }
 
         [Required]
         [Display(Name = "Order Status")]

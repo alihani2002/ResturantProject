@@ -51,10 +51,17 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapGet("/", context =>
+app.MapGet("/", async context =>
 {
-    context.Response.Redirect("/Identity/Account/Login");
-    return Task.CompletedTask;
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        context.Response.Redirect("/Home/Index");
+    }
+    else
+    {
+        context.Response.Redirect("/Identity/Account/Login");
+    }
+    await Task.CompletedTask;
 });
 
 app.MapControllerRoute(

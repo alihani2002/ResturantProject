@@ -104,6 +104,10 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
                     {
                         return RedirectToAction("Index", "Admin");
                     }
+                    if (roles.Contains(AppRoles.Driver))
+                    {
+                        return RedirectToAction("Index", "Driver");
+                    }
                 }
                 return Redirect("~/");
             }
@@ -158,6 +162,10 @@ namespace Resturant.Web.UI.Areas.Identity.Pages.Account
                             roles.Contains(AppRoles.Accountant))
                         {
                             return RedirectToAction("Index", "Admin");
+                        }
+                        if (roles.Contains(AppRoles.Driver))
+                        {
+                            return RedirectToAction("Index", "Driver");
                         }
                     }
 

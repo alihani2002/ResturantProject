@@ -84,9 +84,26 @@ namespace Resturant.Web.UI.Controllers
                 {
                     if (!string.IsNullOrEmpty(model.Role))
                     {
-                        if (await _roleManager.RoleExistsAsync(model.Role))
+                        if (!await _roleManager.RoleExistsAsync(model.Role))
                         {
-                            await _userManager.AddToRoleAsync(user, model.Role);
+                            await _roleManager.CreateAsync(new IdentityRole(model.Role));
+                        }
+                        await _userManager.AddToRoleAsync(user, model.Role);
+
+                        // If role is Driver, also create Driver record
+                        if (model.Role == AppRoles.Driver)
+                        {
+                            var driver = new Driver
+                            {
+                                UserId = user.Id,
+                                FullName = user.FullName,
+                                PhoneNumber = user.PhoneNumber ?? user.Email ?? "",
+                                Status = DriverStatus.Idle,
+                                BranchId = model.BranchId ?? 1,
+                                CreatedOn = DateTime.Now
+                            };
+                            _context.Set<Driver>().Add(driver);
+                            await _context.SaveChangesAsync();
                         }
                     }
                     return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" || (Request.HasFormContentType && Request.Form["iframe"] == "true") ? "true" : null });
@@ -161,8 +178,48 @@ namespace Resturant.Web.UI.Controllers
                     if (!currentRoles.Contains(model.Role))
                     {
                         await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                        if (!await _roleManager.RoleExistsAsync(model.Role))
+                        {
+                            await _roleManager.CreateAsync(new IdentityRole(model.Role));
+                        }
                         await _userManager.AddToRoleAsync(user, model.Role);
                     }
+
+                    // Sync Driver entity status
+                    var existingDriver = await _context.Set<Driver>().FirstOrDefaultAsync(d => d.UserId == user.Id);
+                    if (model.Role == AppRoles.Driver)
+                    {
+                        if (existingDriver == null)
+                        {
+                            var driver = new Driver
+                            {
+                                UserId = user.Id,
+                                FullName = user.FullName,
+                                PhoneNumber = user.PhoneNumber ?? user.Email ?? "",
+                                Status = DriverStatus.Idle,
+                                BranchId = model.BranchId ?? 1,
+                                CreatedOn = DateTime.Now
+                            };
+                            _context.Set<Driver>().Add(driver);
+                        }
+                        else
+                        {
+                            existingDriver.FullName = user.FullName;
+                            existingDriver.PhoneNumber = user.PhoneNumber ?? user.Email ?? "";
+                            existingDriver.BranchId = model.BranchId ?? 1;
+                            existingDriver.IsDeleted = false;
+                            _context.Set<Driver>().Update(existingDriver);
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+                    else if (existingDriver != null)
+                    {
+                        existingDriver.IsDeleted = true;
+                        existingDriver.Status = DriverStatus.Offline;
+                        _context.Set<Driver>().Update(existingDriver);
+                        await _context.SaveChangesAsync();
+                    }
+
                     return RedirectToAction(nameof(Index), new { iframe = Request.Query["iframe"] == "true" || (Request.HasFormContentType && Request.Form["iframe"] == "true") ? "true" : null });
                 }
                 foreach (var error in result.Errors)

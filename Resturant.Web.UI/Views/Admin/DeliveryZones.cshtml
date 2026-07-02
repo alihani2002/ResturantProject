@@ -1,0 +1,369 @@
+@model IEnumerable<Resturant.Core.Entities.DeliveryZone>
+@{
+    ViewData["Title"] = "إدارة التوصيل والطيارين";
+    bool isIframe = Context.Request.Query["iframe"] == "true" || (Context.Request.HasFormContentType && Context.Request.Form["iframe"] == "true");
+    Layout = isIframe ? "~/Views/Shared/_IframeLayout.cshtml" : "~/Views/Shared/_AdminLayout.cshtml";
+
+    var drivers = ViewBag.Drivers as IEnumerable<Resturant.Core.Entities.Driver> ?? new List<Resturant.Core.Entities.Driver>();
+    var orders = ViewBag.Orders as IEnumerable<Resturant.Core.Entities.Order> ?? new List<Resturant.Core.Entities.Order>();
+}
+
+<div class="container-fluid py-4" style="font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, sans-serif; direction: rtl; text-align: right;">
+    
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-bicycle text-warning ms-2" style="color: #f97316 !important;"></i>إدارة التوصيل والديليفري</h2>
+            <p class="text-muted small mb-0">لوحة تحكم شاملة لإدارة مناطق التوصيل، الطيارين، ومتابعة الطلبات النشطة</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 text-dark p-3 rounded-4 mb-4 text-center" style="background: rgba(40, 167, 69, 0.15); border: 1px solid rgba(40, 167, 69, 0.3) !important;">
+            <i class="bi bi-check-circle-fill text-success ms-2"></i>@TempData["SuccessMessage"]
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 text-dark p-3 rounded-4 mb-4 text-center" style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3) !important;">
+            <i class="bi bi-x-circle-fill text-danger ms-2"></i>@TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Dashboard Tabs -->
+    <ul class="nav nav-pills gap-2 mb-4 bg-white p-2 rounded-4 shadow-sm border border-light" style="width: fit-content;">
+        <li class="nav-item">
+            <button class="nav-link active rounded-pill fw-bold px-4" id="zones-tab" onclick="switchDeliveryTab('zones')">
+                <i class="bi bi-geo-alt ms-1"></i> مناطق التوصيل (@Model.Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill text-dark fw-bold px-4" id="drivers-tab" onclick="switchDeliveryTab('drivers')">
+                <i class="bi bi-people-fill ms-1"></i> الطيارين (@drivers.Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link rounded-pill text-dark fw-bold px-4" id="orders-tab" onclick="switchDeliveryTab('orders')">
+                <i class="bi bi-card-list ms-1"></i> طلبات التوصيل (@orders.Count())
+            </button>
+        </li>
+    </ul>
+
+    <!-- TAB 1: ZONES MANAGEMENT -->
+    <div id="content-zones" class="delivery-tab-content">
+        <div class="row g-4">
+            <!-- List of Zones (Col 8) -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 bg-white" style="border: 1px solid rgba(0,0,0,0.05) !important;">
+                    <div class="card-header border-0 bg-transparent p-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-list-ul text-warning ms-2" style="color: #f97316 !important;"></i>المناطق المضافة حالياً</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr class="table-light text-secondary" style="border-bottom: 1.5px solid #dee2e6;">
+                                        <th class="py-3 text-right">المنطقة</th>
+                                        <th class="py-3 text-right">المحافظة</th>
+                                        <th class="py-3 text-left">تكلفة التوصيل</th>
+                                        <th class="py-3 text-center" style="width: 100px;">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5 text-muted">
+                                                <i class="bi bi-geo-alt display-4 text-secondary mb-3 d-block"></i>
+                                                لم يتم إضافة أي مناطق توصيل حتى الآن.
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var zone in Model)
+                                        {
+                                            <tr>
+                                                <td class="py-3 fw-bold text-dark">@zone.Name</td>
+                                                <td class="py-3 text-muted">@zone.Governorate</td>
+                                                <td class="py-3 text-left fw-bold text-success">@zone.DeliveryFee.ToString("N2") ج.م</td>
+                                                <td class="py-3 text-center">
+                                                    <form asp-action="DeleteDeliveryZone" method="post" onsubmit="return confirm('هل تريد بالتأكيد حذف هذه المنطقة؟')">
+                                                        <input type="hidden" name="id" value="@zone.Id" />
+                                                        <input type="hidden" name="iframe" value="@(isIframe ? "true" : "")" />
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center shadow-none" style="width: 32px; height: 32px;">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add New Zone Form (Col 4) -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-white" style="border: 1px solid rgba(0,0,0,0.05) !important;">
+                    <div style="height: 6px; background: linear-gradient(90deg, #f97316, #fdba74, #f97316); border-top-left-radius: 12px; border-top-right-radius: 12px;"></div>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-dark mb-4"><i class="bi bi-plus-circle-fill text-warning ms-2" style="color: #f97316 !important;"></i>إضافة منطقة جديدة</h5>
+                        
+                        <form asp-action="CreateDeliveryZone" method="post">
+                            <input type="hidden" name="iframe" value="@(isIframe ? "true" : "")" />
+                            <!-- Governorate -->
+                            <div class="mb-3">
+                                <label class="form-label text-dark small fw-bold">المحافظة</label>
+                                <input type="text" name="governorate" class="form-control rounded-pill text-right" placeholder="مثال: القاهرة" required />
+                            </div>
+
+                            <!-- Zone Name -->
+                            <div class="mb-3">
+                                <label class="form-label text-dark small fw-bold">اسم المنطقة / الحي</label>
+                                <input type="text" name="name" class="form-control rounded-pill text-right" placeholder="مثال: التجمع الخامس" required />
+                            </div>
+
+                            <!-- Delivery Fee -->
+                            <div class="mb-4">
+                                <label class="form-label text-dark small fw-bold">تكلفة خدمة التوصيل</label>
+                                <div class="input-group" style="direction: ltr;">
+                                    <input type="number" step="0.01" min="0" name="deliveryFee" class="form-control bg-white text-dark border-1 py-2 text-right" style="border-radius: 0 12px 12px 0; border-color: #ddd; border-left: 0; direction: rtl;" placeholder="25.00" required />
+                                    <span class="input-group-text bg-light border-1 text-dark" style="border-radius: 12px 0 0 12px; border-color: #ddd;"><i class="bi bi-cash-stack"></i></span>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary text-white w-100 rounded-pill py-2.5 fw-bold shadow" style="background-color: #f97316 !important; border-color: #f97316 !important; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3) !important;">
+                                <i class="bi bi-plus-lg ms-2"></i> إضافة المنطقة
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: DRIVERS MANAGEMENT -->
+    <div id="content-drivers" class="delivery-tab-content d-none">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-bicycle text-warning ms-2" style="color: #f97316 !important;"></i>قائمة الطيارين ومتابعة الحالة</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="table-light text-secondary" style="border-bottom: 1.5px solid #dee2e6;">
+                            <th class="py-3 text-right">الاسم بالكامل</th>
+                            <th class="py-3 text-right">رقم الهاتف</th>
+                            <th class="py-3 text-right">رقم وسيلة الانتقال</th>
+                            <th class="py-3 text-right">الفرع</th>
+                            <th class="py-3 text-center">الحالة الحالية</th>
+                            <th class="py-3 text-center" style="width: 120px;">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!drivers.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people display-4 text-secondary mb-3 d-block"></i>
+                                    لم يتم تسجيل أي طيارين للفرع الحالي حتى الآن.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var driver in drivers)
+                            {
+                                <tr>
+                                    <td class="py-3 fw-bold text-dark">@driver.FullName</td>
+                                    <td class="py-3 text-muted">@driver.PhoneNumber</td>
+                                    <td class="py-3 text-muted">@(driver.VehicleNumber ?? "غير مسجل")</td>
+                                    <td class="py-3 text-muted">@driver.Branch?.Name</td>
+                                    <td class="py-3 text-center">
+                                        <span class="badge rounded-pill px-3 py-1.5 fw-bold @(driver.Status == Resturant.Core.Entities.DriverStatus.Idle ? "bg-success-subtle text-success border border-success-subtle" : driver.Status == Resturant.Core.Entities.DriverStatus.OnDelivery ? "bg-warning-subtle text-warning border border-warning-subtle" : "bg-secondary-subtle text-secondary border border-secondary-subtle")">
+                                            @(driver.Status == Resturant.Core.Entities.DriverStatus.Idle ? "متاح للرحلات" : driver.Status == Resturant.Core.Entities.DriverStatus.OnDelivery ? "خارج للتوصيل" : "غير نشط")
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-center">
+                                        <button class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold" onclick="openEditDriverModal(@driver.Id, '@driver.FullName', '@driver.PhoneNumber', '@(driver.VehicleNumber ?? "غير مسجل")', @driver.BranchId)">
+                                            <i class="bi bi-pencil-fill ms-1"></i> تعديل
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: DELIVERY ORDERS -->
+    <div id="content-orders" class="delivery-tab-content d-none">
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-receipt-cutoff text-warning ms-2" style="color: #f97316 !important;"></i>مراقبة طلبات الدليفري النشطة والسابقة</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="table-light text-secondary" style="border-bottom: 1.5px solid #dee2e6;">
+                            <th class="py-3 text-right">رقم الطلب</th>
+                            <th class="py-3 text-right">العميل</th>
+                            <th class="py-3 text-right">العنوان</th>
+                            <th class="py-3 text-right">التاريخ والوقت</th>
+                            <th class="py-3 text-right">الطيار المسند</th>
+                            <th class="py-3 text-left">التكلفة الإجمالية</th>
+                            <th class="py-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!orders.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-journal-x display-4 text-secondary mb-3 d-block"></i>
+                                    لا توجد طلبات توصيل مسجلة حالياً.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var order in orders)
+                            {
+                                <tr>
+                                    <td class="py-3 fw-bold text-dark">#@order.Id</td>
+                                    <td class="py-3 fw-bold text-dark">
+                                        @order.CustomerName
+                                        <div class="small text-muted font-normal">@order.PhoneNumber</div>
+                                    </td>
+                                    <td class="py-3 text-muted small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        @if (order.DeliveryAddress != null)
+                                        {
+                                            <span>@order.DeliveryAddress.Governorate، @order.DeliveryAddress.Area، @order.DeliveryAddress.Street</span>
+                                        }
+                                        else
+                                        {
+                                            <span>—</span>
+                                        }
+                                    </td>
+                                    <td class="py-3 text-muted small">@order.OrderDate.ToString("yyyy-MM-dd hh:mm tt")</td>
+                                    <td class="py-3 text-dark font-medium">@(order.Driver?.FullName ?? "غير مسند بعد")</td>
+                                    <td class="py-3 text-left fw-bold text-success">@order.TotalAmount.ToString("N2") ج.م</td>
+                                    <td class="py-3 text-center">
+                                        <span class="badge rounded-pill px-3 py-1.5 fw-bold 
+                                            @(order.Status == Resturant.Core.Entities.OrderStatus.Pending ? "bg-danger text-white" : 
+                                              order.Status == Resturant.Core.Entities.OrderStatus.InPreparation ? "bg-warning text-dark" :
+                                              order.Status == Resturant.Core.Entities.OrderStatus.Ready ? "bg-info text-dark" :
+                                              order.Status == Resturant.Core.Entities.OrderStatus.OutForDelivery ? "bg-primary text-white" :
+                                              order.Status == Resturant.Core.Entities.OrderStatus.Delivered ? "bg-info text-dark" :
+                                              order.Status == Resturant.Core.Entities.OrderStatus.Completed || order.Status == Resturant.Core.Entities.OrderStatus.Paid ? "bg-success text-white" :
+                                              "bg-secondary text-white")">
+                                            @if (order.Status == Resturant.Core.Entities.OrderStatus.Pending) { <span>بانتظار التأكيد</span> }
+                                            else if (order.Status == Resturant.Core.Entities.OrderStatus.InPreparation) { <span>في المطبخ</span> }
+                                            else if (order.Status == Resturant.Core.Entities.OrderStatus.Ready) { <span>جاهز للتوصيل</span> }
+                                            else if (order.Status == Resturant.Core.Entities.OrderStatus.OutForDelivery) { <span>في الطريق</span> }
+                                            else if (order.Status == Resturant.Core.Entities.OrderStatus.Delivered) { <span>تم التوصيل للعميل</span> }
+                                            else if (order.Status == Resturant.Core.Entities.OrderStatus.Completed || order.Status == Resturant.Core.Entities.OrderStatus.Paid) { <span>مسوى ومكتمل</span> }
+                                            else { <span>ملغي</span> }
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit Driver -->
+<div class="modal fade" id="editDriverModal" tabindex="-1" aria-hidden="true" style="font-family: 'Cairo', sans-serif;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div style="height: 5px; background: #ffc107; border-radius: 4px 4px 0 0;"></div>
+            <div class="modal-header border-0 bg-light p-3">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-warning ms-2"></i>تعديل بيانات الطيار</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-right: auto; margin-left: 0;"></button>
+            </div>
+            <form asp-action="UpdateDriver" method="post">
+                <div class="modal-body p-4 text-right" style="direction: rtl;">
+                    <input type="hidden" name="id" id="editDriverId" />
+                    <input type="hidden" name="iframe" value="@(isIframe ? "true" : "")" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold">الاسم بالكامل</label>
+                        <input type="text" name="fullName" id="editDriverFullName" class="form-control rounded-pill text-right" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold">رقم الهاتف</label>
+                        <input type="text" name="phoneNumber" id="editDriverPhoneNumber" class="form-control rounded-pill text-right" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold">رقم وسيلة الانتقال / لوحة الموتوسيكل</label>
+                        <input type="text" name="vehicleNumber" id="editDriverVehicleNumber" class="form-control rounded-pill text-right" placeholder="مثال: أ ب ج 123" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-bold">الفرع</label>
+                        <select name="branchId" id="editDriverBranchId" class="form-select rounded-pill text-right" required>
+                            @foreach (var br in ViewBag.AllBranches as IEnumerable<Resturant.Core.Entities.Branch> ?? new List<Resturant.Core.Entities.Branch>())
+                            {
+                                <option value="@br.Id">@br.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3 bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchDeliveryTab(tabName) {
+        // Toggle tab button states
+        document.querySelectorAll('.nav-link').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('text-white');
+            btn.classList.add('text-dark');
+        });
+        
+        const activeBtn = document.getElementById(`${tabName}-tab`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('text-dark');
+            activeBtn.classList.add('text-white');
+        }
+
+        // Toggle contents
+        document.querySelectorAll('.delivery-tab-content').forEach(content => {
+            content.classList.add('d-none');
+        });
+
+        const activeContent = document.getElementById(`content-${tabName}`);
+        if (activeContent) {
+            activeContent.classList.remove('d-none');
+        }
+    }
+
+    function openEditDriverModal(id, fullName, phoneNumber, vehicleNumber, branchId) {
+        document.getElementById('editDriverId').value = id;
+        document.getElementById('editDriverFullName').value = fullName;
+        document.getElementById('editDriverPhoneNumber').value = phoneNumber;
+        document.getElementById('editDriverVehicleNumber').value = vehicleNumber === 'غير مسجل' ? '' : vehicleNumber;
+        document.getElementById('editDriverBranchId').value = branchId;
+        
+        const modal = new bootstrap.Modal(document.getElementById('editDriverModal'));
+        modal.show();
+    }
+</script>

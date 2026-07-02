@@ -41,6 +41,10 @@ namespace Resturant.Web.UI.Controllers
             {
                 return RedirectToAction("Index", "Cashier");
             }
+            else if (roles.Contains(AppRoles.Driver))
+            {
+                return RedirectToAction("Index", "Driver");
+            }
             else if (roles.Contains(AppRoles.Admin) || roles.Contains(AppRoles.Manager))
             {
                 // Admin and Manager can access all dashboards, show admin dashboard
@@ -278,5 +282,121 @@ namespace Resturant.Web.UI.Controllers
             await _context.SaveChangesAsync();
             return Json(new { success = true });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DeliveryZones()
+        {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
+            var zones = await _context.DeliveryZones
+                .Where(z => z.BranchId == branchId && !z.IsDeleted)
+                .ToListAsync();
+
+            // Load drivers for this branch
+            var drivers = await _context.Set<Driver>()
+                .Include(d => d.Branch)
+                .Where(d => d.BranchId == branchId && !d.IsDeleted)
+                .ToListAsync();
+
+            // Load delivery orders for this branch
+            var orders = await _context.Orders
+                .Include(o => o.Driver)
+                .Include(o => o.DeliveryAddress)
+                .Where(o => o.BranchId == branchId && o.OrderType == OrderType.Delivery)
+                .OrderByDescending(o => o.OrderDate)
+                .Take(100)
+                .ToListAsync();
+
+            ViewBag.BranchId = branchId;
+            ViewBag.Drivers = drivers;
+            ViewBag.Orders = orders;
+            ViewBag.AllBranches = await _context.Branches.Where(b => !b.IsDeleted && b.IsActive).ToListAsync();
+            return View(zones);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateDeliveryZone(string name, string governorate, decimal deliveryFee, string iframe)
+        {
+            string activeBranchIdStr = Request.Cookies["AdminActiveBranchId"];
+            int branchId = 1;
+            if (!string.IsNullOrEmpty(activeBranchIdStr) && int.TryParse(activeBranchIdStr, out int parsedId))
+            {
+                branchId = parsedId;
+            }
+
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(governorate))
+            {
+                TempData["ErrorMessage"] = "جميع الحقول مطلوبة!";
+                return RedirectToAction(nameof(DeliveryZones), new { iframe = iframe == "true" ? "true" : null });
+            }
+
+            var zone = new DeliveryZone
+            {
+                Name = name,
+                ArabicName = name,
+                Governorate = governorate,
+                ArabicGovernorate = governorate,
+                DeliveryFee = deliveryFee,
+                IsActive = true,
+                BranchId = branchId,
+                CreatedOn = System.DateTime.Now
+            };
+
+            _context.DeliveryZones.Add(zone);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "تم إضافة منطقة التوصيل بنجاح!";
+            return RedirectToAction(nameof(DeliveryZones), new { iframe = iframe == "true" ? "true" : null });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteDeliveryZone(int id, string iframe)
+        {
+            var zone = await _context.DeliveryZones.FindAsync(id);
+            if (zone != null)
+            {
+                zone.IsDeleted = true;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "تم حذف المنطقة بنجاح!";
+            }
+            return RedirectToAction(nameof(DeliveryZones), new { iframe = iframe == "true" ? "true" : null });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateDriver(int id, string fullName, string phoneNumber, string vehicleNumber, int branchId, string iframe)
+        {
+            var driver = await _context.Set<Driver>().FindAsync(id);
+            if (driver != null)
+            {
+                driver.FullName = fullName;
+                driver.PhoneNumber = phoneNumber;
+                driver.VehicleNumber = vehicleNumber;
+                driver.BranchId = branchId;
+
+                var user = await _userManager.FindByIdAsync(driver.UserId);
+                if (user != null)
+                {
+                    user.FullName = fullName;
+                    user.PhoneNumber = phoneNumber;
+                    user.BranchId = branchId;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "تم تحديث بيانات الطيار بنجاح!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "عذراً، لم يتم العثور على الطيار.";
+            }
+
+            return RedirectToAction(nameof(DeliveryZones), new { iframe = iframe == "true" ? "true" : null });
+        }
     }
 }
+

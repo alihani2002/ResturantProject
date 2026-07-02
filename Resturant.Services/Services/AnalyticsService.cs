@@ -160,7 +160,7 @@ namespace Resturant.Services.Services
                 .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
                 .FirstOrDefaultAsync();
-            var mostActiveTable = mostActiveTableObj > 0 ? mostActiveTableObj : 5;
+            var mostActiveTable = mostActiveTableObj ?? 5;
 
             var mostOrderedCategory = await _context.OrderItems
                 .Include(oi => oi.MenuItem)
@@ -566,7 +566,7 @@ namespace Resturant.Services.Services
                         PendingCount = pending,
                         Aov = Math.Round(aov, 2),
                         MostOrderedItem = mostOrdered,
-                        MostActiveTable = activeTable > 0 ? activeTable : 4,
+                        MostActiveTable = activeTable ?? 4,
                         GuestsCount = guests > 0 ? guests : 1
                     };
                 })
@@ -600,7 +600,7 @@ namespace Resturant.Services.Services
                         OrderId = o.Id,
                         OrderDate = o.OrderDate,
                         CompletedDate = o.CompletedDate,
-                        TableNumber = o.TableNumber,
+                        TableNumber = o.TableNumber ?? 0,
                         GuestName = !string.IsNullOrEmpty(o.CustomerName) ? o.CustomerName : "Guest Table " + o.TableNumber,
                         GuestPhone = !string.IsNullOrEmpty(o.PhoneNumber) ? o.PhoneNumber : "010998877" + (o.Id % 100).ToString("D2"),
                         PaymentMethod = paymentMethod,

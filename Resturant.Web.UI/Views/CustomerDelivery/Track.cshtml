@@ -1,0 +1,366 @@
+@{
+    ViewData["Title"] = "تتبع الدليفري - منيو الديوان";
+}
+
+<div class="container mt-5 text-right" style="direction: rtl; font-family: 'Cairo', sans-serif;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0 rounded-4 bg-white p-4">
+                <div class="card-header bg-white border-0 text-center pb-3">
+                    <h3 class="fw-bold mb-1 text-dark"><i class="bi bi-compass-fill text-warning ms-2"></i>تتبع حالة الدليفري</h3>
+                    <p class="text-muted small">أدخل رقم الهاتف للبحث عن طلبات التوصيل الخاصة بك وتتبعها لحظة بلحظة</p>
+                </div>
+                
+                <div class="card-body p-0">
+                    <!-- Search Phone Form -->
+                    <div class="mb-4">
+                        <div class="input-group" style="direction: ltr;">
+                            <button type="button" class="btn btn-warning btn-lg rounded-pill-start px-4 fw-bold text-dark" onclick="searchOrders()">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <input type="tel" id="trackPhone" class="form-control form-control-lg rounded-pill-end text-right" placeholder="أدخل رقم الهاتف..." required style="direction: rtl;">
+                        </div>
+                    </div>
+
+                    <!-- Orders Container -->
+                    <div id="orders-loader" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div id="no-orders" class="text-center py-5" style="display: none;">
+                        <i class="bi bi-emoji-frown display-3 text-muted opacity-50"></i>
+                        <p class="mt-3 text-muted">لم نعثر على أي طلبات دليفري نشطة برقم هذا الهاتف.</p>
+                    </div>
+
+                    <div id="orders-list" class="d-flex flex-column gap-4">
+                        <!-- Dynamic Order Cards -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SignalR & Real-time Tracking Code -->
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        let connection = null;
+        let trackedOrderIds = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if phone query parameter exists
+            const params = new URLSearchParams(window.location.search);
+            const phone = params.get('phone');
+            if (phone) {
+                document.getElementById('trackPhone').value = phone;
+                searchOrders();
+            }
+
+            // Setup SignalR connection
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/orderHub")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.start()
+                .then(() => {
+                    console.log("Connected to SignalR OrderHub");
+                    // Join tracking for any already loaded orders
+                    registerSignalRGroups();
+                })
+                .catch(err => console.error("SignalR Connection Error: ", err));
+
+            // Setup SignalR status and location listeners
+            connection.on("OrderStatusChanged", (data) => {
+                console.log("Order status changed via SignalR", data);
+                if (data && data.orderId) {
+                    updateOrderCardStatus(data.orderId, data.status, data.statusText);
+                }
+            });
+
+            connection.on("DriverLocationChanged", (data) => {
+                console.log("Driver location changed via SignalR", data);
+                if (data && data.orderId) {
+                    updateDriverLocationDisplay(data.orderId, data.latitude, data.longitude);
+                }
+            });
+        });
+
+        function searchOrders() {
+            const phone = document.getElementById('trackPhone').value.trim();
+            if (!phone) {
+                alert("الرجاء إدخال رقم الهاتف أولاً.");
+                return;
+            }
+
+            // Update URL query string silently without reloading page
+            const newUrl = `${window.location.pathname}?phone=${encodeURIComponent(phone)}`;
+            window.history.replaceState({ path: newUrl }, '', newUrl);
+
+            document.getElementById('orders-loader').style.display = 'block';
+            document.getElementById('no-orders').style.display = 'none';
+            document.getElementById('orders-list').innerHTML = '';
+
+            fetch(`/api/delivery/track?phone=${encodeURIComponent(phone)}`)
+                .then(res => res.json())
+                .then(orders => {
+                    document.getElementById('orders-loader').style.display = 'none';
+                    if (!orders || orders.length === 0) {
+                        document.getElementById('no-orders').style.display = 'block';
+                        return;
+                    }
+
+                    trackedOrderIds = orders.map(o => o.id);
+                    orders.forEach(order => {
+                        renderOrderCard(order);
+                    });
+
+                    // Join SignalR groups for tracking
+                    registerSignalRGroups();
+                })
+                .catch(err => {
+                    document.getElementById('orders-loader').style.display = 'none';
+                    console.error(err);
+                    alert("فشل جلب بيانات الطلبات.");
+                });
+        }
+
+        function registerSignalRGroups() {
+            if (connection && connection.state === signalR.HubConnectionState.Connected && trackedOrderIds.length > 0) {
+                trackedOrderIds.forEach(orderId => {
+                    connection.invoke("JoinOrderTracker", orderId.toString())
+                        .then(() => console.log(`Joined tracking group for order #${orderId}`))
+                        .catch(err => console.error(`Error joining group for order #${orderId}`, err));
+                });
+            }
+        }
+
+        function renderOrderCard(order) {
+            const list = document.getElementById('orders-list');
+            
+            // Map statuses to Arabic texts & numeric percentages for stepper
+            let statusNum = 0;
+            switch(order.status) {
+                case "Pending": statusNum = 1; break;
+                case "Confirmed": statusNum = 2; break;
+                case "InPreparation": statusNum = 3; break;
+                case "Ready": statusNum = 4; break;
+                case "OutForDelivery": statusNum = 5; break;
+                case "Delivered": statusNum = 6; break;
+                case "Completed": statusNum = 6; break;
+            }
+
+            const step1 = statusNum >= 1 ? "active" : "";
+            const step2 = statusNum >= 2 ? "active" : "";
+            const step3 = statusNum >= 3 ? "active" : "";
+            const step4 = statusNum >= 4 ? "active" : "";
+            const step5 = statusNum >= 5 ? "active" : "";
+            const step6 = statusNum >= 6 ? "active" : "";
+
+            let driverHtml = "";
+            if (order.driverName) {
+                driverHtml = `
+                    <div class="mt-3 p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted d-block small">طيار الدليفري</span>
+                            <strong><i class="bi bi-person-badge text-warning ms-1"></i>${order.driverName}</strong>
+                        </div>
+                        <div>
+                            <span class="text-muted d-block small">رقم الموبايل</span>
+                            <a href="tel:${order.driverPhone}" class="btn btn-sm btn-outline-warning text-dark fw-bold">${order.driverPhone}</a>
+                        </div>
+                    </div>
+                    <div class="driver-live-location-panel mt-2 p-2 bg-warning-subtle text-warning-emphasis rounded-3 text-center small fw-bold" id="driver-loc-${order.id}" style="display: none;">
+                        <i class="bi bi-geo-alt-fill animate-bounce ms-1"></i>
+                        <span>الطيار يتحرك الآن! آخر إحداثيات: (<span class="lat">0</span>, <span class="lng">0</span>)</span>
+                    </div>
+                `;
+            }
+
+            const card = document.createElement('div');
+            card.className = "card border-0 bg-light rounded-4 shadow-sm mb-2";
+            card.id = `order-card-${order.id}`;
+            card.innerHTML = `
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0">طلب توصيل رقم #${order.id}</h5>
+                            <small class="text-muted">${new Date(order.orderDate).toLocaleString('ar-EG')}</small>
+                        </div>
+                        <div class="text-left">
+                            <span class="fw-bold text-success fs-5">${order.totalAmount.toFixed(2)} ج.م</span>
+                            <span class="text-muted d-block small">شامل التوصيل</span>
+                        </div>
+                    </div>
+
+                    <!-- Custom Visual Stepper -->
+                    <div class="stepper-wrapper mb-4">
+                        <div class="stepper-step ${step1}" data-step="1">
+                            <div class="step-circle"><i class="bi bi-file-earmark-text"></i></div>
+                            <div class="step-label">جديد</div>
+                        </div>
+                        <div class="stepper-step ${step2}" data-step="2">
+                            <div class="step-circle"><i class="bi bi-hand-thumbs-up"></i></div>
+                            <div class="step-label">مؤكد</div>
+                        </div>
+                        <div class="stepper-step ${step3}" data-step="3">
+                            <div class="step-circle"><i class="bi bi-egg-fried"></i></div>
+                            <div class="step-label">بالتحضير</div>
+                        </div>
+                        <div class="stepper-step ${step4}" data-step="4">
+                            <div class="step-circle"><i class="bi bi-box2-heart"></i></div>
+                            <div class="step-label">جاهز</div>
+                        </div>
+                        <div class="stepper-step ${step5}" data-step="5">
+                            <div class="step-circle"><i class="bi bi-bicycle"></i></div>
+                            <div class="step-label">بالطريق</div>
+                        </div>
+                        <div class="stepper-step ${step6}" data-step="6">
+                            <div class="step-circle"><i class="bi bi-house-check"></i></div>
+                            <div class="step-label">وصل</div>
+                        </div>
+                    </div>
+
+                    <!-- Address summary -->
+                    <div class="p-3 bg-white rounded-3 shadow-sm text-right small">
+                        <h6 class="fw-bold text-muted border-bottom pb-1.5 mb-2"><i class="bi bi-geo-alt text-warning ms-1"></i>عنوان التوصيل</h6>
+                        <div>${order.address}</div>
+                        ${order.note ? `<div class="mt-2 text-danger"><i class="bi bi-info-circle ms-1"></i>${order.note}</div>` : ''}
+                    </div>
+
+                    <!-- Driver information -->
+                    <div id="driver-container-${order.id}">
+                        ${driverHtml}
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        }
+
+        function updateOrderCardStatus(orderId, statusStr, statusText) {
+            const card = document.getElementById(`order-card-${orderId}`);
+            if (!card) return;
+
+            let statusNum = 0;
+            switch(statusStr) {
+                case "Pending": statusNum = 1; break;
+                case "Confirmed": statusNum = 2; break;
+                case "InPreparation": statusNum = 3; break;
+                case "Ready": statusNum = 4; break;
+                case "OutForDelivery": statusNum = 5; break;
+                case "Delivered": statusNum = 6; break;
+                case "Completed": statusNum = 6; break;
+            }
+
+            // Update all stepper items
+            const steps = card.querySelectorAll('.stepper-step');
+            steps.forEach(step => {
+                const s = parseInt(step.getAttribute('data-step'));
+                if (s <= statusNum) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+
+            // If state transitions to OutForDelivery, let's refresh driver info after a brief delay
+            if (statusStr === "OutForDelivery") {
+                setTimeout(() => {
+                    searchOrders(); // Reload orders to get driver assignment info
+                }, 1000);
+            }
+        }
+
+        function updateDriverLocationDisplay(orderId, lat, lng) {
+            const panel = document.getElementById(`driver-loc-${orderId}`);
+            if (panel) {
+                panel.style.display = 'block';
+                panel.querySelector('.lat').textContent = parseFloat(lat).toFixed(5);
+                panel.querySelector('.lng').textContent = parseFloat(lng).toFixed(5);
+            }
+        }
+    </script>
+
+    <style>
+        .rounded-pill-start { border-top-left-radius: 50rem !important; border-bottom-left-radius: 50rem !important; }
+        .rounded-pill-end { border-top-right-radius: 50rem !important; border-bottom-right-radius: 50rem !important; padding-right: 1.5rem; }
+        
+        /* Premium Visual Stepper Styles */
+        .stepper-wrapper {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 15px 0;
+            direction: ltr; /* Keeps flow left-to-right visually */
+        }
+        .stepper-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #cbd5e1;
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+        .stepper-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex-grow: 1;
+        }
+        .step-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border: 3px solid #ffffff;
+            transition: all 0.3s ease;
+        }
+        .step-label {
+            margin-top: 8px;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: #475569;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        /* Active States */
+        .stepper-step.active .step-circle {
+            background: #ffc107;
+            color: #000000;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.25);
+            transform: scale(1.1);
+        }
+        .stepper-step.active .step-label {
+            color: #ffc107;
+            font-weight: 800;
+        }
+        
+        /* Pulsing keyframe for active step */
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-bounce {
+            animation: bounce 1s infinite alternate;
+        }
+        @@keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-4px); }
+        }
+    </style>
+}

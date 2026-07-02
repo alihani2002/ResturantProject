@@ -8,5 +8,6 @@ namespace Resturant.Core.Common
         public const string User = "User";
         public const string Manager = "Manager";
         public const string Accountant = "Accountant";
+        public const string Driver = "Driver";
     }
 }

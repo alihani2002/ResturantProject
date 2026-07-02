@@ -303,7 +303,7 @@ namespace Resturant.Web.UI.Controllers
                 {
                     await _context.SaveChangesAsync();
 
-                    int tableNumber = orders.First().TableNumber;
+                    int tableNumber = orders.First().TableNumber ?? 0;
                     var notifyData = new { tableNumber = tableNumber };
                     await _hubContext.Clients.Group($"waiter_{branchId}").SendAsync("TableCleared", notifyData);
                     await _hubContext.Clients.Group($"cashier_{branchId}").SendAsync("OrderCompleted", notifyData);
@@ -316,7 +316,7 @@ namespace Resturant.Web.UI.Controllers
             if (orders.Any())
             {
                 int? sessionId = orders.First().TableSessionId;
-                int tableNumber = orders.First().TableNumber;
+                int tableNumber = orders.First().TableNumber ?? 0;
 
                 for (int i = 0; i < orders.Count; i++)
                 {

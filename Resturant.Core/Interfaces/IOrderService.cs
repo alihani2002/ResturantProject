@@ -14,5 +14,9 @@ namespace Resturant.Core.Interfaces
         Task<IEnumerable<Order>> GetOrdersByPhoneAsync(string phoneNumber);
         Task<Order?> GetOrderWithTrackingAsync(int orderId);
         Task UpdateOrderStatusAsync(int orderId, OrderStatus status);
+        Task<IEnumerable<Order>> GetPendingDeliveryOrdersAsync(int branchId);
+        Task<IEnumerable<Driver>> GetAvailableDriversAsync(int branchId);
+        Task AssignDriverAsync(int orderId, int driverId);
+        Task SettleDriverTripAsync(int driverId, int orderId, decimal collectedCash, string cashierId, string? notes);
     }
 }

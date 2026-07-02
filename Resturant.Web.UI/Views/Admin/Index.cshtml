@@ -183,6 +183,11 @@
             <!-- ========================================== -->
             <partial name="Partials/_SettingsMgmtTab" />
 
+            <!-- ========================================== -->
+            <!-- 17. DELIVERY ZONES MANAGEMENT TAB -->
+            <!-- ========================================== -->
+            <partial name="Partials/_DeliveryZonesTab" />
+
 
 
         </main>
@@ -271,7 +276,8 @@
                 'inventory-mgmt': 'Multi-Branch Inventory & Stock Levels',
                 'stock-transfers': 'Branch Stock Transfers Workflow',
                 'recipe-mgmt': 'Menu Item Recipe Setup',
-                'daily-consumption': 'Daily Inventory Consumption & Variance Report'
+                'daily-consumption': 'Daily Inventory Consumption & Variance Report',
+                'delivery-zones': 'Delivery & Driver Operations Management'
             };
             document.getElementById('active-tab-title').textContent = titles[tabId] || 'Management Portal';
 

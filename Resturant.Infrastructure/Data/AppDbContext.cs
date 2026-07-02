@@ -25,6 +25,10 @@ namespace Resturant.Infrastructure.Data
         public DbSet<OrderItemAddOn> OrderItemAddOns { get; set; }
         public DbSet<CashierShift> CashierShifts { get; set; }
         public DbSet<RestaurantSetting> RestaurantSettings { get; set; }
+        public DbSet<DeliveryZone> DeliveryZones { get; set; }
+        public DbSet<DeliveryAddress> DeliveryAddresses { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<DriverSettlement> DriverSettlements { get; set; }
 
         // Enterprise ERP Tables
         public DbSet<Expense> Expenses { get; set; }
@@ -117,6 +121,60 @@ namespace Resturant.Infrastructure.Data
                 entity.HasOne(o => o.Branch)
                     .WithMany(b => b.Orders)
                     .HasForeignKey(o => o.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.DeliveryAddress)
+                    .WithMany()
+                    .HasForeignKey(o => o.DeliveryAddressId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(o => o.DeliveryZone)
+                    .WithMany()
+                    .HasForeignKey(o => o.DeliveryZoneId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.Driver)
+                    .WithMany()
+                    .HasForeignKey(o => o.DriverId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Driver>(entity =>
+            {
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.Branch)
+                    .WithMany()
+                    .HasForeignKey(d => d.BranchId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<DriverSettlement>(entity =>
+            {
+                entity.HasOne(s => s.Driver)
+                    .WithMany()
+                    .HasForeignKey(s => s.DriverId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(s => s.Order)
+                    .WithMany()
+                    .HasForeignKey(s => s.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(s => s.SettledBy)
+                    .WithMany()
+                    .HasForeignKey(s => s.SettledById)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<DeliveryZone>(entity =>
+            {
+                entity.HasOne(z => z.Branch)
+                    .WithMany()
+                    .HasForeignKey(z => z.BranchId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
