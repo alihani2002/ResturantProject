@@ -144,24 +144,6 @@ ResturantProject/
 2. **Configure `appsettings.json`:**
    Navigate to `Resturant.Web.UI/appsettings.json` and adjust the connection string and Cloudinary settings:
 
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=ResturantDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-     },
-     "CloudinarySettings": {
-       "CloudName": "YOUR_CLOUD_NAME",
-       "ApiKey": "YOUR_API_KEY",
-       "ApiSecret": "YOUR_API_SECRET"
-     },
-     "MailJet": {
-       "ApiKey": "YOUR_MAILJET_API_KEY",
-       "SecretKey": "YOUR_MAILJET_SECRET_KEY",
-       "SenderEmail": "info@yourrestaurant.com"
-     }
-   }
-   ```
-
 3. **Database Migrations:**
    Run migrations and update your database schema using the .NET CLI:
    ```bash
@@ -173,26 +155,8 @@ ResturantProject/
    ```bash
    dotnet run
    ```
-   Open your browser and navigate to `https://localhost:7142` (or the port specified in console output).
-
 ---
 
-## 🔑 Default Staff Accounts
-
-On first run, the database automatically seeds standard user roles and a primary Super Administrator account:
-
-| Role | Default Email | Default Password | Permissions / Accessible Area |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@resturant.com` | `Admin@123` | Full system access, configurations, user management, and ERP |
-| **Manager** | *(Create in Admin)* | Custom | Branch management, menu changes, staff scheduling, reports |
-| **Waiter** | *(Create in Admin)* | Custom | Waiter Dashboard (`/Waiter`), confirm orders, table sessions |
-| **Chef** | *(Create in Admin)* | Custom | Kitchen Display System (`/Chef`), order preparation updates |
-| **Cashier / Accountant** | *(Create in Admin)* | Custom | POS Dashboard (`/Cashier`), shifts, settlements, inventory |
-
-> [!IMPORTANT]
-> Immediately change default passwords when deploying to production environments.
-
----
 
 ## 🔄 Order Lifecycle Flow
 
